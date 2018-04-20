@@ -1,0 +1,27 @@
+{
+  "name": "vistechlib",
+  "version": "1.0.0",
+  "description": "Information Visualization Technique Library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LABVIS-UFPA/vistechlib.git"
+  },
+  "keywords": [
+    "Information",
+    "Visualization",
+    "JS",
+    "Library",
+    "Visualization",
+    "Technique"
+  ],
+  "author": "LABVIS - UFPA",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/LABVIS-UFPA/vistechlib/issues"
+  },
+  "homepage": "https://github.com/LABVIS-UFPA/vistechlib#readme"
+}
