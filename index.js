@@ -1050,11 +1050,14 @@ class QuadTree{
     }
 }
 
-var vis = {
-    "Visualization": Visualization,
-    "ParallelCoordinates": ParallelCoordinates,
-    "ScatterplotMatrix": ScatterplotMatrix,
-    "BeeswarmPlot": BeeswarmPlot
-};
+// var vis = {
+//     "Visualization": Visualization,
+//     "ParallelCoordinates": ParallelCoordinates,
+//     "ScatterplotMatrix": ScatterplotMatrix,
+//     "BeeswarmPlot": BeeswarmPlot
+// };
 
-exports.vis = vis;
+exports.Visualization = Visualization;
+exports.ParallelCoordinates = ParallelCoordinates;
+exports.ScatterplotMatrix = ScatterplotMatrix;
+exports.BeeswarmPlot = BeeswarmPlot;

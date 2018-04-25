@@ -1,6 +1,6 @@
 {
-  "name": "vistechlib",
-  "version": "1.0.0",
+  "name": "@labvis-ufpa/vistechlib",
+  "version": "1.0.2",
   "description": "Information Visualization Technique Library",
   "main": "index.js",
   "scripts": {
