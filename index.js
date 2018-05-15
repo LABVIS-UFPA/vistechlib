@@ -847,6 +847,7 @@ class ParallelBundling extends Visualization{
                     .attr("data-index", function(d,i){ return i; })
                     .attr("d", this.lineFunction)
                     .style("stroke", d=> this.colorScheme[this.clusterTags.indexOf(d[this.clusterOn])])
+                    .attr('cluster', d=> d[this.clusterOn])
                     .on("mouseover", (d,i) =>{ this.event.datamouseover(d,i); })
                     .on("mouseout", (d,i) =>{ this.event.datamouseout(d,i); })
                     .on("click", (d,i) =>{ this.event.dataclick(d,i); });
@@ -970,11 +971,12 @@ class ParallelBundling extends Visualization{
         super.highlight.apply(this, args);
     }
     removeHighlight(...args){
+        let self = this;
         if(args[1] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
-                .style("stroke", d=> 'steelblue')
+                .style("stroke", function() {return self.colorScheme[self.clusterTags.indexOf(d3.select(this).attr('cluster'))]})
                 .style("stroke-width", "1");
             // this.overlay.selectAll(".lineHighlight").remove();
             this.event.highlightend.apply(null, args);
