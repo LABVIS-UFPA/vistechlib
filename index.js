@@ -856,10 +856,20 @@ class ParallelBundling extends Visualization{
                     .exit()
                     .remove();
             };
-
+            const painterAlgorithm = () => {
+                const drawOrder = this.clusterTags.slice().sort( (a,b) => this.clusters.find(c => c.key === b).values.length - this.clusters.find(c => c.key === a).values.length);
+                console.log(drawOrder);
+                drawOrder.forEach( tag => {
+                    console.log(this.foreground.selectAll(`path.data[category=${tag}]`));
+                    this.foreground.selectAll(`path[cluster=${tag}].data`).each(function() {
+                        this.parentNode.appendChild(this)
+                    })
+                });
+            };
             appendNewLines();
             updateAllLines();
             removeExtraLines();
+            painterAlgorithm();
         };
         drawLines();
 
@@ -932,7 +942,6 @@ class ParallelBundling extends Visualization{
             });
 
         axisSelection.exit().remove();
-        console.log(this.keys);
         // Add an axis and title.
         this.axis.append("text")
             .style("text-anchor", "middle")
@@ -941,7 +950,6 @@ class ParallelBundling extends Visualization{
             .text(function(d) { return d; });
 
         let categoricalAxisSelection = this.overlay.selectAll('.categoricalAxis');
-        console.log(categoricalAxisSelection);
 
     }
 
