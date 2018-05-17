@@ -373,9 +373,18 @@ class ParallelBundling extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        this.clusterOn = null;
+        this.animation = true;
+        this.clusterOn = 'all';
         this.colorScheme = ['firebrick', 'mediumseagreen', 'steelblue', 'gold', 'dimgrey', 'magenta'];
-        this.colorOf = d3.scale.ordinal().rangePoints(this.colorScheme, 0);
+        this.clusterColor = someCluster => {
+            if (this.clusterTags.includes(someCluster)){
+                return this.colorScheme[this.clusterTags.indexOf(someCluster)];
+            }
+            else {
+                return 'dimgrey';
+            }
+        };
+
         let Path = require('d3-path').path;
         this.lineFunction = d => {
             let path = new Path();
@@ -383,8 +392,10 @@ class ParallelBundling extends Visualization{
             let BOX1 = 1;
             let BOX2 = 20;
             let FACTOR = 10;
-            let cluster = d[this.clusterOn];
-            const isCategorical = someKey => this.domainType[someKey] === "Categorical"
+            let cluster = (this.clusterOn === 'all') ? 'all' : d[this.clusterOn];
+            if (this.clusterOn === 'all') this.domain['all'] = ['all'];
+
+            const isCategorical = someKey => this.domainType[someKey] === "Categorical";
             const map = (i, a, b, x, y) => {
                 let scale = d3.scale.linear().domain([a, b]).range([x, y]);
                 return scale(i);
@@ -432,7 +443,6 @@ class ParallelBundling extends Visualization{
                     this.verticalPositionDisplacementOnAxis = displacementScale(relativeIndexPositionOfd);
                     displacement = displacementScale(relativeIndexPositionOfd);
                 };
-
                 let quantityOfMembersInCluster = this.clusters.find(c => c.key === cluster).values.length;
 
                 let location_in_array_thisKey = this.sortedClusters[cluster][key].indexOf(d);
@@ -617,6 +627,7 @@ class ParallelBundling extends Visualization{
         let pb = this.settings.paddingBottom;
         super.data(d);
         this.categoricalKeys = this.keys.filter(key => this.domainType[key]==='Categorical');
+
         const mode = array => _.chain(array).countBy().pairs().max(_.last).head().value();
         const clustering = () => {
             const defineClusters = () => {
@@ -626,14 +637,17 @@ class ParallelBundling extends Visualization{
                 };
                 const defineClusterTags = () => {this.clusterTags = this.clusters.map(d=>d.key)};
                 const clusterDataByKey = key => {this.clusters = d3.nest().key(d => d[key]).entries(d);};
-                const clusterDataInOneGroup = () => {this.clusters = [{key: 'all', values: d}];};
+                const clusterDataInOneGroup = () => {
+                    this.clusters = [{key: 'all', values: d}];
+                    this.clusterOn = 'all';
+                };
 
-
-                validateClusterOnParameter();
-                if (typeof this.clusterOn === 'string')
-                    clusterDataByKey(this.clusterOn);
-                else
+                if(this.clusterOn === 'all'){
                     clusterDataInOneGroup();
+                } else {
+                    validateClusterOnParameter();
+                    clusterDataByKey(this.clusterOn);
+                }
                 defineClusterTags();
             };
             const defineSortedClusters = () => {
@@ -740,7 +754,6 @@ class ParallelBundling extends Visualization{
                 };
 
                 this.x.domain(this.keys);
-                this.colorOf.domain(this.clusterTags);
                 createBandScaleFromXScale();
             };
             const defineYScales = () => {
@@ -814,7 +827,7 @@ class ParallelBundling extends Visualization{
     }
 
 
-    redraw(){
+    redraw(withAnimation){
         if(!this.hasData)
             return;
         let axis = d3.svg.axis().orient("left");
@@ -841,13 +854,30 @@ class ParallelBundling extends Visualization{
             const appendNewLines = () => {
                 linesUpdateSelection.enter().append("path");
             };
-            const updateAllLines = () => {
-                linesUpdateSelection.attr("class", "data")
+            const updateAllLinesWithAnimation = () => {
+                const transitionScale = d3.scale.linear().domain([0,this.d.length]).range([0,200]);
+                linesUpdateSelection
+                    .transition()
+                    .attr("class", "data")
                     .attr("data-index", function(d,i){ return i; })
                     .attr("d", this.lineFunction)
-                    .style("stroke", d=> this.colorScheme[this.clusterTags.indexOf(d[this.clusterOn])])
-                    .attr('cluster', d=> d[this.clusterOn])
-                    .on("mouseover", (d,i) =>{ this.event.datamouseover(d,i); })
+                    .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
+                    .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
+
+                linesUpdateSelection.on("mouseover", (d,i) =>{ this.event.datamouseover(d,i); })
+                    .on("mouseout", (d,i) =>{ this.event.datamouseout(d,i); })
+                    .on("click", (d,i) =>{ this.event.dataclick(d,i); });
+            };
+            const updateAllLinesWithoutAnimation = () => {
+                linesUpdateSelection
+                    .attr("class", "data")
+                    .attr("data-index", function(d,i){ return i; })
+                    .attr("d", this.lineFunction)
+                    .style('stroke-width', 1)
+                    .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
+                    .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
+
+                linesUpdateSelection.on("mouseover", (d,i) =>{ this.event.datamouseover(d,i); })
                     .on("mouseout", (d,i) =>{ this.event.datamouseout(d,i); })
                     .on("click", (d,i) =>{ this.event.dataclick(d,i); });
             };
@@ -856,20 +886,23 @@ class ParallelBundling extends Visualization{
                     .exit()
                     .remove();
             };
-            const painterAlgorithm = () => {
+            this.painterAlgorithm = () => {
                 const drawOrder = this.clusterTags.slice().sort( (a,b) => this.clusters.find(c => c.key === b).values.length - this.clusters.find(c => c.key === a).values.length);
-                console.log(drawOrder);
                 drawOrder.forEach( tag => {
-                    console.log(this.foreground.selectAll(`path.data[category=${tag}]`));
                     this.foreground.selectAll(`path[cluster=${tag}].data`).each(function() {
                         this.parentNode.appendChild(this)
                     })
                 });
             };
             appendNewLines();
-            updateAllLines();
+            if (this.animation && withAnimation)
+                updateAllLinesWithAnimation();
+            else
+                updateAllLinesWithoutAnimation();
             removeExtraLines();
-            painterAlgorithm();
+
+            setTimeout(this.painterAlgorithm, 250);
+
         };
         drawLines();
 
@@ -943,14 +976,27 @@ class ParallelBundling extends Visualization{
 
         axisSelection.exit().remove();
         // Add an axis and title.
-        this.axis.append("text")
+        axisSelection.append("text")
             .style("text-anchor", "middle")
             .attr("class", "column_label")
             .attr("y", -9)
+            .on('click', d=>this.setClusterKey(d))
             .text(function(d) { return d; });
 
         let categoricalAxisSelection = this.overlay.selectAll('.categoricalAxis');
+    }
 
+    setClusterKey(key) {
+        if (this.domainType[key] !== 'Categorical')
+            this.clusterOn = 'all';
+        else if (this.clusterOn !== key)
+            this.clusterOn = key;
+        else
+            return;
+        this.data(this.d);
+
+        const WITH_ANIMATION = true;
+        this.redraw(WITH_ANIMATION);
     }
 
     highlight(...args){
@@ -983,12 +1029,13 @@ class ParallelBundling extends Visualization{
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
-                .style("stroke", function() {return self.colorScheme[self.clusterTags.indexOf(d3.select(this).attr('cluster'))]})
+                .style("stroke", function(d) {return self.clusterColor(d[self.clusterOn])})
                 .style("stroke-width", "1");
             // this.overlay.selectAll(".lineHighlight").remove();
             this.event.highlightend.apply(null, args);
         }
         super.removeHighlight.apply(this, args);
+        this.painterAlgorithm();
     }
     getHighlightElement(i){
         let parallelcoordinates = this;
