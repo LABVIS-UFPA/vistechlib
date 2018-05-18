@@ -375,7 +375,7 @@ class ParallelBundling extends Visualization{
         super(parentElement, settings);
         this.animation = true;
         this.clusterOn = 'all';
-        this.colorScheme = ['firebrick', 'mediumseagreen', 'steelblue', 'gold', 'dimgrey', 'magenta'];
+        this.colorScheme = ['firebrick', 'mediumseagreen', 'steelblue', 'gold', 'chocolate', 'magenta'];
         this.clusterColor = someCluster => {
             if (this.clusterTags.includes(someCluster)){
                 return this.colorScheme[this.clusterTags.indexOf(someCluster)];
@@ -873,7 +873,7 @@ class ParallelBundling extends Visualization{
                     .attr("class", "data")
                     .attr("data-index", function(d,i){ return i; })
                     .attr("d", this.lineFunction)
-                    .style('stroke-width', 1)
+                    .style('stroke-width',1)
                     .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
                     .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
 
@@ -1030,7 +1030,7 @@ class ParallelBundling extends Visualization{
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
                 .style("stroke", function(d) {return self.clusterColor(d[self.clusterOn])})
-                .style("stroke-width", "1");
+                .style("stroke-width", 1);
             // this.overlay.selectAll(".lineHighlight").remove();
             this.event.highlightend.apply(null, args);
         }
