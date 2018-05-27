@@ -168,10 +168,10 @@ class Visualization {
             this.event.apply("highlightstart", this, args);
         }
     }
-    removeHighlight(...args){
+    removeHighlight(elem, ...args){
         if(this.isHighlighting){
             this.isHighlighting = false;
-            this.event.apply("highlightend", this, args);
+            this.event.apply("highlightend", elem, args);
         }
     }
     getHighlightElement(i){
@@ -277,9 +277,9 @@ class ParallelCoordinates extends Visualization{
             .attr("data-index", function(d,i){ return i; })
             .attr("d", this.lineFunction)
             .style("stroke", this.settings.color)
-            .on("mouseover", function (d,i) { self.event.call("datamouseover", d, i); })
-            .on("mouseout", function (d,i) { self.event.call("datamouseout", d, i); })
-            .on("click", function (d,i) { self.event.call("dataclick", d, i); });
+            .on("mouseover", function (d,i) { self.event.call("datamouseover", this, d, i); })
+            .on("mouseout", function (d,i) { self.event.call("datamouseout", this, d, i); })
+            .on("click", function (d,i) { self.event.call("dataclick", this, d, i); });
         this.foreground.selectAll("path.data")
             .data(this.d)
             .attr("d", this.lineFunction)
@@ -345,13 +345,14 @@ class ParallelCoordinates extends Visualization{
         if(args[1] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
+            let dataSelect = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
                 .style("stroke", this.settings.color)
                 .style("stroke-width", "1");
             // this.overlay.selectAll(".lineHighlight").remove();
-            this.event.apply("highlightend", null, args);
+            super.removeHighlight(dataSelect.node(), dataSelect.datum(), args[1]);
+            // this.event.apply("highlightend", dataSelect.node(), [dataSelect.datum(), args[1]]);
         }
-        super.removeHighlight.apply(this, args);
+
     }
     getHighlightElement(i){
         let parallelcoordinates = this;
@@ -1047,13 +1048,13 @@ class ParallelBundling extends Visualization{
         if(args[1] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
+            let elem = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
                 .style("stroke", function(d) {return self.clusterColor(d[self.clusterOn])})
                 .style("stroke-width", 1);
             // this.overlay.selectAll(".lineHighlight").remove();
-            this.event.apply("highlightend", null, args);
+            // this.event.apply("highlightend", null, args);
+            super.removeHighlight(elem.node(), elem.datum(), args[1]);
         }
-        super.removeHighlight.apply(this, args);
         this.painterAlgorithm();
     }
     getHighlightElement(i){
@@ -1177,13 +1178,13 @@ class ScatterplotMatrix extends Visualization{
                 .style("fill", scatterplot.settings.color)
                 .style("fill-opacity", ".7")
                 .on("mouseover", function(d,i){
-                    scatterplot.event.datamouseover(d,i);
+                    scatterplot.event.call("datamouseover", this, d, i);
                 })
                 .on("mouseout", function(d,i){
-                    scatterplot.event.datamouseout(d,i);
+                    scatterplot.event.call("datamouseout", this, d, i);
                 })
                 .on("click", function(d,i){
-                    scatterplot.event.dataclick(d,i);
+                    scatterplot.event.call("dataclick", this, d, i);
                 });
             cell.selectAll("circle.dataPoints")
                 .data(scatterplot.d)
@@ -1322,10 +1323,10 @@ class ScatterplotMatrix extends Visualization{
     }
     removeHighlight(...args){
         if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            this.foreground.selectAll('circle.dataPoints[data-index="'+args[1]+'"]').style("stroke", "none");
+            let elem = this.foreground.selectAll('circle.dataPoints[data-index="'+args[1]+'"]').style("stroke", "none");
             this.background.selectAll(".lineHighlight").remove();
+            super.removeHighlight(elem.node(), elem.datum(), args[1]);
         }
-        super.removeHighlight.apply(this, args);
     }
     getHighlightElement(i){
         let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -1477,9 +1478,9 @@ class BeeswarmPlot extends Visualization{
                 .attr("class", "dataPoint")
                 .attr("data-index", function(d, i){ return i; })
                 .style("fill-opacity", ".6")
-                .on("mouseover", (d,i) =>{ beeswarm.event.datamouseover(d,i); })
-                .on("mouseout", (d,i) =>{ beeswarm.event.datamouseout(d,i); })
-                .on("click", (d,i) =>{ beeswarm.event.dataclick(d,i); })
+                .on("mouseover", function (d,i) { beeswarm.event.call("datamouseover", this, d,i); })
+                .on("mouseout", function (d,i) { beeswarm.event.call("datamouseout", this, d,i); })
+                .on("click", function (d,i) { beeswarm.event.call("dataclick", this, d,i); })
 
                 .attr("cx", (d) => { return beeswarm.xPoints(d, k); })
                 .attr("cy", (d) => { return beeswarm.yPoints(d, k); })
@@ -1591,10 +1592,10 @@ class BeeswarmPlot extends Visualization{
         if(args[1] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            this.foreground.selectAll('circle[data-index="'+args[1]+'"]').style("stroke", "none");
+            let elem = this.foreground.selectAll('circle[data-index="'+args[1]+'"]').style("stroke", "none");
             this.background.selectAll(".lineHighlight").remove();
+            super.removeHighlight(elem.node(), elem.datum(), args[0]);
         }
-        super.removeHighlight.apply(this, args);
     }
     getHighlightElement(i){
         let str = "M ";
