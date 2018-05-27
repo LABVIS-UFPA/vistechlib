@@ -97,6 +97,10 @@ class Visualization {
             .attr("class", "foreground")
             .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
 
+        this.selectionLayer = this.canvas.append("g")
+            .attr("class", "selectionLayer")
+            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+
         this.overlay = this.canvas.append("g")
             .attr("class", "overlay")
             .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
@@ -183,6 +187,22 @@ class Visualization {
 
     clearAnnotations(){
         this.annotations.selectAll("*").remove();
+    }
+
+
+    select(elems){
+        for(let elem of elems){
+            this.selectionLayer.node().appendChild(elem);
+        }
+    }
+    removeSelect(){
+        let elems = this.selectionLayer.selectAll("*").nodes();
+        for(let elem of elems){
+            this.foreground.node().appendChild(elem);
+        }
+    }
+    getSelected(){
+        return this.selectionLayer.selectAll("*").nodes();
     }
 
 }
@@ -361,6 +381,37 @@ class ParallelCoordinates extends Visualization{
                 .node());
         });
         return group;
+    }
+
+    select(selection){
+        let result = [];
+        if(Array.isArray(selection)){
+            if(Array.isArray(selection[0])){
+                // for(let i=0; i<selection.length; i++){
+                //     lineIntersects([]);
+                // }
+            }else if(typeof selection[0] === "number"){
+                //seleção através de índices.
+                for(let i of selection){
+                    result.push(
+                        this.foreground.select('path.data[data-index="'+i+'"]').node());
+                }
+            }else if(selection[0] instanceof SVGPathElement){
+                for(let i of selection){
+                    result.push(i);
+                }
+            }
+        }
+        super.select(result);
+    }
+    removeSelect(){
+        let elems = this.selectionLayer.selectAll("*").nodes();
+        for(let elem of elems){
+            this.foreground.node().appendChild(elem);
+        }
+    }
+    getSelected(){
+        return this.selectionLayer.selectAll("*").nodes();
     }
 
 }
@@ -1596,7 +1647,7 @@ class BeeswarmPlot extends Visualization{
             .each(function(){
                 let circle = d3.select(this);
                 let t = parseTranslate(this.parentElement);
-                str += (parseFloat(circle.attr("cx")) + t.translate[0])
+                str += (parseFloat(circle.attr("cx")) + t.x)
                     +","+circle.attr("cy") + " L "
             });
         str = str.substring(0, str.length - 3);
@@ -1748,6 +1799,17 @@ let parseTranslate = (elem) => {
     };
 };
 
+let lineIntersects = ([a,b],[c,d],[p,q],[r,s]) => {
+    let det, gamma, lambda;
+    det = (c - a) * (s - q) - (r - p) * (d - b);
+    if (det === 0) {
+        return false;
+    } else {
+        lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+        gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+        return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+    }
+};
 
 exports.Visualization = Visualization;
 exports.ParallelCoordinates = ParallelCoordinates;
