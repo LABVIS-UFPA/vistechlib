@@ -57,7 +57,6 @@ class Visualization {
     constructor(parentElement, settings){
         //default configuration
         this.parentElement = parentElement;
-        console.log(this.parentElement);
         this.settings = {
             color: "#069",//"grey",//"#069",
             highlightColor: "#FF1122",//"#08E700",
@@ -269,51 +268,46 @@ class ParallelCoordinates extends Visualization{
 
         let self = this;
 
+        let dataUpdate = this.foreground.selectAll("path.data");
+
+        dataUpdate.exit().remove();
 
         this.foreground.selectAll("path.data")
             .data(this.d).enter()
             .append("path")
             .attr("class", "data")
             .attr("data-index", function(d,i){ return i; })
-            .attr("d", this.lineFunction)
-            .style("stroke", this.settings.color)
             .on("mouseover", function (d,i) { self.event.call("datamouseover", this, d, i); })
             .on("mouseout", function (d,i) { self.event.call("datamouseout", this, d, i); })
-            .on("click", function (d,i) { self.event.call("dataclick", this, d, i); });
-        this.foreground.selectAll("path.data")
-            .data(this.d)
+            .on("click", function (d,i) { self.event.call("dataclick", this, d, i); })
+
+            .merge(dataUpdate)
             .attr("d", this.lineFunction)
             .style("stroke", this.settings.color);
-        this.foreground.selectAll("path.data")
-            .data(this.d)
-            .exit()
-            .remove();
 
-        this.overlay.selectAll(".axis")
-            .data(this.keys)
-            .exit().remove();
-        this.axis = this.overlay.selectAll(".axis")
-            .data(this.keys)
-            .attr("transform", (d) => { return "translate(" + this.x(d) + ")"; })
-            .each(function(d) { d3.select(this).call(d3.axisLeft(y_axes[d])); });
-        this.axis.select("text.column_label")
-            .text(function(d) { return d; });
 
-        this.axis = this.overlay.selectAll(".axis")
-            .data(this.keys)
+
+        let axisUpdate = this.overlay.selectAll(".axis").data(this.keys);
+
+        axisUpdate.exit().remove();
+        axisUpdate.selectAll("*").remove();
+
+        let axisEnter = axisUpdate
             .enter()
             .append("g")
-            .attr("class", "axis")
-            .attr("transform", (d) => { return "translate(" + this.x(d) + ")"; })
-            .each(function(d) { d3.select(this).call(d3.axisLeft(y_axes[d])); });
+            .attr("class", "axis");
 
-        // Add an axis and title.
-        this.axis.append("text")
+        axisEnter.merge(axisUpdate)
+            .attr("transform", (d) => { return "translate(" + this.x(d) + ")"; })
+            .each(function(d) { d3.select(this).call(d3.axisLeft(y_axes[d])); })
+
+            .append("text")
             .style("text-anchor", "middle")
             .attr("class", "column_label")
             .attr("y", -9)
             .text(function(d) { return d; });
 
+        this.axis = this.overlay.selectAll(".axis");
 
     }
 
@@ -963,7 +957,6 @@ class ParallelBundling extends Visualization{
             .style("text-anchor", "middle")
             .attr("class", "column_label")
             .style("fill", "black")
-            .style("font-size", "10pt")
             .attr("y", -9)
             .on('click', d=>this.setClusterKey(d))
             .text(function(d) { return d; });
@@ -1157,7 +1150,7 @@ class ScatterplotMatrix extends Visualization{
         let y_axes = this.y;
 
         let crossed = ScatterplotMatrix.cross(this.keys, this.keys);
-        console.log(crossed);
+
         let scatterplot = this;
 
         function redrawDataPoints(k) {
@@ -1294,17 +1287,17 @@ class ScatterplotMatrix extends Visualization{
             this.foreground.selectAll('circle.dataPoints[data-index="'+args[1]+'"]').style("stroke", this.settings.highlightColor)
                 .each(function(){
                     let circle = d3.select(this);
-                    let t = d3.transform(d3.select(this.parentElement).attr("transform"));
+                    let t = parseTranslate(this.parentElement);
                     if(isFirst[circle.attr("data-row")]){
                         strObj[circle.attr("data-row")] +=
-                            (parseFloat(circle.attr("cx")) + t.translate[0])
-                            +" "+(parseFloat(circle.attr("cy")) + t.translate[1]);
+                            (parseFloat(circle.attr("cx")) + t.x)
+                            +" "+(parseFloat(circle.attr("cy")) + t.y);
                         isFirst[circle.attr("data-row")] = false;
                     }else{
                         strObj[circle.attr("data-row")] += " Q "+
-                            + t.translate[0]+ " " + t.translate[1]
-                            + " , " + (parseFloat(circle.attr("cx")) + t.translate[0])
-                            + " " +(parseFloat(circle.attr("cy")) + t.translate[1]);
+                            + t.x+ " " + t.y
+                            + " , " + (parseFloat(circle.attr("cx")) + t.x)
+                            + " " +(parseFloat(circle.attr("cy")) + t.y);
                     }
 
 
@@ -1340,17 +1333,17 @@ class ScatterplotMatrix extends Visualization{
         this.foreground.selectAll('circle.dataPoints[data-index="'+i+'"]')
             .each(function(){
                 let circle = d3.select(this);
-                let t = d3.transform(d3.select(this.parentElement).attr("transform"));
+                let t = parseTranslate(this.parentElement);
                 if(isFirst[circle.attr("data-row")]){
                     strObj[circle.attr("data-row")] +=
-                        (parseFloat(circle.attr("cx")) + t.translate[0])
-                        +" "+(parseFloat(circle.attr("cy")) + t.translate[1]);
+                        (parseFloat(circle.attr("cx")) + t.x)
+                        +" "+(parseFloat(circle.attr("cy")) + t.y);
                     isFirst[circle.attr("data-row")] = false;
                 }else{
                     strObj[circle.attr("data-row")] += " Q "+
-                        + t.translate[0]+ " " + t.translate[1]
-                        + " , " + (parseFloat(circle.attr("cx")) + t.translate[0])
-                        + " " +(parseFloat(circle.attr("cy")) + t.translate[1]);
+                        + t.x+ " " + t.y
+                        + " , " + (parseFloat(circle.attr("cx")) + t.x)
+                        + " " +(parseFloat(circle.attr("cy")) + t.y);
                 }
 
 
@@ -1574,8 +1567,8 @@ class BeeswarmPlot extends Visualization{
             this.foreground.selectAll('circle[data-index="'+args[1]+'"]').style("stroke", this.settings.highlightColor)
                 .each(function(){
                     let circle = d3.select(this);
-                    let t = d3.transform(d3.select(this.parentElement).attr("transform"));
-                    str += (parseFloat(circle.attr("cx")) + t.translate[0])
+                    let t = parseTranslate(this.parentElement);
+                    str += (parseFloat(circle.attr("cx")) + t.x)
                         +","+circle.attr("cy") + " L "
                 });
             str = str.substring(0, str.length - 3);
@@ -1594,7 +1587,7 @@ class BeeswarmPlot extends Visualization{
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             let elem = this.foreground.selectAll('circle[data-index="'+args[1]+'"]').style("stroke", "none");
             this.background.selectAll(".lineHighlight").remove();
-            super.removeHighlight(elem.node(), elem.datum(), args[0]);
+            super.removeHighlight(elem.node(), elem.datum(), args[1]);
         }
     }
     getHighlightElement(i){
@@ -1602,7 +1595,7 @@ class BeeswarmPlot extends Visualization{
         this.foreground.selectAll('circle[data-index="'+i+'"]')
             .each(function(){
                 let circle = d3.select(this);
-                let t = d3.transform(d3.select(this.parentElement).attr("transform"));
+                let t = parseTranslate(this.parentElement);
                 str += (parseFloat(circle.attr("cx")) + t.translate[0])
                     +","+circle.attr("cy") + " L "
             });
@@ -1747,6 +1740,14 @@ class QuadTree{
 //     "ScatterplotMatrix": ScatterplotMatrix,
 //     "BeeswarmPlot": BeeswarmPlot
 // };
+
+let parseTranslate = (elem) => {
+    return {
+        x: elem.transform.baseVal.consolidate().matrix.e,
+        y: elem.transform.baseVal.consolidate().matrix.f
+    };
+};
+
 
 exports.Visualization = Visualization;
 exports.ParallelCoordinates = ParallelCoordinates;
