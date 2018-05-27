@@ -1,18 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="width: 100%;height: 100%;">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 
 
     <script src="bundle.js"></script>
+    <style>
+        path.data{
+            fill: none;
+        }
+    </style>
+
+</head>
+<body style="width: 100%;height: 100%;margin: 0">
+    <div id="canvasTest" style="width: 100%;height: 100%;"></div>
+
     <script>
 
         console.log(vistechlib);
-
+        parallel = new vistechlib.BeeswarmPlot(document.getElementById("canvasTest"));
+        parallel.data([
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()},
+            {x:Math.random(),y:Math.random(), z:Math.random()}
+        ]);
+        parallel.redraw();
+        parallel.on("datamouseover", (d) => {
+            console.log("foi", d);
+        });
     </script>
-</head>
-<body>
-
 </body>
 </html>

@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/LABVIS-UFPA/vistechlib#readme",
   "dependencies": {
-    "d3-path": "^1.0.5"
+    "d3": "^5.4.0",
+    "d3-path": "^1.0.5",
+    "underscore": "^1.9.0"
   }
 }

@@ -49,7 +49,8 @@
 // }
 
 
-
+let d3 = require("d3");
+let _ = require("underscore");
 
 class Visualization {
 
@@ -58,7 +59,7 @@ class Visualization {
         this.parentElement = parentElement;
         console.log(this.parentElement);
         this.settings = {
-            color: "grey",//"#069",
+            color: "#069",//"grey",//"#069",
             highlightColor: "#FF1122",//"#08E700",
             opacity: 1,
             size_type: "fit",//"absolute"
@@ -164,13 +165,13 @@ class Visualization {
     highlight(...args){
         if(!this.isHighlighting){
             this.isHighlighting = true;
-            this.event.highlightstart.apply(this, args);
+            this.event.apply("highlightstart", this, args);
         }
     }
     removeHighlight(...args){
         if(this.isHighlighting){
             this.isHighlighting = false;
-            this.event.highlightend.apply(this, args);
+            this.event.apply("highlightend", this, args);
         }
     }
     getHighlightElement(i){
@@ -195,14 +196,15 @@ class ParallelCoordinates extends Visualization{
         this.name = "ParallelCoordinates";
 
         this.lineFunction = (d) => {
-            return d3.svg.line()(this.keys.map((key) => {
+            return d3.line()(this.keys.map((key) => {
                 return [this.x(key), this.y[key](d[key])];
             }))
         };
 
-        this.x = d3.scale.ordinal().rangePoints([
+
+        this.x = d3.scalePoint().range([
             0,
-            $(this.svg[0][0]).width()-this.settings.paddingLeft-this.settings.paddingRight
+            this.svg.node().getBoundingClientRect().width-this.settings.paddingLeft-this.settings.paddingRight
         ], 0);
 
     }
@@ -214,16 +216,17 @@ class ParallelCoordinates extends Visualization{
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
         if(this.x)
-            this.x.rangePoints([0, $(this.svg[0][0]).width()-pl-pr], 0);
+            this.x.range([0, this.svg.node().getBoundingClientRect().width-pl-pr]);
         else
-            this.x = d3.scale.ordinal().rangePoints([0, $(this.svg[0][0]).width()-pl-pr], 0);
+            this.x = d3.scalePoint().range([0, this.svg.node().getBoundingClientRect().width-pl-pr]);
 
         if(this.y) {
             for (let prop of this.keys) {
-                if (typeof this.y[prop].rangePoints === "function")
-                    this.y[prop].rangePoints([$(this.svg[0][0]).height()-pt-pb, 0], 0);
-                else
-                    this.y[prop].range([$(this.svg[0][0]).height() -pt-pb, 0]);
+                //TODO: verificar como diferenciar entre scalePonint e Linear Contínuo.
+                // if (typeof this.y[prop].padding === "function")
+                    this.y[prop].range([this.svg.node().getBoundingClientRect().height-pt-pb, 0]);
+                // else
+                //     this.y[prop].range([$(this.svg.node()).height() -pt-pb, 0]);
             }
         }
         console.log("redraw");
@@ -240,19 +243,16 @@ class ParallelCoordinates extends Visualization{
         this.y = {};
         for(let k of this.keys){
             if(this.domainType[k] === "Categorical") {
-                this.y[k] = d3.scale.ordinal()
-                    .domain(this.domain[k])
-                    .rangePoints([$(this.svg[0][0]).height()-pt-pb, 0], 0);
+                this.y[k] = d3.scalePoint()
             }else if(this.domainType[k] === "Time"){
                 //TODO: Melhorar a escala para o tempo.
-                this.y[k] =  d3.time.scale()
-                    .domain(this.domain[k])
-                    .range([$(this.svg[0][0]).height()-pt-pb, 0]);
+                this.y[k] =  d3.scaleTime();
             } else {
-                this.y[k] =  d3.scale.linear()
-                    .domain(this.domain[k])
-                    .range([$(this.svg[0][0]).height()-pt-pb, 0]);
+                this.y[k] =  d3.scaleLinear();
             }
+            this.y[k]
+                .domain(this.domain[k])
+                .range([this.svg.node().getBoundingClientRect().height-pt-pb, 0]);
         }
 
     }
@@ -263,10 +263,11 @@ class ParallelCoordinates extends Visualization{
         if(!this.hasData)
             return;
 
-        let axis = d3.svg.axis().orient("left");
+        // let axis = d3.svg.axis().orient("left");
         //Atualiza os Eixos
         let y_axes = this.y;
 
+        let self = this;
 
 
         this.foreground.selectAll("path.data")
@@ -276,9 +277,9 @@ class ParallelCoordinates extends Visualization{
             .attr("data-index", function(d,i){ return i; })
             .attr("d", this.lineFunction)
             .style("stroke", this.settings.color)
-            .on("mouseover", (d,i) =>{ this.event.datamouseover(d,i); })
-            .on("mouseout", (d,i) =>{ this.event.datamouseout(d,i); })
-            .on("click", (d,i) =>{ this.event.dataclick(d,i); });
+            .on("mouseover", function (d,i) { self.event.call("datamouseover", d, i); })
+            .on("mouseout", function (d,i) { self.event.call("datamouseout", d, i); })
+            .on("click", function (d,i) { self.event.call("dataclick", d, i); });
         this.foreground.selectAll("path.data")
             .data(this.d)
             .attr("d", this.lineFunction)
@@ -294,7 +295,7 @@ class ParallelCoordinates extends Visualization{
         this.axis = this.overlay.selectAll(".axis")
             .data(this.keys)
             .attr("transform", (d) => { return "translate(" + this.x(d) + ")"; })
-            .each(function(d) { d3.select(this).call(axis.scale(y_axes[d])); });
+            .each(function(d) { d3.select(this).call(d3.axisLeft(y_axes[d])); });
         this.axis.select("text.column_label")
             .text(function(d) { return d; });
 
@@ -304,7 +305,7 @@ class ParallelCoordinates extends Visualization{
             .append("g")
             .attr("class", "axis")
             .attr("transform", (d) => { return "translate(" + this.x(d) + ")"; })
-            .each(function(d) { d3.select(this).call(axis.scale(y_axes[d])); });
+            .each(function(d) { d3.select(this).call(d3.axisLeft(y_axes[d])); });
 
         // Add an axis and title.
         this.axis.append("text")
@@ -348,7 +349,7 @@ class ParallelCoordinates extends Visualization{
                 .style("stroke", this.settings.color)
                 .style("stroke-width", "1");
             // this.overlay.selectAll(".lineHighlight").remove();
-            this.event.highlightend.apply(null, args);
+            this.event.apply("highlightend", null, args);
         }
         super.removeHighlight.apply(this, args);
     }
@@ -379,8 +380,7 @@ class ParallelBundling extends Visualization{
         this.clusterColor = someCluster => {
             if (this.clusterTags.includes(someCluster)){
                 return this.colorScheme[this.clusterTags.indexOf(someCluster)];
-            }
-            else {
+            } else {
                 return 'dimgrey';
             }
         };
@@ -397,7 +397,7 @@ class ParallelBundling extends Visualization{
 
             const isCategorical = someKey => this.domainType[someKey] === "Categorical";
             const map = (i, a, b, x, y) => {
-                let scale = d3.scale.linear().domain([a, b]).range([x, y]);
+                let scale = d3.scaleLinear().domain([a, b]).range([x, y]);
                 return scale(i);
             };
 
@@ -433,7 +433,7 @@ class ParallelBundling extends Visualization{
                             if (tag === cluster) break;
                             auxiliaryDisplacement += this.reservedSpaceInCategoricalAxes[tag][nextKey][d[nextKey]];
                         }
-                        return d3.scale.linear()
+                        return d3.scaleLinear()
                             .domain([0,quantityOfMembers])
                             .range([auxiliaryDisplacement, auxiliaryDisplacement + this.reservedSpaceInCategoricalAxes[cluster][nextKey][d[nextKey]]]);
 
@@ -469,7 +469,7 @@ class ParallelBundling extends Visualization{
                             if (tag === cluster) break;
                             sumOfReservedSpaces += this.reservedSpaceInCategoricalAxes[tag][key][d[key]];
                         }
-                        let displacementScale = d3.scale.linear()
+                        let displacementScale = d3.scaleLinear()
                             .domain([0, quantityOfMembers])
                             .range([sumOfReservedSpaces, this.reservedSpaceInCategoricalAxes[cluster][key][d[key]] + sumOfReservedSpaces]);
                         let displacement = displacementScale(relativeDisplacement);
@@ -591,9 +591,11 @@ class ParallelBundling extends Visualization{
             return path.toString();
         };
 
-        this.x = d3.scale.ordinal().rangePoints([
+        this.x = d3.scalePoint().range([
             0,
-            $(this.svg[0][0]).width()-this.settings.paddingLeft-this.settings.paddingRight
+            this.svg.node().getBoundingClientRect().width
+            -this.settings.paddingLeft
+            -this.settings.paddingRight
         ], 0);
 
     }
@@ -604,17 +606,16 @@ class ParallelBundling extends Visualization{
         let pr = this.settings.paddingRight;
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
+        let svgBounds = this.svg.node().getBoundingClientRect();
+
         if(this.x)
-            this.x.rangePoints([0, $(this.svg[0][0]).width()-pl-pr], 0);
+            this.x.range([0, svgBounds.width-pl-pr]);
         else
-            this.x = d3.scale.ordinal().rangePoints([0, $(this.svg[0][0]).width()-pl-pr], 0);
+            this.x = d3.scalePoint().range([0, svgBounds.width-pl-pr]);
 
         if(this.y) {
             for (let prop of this.keys) {
-                if (typeof this.y[prop].rangePoints === "function")
-                    this.y[prop].rangePoints([$(this.svg[0][0]).height()-pt-pb, 0], 0);
-                else
-                    this.y[prop].range([$(this.svg[0][0]).height() -pt-pb, 0]);
+                this.y[prop].range([svgBounds.height -pt-pb, 0]);
             }
         }
         console.log("redraw");
@@ -757,29 +758,33 @@ class ParallelBundling extends Visualization{
                 createBandScaleFromXScale();
             };
             const defineYScales = () => {
-                const createCategoricalScaleFor = key => {
-                    this.y[key] = d3.scale.ordinal()
-                        .domain(['*'].concat(this.domain[key]))
-                        .rangePoints([$(this.svg[0][0]).height()-pt-pb, 0], 0);
-                };
-                const createTimeScaleFor = key => {
-                    this.y[key] =  d3.time.scale()
-                        .domain(this.domain[key])
-                        .range([$(this.svg[0][0]).height()-pt-pb, 0]);
-                };
-                const createNumericScaleFor = key => {
-                    this.y[key] =  d3.scale.linear()
-                        .domain(this.domain[key])
-                        .range([$(this.svg[0][0]).height()-pt-pb, 0]);
-                };
+                // const createCategoricalScaleFor = key => {
+                //     this.y[key] = d3.scalePoint()
+                //         .domain(['*'].concat(this.domain[key]))
+                //         .range([$(this.svg[0][0]).height()-pt-pb, 0]);
+                // };
+                // const createTimeScaleFor = key => {
+                //     this.y[key] =  d3.scaleTime()
+                //         .domain(this.domain[key])
+                //         .range([$(this.svg[0][0]).height()-pt-pb, 0]);
+                // };
+                // const createNumericScaleFor = key => {
+                //     this.y[key] =  d3.scaleLinear()
+                //         .domain(this.domain[key])
+                //         .range([$(this.svg[0][0]).height()-pt-pb, 0]);
+                // };
 
                 this.y = {};
                 this.keys.forEach(key => {
                     switch(this.domainType[key]){
-                        case ('Categorical'): createCategoricalScaleFor(key); break;
-                        case ('Time'): createTimeScaleFor(key); break;
-                        default: createNumericScaleFor(key);
+                        case ('Categorical'): this.y[key] = d3.scalePoint(); break;
+                        case ('Time'): this.y[key] =  d3.scaleTime(); break;
+                        default: this.y[key] =  d3.scaleLinear();
                     }
+                    this.y[key]
+                        .domain(this.domainType[key] === 'Categorical' ?
+                            ['*'].concat(this.domain[key]) : this.domain[key])
+                        .range([this.svg.node().getBoundingClientRect().height -pt -pb, 0]);
                 });
             };
             this.defineReservedSpaceInCategoricalAxes = () =>{
@@ -799,7 +804,7 @@ class ParallelBundling extends Visualization{
                 const calculateReservedSpaceInCategoricalAxes = (tag,key,category) => {
                     const total = this.totalQuantityOfEntriesThatPassOn[key][category];
                     const size = this.axesSizesWithPadding[key];
-                    const auxiliaryScale = d3.scale.linear().domain([0, total]).range([0, size]);
+                    const auxiliaryScale = d3.scaleLinear().domain([0, total]).range([0, size]);
                     const quantity = this.quantityOfClusterMembersThatPassOn[tag][key][category];
                     this.reservedSpaceInCategoricalAxes[tag][key][category] = auxiliaryScale(quantity);
                 };
@@ -830,7 +835,6 @@ class ParallelBundling extends Visualization{
     redraw(withAnimation){
         if(!this.hasData)
             return;
-        let axis = d3.svg.axis().orient("left");
 
         let y_axes = this.y;
         let self = this;
@@ -851,12 +855,9 @@ class ParallelBundling extends Visualization{
         const drawLines = () => {
             const linesUpdateSelection = this.foreground.selectAll('path.data').data(this.d);
 
-            const appendNewLines = () => {
-                linesUpdateSelection.enter().append("path");
-            };
-            const updateAllLinesWithAnimation = () => {
-                const transitionScale = d3.scale.linear().domain([0,this.d.length]).range([0,200]);
-                linesUpdateSelection
+            const updateAllLinesWithAnimation = (selection) => {
+                const transitionScale = d3.scaleLinear().domain([0,this.d.length]).range([0,200]);
+                selection
                     .transition()
                     .attr("class", "data")
                     .attr("data-index", function(d,i){ return i; })
@@ -864,12 +865,12 @@ class ParallelBundling extends Visualization{
                     .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
                     .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
 
-                linesUpdateSelection.on("mouseover", (d,i) =>{ this.event.datamouseover(d,i); })
-                    .on("mouseout", (d,i) =>{ this.event.datamouseout(d,i); })
-                    .on("click", (d,i) =>{ this.event.dataclick(d,i); });
+                selection.on("mouseover", function (d,i) { self.event.call("datamouseover", this, d, i); })
+                    .on("mouseout", function (d,i) { self.event.call("datamouseout", this, d, i); })
+                    .on("click", function (d,i) { self.event.call("dataclick", this, d, i); });
             };
-            const updateAllLinesWithoutAnimation = () => {
-                linesUpdateSelection
+            const updateAllLinesWithoutAnimation = (selection) => {
+                selection
                     .attr("class", "data")
                     .attr("data-index", function(d,i){ return i; })
                     .attr("d", this.lineFunction)
@@ -877,9 +878,9 @@ class ParallelBundling extends Visualization{
                     .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
                     .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
 
-                linesUpdateSelection.on("mouseover", (d,i) =>{ this.event.datamouseover(d,i); })
-                    .on("mouseout", (d,i) =>{ this.event.datamouseout(d,i); })
-                    .on("click", (d,i) =>{ this.event.dataclick(d,i); });
+                selection.on("mouseover", (d,i) =>{ this.event.call("datamouseover", this, d,i); })
+                    .on("mouseout", (d,i) =>{ this.event.call("datamouseout", this, d,i); })
+                    .on("click", (d,i) =>{ this.event.call("dataclick", this, d,i); });
             };
             const removeExtraLines = () => {
                 linesUpdateSelection
@@ -894,11 +895,13 @@ class ParallelBundling extends Visualization{
                     })
                 });
             };
-            appendNewLines();
+
+            let mergeSelection = linesUpdateSelection.enter().append("path")
+                .merge(linesUpdateSelection);
             if (this.animation && withAnimation)
-                updateAllLinesWithAnimation();
+                updateAllLinesWithAnimation(mergeSelection);
             else
-                updateAllLinesWithoutAnimation();
+                updateAllLinesWithoutAnimation(mergeSelection);
             removeExtraLines();
 
             setTimeout(this.painterAlgorithm, 250);
@@ -923,7 +926,7 @@ class ParallelBundling extends Visualization{
             .data(this.keys)
             .attr("transform", (d) => { return "translate(" + this.x(d) + ")"; })
             .each(function(d) {
-                if(self.domainType[d] !== 'Categorical') d3.select(this).call(axis.scale(y_axes[d]));
+                if(self.domainType[d] !== 'Categorical') d3.select(this).call(d3.axisLeft(y_axes[d]));
             });
 
         this.axis.select("text.column_label")
@@ -931,12 +934,12 @@ class ParallelBundling extends Visualization{
 
         let axisSelection = this.overlay.selectAll('.axis').data(this.keys);
 
-        axisSelection
+        let axisSelectionEnter = axisSelection
             .enter()
             .append("g")
             .attr("class", "axis")
             .each(function(key) {
-                if(self.domainType[key] !== 'Categorical') d3.select(this).call(axis.scale(y_axes[key]));
+                if(self.domainType[key] !== 'Categorical') d3.select(this).call(d3.axisLeft(y_axes[key]));
                 else {
                     // let size = self.y[key](self.domain[key][0]) - self.y[key](self.domain[key][1]);
                     // let PADDING = size/50;
@@ -944,18 +947,31 @@ class ParallelBundling extends Visualization{
                         let g = d3.select(this).append('g').attr('class', 'categoricalAxis').attr('category', category)
                             .attr('transform','translate(0,'+self.y[key](category)+')');
 
-                        let s = d3.scale.linear().domain([0,1]).range([0, self.axesSizesWithPadding[key]]);
-                        g.call(d3.svg.axis().orient('left').scale(s).ticks(0));
+                        let s = d3.scaleLinear().domain([0,1]).range([0, self.axesSizesWithPadding[key]]);
+                        g.call(d3.axisLeft(s).ticks(0));
                         g.append('text').text(category).attr('x', -10).attr('y', self.axesSizesWithPadding[key]/2);
 
                     })
                 }
             });
 
-        axisSelection
+
+        //insere label textual para cada eixo no enter().
+        axisSelectionEnter
+            .append("text")
+            .style("text-anchor", "middle")
+            .attr("class", "column_label")
+            .style("fill", "black")
+            .style("font-size", "10pt")
+            .attr("y", -9)
+            .on('click', d=>this.setClusterKey(d))
+            .text(function(d) { return d; });
+
+        axisSelectionEnter
+            .merge(axisSelection)
             .attr("transform", (key) => { return "translate(" + this.x(key) + ")"; })
             .each(function(key) {
-                if(self.domainType[key] !== 'Categorical') d3.select(this).call(axis.scale(y_axes[key]));
+                if(self.domainType[key] !== 'Categorical') d3.select(this).call(d3.axisLeft(y_axes[key]));
                 else {
                     // let size = self.y[key](self.domain[key][0]) - self.y[key](self.domain[key][1]);
                     // let PADDING = size/50;
@@ -963,10 +979,10 @@ class ParallelBundling extends Visualization{
                         .attr('transform', function() { return 'translate(0,'+ self.y[key](d3.select(this).attr('category')) +')'});
 
 
-                    let s = d3.scale.linear().domain([0,1]).range([0, self.axesSizesWithPadding[key]]);
+                    let s = d3.scaleLinear().domain([0,1]).range([0, self.axesSizesWithPadding[key]]);
 
                     g.selectAll('*').remove();
-                    g.call(d3.svg.axis().orient('left').scale(s).ticks(0));
+                    g.call(d3.axisLeft(s).ticks(0));
                     g.append('text').text(function() {return d3.select(this.parentNode).attr('category')})
                         .attr('text-anchor', 'end')
                         .attr('x', -5)
@@ -976,14 +992,17 @@ class ParallelBundling extends Visualization{
 
         axisSelection.exit().remove();
         // Add an axis and title.
-        axisSelection.append("text")
-            .style("text-anchor", "middle")
-            .attr("class", "column_label")
-            .attr("y", -9)
-            .on('click', d=>this.setClusterKey(d))
-            .text(function(d) { return d; });
+        // let labelUpdate = axisSelection.selectAll("text.column_label").data(this.keys);
+        // labelUpdate.enter()
+        //     .append("text")
+        //     .style("text-anchor", "middle")
+        //     .attr("class", "column_label")
+        //     .attr("y", -9)
+        //     .on('click', d=>this.setClusterKey(d))
+        //     .merge(labelUpdate)
+        //     .text(function(d) { return d; });
 
-        let categoricalAxisSelection = this.overlay.selectAll('.categoricalAxis');
+        // let categoricalAxisSelection = this.overlay.selectAll('.categoricalAxis');
     }
 
     setClusterKey(key) {
@@ -1032,7 +1051,7 @@ class ParallelBundling extends Visualization{
                 .style("stroke", function(d) {return self.clusterColor(d[self.clusterOn])})
                 .style("stroke-width", 1);
             // this.overlay.selectAll(".lineHighlight").remove();
-            this.event.highlightend.apply(null, args);
+            this.event.apply("highlightend", null, args);
         }
         super.removeHighlight.apply(this, args);
         this.painterAlgorithm();
@@ -1068,14 +1087,6 @@ class ScatterplotMatrix extends Visualization{
         // var y = d3.scale.linear()
         //     .range([size - padding / 2, padding / 2]);
 
-        this.xAxis = d3.svg.axis()
-            .orient("bottom")
-            .ticks(6);
-
-        this.yAxis = d3.svg.axis()
-            .orient("left")
-            .ticks(6);
-
     }
 
     resize(){
@@ -1084,18 +1095,19 @@ class ScatterplotMatrix extends Visualization{
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
         let ip = this.settings.innerPadding;
+        let svgBounds = this.svg.node().getBoundingClientRect();
 
-        this.cellWidth = ($(this.svg[0][0]).width()-pl-pr-ip*(this.keys.length-1))/this.keys.length;
-        this.cellHeight = ($(this.svg[0][0]).height()-pt-pb-ip*(this.keys.length-1))/this.keys.length;
+        this.cellWidth = (svgBounds.width-pl-pr-ip*(this.keys.length-1))/this.keys.length;
+        this.cellHeight = (svgBounds.height-pt-pb-ip*(this.keys.length-1))/this.keys.length;
 
         for(let k of this.keys){
-            if(this.domainType[k] === "Categorical"){
-                this.x[k].rangePoints([0, this.cellWidth], 0);
-                this.y[k].rangePoints([0, this.cellHeight], 0);
-            }else{
+            // if(this.domainType[k] === "Categorical"){
+            //     this.x[k].rangePoints([0, this.cellWidth], 0);
+            //     this.y[k].rangePoints([0, this.cellHeight], 0);
+            // }else{
                 this.x[k].range([0, this.cellWidth]);
                 this.y[k].range([this.cellHeight, 0]);
-            }
+            // }
         }
         // console.log("redraw");
         this.redraw();
@@ -1109,25 +1121,26 @@ class ScatterplotMatrix extends Visualization{
         let pr = this.settings.paddingRight;
         let ip = this.settings.innerPadding;
         super.data(d);
+        let svgBounds = this.svg.node().getBoundingClientRect();
 
-        this.cellWidth = ($(this.svg[0][0]).width()-pl-pr-ip*(this.keys.length-1))/this.keys.length;
-        this.cellHeight = ($(this.svg[0][0]).height()-pt-pb-ip*(this.keys.length-1))/this.keys.length;
+        this.cellWidth = (svgBounds.width-pl-pr-ip*(this.keys.length-1))/this.keys.length;
+        this.cellHeight = (svgBounds.height-pt-pb-ip*(this.keys.length-1))/this.keys.length;
 
         this.x = {};
         this.y = {};
         for(let k of this.keys){
             if(this.domainType[k] === "Categorical"){
-                this.x[k] = d3.scale.ordinal()
-                    .domain(this.domain[k])
-                    .rangePoints([0, this.cellWidth], 0);
-                this.y[k] = d3.scale.ordinal()
-                    .domain(this.domain[k])
-                    .rangePoints([0, this.cellHeight], 0);
-            }else{
-                this.x[k] =  d3.scale.linear()
+                this.x[k] = d3.scalePoint()
                     .domain(this.domain[k])
                     .range([0, this.cellWidth]);
-                this.y[k] =  d3.scale.linear()
+                this.y[k] = d3.scalePoint()
+                    .domain(this.domain[k])
+                    .range([0, this.cellHeight]);
+            }else{
+                this.x[k] =  d3.scaleLinear()
+                    .domain(this.domain[k])
+                    .range([0, this.cellWidth]);
+                this.y[k] =  d3.scaleLinear()
                     .domain(this.domain[k])
                     .range([this.cellHeight, 0]);
             }
@@ -1250,10 +1263,9 @@ class ScatterplotMatrix extends Visualization{
             .attr("class", "x axis")
             .attr("transform", (d, i) => { return "translate("
                 + i * (this.cellWidth+this.settings.innerPadding)
-                + "," + ($(this.svg[0][0]).height()-this.settings.paddingBottom-this.settings.paddingTop) +")"; })
+                + "," + (this.svg.node().getBoundingClientRect().height -this.settings.paddingBottom-this.settings.paddingTop) +")"; })
             .each(function(d) {
-                scatterplot.xAxis.scale(scatterplot.x[d]);
-                d3.select(this).call(scatterplot.xAxis);
+                d3.select(this).call(d3.axisBottom(scatterplot.x[d]).ticks(6));
             });
 
         this.foreground.selectAll(".y.axis").remove();
@@ -1263,8 +1275,7 @@ class ScatterplotMatrix extends Visualization{
             .attr("class", "y axis")
             .attr("transform", (d, i) => { return "translate(0," + i * (this.cellHeight+this.settings.innerPadding) + ")"; })
             .each(function(d) {
-                scatterplot.yAxis.scale(scatterplot.y[d]);
-                d3.select(this).call(scatterplot.yAxis);
+                d3.select(this).call(d3.axisLeft(scatterplot.y[d]).ticks(6));
             });
 
     }
@@ -1372,12 +1383,7 @@ class BeeswarmPlot extends Visualization{
         this.settings.radius = settings? settings.radius || 2 : 2;
         this.name = "BeeswarmPlot";
 
-        this.xAxis = d3.svg.axis().orient("bottom");
-        this.yAxis = d3.svg.axis().orient("right").innerTickSize(0);
-        let pl = this.settings.paddingLeft;
-        let pr = this.settings.paddingRight;
-
-        this.x = d3.scale.ordinal()
+        this.x = d3.scalePoint()
     }
 
     resize(){
@@ -1386,18 +1392,18 @@ class BeeswarmPlot extends Visualization{
         let pl = this.settings.paddingLeft;
         let pr = this.settings.paddingRight;
         let ip = this.settings.innerPadding;
+        let svgBounds = this.svg.node().getBoundingClientRect();
 
-        this.boxWidth = ($(this.svg[0][0]).width()-pl-pr-ip*(this.keys.length-1))/this.keys.length;
-        this.innerHeight = $(this.svg[0][0]).height()-pt-pb;
+        this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys.length-1))/this.keys.length;
+        this.innerHeight = svgBounds.height-pt-pb;
 
-        this.x
-            .rangePoints([ this.boxWidth/2, $(this.svg[0][0]).width()-pl-pr-this.boxWidth/2], 0);
+        this.x.range([this.boxWidth/2, svgBounds.width-pl-pr-this.boxWidth/2]);
         for(let k of this.keys){
-            if(this.domainType[k] === "Categorical"){
-                this.y[k].rangePoints([this.innerHeight, 0], 0);
-            }else{
+            // if(this.domainType[k] === "Categorical"){
+            //     this.y[k].rangePoints([this.innerHeight, 0], 0);
+            // }else{
                 this.y[k].range([this.innerHeight, 0]);
-            }
+            // }
         }
 
         this.xPoints = this.getXfunction();
@@ -1416,24 +1422,23 @@ class BeeswarmPlot extends Visualization{
         let ip = this.settings.innerPadding;
         super.data(d);
 
-        this.dByAxis = {};
-        this.boxWidth = ($(this.svg[0][0]).width()-pl-pr-ip*(this.keys.length-1))/this.keys.length;
+        let svgBounds = this.svg.node().getBoundingClientRect();
 
-        this.innerHeight = $(this.svg[0][0]).height()-pt-pb;
+        this.dByAxis = {};
+        this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys.length-1))/this.keys.length;
+
+        this.innerHeight = svgBounds.height-pt-pb;
 
         this.x.domain(this.keys)
-            .rangePoints([ this.boxWidth/2, $(this.svg[0][0]).width()-pl-pr-this.boxWidth/2], 0);
+            .range([ this.boxWidth/2, svgBounds.width-pl-pr-this.boxWidth/2]);
         this.y = {};
         for(let k of this.keys){
             if(this.domainType[k] === "Categorical"){
-                this.y[k] = d3.scale.ordinal()
-                    .domain(this.domain[k])
-                    .rangePoints([this.innerHeight, 0], 0);
+                this.y[k] = d3.scalePoint();
             }else{
-                this.y[k] = d3.scale.linear()
-                    .domain(this.domain[k])
-                    .range([this.innerHeight, 0]);
+                this.y[k] = d3.scaleLinear();
             }
+            this.y[k].domain(this.domain[k]).range([this.innerHeight, 0]);
 
             // this.dByAxis[k] = this.d.map((d) => { return _.pick(d, k); });
         }
@@ -1509,14 +1514,14 @@ class BeeswarmPlot extends Visualization{
             .attr("x", -beeswarm.boxWidth/2)
             .attr("y", 0)
             .attr("width", beeswarm.boxWidth)
-            .attr("height", $(beeswarm.svg[0][0]).height()
+            .attr("height", beeswarm.svg.node().getBoundingClientRect().height
                 -beeswarm.settings.paddingTop-beeswarm.settings.paddingBottom)
             .style("fill", "none")
             .style("stroke", "#aaa");
         beegroupenter.append("g")
             .attr("class", "axis")
             .attr("transform", "translate("+(-beeswarm.boxWidth/2)+",0)")
-            .each(function(k) { d3.select(this).call(beeswarm.yAxis.scale(beeswarm.y[k])); });
+            .each(function(k) { d3.select(this).call(d3.axisRight(beeswarm.y[k]).tickSizeInner(0)); });
         beegroupenter.append("text")
             .attr("class", "axisLabel")
             .attr("x", 0)
@@ -1532,7 +1537,7 @@ class BeeswarmPlot extends Visualization{
         // beegroup.selectAll("")
         beegroup
             .each(function(k) {
-                d3.select(this).selectAll("g.axis").call(beeswarm.yAxis.scale(beeswarm.y[k]));
+                d3.select(this).selectAll("g.axis").call(d3.axisRight(beeswarm.y[k]).tickSizeInner(0));
             })
             .selectAll("g.axis")
             .attr("transform", "translate("+(-beeswarm.boxWidth/2)+",0)");
@@ -1543,7 +1548,7 @@ class BeeswarmPlot extends Visualization{
             .attr("x", -beeswarm.boxWidth/2)
             .attr("y", 0)
             .attr("width", beeswarm.boxWidth)
-            .attr("height", $(beeswarm.svg[0][0]).height()
+            .attr("height", beeswarm.svg.node().getBoundingClientRect().height
                 -beeswarm.settings.paddingTop-beeswarm.settings.paddingBottom);
 
         beegroup
