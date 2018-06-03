@@ -10,6 +10,9 @@
         path.data{
             fill: none;
         }
+        .axis text{
+            user-select: none;
+        }
     </style>
 
 </head>
@@ -45,8 +48,19 @@
         ]);
         parallel.redraw();
         parallel.on("datamouseover", (d) => {
-            console.log("foi", d);
+
         });
+
+        let p0;
+        parallel.svg.node().onmousedown =  function(d){
+            console.log("mousedown",d);
+            p0 = [d.clientX, d.clientY];
+        };
+        parallel.svg.node().onmouseup = function(d){
+            console.log("mouseup", d);
+            parallel.removeSelect();
+            parallel.select([p0, [d.clientX, d.clientY]]);
+        };
     </script>
 </body>
 </html>
