@@ -189,7 +189,7 @@ class ParallelCoordinates extends Visualization{
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             let dataSelect = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
-                .style("stroke", this.settings.color)
+                .style("stroke", this.color)
                 .style("stroke-width", "1");
             // this.overlay.selectAll(".lineHighlight").remove();
             super.removeHighlight(dataSelect.node(), dataSelect.datum(), args[1]);
