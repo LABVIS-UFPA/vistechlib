@@ -8,7 +8,7 @@ class ParallelCoordinates extends Visualization{
     constructor(parentElement, settings){
         super(parentElement, settings);
         this.name = "ParallelCoordinates";
-
+        this.color = 'dimgray'
         this.lineFunction = (d) => {
             return d3.line()(this.keys.map((key) => {
                 return [this.x(key), this.y[key](d[key])];
@@ -60,12 +60,12 @@ class ParallelCoordinates extends Visualization{
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
         super.data(d);
-
         this.x.domain(this.keys);
         this.y = {};
         for(let k of this.keys){
             if(this.domainType[k] === "Categorical") {
                 this.y[k] = d3.scalePoint()
+
             }else if(this.domainType[k] === "Time"){
                 //TODO: Melhorar a escala para o tempo.
                 this.y[k] =  d3.scaleTime();
@@ -114,7 +114,7 @@ class ParallelCoordinates extends Visualization{
 
             .merge(dataUpdate)
             .attr("d", this.lineFunction)
-            .style("stroke", this.settings.color);
+            .style("stroke", this.color);
 
 
 
@@ -136,12 +136,30 @@ class ParallelCoordinates extends Visualization{
             .style("text-anchor", "middle")
             .attr("class", "column_label")
             .attr("y", -9)
+            .on('click', d => {
+                this.focus = d;
+                this.updateColors();
+                console.log(d)
+            })
             .text(function(d) { return d; });
 
         this.axis = this.overlay.selectAll(".axis");
 
     }
 
+    updateColors(){
+        if(this.domainType[this.focus] !== 'Categorical') this.color = "dimgray"
+        else {
+            this.colorScale = d3.scaleOrdinal().domain(this.domain[this.focus]).range(
+                ['firebrick', 'mediumseagreen', 'steelblue', 'gold', 'chocolate', 'magenta']
+            )
+            this.color = d => {
+                let category = d[this.focus]
+                return this.colorScale(category)
+            }
+        }
+        this.redraw()
+    }
     highlight(...args){
         let parallelcoordinates = this;
 
