@@ -1,5 +1,6 @@
 let _ = require("underscore");
 let d3 = require("d3");
+let moment = require('moment');
 
 class Visualization {
 
@@ -76,9 +77,9 @@ class Visualization {
             if(this.d[0].hasOwnProperty(k)){
                 this.keys.push(k);
                 if(isNaN(+this.d[0][k])) {
-                    if(/^\d{1,2}(:\d{1,2}){1,2}(\s*[AaPp][Mm])?$/.test(this.d[0][k])){
+                    if(moment(this.d[0][k]).isValid()){
                         for(let i=0;i<this.d.length;i++) {
-                            this.d[i][k] = new Date(Date.parse(this.d[i][k]));
+                            this.d[i][k] = moment(this.d[i][k]).toDate();
                         }
                         this.domainType[k] = "Time";
                         this.domain[k] = d3.extent(this.d, (obj) => {return obj[k];});
