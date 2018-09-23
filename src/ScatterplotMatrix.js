@@ -169,6 +169,7 @@ class ScatterplotMatrix extends Visualization{
             .filter(function(d) { return d.i === d.j; })
             .append("text")
             .attr("class", "axisLabel")
+            .style("fill", "black")
             .attr("x", scatterplot.settings.innerPadding)
             .attr("y", scatterplot.settings.innerPadding)
             .attr("dy", ".71em")

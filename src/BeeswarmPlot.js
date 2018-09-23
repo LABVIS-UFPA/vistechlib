@@ -155,6 +155,7 @@ class BeeswarmPlot extends Visualization{
             .attr("x", 0)
             .attr("y", -10)
             .attr("text-anchor", "middle")
+            .style("fill", "black")
             .text(function(d){
                 return d;
             });

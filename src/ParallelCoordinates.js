@@ -141,7 +141,8 @@ class ParallelCoordinates extends Visualization{
                 this.updateColors();
                 console.log(d)
             })
-            .text(function(d) { return d; });
+            .text(function(d) { return d; })
+            .style("fill", "black");
 
         this.axis = this.overlay.selectAll(".axis");
 
