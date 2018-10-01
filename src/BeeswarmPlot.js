@@ -96,13 +96,13 @@ class BeeswarmPlot extends Visualization{
             beeswarm.resetXfunction();
 
             let dataSelection = d3.select(this)
-                .selectAll("circle.dataPoint")
+                .selectAll("circle.data")
                 .data(beeswarm.d);
 
             dataSelection.exit().remove();
             dataSelection.enter()
                 .append("circle")
-                .attr("class", "dataPoint")
+                .attr("class", "data")
                 .attr("data-index", function(d, i){ return i; })
                 .style("fill-opacity", ".6")
                 .on("mouseover", function (d,i) { beeswarm.event.call("datamouseover", this, d,i); })

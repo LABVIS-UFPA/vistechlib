@@ -21,35 +21,92 @@
 
     <script>
 
+        let cate = ["laranja", "maçã", "banana"];
         console.log(vistechlib);
-        parallel = new vistechlib.BeeswarmPlot(document.getElementById("canvasTest"));
+        parallel = new vistechlib.Treemap(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
+        parallel.hierarchy(["w"]);
         parallel.data([
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()},
-            {x:Math.random(),y:Math.random(), z:Math.random()}
-        ]);
-        parallel.redraw();
-        parallel.on("datamouseover", (d) => {
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
+            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]}
 
-        });
+        ]);
+        parallel//.setLabel((d)=>{ return d.x; })
+            .redraw()
+            .on("datamouseover", (d, i) => {
+                parallel.highlight(d, i);
+            })
+            .on("datamouseout", (d, i) => {
+                parallel.removeHighlight(d, i);
+            });
 
         let p0;
         parallel.svg.node().onmousedown =  function(d){
@@ -61,6 +118,9 @@
             parallel.removeSelect();
             parallel.select([p0, [d.clientX, d.clientY]]);
         };
+
+
+
     </script>
 </body>
 </html>

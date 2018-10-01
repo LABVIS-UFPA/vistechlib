@@ -96,10 +96,10 @@ class ScatterplotMatrix extends Visualization{
             let cell = d3.select(this);
 
 
-            cell.selectAll("circle.dataPoints")
+            cell.selectAll("circle.data")
                 .data(scatterplot.d).enter()
                 .append("circle")
-                .attr("class", "dataPoints")
+                .attr("class", "data")
                 .attr("data-index", function(d,i){ return i; })
                 .attr("data-col", k.x)
                 .attr("data-row", k.y)
@@ -117,12 +117,12 @@ class ScatterplotMatrix extends Visualization{
                 .on("click", function(d,i){
                     scatterplot.event.call("dataclick", this, d, i);
                 });
-            cell.selectAll("circle.dataPoints")
+            cell.selectAll("circle.data")
                 .data(scatterplot.d)
                 .attr("cx", function(d) { return scatterplot.x[k.x](d[k.x]); })
                 .attr("cy", function(d) { return scatterplot.y[k.y](d[k.y]); })
                 .style("fill", scatterplot.settings.color);
-            cell.selectAll("circle.dataPoints")
+            cell.selectAll("circle.data")
                 .data(scatterplot.d).exit().remove();
 
         }
@@ -223,7 +223,7 @@ class ScatterplotMatrix extends Visualization{
                 isFirst[k] = true;
             }
 
-            this.foreground.selectAll('circle.dataPoints[data-index="'+args[1]+'"]').style("stroke", this.settings.highlightColor)
+            this.foreground.selectAll('circle.data[data-index="'+args[1]+'"]').style("stroke", this.settings.highlightColor)
                 .each(function(){
                     let circle = d3.select(this);
                     let t = utils.parseTranslate(this.parentElement);
@@ -255,7 +255,7 @@ class ScatterplotMatrix extends Visualization{
     }
     removeHighlight(...args){
         if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            let elem = this.foreground.selectAll('circle.dataPoints[data-index="'+args[1]+'"]').style("stroke", "none");
+            let elem = this.foreground.selectAll('circle.data[data-index="'+args[1]+'"]').style("stroke", "none");
             this.background.selectAll(".lineHighlight").remove();
             super.removeHighlight(elem.node(), elem.datum(), args[1]);
         }
@@ -269,7 +269,7 @@ class ScatterplotMatrix extends Visualization{
             isFirst[k] = true;
         }
 
-        this.foreground.selectAll('circle.dataPoints[data-index="'+i+'"]')
+        this.foreground.selectAll('circle.data[data-index="'+i+'"]')
             .each(function(){
                 let circle = d3.select(this);
                 let t = utils.parseTranslate(this.parentElement);
