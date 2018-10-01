@@ -11,18 +11,17 @@ class Treemap extends Visualization{
         super(parentElement, settings);
         //this.settings.radius = settings? settings.radius || 2 : 2;
         this.name = "Treemap";
-        this.settings.labelVAlign = settings? settings.labelVAlign || "top" : "top";
-        this.settings.labelHAlign = settings? settings.labelHAlign || "left" : "left";
+        this.settings.labelVAlign = settings ? settings.labelVAlign || "top" : "top";
+        this.settings.labelHAlign = settings ? settings.labelHAlign || "left" : "left";
+        this.settings.paddingTopHierarchies = settings ? settings.paddingTopHierarchies || 15 : 15;
+        this.settings.paddingBottomHierarchies = settings ? settings.paddingBottomHierarchies || 2 : 2;
+        this.settings.paddingLeftHierarchies = settings ? settings.paddingLeftHierarchies || 2 : 2;
+        this.settings.paddingRightHierarchies = settings ? settings.paddingRightHierarchies || 2 : 2;
     }
 
     resize(){
-        let pt = this.settings.paddingTop;
-        let pb = this.settings.paddingBottom;
-        let pl = this.settings.paddingLeft;
-        let pr = this.settings.paddingRight;
-        let svgBounds = this.svg.node().getBoundingClientRect();
+        _makeHierarchy.call(this, this.d_h);
 
-        d3.treemap().size([svgBounds.width-pl-pr, svgBounds.height-pt-pb])(this.d_h);
         this.redraw();
         return this;
     }
@@ -31,11 +30,6 @@ class Treemap extends Visualization{
 
         super.data(d);
 
-        let svgBounds = this.svg.node().getBoundingClientRect();
-        let pt = this.settings.paddingTop;
-        let pb = this.settings.paddingBottom;
-        let pl = this.settings.paddingLeft;
-        let pr = this.settings.paddingRight;
 
         if(this.settings.hierarchies){
             _hierarchy.call(this, this.settings.hierarchies);
@@ -44,14 +38,11 @@ class Treemap extends Visualization{
             this.d_h = d3.hierarchy(root).count();
         }
 
-        d3.treemap()
-            .paddingTop(15).paddingLeft(2).paddingBottom(2).paddingRight(2)
-            .size([svgBounds.width-pl-pr, svgBounds.height-pt-pb])(this.d_h);
+        _makeHierarchy.call(this, this.d_h);
 
 
         this.d_parents = [];
         this.d_h.each((d) => {
-            console.log(d);
             if(d.height !== 0)
                 this.d_parents.push(d);
         });
@@ -61,7 +52,7 @@ class Treemap extends Visualization{
     redraw(){
 
 
-        let t0 = performance.now();
+        //let t0 = performance.now();
 
 
 
@@ -103,10 +94,9 @@ class Treemap extends Visualization{
             .attr("width", (d)=>{return d.x1 - d.x0;})
             .attr("height", (d)=>{return d.y1 - d.y0;});
 
-        console.log(this.d_h);
 
         let t1 = performance.now();
-        console.log("TIme: "+(t1-t0));
+        //console.log("TIme: "+(t1-t0));
 
         if(this.settings.label) {
             console.log(this.settings.label);
@@ -135,8 +125,10 @@ class Treemap extends Visualization{
         super.highlight.apply(this, args);
     }
     removeHighlight(...args){
-        this.selectionLayer.selectAll("rect.data-highlight").remove();
-        super.removeHighlight.apply(this, args);
+        if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+            this.selectionLayer.selectAll("rect.data-highlight").remove();
+            super.removeHighlight.apply(this, this.d[args[1]], args[1]);
+        }
     }
     getHighlightElement(i){
         let d = this.d_h.children[i];
@@ -232,5 +224,25 @@ let _setLabel = function(func){
         });
     }
 };
+
+let _makeHierarchy = function(obj){
+
+    let svgBounds = this.svg.node().getBoundingClientRect();
+    let pt = this.settings.paddingTop;
+    let pb = this.settings.paddingBottom;
+    let pl = this.settings.paddingLeft;
+    let pr = this.settings.paddingRight;
+
+    let pth = this.settings.paddingTopHierarchies;
+    let pbh = this.settings.paddingBottomHierarchies;
+    let plh = this.settings.paddingLeftHierarchies;
+    let prh = this.settings.paddingRightHierarchies;
+
+
+    d3.treemap()
+        .paddingTop(pth).paddingLeft(plh).paddingBottom(pbh).paddingRight(prh)
+        .size([svgBounds.width-pl-pr, svgBounds.height-pt-pb])(obj);
+};
+
 
 module.exports = Treemap;
