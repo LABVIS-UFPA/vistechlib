@@ -152,7 +152,6 @@ class Visualization {
     }
     removeSelect(){
         let elems = this.selectionLayer.selectAll(".data").nodes();
-        console.log("foi", elems);
         for(let elem of elems){
             this.foreground.node().appendChild(elem);
         }

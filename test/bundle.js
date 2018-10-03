@@ -26166,17 +26166,31 @@ class Treemap extends Visualization{
 
         let updateParents = this.foreground.selectAll(".data-parent").data(this.d_parents);
         updateParents.exit().remove();
-        let enterParents = updateParents.enter().append("rect")
-            .attr("class", "data-parent")
+        let enterParents = updateParents.enter()
+            .append("g")
+            .attr("class", "data-parent");
+
+        enterParents.append("rect")
             .style("fill", "gray")
             .style("stroke", "black")
             .style("stroke-width", "0.5px");
 
-        enterParents.merge(updateParents)
-            .attr("x", (d)=>{return d.x0;})
-            .attr("y", (d)=>{return d.y0;})
+        enterParents.append("text")
+            .style("fill", "black")
+            .style("font-family", "monospace");
+
+        let mergeParents = enterParents.merge(updateParents)
+            .attr("transform", (d)=>{return "translate("+d.x0+","+d.y0+")";});
+
+        mergeParents.select("rect")
             .attr("width", (d)=>{return d.x1 - d.x0;})
             .attr("height", (d)=>{return d.y1 - d.y0;});
+
+        mergeParents.select("text")
+            .text((d)=>{return d.data.name;})
+            .attr("x", 2)
+            .attr("y", function(){ return this.getBoundingClientRect().height - 3; });
+
 
 
 
@@ -26235,7 +26249,9 @@ class Treemap extends Visualization{
     removeHighlight(...args){
         if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             this.selectionLayer.selectAll("rect.data-highlight").remove();
-            super.removeHighlight.apply(this, this.d[args[1]], args[1]);
+            super.removeHighlight(this.foreground
+                    .select('rect.data[data-index="'+args[1]+'"]').node(),
+                this.d[args[1]], args[1]);
         }
     }
     getHighlightElement(i){
