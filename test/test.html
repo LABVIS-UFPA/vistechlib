@@ -101,11 +101,14 @@
         ]);
         parallel//.setLabel((d)=>{ return d.x; })
             .redraw()
-            .on("datamouseover", (d, i) => {
+            .on("datamouseover", function (d, i) {
                 parallel.highlight(d, i);
             })
-            .on("datamouseout", (d, i) => {
+            .on("datamouseout", function (d, i) {
                 parallel.removeHighlight(d, i);
+            })
+            .on("highlightstart", function (d, i) {
+                console.log("highlightstart", this);
             });
 
         let p0;

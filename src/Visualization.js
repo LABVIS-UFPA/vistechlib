@@ -11,6 +11,7 @@ class Visualization {
             color: "#069",//"grey",//"#069",
             highlightColor: "#FF1122",//"#08E700",
             opacity: 1,
+            notSelectedOpacity: 0.3,
             size_type: "fit",//"absolute"
             width: 700,
             height: 300,
@@ -20,6 +21,7 @@ class Visualization {
             paddingBottom: 30,
             autoresize: true
         };
+        this._putDefaultSettings();
         //sobreescreve as configurações padrão pelas configurações dadas por parâmetro.
         if(typeof settings === "object"){
             for(let p in this.settings){
@@ -30,8 +32,11 @@ class Visualization {
 
         this.autoresize = this.settings.autoresize;
 
-        this.event = d3.dispatch("brush", "draw", "highlightstart", "highlightend",
-            "datamouseover","datamouseout", "dataclick");
+        this.event = d3.dispatch("brush", "draw",
+            "highlightstart", "highlightend",
+            "datamouseover","datamouseout", "dataclick", "datadblclick",
+            "ancestormouseover", "ancestormouseout",
+            "ancestorclick", "ancestordblclick");
 
         let fit = this.settings.size_type === "fit";
 
@@ -40,32 +45,40 @@ class Visualization {
             .attr("width", fit ? "100%" : this.settings.width)
             .attr("height", fit ? "100%" : this.settings.height);
 
+        let translatestr = "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")";
+
         this.canvas = this.svg.append("g");
         this.background = this.canvas.append("g")
             .attr("class", "background")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
 
         this.foreground = this.canvas.append("g")
             .attr("class", "foreground")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
+
+        this.highlightLayer = this.canvas.append("g")
+            .attr("class", "highlightLayer")
+            .attr("transform", translatestr);
 
         this.selectionLayer = this.canvas.append("g")
             .attr("class", "selectionLayer")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
 
         this.overlay = this.canvas.append("g")
             .attr("class", "overlay")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
 
         this.annotations = this.canvas.append("g")
             .attr("class", "annotations")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
 
         this.parentElement.__vis__ = this;
 
         this.isHighlighting = false;
 
     }
+
+    _putDefaultSettings(){}
 
 
     data(d){
@@ -117,21 +130,19 @@ class Visualization {
         return this;
     };
 
-    highlight(...args){
+    highlight(element, ...args){
         if(!this.isHighlighting){
             this.isHighlighting = true;
-            this.event.apply("highlightstart", this, args);
+            this.event.apply("highlightstart", element, args);
         }
     }
-    removeHighlight(elem, ...args){
+    removeHighlight(element, ...args){
         if(this.isHighlighting){
             this.isHighlighting = false;
-            this.event.apply("highlightend", elem, args);
+            this.event.apply("highlightend", element, args);
         }
     }
-    getHighlightElement(i){
-
-    }
+    getHighlightElement(i){ }
 
     annotate(svgElement){
         this.annotations.node().appendChild(svgElement);
@@ -147,7 +158,8 @@ class Visualization {
             for(let elem of elems){
                 this.selectionLayer.node().appendChild(elem);
             }
-            this.foreground.selectAll(".data").style("opacity", "0.2");
+            this.foreground.selectAll(".data")
+                .style("opacity", this.settings.notSelectedOpacity);
         }
     }
     removeSelect(){
@@ -161,6 +173,9 @@ class Visualization {
         return this.selectionLayer.selectAll("*").nodes();
     }
 
+
+    hierarchy(){}
+
     set autoresize(isAutoResize){
         this.settings.autoresize = isAutoResize;
         window.onresize = isAutoResize ? () => {
@@ -170,6 +185,17 @@ class Visualization {
 
     get autoresize(){
         return this.settings.autoresize;
+    }
+
+
+    _bindDataMouseEvents(selection, prefix){
+        let vis = this;
+        let _prefix = prefix || "data";
+        selection
+            .on("mouseover", function(d,i){ vis.event.call(_prefix+"mouseover", this, d, i); })
+            .on("mouseout", function(d,i){ vis.event.call(_prefix+"mouseout", this, d, i); })
+            .on("click", function(d,i){ vis.event.call(_prefix+"click", this, d, i); })
+            .on("dblclick", function(d,i){ vis.event.call(_prefix+"dblclick", this, d, i); });
     }
 
 }

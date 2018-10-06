@@ -91,7 +91,7 @@ class ParallelCoordinates extends Visualization{
     redraw(){
 
         if(!this.hasData)
-            return;
+            return this;
 
         // let axis = d3.svg.axis().orient("left");
         //Atualiza os Eixos
@@ -99,20 +99,19 @@ class ParallelCoordinates extends Visualization{
 
         let self = this;
 
-        let dataUpdate = this.foreground.selectAll("path.data");
+        let dataUpdate = this.foreground.selectAll("path.data").data(this.d);
 
         dataUpdate.exit().remove();
 
-        this.foreground.selectAll("path.data")
-            .data(this.d).enter()
+        let dataEnter = dataUpdate
+            .enter()
             .append("path")
             .attr("class", "data")
-            .attr("data-index", function(d,i){ return i; })
-            .on("mouseover", function (d,i) { self.event.call("datamouseover", this, d, i); })
-            .on("mouseout", function (d,i) { self.event.call("datamouseout", this, d, i); })
-            .on("click", function (d,i) { self.event.call("dataclick", this, d, i); })
+            .attr("data-index", function(d,i){ return i; });
 
-            .merge(dataUpdate)
+        this._bindDataMouseEvents(dataEnter);
+
+        dataEnter.merge(dataUpdate)
             .attr("d", this.lineFunction)
             .style("stroke", this.color);
 
@@ -146,6 +145,9 @@ class ParallelCoordinates extends Visualization{
 
         this.axis = this.overlay.selectAll(".axis");
 
+        this.event.apply("draw");
+
+        return this;
     }
 
     updateColors(){
@@ -164,26 +166,22 @@ class ParallelCoordinates extends Visualization{
     highlight(...args){
         let parallelcoordinates = this;
 
+        let highlighted;
         if(args[0] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             // this.foreground.select
             // d3.select(args[0])
-            this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
-                .style("stroke", parallelcoordinates.settings.highlightColor)
+            highlighted = this.foreground
+                .selectAll('path.data[data-index="'+args[1]+'"]')
+                .style("stroke", this.settings.highlightColor)
                 .style("stroke-width", "2")
                 .each(function(){
-                    // parallelcoordinates.overlay.node()
-                    //     .appendChild(d3.select(this.cloneNode())
-                    //         .attr("class", "lineHighlight")
-                    //         .style("stroke", parallelcoordinates.settings.highlightColor)
-                    //         .style("stroke-width", "2")
-                    //         .style("fill", "none")
-                    //         .node());
                     this.parentNode.appendChild(this);
                 });
         }
-        super.highlight.apply(this, args);
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
@@ -218,7 +216,6 @@ class ParallelCoordinates extends Visualization{
         let result = [];
         if(Array.isArray(selection)){
             if(Array.isArray(selection[0])){
-                console.log("aqui");
                 for(let k=0; k<this.linesCoords.length; k++){
                     data_block: {
                         let polyLine = this.linesCoords[k];

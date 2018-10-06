@@ -9,16 +9,12 @@ class ScatterplotMatrix extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        this.settings.innerPadding = settings? settings.innerPadding || 8 : 8;
-        this.settings.paddingRight = settings? settings.paddingRight || 20 : 20;
         this.name = "ScatterplotMatrix";
+    }
 
-        // this.x = d3.scale.linear()
-        //     .range([padding / 2, size - padding / 2]);
-        //
-        // var y = d3.scale.linear()
-        //     .range([size - padding / 2, padding / 2]);
-
+    _putDefaultSettings(){
+        this.settings.innerPadding = 8;
+        this.settings.paddingRight = 20;
     }
 
     resize(){
@@ -77,7 +73,7 @@ class ScatterplotMatrix extends Visualization{
                     .range([this.cellHeight, 0]);
             }
         }
-
+        return this;
     }
 
 
@@ -96,7 +92,7 @@ class ScatterplotMatrix extends Visualization{
             let cell = d3.select(this);
 
 
-            cell.selectAll("circle.data")
+            let dataEnter = cell.selectAll("circle.data")
                 .data(scatterplot.d).enter()
                 .append("circle")
                 .attr("class", "data")
@@ -107,16 +103,10 @@ class ScatterplotMatrix extends Visualization{
                 .attr("cy", function(d) { return scatterplot.y[k.y](d[k.y]); })
                 .attr("r", 2)
                 .style("fill", scatterplot.settings.color)
-                .style("fill-opacity", ".7")
-                .on("mouseover", function(d,i){
-                    scatterplot.event.call("datamouseover", this, d, i);
-                })
-                .on("mouseout", function(d,i){
-                    scatterplot.event.call("datamouseout", this, d, i);
-                })
-                .on("click", function(d,i){
-                    scatterplot.event.call("dataclick", this, d, i);
-                });
+                .style("fill-opacity", ".7");
+
+            scatterplot._bindDataMouseEvents(dataEnter);
+
             cell.selectAll("circle.data")
                 .data(scatterplot.d)
                 .attr("cx", function(d) { return scatterplot.x[k.x](d[k.x]); })
@@ -211,9 +201,15 @@ class ScatterplotMatrix extends Visualization{
                 d3.select(this).call(d3.axisLeft(scatterplot.y[d]).ticks(6));
             });
 
+        this.event.apply("draw");
+
+        return this;
     }
 
     highlight(...args){
+
+        let highlighted;
+
         if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             // this.foreground.select
             // d3.select(args[0])
@@ -223,7 +219,9 @@ class ScatterplotMatrix extends Visualization{
                 isFirst[k] = true;
             }
 
-            this.foreground.selectAll('circle.data[data-index="'+args[1]+'"]').style("stroke", this.settings.highlightColor)
+            highlighted = this.foreground
+                .selectAll('circle.data[data-index="'+args[1]+'"]')
+                .style("stroke", this.settings.highlightColor)
                 .each(function(){
                     let circle = d3.select(this);
                     let t = utils.parseTranslate(this.parentElement);
@@ -247,11 +245,12 @@ class ScatterplotMatrix extends Visualization{
                 .data(_.values(strObj)).enter()
                 .append("path")
                 .attr("class", "lineHighlight")
-                .style("fill", "none")
-                .style("stroke", this.settings.highlightColor)
                 .attr("d", function(d) { return d; })
+                .style("fill", "none")
+                .style("stroke", this.settings.highlightColor);
         }
-        super.highlight.apply(this, args);
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
         if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){

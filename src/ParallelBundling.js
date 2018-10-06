@@ -498,10 +498,9 @@ class ParallelBundling extends Visualization{
                     .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
                     .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
 
-                selection.on("mouseover", function (d,i) { self.event.call("datamouseover", this, d, i); })
-                    .on("mouseout", function (d,i) { self.event.call("datamouseout", this, d, i); })
-                    .on("click", function (d,i) { self.event.call("dataclick", this, d, i); });
+                this._bindDataMouseEvents(selection);
             };
+
             const updateAllLinesWithoutAnimation = (selection) => {
                 selection
                     .attr("class", "data")
@@ -511,9 +510,7 @@ class ParallelBundling extends Visualization{
                     .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
                     .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
 
-                selection.on("mouseover", (d,i) =>{ this.event.call("datamouseover", this, d,i); })
-                    .on("mouseout", (d,i) =>{ this.event.call("datamouseout", this, d,i); })
-                    .on("click", (d,i) =>{ this.event.call("dataclick", this, d,i); });
+                this._bindDataMouseEvents(selection);
             };
             const removeExtraLines = () => {
                 linesUpdateSelection
@@ -623,6 +620,9 @@ class ParallelBundling extends Visualization{
             });
 
         axisSelection.exit().remove();
+
+        this.event.apply("draw");
+
         // Add an axis and title.
         // let labelUpdate = axisSelection.selectAll("text.column_label").data(this.keys);
         // labelUpdate.enter()

@@ -7,11 +7,14 @@ class BeeswarmPlot extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        this.settings.innerPadding = settings? settings.innerPadding || 10 : 10;
-        this.settings.radius = settings? settings.radius || 2 : 2;
+
         this.name = "BeeswarmPlot";
 
         this.x = d3.scalePoint()
+    }
+    _putDefaultSettings(){
+        this.settings.innerPadding = 10;
+        this.settings.radius = 2;
     }
 
     resize(){
@@ -78,6 +81,7 @@ class BeeswarmPlot extends Visualization{
             return Math.floor(this.y[k](d[k])/this.binHeight)*this.binHeight;
         };
 
+        return this;
     }
 
 
@@ -100,19 +104,17 @@ class BeeswarmPlot extends Visualization{
                 .data(beeswarm.d);
 
             dataSelection.exit().remove();
-            dataSelection.enter()
+            let dataEnter = dataSelection.enter()
                 .append("circle")
                 .attr("class", "data")
                 .attr("data-index", function(d, i){ return i; })
                 .style("fill-opacity", ".6")
-                .on("mouseover", function (d,i) { beeswarm.event.call("datamouseover", this, d,i); })
-                .on("mouseout", function (d,i) { beeswarm.event.call("datamouseout", this, d,i); })
-                .on("click", function (d,i) { beeswarm.event.call("dataclick", this, d,i); })
-
                 .attr("cx", (d) => { return beeswarm.xPoints(d, k); })
                 .attr("cy", (d) => { return beeswarm.yPoints(d, k); })
                 .style("fill", beeswarm.settings.color)
                 .attr("r", beeswarm.settings.radius);
+
+            beeswarm._bindDataMouseEvents(dataEnter);
 
             dataSelection
                 .attr("cx", (d) => { return beeswarm.xPoints(d, k); })
@@ -188,24 +190,30 @@ class BeeswarmPlot extends Visualization{
 
         let t1 = performance.now();
         console.log("TIme: "+(t1-t0));
+
+        this.event.apply("draw");
+
+        return this;
     }
 
     highlight(...args){
-        let beeswarm = this;
-        let pl = this.settings.paddingLeft;
+        let highlighted;
         if(args[0] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             // this.foreground.select
             // d3.select(args[0])
             let str = "M ";
-            this.foreground.selectAll('circle[data-index="'+args[1]+'"]').style("stroke", this.settings.highlightColor)
+            highlighted = this.foreground
+                .selectAll('circle[data-index="'+args[1]+'"]')
+                .style("stroke", this.settings.highlightColor)
                 .each(function(){
                     let circle = d3.select(this);
                     let t = utils.parseTranslate(this.parentElement);
                     str += (parseFloat(circle.attr("cx")) + t.x)
                         +","+circle.attr("cy") + " L "
                 });
+
             str = str.substring(0, str.length - 3);
             this.background
                 .append("path")
@@ -214,7 +222,8 @@ class BeeswarmPlot extends Visualization{
                 .style("stroke", this.settings.highlightColor)
                 .attr("d", str)
         }
-        super.highlight.apply(this, args);
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){

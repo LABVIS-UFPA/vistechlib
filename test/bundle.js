@@ -24527,11 +24527,14 @@ class BeeswarmPlot extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        this.settings.innerPadding = settings? settings.innerPadding || 10 : 10;
-        this.settings.radius = settings? settings.radius || 2 : 2;
+
         this.name = "BeeswarmPlot";
 
         this.x = d3.scalePoint()
+    }
+    _putDefaultSettings(){
+        this.settings.innerPadding = 10;
+        this.settings.radius = 2;
     }
 
     resize(){
@@ -24598,6 +24601,7 @@ class BeeswarmPlot extends Visualization{
             return Math.floor(this.y[k](d[k])/this.binHeight)*this.binHeight;
         };
 
+        return this;
     }
 
 
@@ -24620,19 +24624,17 @@ class BeeswarmPlot extends Visualization{
                 .data(beeswarm.d);
 
             dataSelection.exit().remove();
-            dataSelection.enter()
+            let dataEnter = dataSelection.enter()
                 .append("circle")
                 .attr("class", "data")
                 .attr("data-index", function(d, i){ return i; })
                 .style("fill-opacity", ".6")
-                .on("mouseover", function (d,i) { beeswarm.event.call("datamouseover", this, d,i); })
-                .on("mouseout", function (d,i) { beeswarm.event.call("datamouseout", this, d,i); })
-                .on("click", function (d,i) { beeswarm.event.call("dataclick", this, d,i); })
-
                 .attr("cx", (d) => { return beeswarm.xPoints(d, k); })
                 .attr("cy", (d) => { return beeswarm.yPoints(d, k); })
                 .style("fill", beeswarm.settings.color)
                 .attr("r", beeswarm.settings.radius);
+
+            beeswarm._bindDataMouseEvents(dataEnter);
 
             dataSelection
                 .attr("cx", (d) => { return beeswarm.xPoints(d, k); })
@@ -24708,24 +24710,30 @@ class BeeswarmPlot extends Visualization{
 
         let t1 = performance.now();
         console.log("TIme: "+(t1-t0));
+
+        return this;
     }
 
     highlight(...args){
         let beeswarm = this;
         let pl = this.settings.paddingLeft;
+        let highlighted;
         if(args[0] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             // this.foreground.select
             // d3.select(args[0])
             let str = "M ";
-            this.foreground.selectAll('circle[data-index="'+args[1]+'"]').style("stroke", this.settings.highlightColor)
+            highlighted = this.foreground
+                .selectAll('circle[data-index="'+args[1]+'"]')
+                .style("stroke", this.settings.highlightColor)
                 .each(function(){
                     let circle = d3.select(this);
                     let t = utils.parseTranslate(this.parentElement);
                     str += (parseFloat(circle.attr("cx")) + t.x)
                         +","+circle.attr("cy") + " L "
                 });
+
             str = str.substring(0, str.length - 3);
             this.background
                 .append("path")
@@ -24734,7 +24742,8 @@ class BeeswarmPlot extends Visualization{
                 .style("stroke", this.settings.highlightColor)
                 .attr("d", str)
         }
-        super.highlight.apply(this, args);
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
@@ -25310,10 +25319,9 @@ class ParallelBundling extends Visualization{
                     .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
                     .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
 
-                selection.on("mouseover", function (d,i) { self.event.call("datamouseover", this, d, i); })
-                    .on("mouseout", function (d,i) { self.event.call("datamouseout", this, d, i); })
-                    .on("click", function (d,i) { self.event.call("dataclick", this, d, i); });
+                this._bindDataMouseEvents(selection);
             };
+
             const updateAllLinesWithoutAnimation = (selection) => {
                 selection
                     .attr("class", "data")
@@ -25323,9 +25331,7 @@ class ParallelBundling extends Visualization{
                     .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
                     .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
 
-                selection.on("mouseover", (d,i) =>{ this.event.call("datamouseover", this, d,i); })
-                    .on("mouseout", (d,i) =>{ this.event.call("datamouseout", this, d,i); })
-                    .on("click", (d,i) =>{ this.event.call("dataclick", this, d,i); });
+                this._bindDataMouseEvents(selection);
             };
             const removeExtraLines = () => {
                 linesUpdateSelection
@@ -25613,7 +25619,7 @@ class ParallelCoordinates extends Visualization{
     redraw(){
 
         if(!this.hasData)
-            return;
+            return this;
 
         // let axis = d3.svg.axis().orient("left");
         //Atualiza os Eixos
@@ -25621,20 +25627,19 @@ class ParallelCoordinates extends Visualization{
 
         let self = this;
 
-        let dataUpdate = this.foreground.selectAll("path.data");
+        let dataUpdate = this.foreground.selectAll("path.data").data(this.d);
 
         dataUpdate.exit().remove();
 
-        this.foreground.selectAll("path.data")
-            .data(this.d).enter()
+        let dataEnter = dataUpdate
+            .enter()
             .append("path")
             .attr("class", "data")
-            .attr("data-index", function(d,i){ return i; })
-            .on("mouseover", function (d,i) { self.event.call("datamouseover", this, d, i); })
-            .on("mouseout", function (d,i) { self.event.call("datamouseout", this, d, i); })
-            .on("click", function (d,i) { self.event.call("dataclick", this, d, i); })
+            .attr("data-index", function(d,i){ return i; });
 
-            .merge(dataUpdate)
+        this._bindDataMouseEvents(dataEnter);
+
+        dataEnter.merge(dataUpdate)
             .attr("d", this.lineFunction)
             .style("stroke", this.color);
 
@@ -25668,6 +25673,7 @@ class ParallelCoordinates extends Visualization{
 
         this.axis = this.overlay.selectAll(".axis");
 
+        return this;
     }
 
     updateColors(){
@@ -25686,26 +25692,22 @@ class ParallelCoordinates extends Visualization{
     highlight(...args){
         let parallelcoordinates = this;
 
+        let highlighted;
         if(args[0] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             // this.foreground.select
             // d3.select(args[0])
-            this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
-                .style("stroke", parallelcoordinates.settings.highlightColor)
+            highlighted = this.foreground
+                .selectAll('path.data[data-index="'+args[1]+'"]')
+                .style("stroke", this.settings.highlightColor)
                 .style("stroke-width", "2")
                 .each(function(){
-                    // parallelcoordinates.overlay.node()
-                    //     .appendChild(d3.select(this.cloneNode())
-                    //         .attr("class", "lineHighlight")
-                    //         .style("stroke", parallelcoordinates.settings.highlightColor)
-                    //         .style("stroke-width", "2")
-                    //         .style("fill", "none")
-                    //         .node());
                     this.parentNode.appendChild(this);
                 });
         }
-        super.highlight.apply(this, args);
+        if(highlighted)
+            super.highlight.apply(highlighted.nodes(), args);
     }
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
@@ -25740,7 +25742,6 @@ class ParallelCoordinates extends Visualization{
         let result = [];
         if(Array.isArray(selection)){
             if(Array.isArray(selection[0])){
-                console.log("aqui");
                 for(let k=0; k<this.linesCoords.length; k++){
                     data_block: {
                         let polyLine = this.linesCoords[k];
@@ -25804,16 +25805,12 @@ class ScatterplotMatrix extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        this.settings.innerPadding = settings? settings.innerPadding || 8 : 8;
-        this.settings.paddingRight = settings? settings.paddingRight || 20 : 20;
         this.name = "ScatterplotMatrix";
+    }
 
-        // this.x = d3.scale.linear()
-        //     .range([padding / 2, size - padding / 2]);
-        //
-        // var y = d3.scale.linear()
-        //     .range([size - padding / 2, padding / 2]);
-
+    _putDefaultSettings(){
+        this.settings.innerPadding = 8;
+        this.settings.paddingRight = 20;
     }
 
     resize(){
@@ -25872,7 +25869,7 @@ class ScatterplotMatrix extends Visualization{
                     .range([this.cellHeight, 0]);
             }
         }
-
+        return this;
     }
 
 
@@ -25891,7 +25888,7 @@ class ScatterplotMatrix extends Visualization{
             let cell = d3.select(this);
 
 
-            cell.selectAll("circle.data")
+            let dataEnter = cell.selectAll("circle.data")
                 .data(scatterplot.d).enter()
                 .append("circle")
                 .attr("class", "data")
@@ -25902,16 +25899,10 @@ class ScatterplotMatrix extends Visualization{
                 .attr("cy", function(d) { return scatterplot.y[k.y](d[k.y]); })
                 .attr("r", 2)
                 .style("fill", scatterplot.settings.color)
-                .style("fill-opacity", ".7")
-                .on("mouseover", function(d,i){
-                    scatterplot.event.call("datamouseover", this, d, i);
-                })
-                .on("mouseout", function(d,i){
-                    scatterplot.event.call("datamouseout", this, d, i);
-                })
-                .on("click", function(d,i){
-                    scatterplot.event.call("dataclick", this, d, i);
-                });
+                .style("fill-opacity", ".7");
+
+            scatterplot._bindDataMouseEvents(dataEnter);
+
             cell.selectAll("circle.data")
                 .data(scatterplot.d)
                 .attr("cx", function(d) { return scatterplot.x[k.x](d[k.x]); })
@@ -26006,9 +25997,13 @@ class ScatterplotMatrix extends Visualization{
                 d3.select(this).call(d3.axisLeft(scatterplot.y[d]).ticks(6));
             });
 
+        return this;
     }
 
     highlight(...args){
+
+        let highlighted;
+
         if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             // this.foreground.select
             // d3.select(args[0])
@@ -26018,7 +26013,9 @@ class ScatterplotMatrix extends Visualization{
                 isFirst[k] = true;
             }
 
-            this.foreground.selectAll('circle.data[data-index="'+args[1]+'"]').style("stroke", this.settings.highlightColor)
+            highlighted = this.foreground
+                .selectAll('circle.data[data-index="'+args[1]+'"]')
+                .style("stroke", this.settings.highlightColor)
                 .each(function(){
                     let circle = d3.select(this);
                     let t = utils.parseTranslate(this.parentElement);
@@ -26042,11 +26039,12 @@ class ScatterplotMatrix extends Visualization{
                 .data(_.values(strObj)).enter()
                 .append("path")
                 .attr("class", "lineHighlight")
-                .style("fill", "none")
-                .style("stroke", this.settings.highlightColor)
                 .attr("d", function(d) { return d; })
+                .style("fill", "none")
+                .style("stroke", this.settings.highlightColor);
         }
-        super.highlight.apply(this, args);
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
         if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
@@ -26117,14 +26115,18 @@ class Treemap extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        //this.settings.radius = settings? settings.radius || 2 : 2;
         this.name = "Treemap";
-        this.settings.labelVAlign = settings ? settings.labelVAlign || "top" : "top";
-        this.settings.labelHAlign = settings ? settings.labelHAlign || "left" : "left";
-        this.settings.paddingTopHierarchies = settings ? settings.paddingTopHierarchies || 15 : 15;
-        this.settings.paddingBottomHierarchies = settings ? settings.paddingBottomHierarchies || 2 : 2;
-        this.settings.paddingLeftHierarchies = settings ? settings.paddingLeftHierarchies || 2 : 2;
-        this.settings.paddingRightHierarchies = settings ? settings.paddingRightHierarchies || 2 : 2;
+    }
+
+    _putDefaultSettings(){
+        this.settings.labelVAlign = "top";
+        this.settings.labelHAlign = "left";
+        this.settings.paddingTopHierarchies = 15;
+        this.settings.paddingBottomHierarchies = 2;
+        this.settings.paddingLeftHierarchies = 2;
+        this.settings.paddingRightHierarchies = 2;
+        this.settings.paddingTop = this.settings.paddingBottom
+            = this.settings.paddingLeft = this.settings.paddingRight = 20;
     }
 
     resize(){
@@ -26159,21 +26161,25 @@ class Treemap extends Visualization{
 
     redraw(){
 
-
         //let t0 = performance.now();
+        let treemap = this;
 
+        let updateParents = this.foreground
+            .selectAll(".data-parent")
+            .data(this.d_parents);
 
-
-        let updateParents = this.foreground.selectAll(".data-parent").data(this.d_parents);
         updateParents.exit().remove();
+
         let enterParents = updateParents.enter()
             .append("g")
             .attr("class", "data-parent");
 
-        enterParents.append("rect")
+        let rectEnter = enterParents.append("rect")
             .style("fill", "gray")
             .style("stroke", "black")
             .style("stroke-width", "0.5px");
+
+        treemap._bindDataMouseEvents(rectEnter, "ancestor");
 
         enterParents.append("text")
             .style("fill", "black")
@@ -26197,18 +26203,17 @@ class Treemap extends Visualization{
         let updateSelection = this.foreground.selectAll(".data").data(this.d_h.leaves());
         updateSelection.exit().remove();
 
-        let treemap = this;
+
 
         let enterSelection = updateSelection.enter().append("rect")
             .attr("class", "data")
             .attr("data-index", function(d, i){ return i; })
             .style("fill", this.settings.color)
             .style("stroke", "black")
-            .style("stroke-width", "0.5px")
+            .style("stroke-width", "0.5px");
 
-            .on("mouseover", function (d,i) { treemap.event.call("datamouseover", this, d,i); })
-            .on("mouseout", function (d,i) { treemap.event.call("datamouseout", this, d,i); })
-            .on("click", function (d,i) { treemap.event.call("dataclick", this, d,i); });
+        this._bindDataMouseEvents(enterSelection);
+
 
         enterSelection.merge(updateSelection)
             .attr("x", (d)=>{return d.x0;})
@@ -26217,25 +26222,29 @@ class Treemap extends Visualization{
             .attr("height", (d)=>{return d.y1 - d.y0;});
 
 
-        let t1 = performance.now();
-        //console.log("TIme: "+(t1-t0));
+
 
         if(this.settings.label) {
             console.log(this.settings.label);
             _setLabel.call(this, this.settings.label);
         }
 
+
+        //let t1 = performance.now();
+        //console.log("TIme: "+(t1-t0));
+
         return this;
     }
 
     highlight(...args){
+        let highlighted;
         let dataItens = this.d_h.leaves();
         if(args[0] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < dataItens.length){
             let d = dataItens[args[1]];
-            this.selectionLayer.selectAll("rect.data-highlight").remove();
-            this.selectionLayer.append("rect")
+            this.highlightLayer.selectAll("rect.data-highlight").remove();
+            highlighted = this.highlightLayer.append("rect")
                 .attr("class", "data-highlight")
                 .attr("x", d.x0)
                 .attr("y", d.y0)
@@ -26244,11 +26253,12 @@ class Treemap extends Visualization{
                 .style("fill", "none")
                 .style("stroke", this.settings.highlightColor);
         }
-        super.highlight.apply(this, args);
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
         if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            this.selectionLayer.selectAll("rect.data-highlight").remove();
+            this.highlightLayer.selectAll("rect.data-highlight").remove();
             super.removeHighlight(this.foreground
                     .select('rect.data[data-index="'+args[1]+'"]').node(),
                 this.d[args[1]], args[1]);
@@ -26272,9 +26282,10 @@ class Treemap extends Visualization{
         return group;
     }
 
-    setLabel(func){
-        this.settings.label = func;
-        return this;
+    select(selection){
+        if(Array.isArray(selection)){
+            //selection[0]
+        }
     }
 
     hierarchy(attrs){
@@ -26284,17 +26295,20 @@ class Treemap extends Visualization{
         return this;
     }
 
+    setLabel(func){
+        this.settings.label = func;
+        return this;
+    }
+
 }
 
 let _hierarchy = function(attrs){
 
-    console.log(attrs, this.domain);
     let group = (data, index) => {
         if(index >= attrs.length)
             return;
 
         let attr = attrs[index];
-        console.log(attr, this.domain[attr]);
         for(let d of this.domain[attr]){
             let child = {name: d, children: []};
             data.children.push(child);
@@ -26485,6 +26499,7 @@ class Visualization {
             color: "#069",//"grey",//"#069",
             highlightColor: "#FF1122",//"#08E700",
             opacity: 1,
+            notSelectedOpacity: 0.3,
             size_type: "fit",//"absolute"
             width: 700,
             height: 300,
@@ -26494,6 +26509,7 @@ class Visualization {
             paddingBottom: 30,
             autoresize: true
         };
+        this._putDefaultSettings();
         //sobreescreve as configurações padrão pelas configurações dadas por parâmetro.
         if(typeof settings === "object"){
             for(let p in this.settings){
@@ -26504,8 +26520,11 @@ class Visualization {
 
         this.autoresize = this.settings.autoresize;
 
-        this.event = d3.dispatch("brush", "draw", "highlightstart", "highlightend",
-            "datamouseover","datamouseout", "dataclick");
+        this.event = d3.dispatch("brush", "draw",
+            "highlightstart", "highlightend",
+            "datamouseover","datamouseout", "dataclick", "datadblclick",
+            "ancestormouseover", "ancestormouseout",
+            "ancestorclick", "ancestordblclick");
 
         let fit = this.settings.size_type === "fit";
 
@@ -26514,32 +26533,40 @@ class Visualization {
             .attr("width", fit ? "100%" : this.settings.width)
             .attr("height", fit ? "100%" : this.settings.height);
 
+        let translatestr = "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")";
+
         this.canvas = this.svg.append("g");
         this.background = this.canvas.append("g")
             .attr("class", "background")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
 
         this.foreground = this.canvas.append("g")
             .attr("class", "foreground")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
+
+        this.highlightLayer = this.canvas.append("g")
+            .attr("class", "highlightLayer")
+            .attr("transform", translatestr);
 
         this.selectionLayer = this.canvas.append("g")
             .attr("class", "selectionLayer")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
 
         this.overlay = this.canvas.append("g")
             .attr("class", "overlay")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
 
         this.annotations = this.canvas.append("g")
             .attr("class", "annotations")
-            .attr("transform", "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")");
+            .attr("transform", translatestr);
 
         this.parentElement.__vis__ = this;
 
         this.isHighlighting = false;
 
     }
+
+    _putDefaultSettings(){}
 
 
     data(d){
@@ -26591,21 +26618,19 @@ class Visualization {
         return this;
     };
 
-    highlight(...args){
+    highlight(element, ...args){
         if(!this.isHighlighting){
             this.isHighlighting = true;
-            this.event.apply("highlightstart", this, args);
+            this.event.apply("highlightstart", element, args);
         }
     }
-    removeHighlight(elem, ...args){
+    removeHighlight(element, ...args){
         if(this.isHighlighting){
             this.isHighlighting = false;
-            this.event.apply("highlightend", elem, args);
+            this.event.apply("highlightend", element, args);
         }
     }
-    getHighlightElement(i){
-
-    }
+    getHighlightElement(i){ }
 
     annotate(svgElement){
         this.annotations.node().appendChild(svgElement);
@@ -26621,12 +26646,12 @@ class Visualization {
             for(let elem of elems){
                 this.selectionLayer.node().appendChild(elem);
             }
-            this.foreground.selectAll(".data").style("opacity", "0.2");
+            this.foreground.selectAll(".data")
+                .style("opacity", this.settings.notSelectedOpacity);
         }
     }
     removeSelect(){
         let elems = this.selectionLayer.selectAll(".data").nodes();
-        console.log("foi", elems);
         for(let elem of elems){
             this.foreground.node().appendChild(elem);
         }
@@ -26635,6 +26660,9 @@ class Visualization {
     getSelected(){
         return this.selectionLayer.selectAll("*").nodes();
     }
+
+
+    hierarchy(){}
 
     set autoresize(isAutoResize){
         this.settings.autoresize = isAutoResize;
@@ -26645,6 +26673,17 @@ class Visualization {
 
     get autoresize(){
         return this.settings.autoresize;
+    }
+
+
+    _bindDataMouseEvents(selection, prefix){
+        let vis = this;
+        let _prefix = prefix || "data";
+        selection
+            .on("mouseover", function(d,i){ vis.event.call(_prefix+"mouseover", this, d, i); })
+            .on("mouseout", function(d,i){ vis.event.call(_prefix+"mouseout", this, d, i); })
+            .on("click", function(d,i){ vis.event.call(_prefix+"click", this, d, i); })
+            .on("dblclick", function(d,i){ vis.event.call(_prefix+"dblclick", this, d, i); });
     }
 
 }

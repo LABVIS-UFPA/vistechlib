@@ -9,14 +9,18 @@ class Treemap extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        //this.settings.radius = settings? settings.radius || 2 : 2;
         this.name = "Treemap";
-        this.settings.labelVAlign = settings ? settings.labelVAlign || "top" : "top";
-        this.settings.labelHAlign = settings ? settings.labelHAlign || "left" : "left";
-        this.settings.paddingTopHierarchies = settings ? settings.paddingTopHierarchies || 15 : 15;
-        this.settings.paddingBottomHierarchies = settings ? settings.paddingBottomHierarchies || 2 : 2;
-        this.settings.paddingLeftHierarchies = settings ? settings.paddingLeftHierarchies || 2 : 2;
-        this.settings.paddingRightHierarchies = settings ? settings.paddingRightHierarchies || 2 : 2;
+    }
+
+    _putDefaultSettings(){
+        this.settings.labelVAlign = "top";
+        this.settings.labelHAlign = "left";
+        this.settings.paddingTopHierarchies = 15;
+        this.settings.paddingBottomHierarchies = 2;
+        this.settings.paddingLeftHierarchies = 2;
+        this.settings.paddingRightHierarchies = 2;
+        this.settings.paddingTop = this.settings.paddingBottom
+            = this.settings.paddingLeft = this.settings.paddingRight = 20;
     }
 
     resize(){
@@ -51,21 +55,25 @@ class Treemap extends Visualization{
 
     redraw(){
 
-
         //let t0 = performance.now();
+        let treemap = this;
 
+        let updateParents = this.foreground
+            .selectAll(".data-parent")
+            .data(this.d_parents);
 
-
-        let updateParents = this.foreground.selectAll(".data-parent").data(this.d_parents);
         updateParents.exit().remove();
+
         let enterParents = updateParents.enter()
             .append("g")
             .attr("class", "data-parent");
 
-        enterParents.append("rect")
+        let rectEnter = enterParents.append("rect")
             .style("fill", "gray")
             .style("stroke", "black")
             .style("stroke-width", "0.5px");
+
+        treemap._bindDataMouseEvents(rectEnter, "ancestor");
 
         enterParents.append("text")
             .style("fill", "black")
@@ -86,21 +94,21 @@ class Treemap extends Visualization{
 
 
 
-        let updateSelection = this.foreground.selectAll(".data").data(this.d_h.leaves());
+        let updateSelection = this.foreground.selectAll(".data")
+            .data(this.d_h.leaves());
         updateSelection.exit().remove();
 
-        let treemap = this;
+
 
         let enterSelection = updateSelection.enter().append("rect")
             .attr("class", "data")
             .attr("data-index", function(d, i){ return i; })
             .style("fill", this.settings.color)
             .style("stroke", "black")
-            .style("stroke-width", "0.5px")
+            .style("stroke-width", "0.5px");
 
-            .on("mouseover", function (d,i) { treemap.event.call("datamouseover", this, d,i); })
-            .on("mouseout", function (d,i) { treemap.event.call("datamouseout", this, d,i); })
-            .on("click", function (d,i) { treemap.event.call("dataclick", this, d,i); });
+        this._bindDataMouseEvents(enterSelection);
+
 
         enterSelection.merge(updateSelection)
             .attr("x", (d)=>{return d.x0;})
@@ -109,25 +117,30 @@ class Treemap extends Visualization{
             .attr("height", (d)=>{return d.y1 - d.y0;});
 
 
-        let t1 = performance.now();
-        //console.log("TIme: "+(t1-t0));
+
 
         if(this.settings.label) {
             console.log(this.settings.label);
             _setLabel.call(this, this.settings.label);
         }
 
+
+        //let t1 = performance.now();
+        //console.log("TIme: "+(t1-t0));
+        this.event.apply("draw");
+
         return this;
     }
 
     highlight(...args){
+        let highlighted;
         let dataItens = this.d_h.leaves();
         if(args[0] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < dataItens.length){
             let d = dataItens[args[1]];
-            this.selectionLayer.selectAll("rect.data-highlight").remove();
-            this.selectionLayer.append("rect")
+            this.highlightLayer.selectAll("rect.data-highlight").remove();
+            highlighted = this.highlightLayer.append("rect")
                 .attr("class", "data-highlight")
                 .attr("x", d.x0)
                 .attr("y", d.y0)
@@ -136,11 +149,12 @@ class Treemap extends Visualization{
                 .style("fill", "none")
                 .style("stroke", this.settings.highlightColor);
         }
-        super.highlight.apply(this, args);
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
         if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            this.selectionLayer.selectAll("rect.data-highlight").remove();
+            this.highlightLayer.selectAll("rect.data-highlight").remove();
             super.removeHighlight(this.foreground
                     .select('rect.data[data-index="'+args[1]+'"]').node(),
                 this.d[args[1]], args[1]);
@@ -164,9 +178,10 @@ class Treemap extends Visualization{
         return group;
     }
 
-    setLabel(func){
-        this.settings.label = func;
-        return this;
+    select(selection){
+        if(Array.isArray(selection)){
+            //selection[0]
+        }
     }
 
     hierarchy(attrs){
@@ -176,17 +191,20 @@ class Treemap extends Visualization{
         return this;
     }
 
+    setLabel(func){
+        this.settings.label = func;
+        return this;
+    }
+
 }
 
 let _hierarchy = function(attrs){
 
-    console.log(attrs, this.domain);
     let group = (data, index) => {
         if(index >= attrs.length)
             return;
 
         let attr = attrs[index];
-        console.log(attr, this.domain[attr]);
         for(let d of this.domain[attr]){
             let child = {name: d, children: []};
             data.children.push(child);
