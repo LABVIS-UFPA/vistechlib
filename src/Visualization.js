@@ -36,7 +36,7 @@ class Visualization {
             "highlightstart", "highlightend",
             "datamouseover","datamouseout", "dataclick", "datadblclick",
             "ancestormouseover", "ancestormouseout",
-            "ancestorclick", "ancestordblclick");
+            "ancestorclick", "ancestordblclick", "dimensiontitleclick");
 
         let fit = this.settings.size_type === "fit";
 

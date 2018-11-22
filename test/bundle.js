@@ -24711,12 +24711,12 @@ class BeeswarmPlot extends Visualization{
         let t1 = performance.now();
         console.log("TIme: "+(t1-t0));
 
+        this.event.apply("draw");
+
         return this;
     }
 
     highlight(...args){
-        let beeswarm = this;
-        let pl = this.settings.paddingLeft;
         let highlighted;
         if(args[0] instanceof SVGElement){
 
@@ -25441,6 +25441,9 @@ class ParallelBundling extends Visualization{
             });
 
         axisSelection.exit().remove();
+
+        this.event.apply("draw");
+
         // Add an axis and title.
         // let labelUpdate = axisSelection.selectAll("text.column_label").data(this.keys);
         // labelUpdate.enter()
@@ -25571,7 +25574,7 @@ class ParallelCoordinates extends Visualization{
                 //     this.y[prop].range([$(this.svg.node()).height() -pt-pb, 0]);
             }
         }
-        console.log("redraw");
+
         this.redraw();
 
         this.linesCoords =  [];
@@ -25663,15 +25666,19 @@ class ParallelCoordinates extends Visualization{
             .style("text-anchor", "middle")
             .attr("class", "column_label")
             .attr("y", -9)
-            .on('click', d => {
-                this.focus = d;
-                this.updateColors();
-                console.log(d)
+            .on('click', function(d, i) {
+                // this.focus = d;
+                // this.updateColors();
+                // console.log(d)
+                self.event.call("dimensiontitleclick", this, d, i);
+
             })
             .text(function(d) { return d; })
             .style("fill", "black");
 
         this.axis = this.overlay.selectAll(".axis");
+
+        this.event.apply("draw");
 
         return this;
     }
@@ -25707,7 +25714,7 @@ class ParallelCoordinates extends Visualization{
                 });
         }
         if(highlighted)
-            super.highlight.apply(highlighted.nodes(), args);
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
@@ -25997,6 +26004,8 @@ class ScatterplotMatrix extends Visualization{
                 d3.select(this).call(d3.axisLeft(scatterplot.y[d]).ticks(6));
             });
 
+        this.event.apply("draw");
+
         return this;
     }
 
@@ -26200,7 +26209,8 @@ class Treemap extends Visualization{
 
 
 
-        let updateSelection = this.foreground.selectAll(".data").data(this.d_h.leaves());
+        let updateSelection = this.foreground.selectAll(".data")
+            .data(this.d_h.leaves());
         updateSelection.exit().remove();
 
 
@@ -26232,6 +26242,7 @@ class Treemap extends Visualization{
 
         //let t1 = performance.now();
         //console.log("TIme: "+(t1-t0));
+        this.event.apply("draw");
 
         return this;
     }
@@ -26524,7 +26535,7 @@ class Visualization {
             "highlightstart", "highlightend",
             "datamouseover","datamouseout", "dataclick", "datadblclick",
             "ancestormouseover", "ancestormouseout",
-            "ancestorclick", "ancestordblclick");
+            "ancestorclick", "ancestordblclick", "dimensiontitleclick");
 
         let fit = this.settings.size_type === "fit";
 

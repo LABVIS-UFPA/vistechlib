@@ -43,7 +43,7 @@ class ParallelCoordinates extends Visualization{
                 //     this.y[prop].range([$(this.svg.node()).height() -pt-pb, 0]);
             }
         }
-        console.log("redraw");
+
         this.redraw();
 
         this.linesCoords =  [];
@@ -135,10 +135,12 @@ class ParallelCoordinates extends Visualization{
             .style("text-anchor", "middle")
             .attr("class", "column_label")
             .attr("y", -9)
-            .on('click', d => {
-                this.focus = d;
-                this.updateColors();
-                console.log(d)
+            .on('click', function(d, i) {
+                // this.focus = d;
+                // this.updateColors();
+                // console.log(d)
+                self.event.call("dimensiontitleclick", this, d, i);
+
             })
             .text(function(d) { return d; })
             .style("fill", "black");
