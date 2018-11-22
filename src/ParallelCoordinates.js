@@ -136,11 +136,7 @@ class ParallelCoordinates extends Visualization{
             .attr("class", "column_label")
             .attr("y", -9)
             .on('click', function(d, i) {
-                // this.focus = d;
-                // this.updateColors();
-                // console.log(d)
                 self.event.call("dimensiontitleclick", this, d, i);
-
             })
             .text(function(d) { return d; })
             .style("fill", "black");
