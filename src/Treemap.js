@@ -113,6 +113,7 @@ class Treemap extends Visualization{
         enterSelection.merge(updateSelection)
             .attr("x", (d)=>{return d.x0;})
             .attr("y", (d)=>{return d.y0;})
+            .style("fill", this.settings.color)
             .attr("width", (d)=>{return d.x1 - d.x0;})
             .attr("height", (d)=>{return d.y1 - d.y0;});
 
