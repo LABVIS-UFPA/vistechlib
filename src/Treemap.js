@@ -3,8 +3,6 @@ let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
 
 
-
-
 class Treemap extends Visualization{
 
     constructor(parentElement, settings){
@@ -33,15 +31,17 @@ class Treemap extends Visualization{
     data(d){
 
         super.data(d);
-
-
         if(this.settings.hierarchies){
             _hierarchy.call(this, this.settings.hierarchies);
         }else{
             let root = {name:"root", children: d};
-            this.d_h = d3.hierarchy(root).count();
+            if(this.settings.size){
+                let size = this.settings.size;
+                this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
+            }else{
+                this.d_h = d3.hierarchy(root).count();
+            }
         }
-
         _makeHierarchy.call(this, this.d_h);
 
 
@@ -185,6 +185,10 @@ class Treemap extends Visualization{
         }
     }
 
+    setSize(attrs){
+        this.settings.size = attrs;
+    }
+
     hierarchy(attrs){
         this.settings.hierarchies = attrs;
         if(this.domain)
@@ -200,7 +204,7 @@ class Treemap extends Visualization{
 }
 
 let _hierarchy = function(attrs){
-
+    let size = this.settings.size;
     let group = (data, index) => {
         if(index >= attrs.length)
             return;
@@ -229,7 +233,12 @@ let _hierarchy = function(attrs){
             }
             aux.children.push(d);
         }
-        this.d_h = d3.hierarchy(hie).count();
+        if(size){
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+        }else{
+            this.d_h = d3.hierarchy(hie).count();
+        }
+
     }
 };
 

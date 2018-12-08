@@ -23,7 +23,8 @@
 
         let cate = ["laranja", "maçã", "banana"];
         console.log(vistechlib);
-        parallel = new vistechlib.ParallelCoordinates(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
+        parallel = new vistechlib.Treemap(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
+
         parallel.hierarchy(["w"]);
         parallel.data([
             {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
