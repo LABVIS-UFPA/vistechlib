@@ -100,7 +100,7 @@
             {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]}
 
         ]);
-        parallel//.setLabel((d)=>{ return d.x; })
+        parallel.setLabel((d)=>{ return d.x; })
             .redraw()
             .on("datamouseover", function (d, i) {
                 parallel.highlight(d, i);

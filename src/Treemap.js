@@ -62,16 +62,21 @@ class Treemap extends Visualization{
             .selectAll(".data-parent")
             .data(this.d_parents);
 
-        updateParents.exit().remove();
 
+        updateParents.exit().remove();
         let enterParents = updateParents.enter()
             .append("g")
-            .attr("class", "data-parent");
+            .attr("class", "data-parent")
+            .attr('id', d=>d.data.name)
+
+        ;
 
         let rectEnter = enterParents.append("rect")
             .style("fill", "gray")
             .style("stroke", "black")
             .style("stroke-width", "0.5px");
+
+
 
         treemap._bindDataMouseEvents(rectEnter, "ancestor");
 
@@ -93,7 +98,6 @@ class Treemap extends Visualization{
 
 
 
-
         let updateSelection = this.foreground.selectAll(".data")
             .data(this.d_h.leaves());
         updateSelection.exit().remove();
@@ -102,7 +106,8 @@ class Treemap extends Visualization{
 
         let enterSelection = updateSelection.enter().append("rect")
             .attr("class", "data")
-            .attr("data-index", function(d, i){ return i; })
+            .attr("data-index", function(d, i){return i; })
+            //.attr("parent",d=>d.)
             .style("fill", this.settings.color)
             .style("stroke", "black")
             .style("stroke-width", "0.5px");
@@ -111,13 +116,24 @@ class Treemap extends Visualization{
 
 
         enterSelection.merge(updateSelection)
+            .attr('parent', d=>d.parent.data.name)
             .attr("x", (d)=>{return d.x0;})
             .attr("y", (d)=>{return d.y0;})
             .style("fill", this.settings.color)
             .attr("width", (d)=>{return d.x1 - d.x0;})
             .attr("height", (d)=>{return d.y1 - d.y0;});
 
-
+        let foreground = this.foreground
+        foreground.selectAll('rect.data').attr('parent', d=>d.parent.data.name)
+            .each(function(){
+                let rect = d3.select(this)
+                    .attr("x", (d)=>{return d.x0;})
+                    .attr("y", (d)=>{return d.y0;}).remove()
+                let parentName = rect.attr("parent")
+                foreground.append(()=>
+                    rect.node()
+                )
+            })
 
 
         if(this.settings.label) {
@@ -251,7 +267,6 @@ let _setLabel = function(func){
     if(typeof func === "function"){
         this.foreground.selectAll(".dataLabel").remove();
         this.foreground.selectAll(".data").each(function(d, i){
-            console.log(func(d.data,i), d.data);
             let text = treemap.foreground.append("text")
                 .attr("class", "dataLabel")
                 .text(func(d.data,i))
