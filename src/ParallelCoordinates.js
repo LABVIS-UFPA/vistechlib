@@ -8,15 +8,13 @@ class ParallelCoordinates extends Visualization{
     constructor(parentElement, settings){
         super(parentElement, settings);
         this.name = "ParallelCoordinates";
-        this.color = 'dimgray'
         this.lineFunction = (d) => {
             return d3.line()(this.keys.map((key) => {
-                return [this.x(key), this.y[key](d[key])];
+               return [this.x(key), this.y[key](d[key])];
             }))
         };
 
-
-        this.x = d3.scalePoint().range([
+        this.x = d3.scalePoint().range( [
             0,
             this.svg.node().getBoundingClientRect().width-this.settings.paddingLeft-this.settings.paddingRight
         ], 0);
@@ -107,13 +105,14 @@ class ParallelCoordinates extends Visualization{
             .enter()
             .append("path")
             .attr("class", "data")
+            .style("stroke", this.settings.color)
             .attr("data-index", function(d,i){ return i; });
 
         this._bindDataMouseEvents(dataEnter);
 
         dataEnter.merge(dataUpdate)
             .attr("d", this.lineFunction)
-            .style("stroke", this.color);
+            .style("stroke", this.settings.color);
 
 
 
@@ -186,7 +185,7 @@ class ParallelCoordinates extends Visualization{
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             let dataSelect = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
-                .style("stroke", this.color)
+                .style("stroke", this.settings.color)
                 .style("stroke-width", "1");
             // this.overlay.selectAll(".lineHighlight").remove();
             super.removeHighlight(dataSelect.node(), dataSelect.datum(), args[1]);
