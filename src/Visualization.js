@@ -118,6 +118,11 @@ class Visualization {
         return this;
     }
 
+    getColor(){
+        let color = this.settings.color;
+        return color;
+    }
+
     setColor(color){
         if(arguments.length === 0)
             return this.settings.color;
