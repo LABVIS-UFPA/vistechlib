@@ -23,9 +23,9 @@
 
         let cate = ["laranja", "maçã", "banana"];
         console.log(vistechlib);
-        parallel = new vistechlib.Treemap(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
+        parallel = new vistechlib.BarChart(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
 
-        parallel.hierarchy(["w"]);
+        // parallel.hierarchy(["w"]);
         parallel.data([
             {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
             {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
@@ -100,7 +100,9 @@
             {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]}
 
         ]);
-        parallel.setLabel((d)=>{ return d.x; })
+
+        parallel.setColor("pink");
+        parallel//.setLabel((d)=>{ return d.x; })
             .redraw()
             .on("datamouseover", function (d, i) {
                 parallel.highlight(d, i);
@@ -115,6 +117,7 @@
                 console.log("clicou no titulo", d);
 
             });
+
 
         let p0;
         parallel.svg.node().onmousedown =  function(d){
