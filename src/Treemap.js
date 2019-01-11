@@ -258,7 +258,6 @@ let _hierarchy = function(attrs){
     }
 };
 
-
 let _setLabel = function(func){
     let treemap = this;
     let ha = this.settings.labelHAlign;
