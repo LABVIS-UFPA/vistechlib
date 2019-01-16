@@ -8,8 +8,8 @@ exports.ParallelBundling = require("./src/ParallelBundling.js");
 exports.ScatterplotMatrix = require("./src/ScatterplotMatrix.js");
 exports.BeeswarmPlot = require("./src/BeeswarmPlot.js");
 exports.Treemap = require("./src/Treemap.js");
-exports.BarChart = require("./src/BarChart.js");
-},{"./src/BarChart.js":39,"./src/BeeswarmPlot.js":40,"./src/ParallelBundling.js":41,"./src/ParallelCoordinates.js":42,"./src/ScatterplotMatrix.js":43,"./src/Treemap.js":44,"./src/Visualization.js":46}],2:[function(require,module,exports){
+exports.Histogram = require("./src/Histogram.js");
+},{"./src/BeeswarmPlot.js":39,"./src/Histogram.js":40,"./src/ParallelBundling.js":41,"./src/ParallelCoordinates.js":42,"./src/ScatterplotMatrix.js":43,"./src/Treemap.js":44,"./src/Visualization.js":46}],2:[function(require,module,exports){
 // https://d3js.org/d3-array/ v1.2.4 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -24598,255 +24598,6 @@ arguments[4][6][0].apply(exports,arguments)
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],39:[function(require,module,exports){
-
-let d3 = require("d3");
-
-let Visualization = require("./Visualization.js");
-let utils = require("./Utils.js");
-
-
-class BarChart extends Visualization{
-
-    constructor(parentElement, settings){
-        super(parentElement, settings);
-        this.name = "BarChart";
-        this.xdata = [];
-        this.ydata = [];
-        // this.x = d3.scalePoint()
-    }
-
-    _putDefaultSettings(){
-        this.settings.innerPadding = 8;
-        this.settings.paddingRight = 20;
-        this.settings.paddingBottom = 75;
-    }
-
-    resize(){
-        let pt = this.settings.paddingTop;
-        let pb = this.settings.paddingBottom;
-        let pl = this.settings.paddingLeft;
-        let pr = this.settings.paddingRight;
-        let ip = this.settings.innerPadding;
-
-        let svgBounds = this.svg.node().getBoundingClientRect();
-        this.cellWidth = svgBounds.width - pl;
-        this.cellHeight = svgBounds.height -pb;
-
-
-
-
-        this.redraw();
-        return this;
-    }
-
-    data(d){
-        let pt = this.settings.paddingTop;
-        let pb = this.settings.paddingBottom;
-        let pl = this.settings.paddingLeft;
-        let pr = this.settings.paddingRight;
-        let ip = this.settings.innerPadding;
-
-        super.data(d);
-        let svgBounds = this.svg.node().getBoundingClientRect();
-        let axisX = this.settings.axisX;
-        let axisY = this.settings.axisY;
-        this.cellWidth = svgBounds.width - pl;
-        this.cellHeight = svgBounds.height -pb;
-
-
-        this.axis = [];
-        this.x = [];
-        this.y = [];
-
-        let datax = [],datay = [],data_arr = [], value =0;
-
-        let data = Object.keys(this.d).map(key => this.d[key]);
-
-        for(let k of this.keys){
-            let xvalues = [];
-            data_arr.push([k]);
-            for (let i = 0; i <data.length ; i++){
-                xvalues.push(data[i][k]);
-            }
-            data_arr[value].push([xvalues]);
-            value += 1;
-        }
-        // console.log("eixo x",axisX);
-        if(!axisX)
-            axisX  = [this.keys[0]];
-        if(!axisY)
-            axisY =  [this.keys[1]];
-        data_arr.forEach(function (d,i) {
-            if(d.indexOf(axisX[0])!=-1){
-                datax = d[1][0];
-            }
-            if(d.indexOf(axisY[0])!=-1){
-                datay = d[1][0];
-            }
-
-        });
-        this.x = datax;
-        this.y = datay;
-        this.redraw();
-        return this;
-    }
-
-
-    redraw(){
-        let barchart = this;
-        this.foreground.selectAll(".textLabel").remove();
-        this.foreground.selectAll(".data").remove();
-        this.foreground.selectAll(".axisY").remove();
-
-        let margin = ({top: this.settings.paddingTop , right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
-
-        let chart = this.foreground;
-
-        let updateChart  = this.foreground
-            .selectAll(".data")
-            .data(this.d);
-
-        updateChart.exit().remove();
-
-        let x = d3.scaleBand()
-            .domain(this.x)
-            .range([margin.left, this.cellWidth - margin.right])
-            .padding(0.1);
-
-        let y = d3.scaleLinear()
-            .domain([0, d3.max(this.y)]).nice()
-            .range([this.cellHeight - margin.bottom, margin.top]);
-
-        this.xAxis = g => g
-            .attr("transform", `translate(0,${this.cellHeight - margin.bottom})`)
-            .call(d3.axisBottom(x)
-                .tickSizeOuter(0));
-
-        this.yAxis = g => g
-            .attr("transform", `translate(${margin.left},0)`)
-            .call(d3.axisLeft(y))
-            .call(g => g.select(".domain").remove());
-
-        let dataEnter = updateChart
-            .data(barchart.d).enter()
-            .append("rect")
-            .attr("class","data")
-            .data(barchart.y)
-            .attr("width", x.bandwidth())
-            .attr("height", d => y(0)- y(d))
-            .attr("y", d => y(d))
-            .data(barchart.x)
-            .attr("x",function(d){ return x(d);})
-            .attr("data-index", function(d,i){ return i; })
-            .style("fill",barchart.settings.color)
-            .style("stroke","black")
-            .style("stroke-width",0.5);
-
-        //
-        // let  barUpdate = dataEnter.enter()
-        //     .selectAll(".rect")
-        //     .data(this.d)
-        //     .style("fill", this.settings.color);
-
-        dataEnter.exit().remove();
-        // let  dataEnterWidth = updateChart()
-        //     selectAll(".data")
-
-
-        //         .attr("x",function (d,i) {
-        //             return y(d);})
-        //
-
-
-
-        let enterAxisX = chart.append("g")
-            .attr("class","textLabel")
-            .call(this.xAxis)
-            .selectAll("text")
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", "-.55em")
-            .attr("transform", "rotate(-90)" );
-
-        let enterAxisY = chart.append("g")
-            .attr("class","axisY")
-            .call(this.yAxis);
-
-        return this;
-    }
-
-    highlight(...args){
-
-    }
-    removeHighlight(...args){
-
-    }
-    getHighlightElement(i){
-
-    }
-
-    setAxisX(args){
-        this.settings.axisX = args;
-        console.log(args);
-    }
-
-    setAxisY(args){
-        this.settings.axisY = args;
-        console.log(args);
-
-    }
-
-    hierarchy(attrs){
-        this.settings.hierarchies = attrs;
-        if(this.domain)
-            _hierarchy.call(this, attrs);
-        return this;
-    }
-
-}
-
-let _hierarchy = function(attrs){
-    let size = this.settings.size;
-    let group = (data, index) => {
-        if(index >= attrs.length)
-            return;
-
-        let attr = attrs[index];
-        for(let d of this.domain[attr]){
-            let child = {name: d, children: []};
-            data.children.push(child);
-            group(child, index+1);
-        }
-    };
-
-    let hie = {name: "root", children:[]};
-    if(attrs && attrs.length > 0){
-        group(hie, 0);
-
-        for(let d of this.d){
-            let aux = hie;
-            for(let attr of attrs){
-                for(let c of aux.children){
-                    if(c.name === d[attr]){
-                        aux = c;
-                        break;
-                    }
-                }
-            }
-            aux.children.push(d);
-        }
-        if(size){
-            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
-        }else{
-            this.d_h = d3.hierarchy(hie).count();
-        }
-
-    }
-};
-
-
-module.exports = BarChart;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":35}],40:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
@@ -25147,6 +24898,203 @@ class BeeswarmPlot extends Visualization{
 }
 
 module.exports = BeeswarmPlot;
+},{"./Utils.js":45,"./Visualization.js":46,"d3":35}],40:[function(require,module,exports){
+let d3 = require("d3");
+
+let Visualization = require("./Visualization.js");
+let utils = require("./Utils.js");
+
+
+class Histogram extends Visualization{
+
+    constructor(parentElement, settings){
+        super(parentElement, settings);
+        this.name = "Histogram";
+    }
+
+    _putDefaultSettings(){
+        // this.settings.innerPadding = 8;
+        this.settings.paddingRight = 20;
+        this.settings.paddingTop = 25;
+        this.settings.paddingBottom = 50;
+        this.settings.paddingLeft = 40;
+    }
+
+    resize(){
+        let pt = this.settings.paddingTop;
+        let pb = this.settings.paddingBottom;
+        let pl = this.settings.paddingLeft;
+        let pr = this.settings.paddingRight;
+        let ip = this.settings.innerPadding;
+
+        let svgBounds = this.svg.node().getBoundingClientRect();
+
+
+
+        // this.redraw();
+        return this;
+    }
+
+    data(d){
+        super.data(d);
+        let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
+        let svgBounds = this.svg.node().getBoundingClientRect();
+
+
+        let value =0, datak = {};
+
+        this.cellHeight = svgBounds.height-margin.bottom;
+        this.cellWidth = svgBounds.width- margin.bottom;
+
+        this.x = {},this.y = {},this.bins = {},this.xAxis = {},this.yAxis = {},this.newkey = [];
+        datak = {};
+        let i = 0;
+
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+            }else{
+                this.newkey.push(k);
+            }
+        }
+
+        this.cellHeight /= this.newkey.length;
+
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+
+            }else{
+                let xvalues = [];
+                for (let i = 0; i <this.d.length ; i++){
+                    xvalues.push(this.d[i][k]);
+                }
+                datak[k] = xvalues;
+
+                this.x[k] = d3.scaleLinear()
+                    .domain(this.domain[k]).nice()
+                    .range([margin.left, this.cellWidth]);
+
+                this.bins[k] = d3.histogram()
+                    .domain(this.x[k].domain())
+                    .thresholds(this.x[k].ticks(20))
+                    (datak[k]);
+
+                this.y[k] =  d3.scaleLinear()
+                    .domain([0,d3.max(this.bins[k], d => d.length)]).nice()
+                    .range([this.cellHeight, margin.top]);
+
+                this.xAxis[k] = g => g
+                    .attr("transform", `translate(0,${this.cellHeight})`)
+                    .call(d3.axisBottom(this.x[k])
+                        .tickSizeOuter(10));
+
+                this.yAxis[k] = g => g
+                    .attr("transform", `translate(${margin.left},0)`)
+                    .call(d3.axisLeft(this.y[k]))
+                    .call(g => g.select(".domain").remove())
+                    .call(g => g.select(".tick:last-of-type text").clone()
+                        .attr("x", -50)
+                        .attr("text-anchor", "start")
+                        .text("-"+k));
+
+                i++;
+            }
+        }
+
+
+        this.redraw();
+        return this;
+    }
+
+
+    redraw(){
+        let histogram = this;
+
+        // this.foreground.selectAll(".textLabel").remove();
+        // this.foreground.selectAll(".data").remove();
+        // this.foreground.selectAll(".axisY").remove();
+
+        let margin = ({top: this.settings.paddingTop , right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
+
+        let keys = this.newkey;
+
+        // let updateChart  = this.foreground
+        //     .selectAll(".data")
+        //     .data(this.d);
+
+        function rPoints(k) {
+
+            let chart = d3.select("g."+k);
+            let dataEnter = chart.selectAll("rect.data")
+                .data(histogram.bins[k])
+                .enter().append("rect")
+                .style("fill", histogram.settings.color)
+                .attr("x", d => histogram.x[k](d.x0) + 1)
+                .attr("width", d => Math.max(0, histogram.x[k](d.x1) - histogram.x[k](d.x0) - 1))
+                .attr("y", d => histogram.y[k](d.length))
+                .attr("height", d => histogram.y[k](0) - histogram.y[k](d.length))
+                .append("rect")
+                .attr("class", "data")
+                .attr("data-index", function(d,i){ return i; })
+                .attr("key", k);
+
+            let enterAxisX = chart.append("g")
+                .attr("class","textLabel")
+                .call(histogram.xAxis[k])
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", "-.55em")
+                .attr("transform", "translate(10,15)" );
+
+            let enterAxisY = chart.append("g")
+                .attr("class","axisY")
+                .call(histogram.yAxis[k]);
+        }
+
+        // this.foreground.selectAll("g.cellGroup").remove();
+
+        let groups = this.foreground
+            .selectAll(".g")
+            .attr("class", "cellGroup")
+            .data(keys).enter()
+            .append("g")
+            .attr("class",function (d) {return d})
+            .style("transform",(d,i)=>{ return "translateY("+(i*this.cellHeight)+"px)"});
+
+        console.log(keys);
+        for (let i = 0; i <keys.length ; i++) {
+            rPoints(keys[i]);
+        }
+
+
+
+
+        return this;
+    }
+
+    highlight(...args){
+
+    }
+    removeHighlight(...args){
+
+    }
+    getHighlightElement(i){
+
+    }
+
+    setAxisX(args){
+        this.settings.axisX = args;
+        console.log(args);
+    }
+
+    setAxisY(args){
+        this.settings.axisY = args;
+        console.log(args);
+
+    }
+}
+
+module.exports = Histogram;
 },{"./Utils.js":45,"./Visualization.js":46,"d3":35}],41:[function(require,module,exports){
 
 let d3 = require("d3");
