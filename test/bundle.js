@@ -24921,26 +24921,9 @@ class Histogram extends Visualization{
     }
 
     resize(){
-        let pt = this.settings.paddingTop;
-        let pb = this.settings.paddingBottom;
-        let pl = this.settings.paddingLeft;
-        let pr = this.settings.paddingRight;
-        let ip = this.settings.innerPadding;
-
-        let svgBounds = this.svg.node().getBoundingClientRect();
-
-
-
-        // this.redraw();
-        return this;
-    }
-
-    data(d){
-        super.data(d);
         let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
+
         let svgBounds = this.svg.node().getBoundingClientRect();
-
-
         let value =0, datak = {};
 
         this.cellHeight = svgBounds.height-margin.bottom;
@@ -24957,8 +24940,58 @@ class Histogram extends Visualization{
             }
         }
 
-        this.cellHeight /= this.newkey.length;
+        // this.cellHeight /= this.newkey.length;
+        this.cellWidth /= this.newkey.length;
 
+
+        this.redraw();
+        return this;
+    }
+
+    data(d){
+        super.data(d);
+        let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
+        let svgBounds = this.svg.node().getBoundingClientRect();
+
+
+        let value =0;
+
+        this.cellHeight = svgBounds.height-margin.bottom;
+        this.cellWidth = svgBounds.width- margin.bottom;
+
+        this.x = {},this.y = {},this.bins = {},this.xAxis = {},this.yAxis = {},this.newkey = [];
+        this.datak = {};
+        let i = 0;
+
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+            }else{
+                this.newkey.push(k);
+            }
+        }
+
+        // this.cellHeight /= this.newkey.length;
+        this.cellWidth /= this.newkey.length;
+
+
+
+        this.redraw();
+        return this;
+    }
+
+
+    redraw(){
+        let histogram = this;
+
+        this.foreground.selectAll(".textLabel").remove();
+        this.foreground.selectAll(".axisY").remove();
+        this.foreground.selectAll("rect.data").remove();
+
+        let margin = ({top: this.settings.paddingTop , right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
+
+        let keys = this.newkey;
+
+        let i =0;
         for(let k of this.keys){
             if(this.domainType[k] === "Categorical"){
 
@@ -24967,7 +25000,7 @@ class Histogram extends Visualization{
                 for (let i = 0; i <this.d.length ; i++){
                     xvalues.push(this.d[i][k]);
                 }
-                datak[k] = xvalues;
+                this.datak[k] = xvalues;
 
                 this.x[k] = d3.scaleLinear()
                     .domain(this.domain[k]).nice()
@@ -24976,7 +25009,7 @@ class Histogram extends Visualization{
                 this.bins[k] = d3.histogram()
                     .domain(this.x[k].domain())
                     .thresholds(this.x[k].ticks(20))
-                    (datak[k]);
+                    (this.datak[k]);
 
                 this.y[k] =  d3.scaleLinear()
                     .domain([0,d3.max(this.bins[k], d => d.length)]).nice()
@@ -24992,7 +25025,7 @@ class Histogram extends Visualization{
                     .call(d3.axisLeft(this.y[k]))
                     .call(g => g.select(".domain").remove())
                     .call(g => g.select(".tick:last-of-type text").clone()
-                        .attr("x", -50)
+                        .attr("x", 5)
                         .attr("text-anchor", "start")
                         .text("-"+k));
 
@@ -25000,41 +25033,25 @@ class Histogram extends Visualization{
             }
         }
 
+        function rPoints(k,j) {
 
-        this.redraw();
-        return this;
-    }
+            let chart = histogram.foreground.select(".cellGroup")
+                .append("g")
+                .attr("class","hChart")
+                .attr("id","data_"+j)
+                .attr("transform",`translate(${(j* histogram.cellWidth)},0)`);
 
-
-    redraw(){
-        let histogram = this;
-
-        // this.foreground.selectAll(".textLabel").remove();
-        // this.foreground.selectAll(".data").remove();
-        // this.foreground.selectAll(".axisY").remove();
-
-        let margin = ({top: this.settings.paddingTop , right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
-
-        let keys = this.newkey;
-
-        // let updateChart  = this.foreground
-        //     .selectAll(".data")
-        //     .data(this.d);
-
-        function rPoints(k) {
-
-            let chart = d3.select("g."+k);
             let dataEnter = chart.selectAll("rect.data")
-                .data(histogram.bins[k])
+                .data(histogram.d)
                 .enter().append("rect")
-                .style("fill", histogram.settings.color)
+                .attr("data-index", function(d,i){ return i; })
+                .attr("class", "data")
+                .data(histogram.bins[k])
                 .attr("x", d => histogram.x[k](d.x0) + 1)
                 .attr("width", d => Math.max(0, histogram.x[k](d.x1) - histogram.x[k](d.x0) - 1))
                 .attr("y", d => histogram.y[k](d.length))
                 .attr("height", d => histogram.y[k](0) - histogram.y[k](d.length))
-                .append("rect")
-                .attr("class", "data")
-                .attr("data-index", function(d,i){ return i; })
+                .style("fill", histogram.settings.color)
                 .attr("key", k);
 
             let enterAxisX = chart.append("g")
@@ -25052,20 +25069,27 @@ class Histogram extends Visualization{
         }
 
         // this.foreground.selectAll("g.cellGroup").remove();
+        this.foreground.selectAll("g.cellGroup").remove();
+
+        let updateChart  = this.foreground
+            .selectAll(".data")
+            .data(this.d);
 
         let groups = this.foreground
-            .selectAll(".g")
-            .attr("class", "cellGroup")
-            .data(keys).enter()
             .append("g")
-            .attr("class",function (d) {return d})
-            .style("transform",(d,i)=>{ return "translateY("+(i*this.cellHeight)+"px)"});
+            .attr("class","cellGroup");
+
 
         console.log(keys);
         for (let i = 0; i <keys.length ; i++) {
-            rPoints(keys[i]);
+            rPoints(keys[i],i);
         }
 
+        // let groupsUpdate =  d3.selectAll(".hChart");
+        // groupsUpdate.each(function(p,j) {
+        //         console.log(this);
+        //         d3.select(this).attr("transform", `translate(${(j* histogram.cellWidth)},0)`)
+        //     });
 
 
 
