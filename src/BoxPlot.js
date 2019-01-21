@@ -4,11 +4,11 @@ let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
 
 
-class Histogram extends Visualization{
+class BoxPlot extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        this.name = "Histogram";
+        this.name = "BoxPlot";
     }
 
     _putDefaultSettings(){
@@ -79,7 +79,7 @@ class Histogram extends Visualization{
 
 
     redraw(){
-        let histogram = this;
+        let boxplot = this;
 
         this.foreground.selectAll(".textLabel").remove();
         this.foreground.selectAll(".axisY").remove();
@@ -98,27 +98,29 @@ class Histogram extends Visualization{
                 for (let i = 0; i <this.d.length ; i++){
                     xvalues.push(this.d[i][k]);
                 }
-                histogram.datak[k] = xvalues;
+                boxplot.datak[k] = xvalues;
 
-                histogram.x[k] = d3.scaleLinear()
-                    .domain(this.domain[k]).nice()
-                    .range([margin.left, this.cellWidth]);
+                boxplot.x[k] = d3.scaleBand()
+                    .domain(k)
+                    .range([margin.left, this.cellWidth])
+                    .padding(0.3);
 
-                histogram.bins[k] = d3.histogram()
-                    .domain(this.x[k].domain())
-                    .thresholds(this.x[k].ticks(20))
-                    (this.datak[k]);
+                // boxplot.bins[k] = d3.histogram()
+                //     .domain(this.x[k].domain())
+                //     // .thresholds(this.x[k].ticks(20))
+                //     (this.datak[k]);
+                // console.log(k," ",d3.max(this.datak[k]));
 
-                histogram.y[k] =  d3.scaleLinear()
-                    .domain([0,d3.max(this.bins[k], d => d.length)]).nice()
-                    .range([this.cellHeight, margin.top]);
+                boxplot.y[k] = d3.scaleLinear()
+                    .range([this.cellHeight, margin.top])
+                    .domain([0, d3.max(this.datak[k])]).nice();
 
-                histogram.xAxis[k] = g => g
+
+                boxplot.xAxis[k] = g => g
                     .attr("transform", `translate(0,${this.cellHeight})`)
-                    .call(d3.axisBottom(this.x[k])
-                        .tickSizeOuter(10));
+                    .call(d3.axisBottom(this.x[k]));
 
-                histogram.yAxis[k] = g => g
+                boxplot.yAxis[k] = g => g
                     .attr("transform", `translate(${margin.left},0)`)
                     .call(d3.axisLeft(this.y[k]))
                     .call(g => g.select(".domain").remove())
@@ -133,37 +135,37 @@ class Histogram extends Visualization{
 
         function rPoints(k,j) {
 
-            let chart = histogram.foreground.select(".cellGroup")
+            let chart = boxplot.foreground.select(".cellGroup")
                 .append("g")
                 .attr("class","hChart")
                 .attr("id","data_"+j)
-                .attr("transform",`translate(${(j* histogram.cellWidth)},0)`);
+                .attr("transform",`translate(${(j* boxplot.cellWidth)},0)`);
 
             let dataEnter = chart.selectAll("rect.data")
-                .data(histogram.d)
+                .data(boxplot.d)
                 .enter().append("rect")
                 .attr("data-index", function(d,i){ return i; })
                 .attr("class", "data")
-                .data(histogram.bins[k])
-                .attr("x", d => histogram.x[k](d.x0) + 1)
-                .attr("width", d => Math.max(0, histogram.x[k](d.x1) - histogram.x[k](d.x0) - 1))
-                .attr("y", d => histogram.y[k](d.length))
-                .attr("height", d => histogram.y[k](0) - histogram.y[k](d.length))
-                .style("fill", histogram.settings.color)
+                .attr("x", d => boxplot.x[k].bandwidth())
+                // .data(boxplot.datak[k])
+                // .attr("y", d => boxplot.y[k](d.length))
+                // .attr("width", d => Math.max(0, boxplot.x[k](d.x1) - boxplot.x[k](d.x0) - 1))
+                // .attr("height", d => boxplot.y[k](0) - boxplot.y[k](d.length))
+                .style("fill", boxplot.settings.color)
                 .attr("key", k);
 
             let enterAxisX = chart.append("g")
                 .attr("class","textLabel")
-                .call(histogram.xAxis[k])
+                .call(boxplot.xAxis[k])
                 .selectAll("text")
                 .style("text-anchor", "end")
                 .attr("dx", "-.8em")
                 .attr("dy", "-.55em")
                 .attr("transform", "translate(10,15)" );
-
+            //
             let enterAxisY = chart.append("g")
                 .attr("class","axisY")
-                .call(histogram.yAxis[k]);
+                .call(boxplot.yAxis[k]);
         }
 
         // this.foreground.selectAll("g.cellGroup").remove();
@@ -182,6 +184,44 @@ class Histogram extends Visualization{
         for (let i = 0; i <keys.length ; i++) {
             rPoints(keys[i],i);
         }
+
+        function histogram (season) {
+            
+        }
+            // sort players by points asc
+            let skaters = season.skaters.sort((a,b) => a[perMode] - b[perMode]);
+
+            // map points to an array
+            let stat = skaters.map((sk) => sk[perMode]);
+
+            // get the min and max
+            let min = stat[0];
+            let max = stat[stat.length-1];
+
+            // quantiles
+            let q1 = d3.quantile(stat, 0.25);
+            let q2 = d3.quantile(stat, 0.50);
+            let q3 = d3.quantile(stat, 0.75);
+
+            // interquartile range
+            let iqr = q3 - q1;
+
+            // range
+            let r0 = Math.max(min, q1 - iqr * 1.50);
+            let r1 = Math.min(max, q3 + iqr * 1.50);
+
+            let group = {
+                group: season.sid,
+                skaters,
+                min,
+                max,
+                quartiles: [q1,q2,q3],
+                range: [r0,r1],
+                iqr,
+                outliers: skaters.filter(sk => sk[perMode] > r1)
+            }
+
+            return group;
 
 
         return this;
@@ -209,4 +249,4 @@ class Histogram extends Visualization{
     }
 }
 
-module.exports = Histogram;
+module.exports = BoxPlot;

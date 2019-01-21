@@ -9,7 +9,9 @@ exports.ScatterplotMatrix = require("./src/ScatterplotMatrix.js");
 exports.BeeswarmPlot = require("./src/BeeswarmPlot.js");
 exports.Treemap = require("./src/Treemap.js");
 exports.Histogram = require("./src/Histogram.js");
-},{"./src/BeeswarmPlot.js":39,"./src/Histogram.js":40,"./src/ParallelBundling.js":41,"./src/ParallelCoordinates.js":42,"./src/ScatterplotMatrix.js":43,"./src/Treemap.js":44,"./src/Visualization.js":46}],2:[function(require,module,exports){
+exports.BoxPlot = require("./src/BoxPlot.js");
+exports.Sunbust = require("./src/Sunbust.js");
+},{"./src/BeeswarmPlot.js":39,"./src/BoxPlot.js":40,"./src/Histogram.js":41,"./src/ParallelBundling.js":42,"./src/ParallelCoordinates.js":43,"./src/ScatterplotMatrix.js":44,"./src/Sunbust.js":45,"./src/Treemap.js":46,"./src/Visualization.js":48}],2:[function(require,module,exports){
 // https://d3js.org/d3-array/ v1.2.4 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -24898,7 +24900,260 @@ class BeeswarmPlot extends Visualization{
 }
 
 module.exports = BeeswarmPlot;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":35}],40:[function(require,module,exports){
+},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],40:[function(require,module,exports){
+let d3 = require("d3");
+
+let Visualization = require("./Visualization.js");
+let utils = require("./Utils.js");
+
+
+class BoxPlot extends Visualization{
+
+    constructor(parentElement, settings){
+        super(parentElement, settings);
+        this.name = "BoxPlot";
+    }
+
+    _putDefaultSettings(){
+        // this.settings.innerPadding = 8;
+        this.settings.paddingRight = 20;
+        this.settings.paddingTop = 25;
+        this.settings.paddingBottom = 50;
+        this.settings.paddingLeft = 40;
+    }
+
+    resize(){
+        let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
+
+        let svgBounds = this.svg.node().getBoundingClientRect();
+        let value =0, datak = {};
+
+        this.cellHeight = svgBounds.height-margin.bottom;
+        this.cellWidth = svgBounds.width- margin.bottom;
+
+        this.x = {},this.y = {},this.bins = {},this.xAxis = {},this.yAxis = {},this.newkey = [];
+        datak = {};
+        let i = 0;
+
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+            }else{
+                this.newkey.push(k);
+            }
+        }
+
+        this.cellWidth /= this.newkey.length;
+
+
+        this.redraw();
+        return this;
+    }
+
+    data(d){
+        super.data(d);
+        let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
+        let svgBounds = this.svg.node().getBoundingClientRect();
+
+
+        let value =0;
+
+        this.cellHeight = svgBounds.height-margin.bottom;
+        this.cellWidth = svgBounds.width- margin.bottom;
+
+        this.x = {},this.y = {},this.bins = {},this.xAxis = {},this.yAxis = {},this.newkey = [];
+        this.datak = {};
+        let i = 0;
+
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+            }else{
+                this.newkey.push(k);
+            }
+        }
+
+        // this.cellHeight /= this.newkey.length;
+        this.cellWidth /= this.newkey.length;
+
+
+
+        this.redraw();
+        return this;
+    }
+
+
+    redraw(){
+        let boxplot = this;
+
+        this.foreground.selectAll(".textLabel").remove();
+        this.foreground.selectAll(".axisY").remove();
+        this.foreground.selectAll("rect.data").remove();
+
+        let margin = ({top: this.settings.paddingTop , right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
+
+        let keys = this.newkey;
+
+        let i =0;
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+
+            }else{
+                let xvalues = [];
+                for (let i = 0; i <this.d.length ; i++){
+                    xvalues.push(this.d[i][k]);
+                }
+                boxplot.datak[k] = xvalues;
+
+                boxplot.x[k] = d3.scaleBand()
+                    .domain(k)
+                    .range([margin.left, this.cellWidth])
+                    .padding(0.3);
+
+                // boxplot.bins[k] = d3.histogram()
+                //     .domain(this.x[k].domain())
+                //     // .thresholds(this.x[k].ticks(20))
+                //     (this.datak[k]);
+                // console.log(k," ",d3.max(this.datak[k]));
+
+                boxplot.y[k] = d3.scaleLinear()
+                    .range([this.cellHeight, margin.top])
+                    .domain([0, d3.max(this.datak[k])]).nice();
+
+
+                boxplot.xAxis[k] = g => g
+                    .attr("transform", `translate(0,${this.cellHeight})`)
+                    .call(d3.axisBottom(this.x[k]));
+
+                boxplot.yAxis[k] = g => g
+                    .attr("transform", `translate(${margin.left},0)`)
+                    .call(d3.axisLeft(this.y[k]))
+                    .call(g => g.select(".domain").remove())
+                    .call(g => g.select(".tick:last-of-type text").clone()
+                        .attr("x", 5)
+                        .attr("text-anchor", "start")
+                        .text("-"+k));
+
+                i++;
+            }
+        }
+
+        function rPoints(k,j) {
+
+            let chart = boxplot.foreground.select(".cellGroup")
+                .append("g")
+                .attr("class","hChart")
+                .attr("id","data_"+j)
+                .attr("transform",`translate(${(j* boxplot.cellWidth)},0)`);
+
+            let dataEnter = chart.selectAll("rect.data")
+                .data(boxplot.d)
+                .enter().append("rect")
+                .attr("data-index", function(d,i){ return i; })
+                .attr("class", "data")
+                .attr("x", d => boxplot.x[k].bandwidth())
+                // .data(boxplot.datak[k])
+                // .attr("y", d => boxplot.y[k](d.length))
+                // .attr("width", d => Math.max(0, boxplot.x[k](d.x1) - boxplot.x[k](d.x0) - 1))
+                // .attr("height", d => boxplot.y[k](0) - boxplot.y[k](d.length))
+                .style("fill", boxplot.settings.color)
+                .attr("key", k);
+
+            let enterAxisX = chart.append("g")
+                .attr("class","textLabel")
+                .call(boxplot.xAxis[k])
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", "-.55em")
+                .attr("transform", "translate(10,15)" );
+            //
+            let enterAxisY = chart.append("g")
+                .attr("class","axisY")
+                .call(boxplot.yAxis[k]);
+        }
+
+        // this.foreground.selectAll("g.cellGroup").remove();
+        this.foreground.selectAll("g.cellGroup").remove();
+
+        let updateChart  = this.foreground
+            .selectAll(".data")
+            .data(this.d);
+
+        let groups = this.foreground
+            .append("g")
+            .attr("class","cellGroup");
+
+
+        console.log(keys);
+        for (let i = 0; i <keys.length ; i++) {
+            rPoints(keys[i],i);
+        }
+
+        function histogram (season) {
+            
+        }
+            // sort players by points asc
+            let skaters = season.skaters.sort((a,b) => a[perMode] - b[perMode]);
+
+            // map points to an array
+            let stat = skaters.map((sk) => sk[perMode]);
+
+            // get the min and max
+            let min = stat[0];
+            let max = stat[stat.length-1];
+
+            // quantiles
+            let q1 = d3.quantile(stat, 0.25);
+            let q2 = d3.quantile(stat, 0.50);
+            let q3 = d3.quantile(stat, 0.75);
+
+            // interquartile range
+            let iqr = q3 - q1;
+
+            // range
+            let r0 = Math.max(min, q1 - iqr * 1.50);
+            let r1 = Math.min(max, q3 + iqr * 1.50);
+
+            let group = {
+                group: season.sid,
+                skaters,
+                min,
+                max,
+                quartiles: [q1,q2,q3],
+                range: [r0,r1],
+                iqr,
+                outliers: skaters.filter(sk => sk[perMode] > r1)
+            }
+
+            return group;
+
+
+        return this;
+    }
+
+    highlight(...args){
+
+    }
+    removeHighlight(...args){
+
+    }
+    getHighlightElement(i){
+
+    }
+
+    setAxisX(args){
+        this.settings.axisX = args;
+        console.log(args);
+    }
+
+    setAxisY(args){
+        this.settings.axisY = args;
+        console.log(args);
+
+    }
+}
+
+module.exports = BoxPlot;
+},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],41:[function(require,module,exports){
 let d3 = require("d3");
 
 let Visualization = require("./Visualization.js");
@@ -24940,7 +25195,6 @@ class Histogram extends Visualization{
             }
         }
 
-        // this.cellHeight /= this.newkey.length;
         this.cellWidth /= this.newkey.length;
 
 
@@ -25000,27 +25254,27 @@ class Histogram extends Visualization{
                 for (let i = 0; i <this.d.length ; i++){
                     xvalues.push(this.d[i][k]);
                 }
-                this.datak[k] = xvalues;
+                histogram.datak[k] = xvalues;
 
-                this.x[k] = d3.scaleLinear()
+                histogram.x[k] = d3.scaleLinear()
                     .domain(this.domain[k]).nice()
                     .range([margin.left, this.cellWidth]);
 
-                this.bins[k] = d3.histogram()
+                histogram.bins[k] = d3.histogram()
                     .domain(this.x[k].domain())
                     .thresholds(this.x[k].ticks(20))
                     (this.datak[k]);
 
-                this.y[k] =  d3.scaleLinear()
+                histogram.y[k] =  d3.scaleLinear()
                     .domain([0,d3.max(this.bins[k], d => d.length)]).nice()
                     .range([this.cellHeight, margin.top]);
 
-                this.xAxis[k] = g => g
+                histogram.xAxis[k] = g => g
                     .attr("transform", `translate(0,${this.cellHeight})`)
                     .call(d3.axisBottom(this.x[k])
                         .tickSizeOuter(10));
 
-                this.yAxis[k] = g => g
+                histogram.yAxis[k] = g => g
                     .attr("transform", `translate(${margin.left},0)`)
                     .call(d3.axisLeft(this.y[k]))
                     .call(g => g.select(".domain").remove())
@@ -25085,13 +25339,6 @@ class Histogram extends Visualization{
             rPoints(keys[i],i);
         }
 
-        // let groupsUpdate =  d3.selectAll(".hChart");
-        // groupsUpdate.each(function(p,j) {
-        //         console.log(this);
-        //         d3.select(this).attr("transform", `translate(${(j* histogram.cellWidth)},0)`)
-        //     });
-
-
 
         return this;
     }
@@ -25119,7 +25366,7 @@ class Histogram extends Visualization{
 }
 
 module.exports = Histogram;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":35}],41:[function(require,module,exports){
+},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],42:[function(require,module,exports){
 
 let d3 = require("d3");
 let _ = require("underscore");
@@ -25829,7 +26076,7 @@ class ParallelBundling extends Visualization{
 
 
 module.exports = ParallelBundling;
-},{"./Visualization.js":46,"d3":35,"d3-path":20,"underscore":38}],42:[function(require,module,exports){
+},{"./Visualization.js":48,"d3":35,"d3-path":20,"underscore":38}],43:[function(require,module,exports){
 
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
@@ -26096,7 +26343,7 @@ class ParallelCoordinates extends Visualization{
 }
 
 module.exports = ParallelCoordinates;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":35}],43:[function(require,module,exports){
+},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],44:[function(require,module,exports){
 
 let d3 = require("d3");
 let _ = require("underscore");
@@ -26408,7 +26655,207 @@ class ScatterplotMatrix extends Visualization{
 
 
 module.exports = ScatterplotMatrix;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":35,"underscore":38}],44:[function(require,module,exports){
+},{"./Utils.js":47,"./Visualization.js":48,"d3":35,"underscore":38}],45:[function(require,module,exports){
+let d3 = require("d3");
+let Visualization = require("./Visualization.js");
+let utils = require("./Utils.js");
+
+
+class Sunbust extends Visualization{
+
+    constructor(parentElement, settings){
+        super(parentElement, settings);
+        this.name = "Sunbust";
+    }
+    
+    _putDefaultSettings(){
+        this.settings.labelVAlign = "top";
+        this.settings.labelHAlign = "left";
+        this.settings.paddingTop =0 ;
+        this.settings.paddingBottom =0;
+        this.settings.paddingLeft = 0;
+        this.settings.paddingRight = 0;
+    }
+
+    resize(){
+        _makeHierarchy.call(this, this.d_h);
+        let svgBounds = this.svg.node().getBoundingClientRect();
+        this.h =  Math.min(svgBounds.height,svgBounds.width);
+        this.w = Math.min(svgBounds.height,svgBounds.width);
+        this.r = Math.min(svgBounds.height,svgBounds.width)/2;
+
+        this.redraw();
+        return this;
+    }
+
+    data(d){
+
+        super.data(d);
+
+        let svgBounds = this.svg.node().getBoundingClientRect();
+
+        this.w = Math.min(svgBounds.height,svgBounds.width);
+        this.h =  Math.min(svgBounds.height,svgBounds.width);
+        this.r = Math.min(this.w, this.h) / 2;
+
+        if(this.settings.hierarchies){
+            _hierarchy.call(this, this.settings.hierarchies);
+        }else{
+            let root = {name:"root", children: d};
+            if(this.settings.size){
+                let size = this.settings.size;
+                this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
+
+
+            }else{
+                this.d_h = d3.hierarchy(root).count();
+            }
+        }
+        _makeHierarchy.call(this, this.d_h);
+
+
+        this.d_parents = [];
+        this.d_h.each((d) => {
+            if(d.height !== 0)
+                this.d_parents.push(d);
+        });
+    }
+
+    redraw(){
+
+        let Sunbust = this;
+
+        let radius = this.w/ 2;
+
+        let svgBounds = this.svg.node().getBoundingClientRect();
+        this.foreground.selectAll("#sun").remove();
+
+        let Parens = this.foreground
+            .append("g")
+            .attr("id","sun")
+            .attr("transform", "translate(" + svgBounds.width/ 2 + "," + svgBounds.height/ 2 + ")");
+
+        let upParents = Parens
+            .selectAll(".g")
+            .data(this.d_h.descendants().filter(d => d.depth));
+
+        console.log("parents:",this.d_parents);
+        console.log("this.dh",this.d_h.descendants().filter(d => d.depth));
+
+        let arc = d3.arc()
+            .startAngle(d => d.x0)
+            .endAngle(d => d.x1)
+            .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+            .padRadius(radius / 2)
+            .innerRadius(d => d.y0)
+            .outerRadius(d => d.y1 - 1);
+
+        upParents.exit().remove();
+        let enterParents = upParents.enter()
+            .append("g")
+            .attr("class", "data-parent");
+
+        let ArcEnter = enterParents.append("path")
+            .attr("d", arc)
+            .attr("data-index", function(d, i){return i; })
+            .style("fill",  this.settings.color )
+            .style("stroke", "white")
+            .style("stroke-width", "1px");
+            // .attr('id', d=>d.data.name);
+
+        return this;
+    }
+
+    highlight(...args){
+
+    }
+    removeHighlight(...args){
+
+    }
+    getHighlightElement(i){
+
+    }
+
+    select(selection){
+        if(Array.isArray(selection)){
+            //selection[0]
+        }
+    }
+
+    setSize(attrs){
+        this.settings.size = attrs;
+    }
+
+    hierarchy(attrs){
+        this.settings.hierarchies = attrs;
+        if(this.domain)
+            _hierarchy.call(this, attrs);
+        return this;
+    }
+
+    // setLabel(func){
+    //     this.settings.label = func;
+    //     return this;
+    // }
+
+}
+
+let _hierarchy = function(attrs){
+    let size = this.settings.size;
+    let group = (data, index) => {
+        if(index >= attrs.length)
+            return;
+
+        let attr = attrs[index];
+        for(let d of this.domain[attr]){
+            let child = {name: d, children: []};
+            data.children.push(child);
+            group(child, index+1);
+        }
+    };
+
+    let hie = {name: "root", children:[]};
+    if(attrs && attrs.length > 0){
+        group(hie, 0);
+
+        for(let d of this.d){
+            let aux = hie;
+            for(let attr of attrs){
+                for(let c of aux.children){
+                    if(c.name === d[attr]){
+                        aux = c;
+                        break;
+                    }
+                }
+            }
+            aux.children.push(d);
+        }
+        if(size){
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+        }else{
+            this.d_h = d3.hierarchy(hie).count();
+        }
+
+    }
+};
+
+// let _setLabel = function(func){
+
+// };
+
+let _makeHierarchy = function(obj){
+    let svgBounds = this.svg.node().getBoundingClientRect();
+
+    let radius = Math.min(svgBounds.height,svgBounds.width)/ 2;
+    d3.partition()
+        .size([2 * Math.PI, radius])
+        (obj);
+
+};
+
+
+module.exports = Sunbust;
+},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],46:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
@@ -26715,7 +27162,7 @@ let _makeHierarchy = function(obj){
 
 
 module.exports = Treemap;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":35}],45:[function(require,module,exports){
+},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],47:[function(require,module,exports){
 
 module.exports.lineIntersects = (a,b,c,d,p,q,r,s) => {
     let det, gamma, lambda;
@@ -26816,7 +27263,7 @@ module.exports.parseTranslate = (elem) => {
 //             b2.y2 < b1.y1);
 //     }
 // }
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 let _ = require("underscore");
 let d3 = require("d3");
 let moment = require('moment');

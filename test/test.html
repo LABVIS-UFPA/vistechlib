@@ -23,9 +23,9 @@
 
         let cate = ["laranja", "maçã", "banana"];
         console.log(vistechlib);
-        parallel = new vistechlib.Histogram(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
+        parallel = new vistechlib.Sunbust(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
 
-        // parallel.hierarchy(["w"]);
+        parallel.hierarchy(["w"]);
         // parallel.setAxisX(["x"]);
         // parallel.setAxisY(["x"]);
 
@@ -136,8 +136,30 @@
 
         ]);
 
-        console.log("data",parallel.d);
-        parallel.setColor("pink");
+
+        // console.log("------------data:",parallel.d[0]["x"]);
+        let colors = ["#66aa00", "#b82e2e", "#316395", "#994499", "#3b3eac","#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477"];
+
+        parallel.setColor("purple");
+
+        parallel.setColor(function (d,i) {
+            // console.log(d,i);
+            // return "purple";
+            // console.log(d.data["name"]);
+            if(d.data["name"]){
+                console.log("----------");
+                console.log(d.data["name"]);
+                return colors[cate.indexOf(d.data["name"])];
+            }
+            else if(d.data["w"]){
+                console.log("----------");
+                console.log(d.data["w"]);
+                return colors[cate.indexOf(d.data["w"])];
+            }
+
+
+        });
+
         parallel//.setLabel((d)=>{ return d.x; })
             .redraw()
             .on("datamouseover", function (d, i) {
