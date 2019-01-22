@@ -222,6 +222,8 @@ class BeeswarmPlot extends Visualization{
                 .style("stroke", this.settings.highlightColor)
                 .attr("d", str)
         }
+
+
         if(highlighted)
             super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }

@@ -24824,6 +24824,8 @@ class BeeswarmPlot extends Visualization{
                 .style("stroke", this.settings.highlightColor)
                 .attr("d", str)
         }
+
+
         if(highlighted)
             super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
@@ -25197,6 +25199,38 @@ class Histogram extends Visualization{
 
         this.cellWidth /= this.newkey.length;
 
+        let keys = this.newkey;
+
+        let j =0;
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+
+            }else{
+                let xvalues = [];
+                for (let i = 0; i <this.d.length ; i++){
+                    xvalues.push(this.d[i][k]);
+                }
+                this.datak[k] = xvalues;
+
+                this.bins[k] = d3.histogram()
+                    .domain(this.domain[k])
+                    .thresholds(20)
+                    (this.datak[k]);
+
+
+                this.x[k] = d3.scaleBand()
+                    .domain(this.bins[k].map(d => d.x0))
+                    .range([margin.left, this.cellWidth]);
+
+
+                this.y[k] =  d3.scaleLinear()
+                    .domain([0,d3.max(this.bins[k], d => d.length)]).nice()
+                    .range([this.cellHeight, margin.top]);
+
+                j++;
+            }
+        }
+
 
         this.redraw();
         return this;
@@ -25227,7 +25261,37 @@ class Histogram extends Visualization{
         // this.cellHeight /= this.newkey.length;
         this.cellWidth /= this.newkey.length;
 
+        let keys = this.newkey;
 
+        let j =0;
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+
+            }else{
+                let xvalues = [];
+                for (let i = 0; i <this.d.length ; i++){
+                    xvalues.push(this.d[i][k]);
+                }
+                this.datak[k] = xvalues;
+
+                this.bins[k] = d3.histogram()
+                    .domain(this.domain[k])
+                    .thresholds(20)
+                    (this.datak[k]);
+
+
+                this.x[k] = d3.scaleBand()
+                    .domain(this.bins[k].map(d => d.x0))
+                    .range([margin.left, this.cellWidth]);
+
+
+                this.y[k] =  d3.scaleLinear()
+                    .domain([0,d3.max(this.bins[k], d => d.length)]).nice()
+                    .range([this.cellHeight, margin.top]);
+
+                j++;
+            }
+        }
 
         this.redraw();
         return this;
@@ -25243,51 +25307,22 @@ class Histogram extends Visualization{
 
         let margin = ({top: this.settings.paddingTop , right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
 
-        let keys = this.newkey;
 
-        let i =0;
-        for(let k of this.keys){
-            if(this.domainType[k] === "Categorical"){
 
-            }else{
-                let xvalues = [];
-                for (let i = 0; i <this.d.length ; i++){
-                    xvalues.push(this.d[i][k]);
-                }
-                histogram.datak[k] = xvalues;
+         let rPoints = (k,j) => {
+            this.xAxis[k] = g => g
+                .attr("transform", `translate(0,${this.cellHeight})`)
+                .call(d3.axisBottom(this.x[k])
+                    .tickSizeOuter(10));
 
-                histogram.x[k] = d3.scaleLinear()
-                    .domain(this.domain[k]).nice()
-                    .range([margin.left, this.cellWidth]);
-
-                histogram.bins[k] = d3.histogram()
-                    .domain(this.x[k].domain())
-                    .thresholds(this.x[k].ticks(20))
-                    (this.datak[k]);
-
-                histogram.y[k] =  d3.scaleLinear()
-                    .domain([0,d3.max(this.bins[k], d => d.length)]).nice()
-                    .range([this.cellHeight, margin.top]);
-
-                histogram.xAxis[k] = g => g
-                    .attr("transform", `translate(0,${this.cellHeight})`)
-                    .call(d3.axisBottom(this.x[k])
-                        .tickSizeOuter(10));
-
-                histogram.yAxis[k] = g => g
-                    .attr("transform", `translate(${margin.left},0)`)
-                    .call(d3.axisLeft(this.y[k]))
-                    .call(g => g.select(".domain").remove())
-                    .call(g => g.select(".tick:last-of-type text").clone()
-                        .attr("x", 5)
-                        .attr("text-anchor", "start")
-                        .text("-"+k));
-
-                i++;
-            }
-        }
-
-        function rPoints(k,j) {
+            this.yAxis[k] = g => g
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(this.y[k]))
+                .call(g => g.select(".domain").remove())
+                .call(g => g.select(".tick:last-of-type text").clone()
+                    .attr("x", 5)
+                    .attr("text-anchor", "start")
+                    .text("-"+k));
 
             let chart = histogram.foreground.select(".cellGroup")
                 .append("g")
@@ -25301,8 +25336,8 @@ class Histogram extends Visualization{
                 .attr("data-index", function(d,i){ return i; })
                 .attr("class", "data")
                 .data(histogram.bins[k])
-                .attr("x", d => histogram.x[k](d.x0) + 1)
-                .attr("width", d => Math.max(0, histogram.x[k](d.x1) - histogram.x[k](d.x0) - 1))
+                .attr("x", d => histogram.x[k](d.x0))
+                .attr("width", histogram.x[k].bandwidth())
                 .attr("y", d => histogram.y[k](d.length))
                 .attr("height", d => histogram.y[k](0) - histogram.y[k](d.length))
                 .style("fill", histogram.settings.color)
@@ -25334,9 +25369,11 @@ class Histogram extends Visualization{
             .attr("class","cellGroup");
 
 
-        console.log(keys);
-        for (let i = 0; i <keys.length ; i++) {
-            rPoints(keys[i],i);
+
+        for (let i = 0; i <this.keys.length ; i++) {
+            if(this.domainType[this.keys[i]] ==="Numeric"){
+                rPoints(this.keys[i],i);
+            }
         }
 
 
@@ -26661,11 +26698,11 @@ let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
 
 
-class Sunbust extends Visualization{
+class Sunburst extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        this.name = "Sunbust";
+        this.name = "Sunburst";
     }
     
     _putDefaultSettings(){
@@ -26737,7 +26774,7 @@ class Sunbust extends Visualization{
 
         let upParents = Parens
             .selectAll(".g")
-            .data(sunbust.d_h.descendants().filter(d => d.depth));
+            .data(this.d_h.descendants().filter(d => d.depth));
 
         let arc = d3.arc()
             .startAngle(d => d.x0)
@@ -26758,19 +26795,19 @@ class Sunbust extends Visualization{
             .attr("d", arc)
             .attr("class", "data")
             .attr("data-index", function(d, i){return i; })
-            .style("fill",  sunbust.settings.color )
-            .style("stroke", "white")
-            .style("stroke-width", "1px")
-            .append("title");
+            .style("fill",  this.settings.color )
+            .style("stroke", "black")
+            .style("stroke-width", "1.4px");
             // .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
             // .attr('id', d=>d.data.name);
 
+        this._bindDataMouseEvents(ArcEnter);
 
         let letterEnter =  d3.select("#sun").append("g")
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle")
             .selectAll("text")
-            .data(sunbust.d_h.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
+            .data(this.d_h.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
             .enter().append("text")
             .attr("transform", function(d) {
                 const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
@@ -26784,15 +26821,23 @@ class Sunbust extends Visualization{
     }
 
     highlight(...args){
+        let highlighted;
 
+        console.log("args",args[1]);
+
+        if(args[0] instanceof SVGElement){
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
+
+            highlighted = this.foreground
+                .selectAll('path[data-index="' + args[1] + '"]')
+                .style("stroke", this.settings.highlightColor)
+
+            if(highlighted)
+                super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
+        }
     }
 
-    removeHighlight(...args){
 
-    }
-    getHighlightElement(i){
-
-    }
 
     select(selection){
         if(Array.isArray(selection)){
@@ -26871,7 +26916,7 @@ let _makeHierarchy = function(obj){
 };
 
 
-module.exports = Sunbust;
+module.exports = Sunburst;
 },{"./Utils.js":47,"./Visualization.js":48,"d3":35}],46:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");

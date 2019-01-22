@@ -3,11 +3,11 @@ let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
 
 
-class Sunbust extends Visualization{
+class Sunburst extends Visualization{
 
     constructor(parentElement, settings){
         super(parentElement, settings);
-        this.name = "Sunbust";
+        this.name = "Sunburst";
     }
     
     _putDefaultSettings(){
@@ -79,7 +79,7 @@ class Sunbust extends Visualization{
 
         let upParents = Parens
             .selectAll(".g")
-            .data(sunbust.d_h.descendants().filter(d => d.depth));
+            .data(this.d_h.descendants().filter(d => d.depth));
 
         let arc = d3.arc()
             .startAngle(d => d.x0)
@@ -100,19 +100,19 @@ class Sunbust extends Visualization{
             .attr("d", arc)
             .attr("class", "data")
             .attr("data-index", function(d, i){return i; })
-            .style("fill",  sunbust.settings.color )
-            .style("stroke", "white")
-            .style("stroke-width", "1px")
-            .append("title");
+            .style("fill",  this.settings.color )
+            .style("stroke", "black")
+            .style("stroke-width", "1.4px");
             // .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
             // .attr('id', d=>d.data.name);
 
+        this._bindDataMouseEvents(ArcEnter);
 
         let letterEnter =  d3.select("#sun").append("g")
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle")
             .selectAll("text")
-            .data(sunbust.d_h.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
+            .data(this.d_h.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
             .enter().append("text")
             .attr("transform", function(d) {
                 const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
@@ -126,15 +126,23 @@ class Sunbust extends Visualization{
     }
 
     highlight(...args){
+        let highlighted;
 
+        console.log("args",args[1]);
+
+        if(args[0] instanceof SVGElement){
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
+
+            highlighted = this.foreground
+                .selectAll('path[data-index="' + args[1] + '"]')
+                .style("stroke", this.settings.highlightColor)
+
+            if(highlighted)
+                super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
+        }
     }
 
-    removeHighlight(...args){
 
-    }
-    getHighlightElement(i){
-
-    }
 
     select(selection){
         if(Array.isArray(selection)){
@@ -213,4 +221,4 @@ let _makeHierarchy = function(obj){
 };
 
 
-module.exports = Sunbust;
+module.exports = Sunburst;
