@@ -26723,7 +26723,7 @@ class Sunbust extends Visualization{
 
     redraw(){
 
-        let Sunbust = this;
+        let sunbust = this;
 
         let radius = this.w/ 2;
 
@@ -26737,10 +26737,7 @@ class Sunbust extends Visualization{
 
         let upParents = Parens
             .selectAll(".g")
-            .data(this.d_h.descendants().filter(d => d.depth));
-
-        console.log("parents:",this.d_parents);
-        console.log("this.dh",this.d_h.descendants().filter(d => d.depth));
+            .data(sunbust.d_h.descendants().filter(d => d.depth));
 
         let arc = d3.arc()
             .startAngle(d => d.x0)
@@ -26753,15 +26750,35 @@ class Sunbust extends Visualization{
         upParents.exit().remove();
         let enterParents = upParents.enter()
             .append("g")
-            .attr("class", "data-parent");
+            .attr("class", "data");
+
+        let format = d3.format(",d");
 
         let ArcEnter = enterParents.append("path")
             .attr("d", arc)
+            .attr("class", "data")
             .attr("data-index", function(d, i){return i; })
-            .style("fill",  this.settings.color )
+            .style("fill",  sunbust.settings.color )
             .style("stroke", "white")
-            .style("stroke-width", "1px");
+            .style("stroke-width", "1px")
+            .append("title");
+            // .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
             // .attr('id', d=>d.data.name);
+
+
+        let letterEnter =  d3.select("#sun").append("g")
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle")
+            .selectAll("text")
+            .data(sunbust.d_h.descendants().filter(d => d.depth && (d.y0 + d.y1) / 2 * (d.x1 - d.x0) > 10))
+            .enter().append("text")
+            .attr("transform", function(d) {
+                const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+                const y = (d.y0 + d.y1) / 2;
+                return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+            })
+            .attr("dy", "0.35em")
+            .text(d => d.data.name);
 
         return this;
     }
@@ -26769,6 +26786,7 @@ class Sunbust extends Visualization{
     highlight(...args){
 
     }
+
     removeHighlight(...args){
 
     }
@@ -26840,7 +26858,6 @@ let _hierarchy = function(attrs){
 };
 
 // let _setLabel = function(func){
-
 // };
 
 let _makeHierarchy = function(obj){

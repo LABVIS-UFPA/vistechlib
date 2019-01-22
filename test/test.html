@@ -17,176 +17,267 @@
 
 </head>
 <body style="width: 100%;height: 100%;margin: 0">
-    <div id="canvasTest" style="width: 100%;height: 100%;"></div>
+<div id="canvasTest" style="width: 100%;height: 100%;"></div>
 
-    <script>
+<script>
 
-        let cate = ["laranja", "maçã", "banana"];
-        console.log(vistechlib);
-        parallel = new vistechlib.Sunbust(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
+    let cate = ["laranja", "maçã", "banana"];
+    let tipo = ["polistation", "daynavision", "nitendo 32"];
 
-        parallel.hierarchy(["w"]);
-        // parallel.setAxisX(["x"]);
-        // parallel.setAxisY(["x"]);
+    console.log(vistechlib);
+    parallel = new vistechlib.Sunbust(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
 
+    parallel.hierarchy(["r","w"]);
 
-        parallel.data([
-            {x:Math.random(),y:Math.random(), z:25, w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:20, w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:16, w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:16, w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:10, w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:10, w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:10, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:19, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]},
-            {x:Math.random(),y:Math.random(), z:Math.random(), w: cate[Math.floor(Math.random()*3)]}
-
-        ]);
+    // parallel.setAxisX(["x"]);
+    // parallel.setAxisY(["x"]);
 
 
-        // console.log("------------data:",parallel.d[0]["x"]);
-        let colors = ["#66aa00", "#b82e2e", "#316395", "#994499", "#3b3eac","#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477"];
+    parallel.data([
+        // {x:Math.random(),y:Math.random(), z:25, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:20, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:16, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:16, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:10, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:10, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:10, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:19, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        // {x:Math.random(),y:Math.random(), z:18, w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]},
+        {x:Math.random(),y:Math.random(), z:Math.random(), r: tipo[Math.floor(Math.random()*2)], w: cate[Math.floor(Math.random()*3)]}
 
-        parallel.setColor("purple");
 
-        parallel.setColor(function (d,i) {
-            // console.log(d,i);
-            // return "purple";
-            // console.log(d.data["name"]);
-            if(d.data["name"]){
-                console.log("----------");
-                console.log(d.data["name"]);
-                return colors[cate.indexOf(d.data["name"])];
-            }
-            else if(d.data["w"]){
-                console.log("----------");
-                console.log(d.data["w"]);
-                return colors[cate.indexOf(d.data["w"])];
-            }
 
+
+    ]);
+
+
+    // console.log("------------data:",parallel.d[0]["x"]);
+    let colors = ["#66aa00", "#b82e2e", "#316395", "#994499", "#3b3eac","#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477"];
+
+    parallel.setColor("purple");
+
+
+    parallel//.setLabel((d)=>{ return d.w; })
+        .redraw()
+        .on("datamouseover", function (d, i) {
+            parallel.highlight(d, i);
+        })
+        .on("datamouseout", function (d, i) {
+            parallel.removeHighlight(d, i);
+        })
+        .on("highlightstart", function (d, i) {
+            console.log("highlightstart", this);
+        })
+        .on("dimensiontitleclick", function(d){
+            console.log("clicou no titulo", d);
 
         });
 
-        parallel//.setLabel((d)=>{ return d.x; })
-            .redraw()
-            .on("datamouseover", function (d, i) {
-                parallel.highlight(d, i);
-            })
-            .on("datamouseout", function (d, i) {
-                parallel.removeHighlight(d, i);
-            })
-            .on("highlightstart", function (d, i) {
-                console.log("highlightstart", this);
-            })
-            .on("dimensiontitleclick", function(d){
-                console.log("clicou no titulo", d);
 
-            });
+    let p0;
+    parallel.svg.node().onmousedown =  function(d){
+        p0 = [d.clientX, d.clientY];
+    };
+    parallel.svg.node().onmouseup = function(d){
+        parallel.removeSelect();
+        parallel.select([p0, [d.clientX, d.clientY]]);
+    };
 
 
-        let p0;
-        parallel.svg.node().onmousedown =  function(d){
-            p0 = [d.clientX, d.clientY];
-        };
-        parallel.svg.node().onmouseup = function(d){
-            parallel.removeSelect();
-            parallel.select([p0, [d.clientX, d.clientY]]);
-        };
-
-
-    </script>
+</script>
 </body>
 </html>
