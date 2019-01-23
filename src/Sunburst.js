@@ -135,13 +135,38 @@ class Sunburst extends Visualization{
 
             highlighted = this.foreground
                 .selectAll('path[data-index="' + args[1] + '"]')
-                .style("stroke", this.settings.highlightColor)
+                .style("stroke", this.settings.highlightColor);
 
             if(highlighted)
                 super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
         }
     }
 
+    removeHighlight(...args){
+        if(args[1] instanceof SVGElement){
+
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+            let elem = this.foreground.selectAll('path[data-index="'+args[1]+'"]').style("stroke", "black");
+            this.background.selectAll(".lineHighlight").remove();
+            super.removeHighlight(elem.node(), elem.datum(), args[1]);
+        }
+    }
+
+    getHighlightElement(i){
+
+        this.foreground.selectAll('path[data-index="'+i+'"]')
+
+        str = str.substring(0, str.length - 3);
+
+        let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        d3.select(group).attr("class", "groupHighlight");
+        let path = d3.select(document.createElementNS("http://www.w3.org/2000/svg", "path"))
+            .attr("class", "lineHighlight")
+            .style("fill", "none")
+            .style("stroke", this.settings.highlightColor)
+        group.appendChild(path);
+        return group;
+    }
 
 
     select(selection){

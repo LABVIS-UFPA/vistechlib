@@ -10,8 +10,8 @@ exports.BeeswarmPlot = require("./src/BeeswarmPlot.js");
 exports.Treemap = require("./src/Treemap.js");
 exports.Histogram = require("./src/Histogram.js");
 exports.BoxPlot = require("./src/BoxPlot.js");
-exports.Sunbust = require("./src/Sunbust.js");
-},{"./src/BeeswarmPlot.js":39,"./src/BoxPlot.js":40,"./src/Histogram.js":41,"./src/ParallelBundling.js":42,"./src/ParallelCoordinates.js":43,"./src/ScatterplotMatrix.js":44,"./src/Sunbust.js":45,"./src/Treemap.js":46,"./src/Visualization.js":48}],2:[function(require,module,exports){
+exports.Sunburst = require("./src/Sunburst.js");
+},{"./src/BeeswarmPlot.js":36,"./src/BoxPlot.js":37,"./src/Histogram.js":38,"./src/ParallelBundling.js":39,"./src/ParallelCoordinates.js":40,"./src/ScatterplotMatrix.js":41,"./src/Sunburst.js":42,"./src/Treemap.js":43,"./src/Visualization.js":45}],2:[function(require,module,exports){
 // https://d3js.org/d3-array/ v1.2.4 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -1367,7 +1367,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-dispatch":10,"d3-drag":11,"d3-interpolate":19,"d3-selection":26,"d3-transition":32}],5:[function(require,module,exports){
+},{"d3-dispatch":9,"d3-drag":10,"d3-interpolate":18,"d3-selection":25,"d3-transition":30}],5:[function(require,module,exports){
 // https://d3js.org/d3-chord/ v1.0.6 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-array'), require('d3-path')) :
@@ -1599,150 +1599,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-array":2,"d3-path":6}],6:[function(require,module,exports){
-// https://d3js.org/d3-path/ v1.0.7 Copyright 2018 Mike Bostock
-(function (global, factory) {
-typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-typeof define === 'function' && define.amd ? define(['exports'], factory) :
-(factory((global.d3 = global.d3 || {})));
-}(this, (function (exports) { 'use strict';
-
-var pi = Math.PI,
-    tau = 2 * pi,
-    epsilon = 1e-6,
-    tauEpsilon = tau - epsilon;
-
-function Path() {
-  this._x0 = this._y0 = // start of current subpath
-  this._x1 = this._y1 = null; // end of current subpath
-  this._ = "";
-}
-
-function path() {
-  return new Path;
-}
-
-Path.prototype = path.prototype = {
-  constructor: Path,
-  moveTo: function(x, y) {
-    this._ += "M" + (this._x0 = this._x1 = +x) + "," + (this._y0 = this._y1 = +y);
-  },
-  closePath: function() {
-    if (this._x1 !== null) {
-      this._x1 = this._x0, this._y1 = this._y0;
-      this._ += "Z";
-    }
-  },
-  lineTo: function(x, y) {
-    this._ += "L" + (this._x1 = +x) + "," + (this._y1 = +y);
-  },
-  quadraticCurveTo: function(x1, y1, x, y) {
-    this._ += "Q" + (+x1) + "," + (+y1) + "," + (this._x1 = +x) + "," + (this._y1 = +y);
-  },
-  bezierCurveTo: function(x1, y1, x2, y2, x, y) {
-    this._ += "C" + (+x1) + "," + (+y1) + "," + (+x2) + "," + (+y2) + "," + (this._x1 = +x) + "," + (this._y1 = +y);
-  },
-  arcTo: function(x1, y1, x2, y2, r) {
-    x1 = +x1, y1 = +y1, x2 = +x2, y2 = +y2, r = +r;
-    var x0 = this._x1,
-        y0 = this._y1,
-        x21 = x2 - x1,
-        y21 = y2 - y1,
-        x01 = x0 - x1,
-        y01 = y0 - y1,
-        l01_2 = x01 * x01 + y01 * y01;
-
-    // Is the radius negative? Error.
-    if (r < 0) throw new Error("negative radius: " + r);
-
-    // Is this path empty? Move to (x1,y1).
-    if (this._x1 === null) {
-      this._ += "M" + (this._x1 = x1) + "," + (this._y1 = y1);
-    }
-
-    // Or, is (x1,y1) coincident with (x0,y0)? Do nothing.
-    else if (!(l01_2 > epsilon));
-
-    // Or, are (x0,y0), (x1,y1) and (x2,y2) collinear?
-    // Equivalently, is (x1,y1) coincident with (x2,y2)?
-    // Or, is the radius zero? Line to (x1,y1).
-    else if (!(Math.abs(y01 * x21 - y21 * x01) > epsilon) || !r) {
-      this._ += "L" + (this._x1 = x1) + "," + (this._y1 = y1);
-    }
-
-    // Otherwise, draw an arc!
-    else {
-      var x20 = x2 - x0,
-          y20 = y2 - y0,
-          l21_2 = x21 * x21 + y21 * y21,
-          l20_2 = x20 * x20 + y20 * y20,
-          l21 = Math.sqrt(l21_2),
-          l01 = Math.sqrt(l01_2),
-          l = r * Math.tan((pi - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2),
-          t01 = l / l01,
-          t21 = l / l21;
-
-      // If the start tangent is not coincident with (x0,y0), line to.
-      if (Math.abs(t01 - 1) > epsilon) {
-        this._ += "L" + (x1 + t01 * x01) + "," + (y1 + t01 * y01);
-      }
-
-      this._ += "A" + r + "," + r + ",0,0," + (+(y01 * x20 > x01 * y20)) + "," + (this._x1 = x1 + t21 * x21) + "," + (this._y1 = y1 + t21 * y21);
-    }
-  },
-  arc: function(x, y, r, a0, a1, ccw) {
-    x = +x, y = +y, r = +r;
-    var dx = r * Math.cos(a0),
-        dy = r * Math.sin(a0),
-        x0 = x + dx,
-        y0 = y + dy,
-        cw = 1 ^ ccw,
-        da = ccw ? a0 - a1 : a1 - a0;
-
-    // Is the radius negative? Error.
-    if (r < 0) throw new Error("negative radius: " + r);
-
-    // Is this path empty? Move to (x0,y0).
-    if (this._x1 === null) {
-      this._ += "M" + x0 + "," + y0;
-    }
-
-    // Or, is (x0,y0) not coincident with the previous point? Line to (x0,y0).
-    else if (Math.abs(this._x1 - x0) > epsilon || Math.abs(this._y1 - y0) > epsilon) {
-      this._ += "L" + x0 + "," + y0;
-    }
-
-    // Is this arc empty? We’re done.
-    if (!r) return;
-
-    // Does the angle go the wrong way? Flip the direction.
-    if (da < 0) da = da % tau + tau;
-
-    // Is this a complete circle? Draw two arcs to complete the circle.
-    if (da > tauEpsilon) {
-      this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x - dx) + "," + (y - dy) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
-    }
-
-    // Is this arc non-empty? Draw an arc!
-    else if (da > epsilon) {
-      this._ += "A" + r + "," + r + ",0," + (+(da >= pi)) + "," + cw + "," + (this._x1 = x + r * Math.cos(a1)) + "," + (this._y1 = y + r * Math.sin(a1));
-    }
-  },
-  rect: function(x, y, w, h) {
-    this._ += "M" + (this._x0 = this._x1 = +x) + "," + (this._y0 = this._y1 = +y) + "h" + (+w) + "v" + (+h) + "h" + (-w) + "Z";
-  },
-  toString: function() {
-    return this._;
-  }
-};
-
-exports.path = path;
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
-
-},{}],7:[function(require,module,exports){
+},{"d3-array":2,"d3-path":19}],6:[function(require,module,exports){
 // https://d3js.org/d3-collection/ v1.0.7 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -1961,7 +1818,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 // https://d3js.org/d3-color/ v1.2.3 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -2512,7 +2369,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // https://d3js.org/d3-contour/ v1.3.2 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-array')) :
@@ -2945,7 +2802,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-array":2}],10:[function(require,module,exports){
+},{"d3-array":2}],9:[function(require,module,exports){
 // https://d3js.org/d3-dispatch/ v1.0.5 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -3042,7 +2899,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 // https://d3js.org/d3-drag/ v1.2.3 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-selection'), require('d3-dispatch')) :
@@ -3278,7 +3135,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-dispatch":10,"d3-selection":26}],12:[function(require,module,exports){
+},{"d3-dispatch":9,"d3-selection":25}],11:[function(require,module,exports){
 // https://d3js.org/d3-dsv/ v1.0.10 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -3442,7 +3299,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 // https://d3js.org/d3-ease/ v1.0.5 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -3703,7 +3560,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 // https://d3js.org/d3-fetch/ v1.1.2 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-dsv')) :
@@ -3807,7 +3664,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-dsv":12}],15:[function(require,module,exports){
+},{"d3-dsv":11}],14:[function(require,module,exports){
 // https://d3js.org/d3-force/ v1.1.2 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-quadtree'), require('d3-collection'), require('d3-dispatch'), require('d3-timer')) :
@@ -4469,7 +4326,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-collection":7,"d3-dispatch":10,"d3-quadtree":22,"d3-timer":31}],16:[function(require,module,exports){
+},{"d3-collection":6,"d3-dispatch":9,"d3-quadtree":21,"d3-timer":29}],15:[function(require,module,exports){
 // https://d3js.org/d3-format/ v1.3.2 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -4791,7 +4648,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 // https://d3js.org/d3-geo/ v1.11.3 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-array')) :
@@ -7896,7 +7753,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-array":2}],18:[function(require,module,exports){
+},{"d3-array":2}],17:[function(require,module,exports){
 // https://d3js.org/d3-hierarchy/ v1.1.8 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -9188,7 +9045,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 // https://d3js.org/d3-interpolate/ v1.3.2 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-color')) :
@@ -9762,9 +9619,150 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-color":8}],20:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"dup":6}],21:[function(require,module,exports){
+},{"d3-color":7}],19:[function(require,module,exports){
+// https://d3js.org/d3-path/ v1.0.7 Copyright 2018 Mike Bostock
+(function (global, factory) {
+typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+typeof define === 'function' && define.amd ? define(['exports'], factory) :
+(factory((global.d3 = global.d3 || {})));
+}(this, (function (exports) { 'use strict';
+
+var pi = Math.PI,
+    tau = 2 * pi,
+    epsilon = 1e-6,
+    tauEpsilon = tau - epsilon;
+
+function Path() {
+  this._x0 = this._y0 = // start of current subpath
+  this._x1 = this._y1 = null; // end of current subpath
+  this._ = "";
+}
+
+function path() {
+  return new Path;
+}
+
+Path.prototype = path.prototype = {
+  constructor: Path,
+  moveTo: function(x, y) {
+    this._ += "M" + (this._x0 = this._x1 = +x) + "," + (this._y0 = this._y1 = +y);
+  },
+  closePath: function() {
+    if (this._x1 !== null) {
+      this._x1 = this._x0, this._y1 = this._y0;
+      this._ += "Z";
+    }
+  },
+  lineTo: function(x, y) {
+    this._ += "L" + (this._x1 = +x) + "," + (this._y1 = +y);
+  },
+  quadraticCurveTo: function(x1, y1, x, y) {
+    this._ += "Q" + (+x1) + "," + (+y1) + "," + (this._x1 = +x) + "," + (this._y1 = +y);
+  },
+  bezierCurveTo: function(x1, y1, x2, y2, x, y) {
+    this._ += "C" + (+x1) + "," + (+y1) + "," + (+x2) + "," + (+y2) + "," + (this._x1 = +x) + "," + (this._y1 = +y);
+  },
+  arcTo: function(x1, y1, x2, y2, r) {
+    x1 = +x1, y1 = +y1, x2 = +x2, y2 = +y2, r = +r;
+    var x0 = this._x1,
+        y0 = this._y1,
+        x21 = x2 - x1,
+        y21 = y2 - y1,
+        x01 = x0 - x1,
+        y01 = y0 - y1,
+        l01_2 = x01 * x01 + y01 * y01;
+
+    // Is the radius negative? Error.
+    if (r < 0) throw new Error("negative radius: " + r);
+
+    // Is this path empty? Move to (x1,y1).
+    if (this._x1 === null) {
+      this._ += "M" + (this._x1 = x1) + "," + (this._y1 = y1);
+    }
+
+    // Or, is (x1,y1) coincident with (x0,y0)? Do nothing.
+    else if (!(l01_2 > epsilon));
+
+    // Or, are (x0,y0), (x1,y1) and (x2,y2) collinear?
+    // Equivalently, is (x1,y1) coincident with (x2,y2)?
+    // Or, is the radius zero? Line to (x1,y1).
+    else if (!(Math.abs(y01 * x21 - y21 * x01) > epsilon) || !r) {
+      this._ += "L" + (this._x1 = x1) + "," + (this._y1 = y1);
+    }
+
+    // Otherwise, draw an arc!
+    else {
+      var x20 = x2 - x0,
+          y20 = y2 - y0,
+          l21_2 = x21 * x21 + y21 * y21,
+          l20_2 = x20 * x20 + y20 * y20,
+          l21 = Math.sqrt(l21_2),
+          l01 = Math.sqrt(l01_2),
+          l = r * Math.tan((pi - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2),
+          t01 = l / l01,
+          t21 = l / l21;
+
+      // If the start tangent is not coincident with (x0,y0), line to.
+      if (Math.abs(t01 - 1) > epsilon) {
+        this._ += "L" + (x1 + t01 * x01) + "," + (y1 + t01 * y01);
+      }
+
+      this._ += "A" + r + "," + r + ",0,0," + (+(y01 * x20 > x01 * y20)) + "," + (this._x1 = x1 + t21 * x21) + "," + (this._y1 = y1 + t21 * y21);
+    }
+  },
+  arc: function(x, y, r, a0, a1, ccw) {
+    x = +x, y = +y, r = +r;
+    var dx = r * Math.cos(a0),
+        dy = r * Math.sin(a0),
+        x0 = x + dx,
+        y0 = y + dy,
+        cw = 1 ^ ccw,
+        da = ccw ? a0 - a1 : a1 - a0;
+
+    // Is the radius negative? Error.
+    if (r < 0) throw new Error("negative radius: " + r);
+
+    // Is this path empty? Move to (x0,y0).
+    if (this._x1 === null) {
+      this._ += "M" + x0 + "," + y0;
+    }
+
+    // Or, is (x0,y0) not coincident with the previous point? Line to (x0,y0).
+    else if (Math.abs(this._x1 - x0) > epsilon || Math.abs(this._y1 - y0) > epsilon) {
+      this._ += "L" + x0 + "," + y0;
+    }
+
+    // Is this arc empty? We’re done.
+    if (!r) return;
+
+    // Does the angle go the wrong way? Flip the direction.
+    if (da < 0) da = da % tau + tau;
+
+    // Is this a complete circle? Draw two arcs to complete the circle.
+    if (da > tauEpsilon) {
+      this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x - dx) + "," + (y - dy) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
+    }
+
+    // Is this arc non-empty? Draw an arc!
+    else if (da > epsilon) {
+      this._ += "A" + r + "," + r + ",0," + (+(da >= pi)) + "," + cw + "," + (this._x1 = x + r * Math.cos(a1)) + "," + (this._y1 = y + r * Math.sin(a1));
+    }
+  },
+  rect: function(x, y, w, h) {
+    this._ += "M" + (this._x0 = this._x1 = +x) + "," + (this._y0 = this._y1 = +y) + "h" + (+w) + "v" + (+h) + "h" + (-w) + "Z";
+  },
+  toString: function() {
+    return this._;
+  }
+};
+
+exports.path = path;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+
+},{}],20:[function(require,module,exports){
 // https://d3js.org/d3-polygon/ v1.0.5 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -9916,7 +9914,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 // https://d3js.org/d3-quadtree/ v1.0.5 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -10353,7 +10351,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],23:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 // https://d3js.org/d3-random/ v1.1.2 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -10470,7 +10468,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],24:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 // https://d3js.org/d3-scale-chromatic/ v1.3.3 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-interpolate'), require('d3-color')) :
@@ -10970,7 +10968,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-color":8,"d3-interpolate":19}],25:[function(require,module,exports){
+},{"d3-color":7,"d3-interpolate":18}],24:[function(require,module,exports){
 // https://d3js.org/d3-scale/ v2.1.2 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-collection'), require('d3-array'), require('d3-interpolate'), require('d3-format'), require('d3-time'), require('d3-time-format')) :
@@ -11873,7 +11871,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-array":2,"d3-collection":7,"d3-format":16,"d3-interpolate":19,"d3-time":30,"d3-time-format":29}],26:[function(require,module,exports){
+},{"d3-array":2,"d3-collection":6,"d3-format":15,"d3-interpolate":18,"d3-time":28,"d3-time-format":27}],25:[function(require,module,exports){
 // https://d3js.org/d3-selection/ v1.3.2 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -12870,7 +12868,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 // https://d3js.org/d3-shape/ v1.2.2 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-path')) :
@@ -14807,9 +14805,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-path":28}],28:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"dup":6}],29:[function(require,module,exports){
+},{"d3-path":19}],27:[function(require,module,exports){
 // https://d3js.org/d3-time-format/ v2.1.3 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-time')) :
@@ -15495,7 +15491,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-time":30}],30:[function(require,module,exports){
+},{"d3-time":28}],28:[function(require,module,exports){
 // https://d3js.org/d3-time/ v1.0.10 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -15870,7 +15866,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],31:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 // https://d3js.org/d3-timer/ v1.0.9 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -16021,7 +16017,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],32:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 // https://d3js.org/d3-transition/ v1.1.3 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-dispatch'), require('d3-timer'), require('d3-color'), require('d3-interpolate'), require('d3-selection'), require('d3-ease')) :
@@ -16810,7 +16806,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-color":8,"d3-dispatch":10,"d3-ease":13,"d3-interpolate":19,"d3-selection":26,"d3-timer":31}],33:[function(require,module,exports){
+},{"d3-color":7,"d3-dispatch":9,"d3-ease":12,"d3-interpolate":18,"d3-selection":25,"d3-timer":29}],31:[function(require,module,exports){
 // https://d3js.org/d3-voronoi/ v1.1.4 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -17811,7 +17807,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{}],34:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 // https://d3js.org/d3-zoom/ v1.7.3 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-selection'), require('d3-dispatch'), require('d3-drag'), require('d3-interpolate'), require('d3-transition')) :
@@ -18315,7 +18311,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 
-},{"d3-dispatch":10,"d3-drag":11,"d3-interpolate":19,"d3-selection":26,"d3-transition":32}],35:[function(require,module,exports){
+},{"d3-dispatch":9,"d3-drag":10,"d3-interpolate":18,"d3-selection":25,"d3-transition":30}],33:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -18388,9 +18384,7 @@ Object.keys(d3Zoom).forEach(function (key) { exports[key] = d3Zoom[key]; });
 exports.version = version;
 Object.defineProperty(exports, "event", {get: function() { return d3Selection.event; }});
 
-},{"d3-array":2,"d3-axis":3,"d3-brush":4,"d3-chord":5,"d3-collection":7,"d3-color":8,"d3-contour":9,"d3-dispatch":10,"d3-drag":11,"d3-dsv":12,"d3-ease":13,"d3-fetch":14,"d3-force":15,"d3-format":16,"d3-geo":17,"d3-hierarchy":18,"d3-interpolate":19,"d3-path":36,"d3-polygon":21,"d3-quadtree":22,"d3-random":23,"d3-scale":25,"d3-scale-chromatic":24,"d3-selection":26,"d3-shape":27,"d3-time":30,"d3-time-format":29,"d3-timer":31,"d3-transition":32,"d3-voronoi":33,"d3-zoom":34}],36:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"dup":6}],37:[function(require,module,exports){
+},{"d3-array":2,"d3-axis":3,"d3-brush":4,"d3-chord":5,"d3-collection":6,"d3-color":7,"d3-contour":8,"d3-dispatch":9,"d3-drag":10,"d3-dsv":11,"d3-ease":12,"d3-fetch":13,"d3-force":14,"d3-format":15,"d3-geo":16,"d3-hierarchy":17,"d3-interpolate":18,"d3-path":19,"d3-polygon":20,"d3-quadtree":21,"d3-random":22,"d3-scale":24,"d3-scale-chromatic":23,"d3-selection":25,"d3-shape":26,"d3-time":28,"d3-time-format":27,"d3-timer":29,"d3-transition":30,"d3-voronoi":31,"d3-zoom":32}],34:[function(require,module,exports){
 //! moment.js
 
 ;(function (global, factory) {
@@ -22903,7 +22897,7 @@ arguments[4][6][0].apply(exports,arguments)
 
 })));
 
-},{}],38:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 (function (global){
 //     Underscore.js 1.9.1
 //     http://underscorejs.org
@@ -24599,7 +24593,7 @@ arguments[4][6][0].apply(exports,arguments)
 }());
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
@@ -24902,7 +24896,7 @@ class BeeswarmPlot extends Visualization{
 }
 
 module.exports = BeeswarmPlot;
-},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],40:[function(require,module,exports){
+},{"./Utils.js":44,"./Visualization.js":45,"d3":33}],37:[function(require,module,exports){
 let d3 = require("d3");
 
 let Visualization = require("./Visualization.js");
@@ -25155,7 +25149,7 @@ class BoxPlot extends Visualization{
 }
 
 module.exports = BoxPlot;
-},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],41:[function(require,module,exports){
+},{"./Utils.js":44,"./Visualization.js":45,"d3":33}],38:[function(require,module,exports){
 let d3 = require("d3");
 
 let Visualization = require("./Visualization.js");
@@ -25170,7 +25164,6 @@ class Histogram extends Visualization{
     }
 
     _putDefaultSettings(){
-        // this.settings.innerPadding = 8;
         this.settings.paddingRight = 20;
         this.settings.paddingTop = 25;
         this.settings.paddingBottom = 50;
@@ -25179,16 +25172,13 @@ class Histogram extends Visualization{
 
     resize(){
         let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
-
         let svgBounds = this.svg.node().getBoundingClientRect();
-        let value =0, datak = {};
 
         this.cellHeight = svgBounds.height-margin.bottom;
-        this.cellWidth = svgBounds.width- margin.bottom;
+        this.cellWidth = svgBounds.width- margin.left;
 
         this.x = {},this.y = {},this.bins = {},this.xAxis = {},this.yAxis = {},this.newkey = [];
-        datak = {};
-        let i = 0;
+        this.datak = {};
 
         for(let k of this.keys){
             if(this.domainType[k] === "Categorical"){
@@ -25199,7 +25189,7 @@ class Histogram extends Visualization{
 
         this.cellWidth /= this.newkey.length;
 
-        let keys = this.newkey;
+        this.newkey =[];
 
         let j =0;
         for(let k of this.keys){
@@ -25210,13 +25200,13 @@ class Histogram extends Visualization{
                 for (let i = 0; i <this.d.length ; i++){
                     xvalues.push(this.d[i][k]);
                 }
+                this.newkey.push(k);
                 this.datak[k] = xvalues;
 
                 this.bins[k] = d3.histogram()
                     .domain(this.domain[k])
                     .thresholds(20)
                     (this.datak[k]);
-
 
                 this.x[k] = d3.scaleBand()
                     .domain(this.bins[k].map(d => d.x0))
@@ -25241,15 +25231,11 @@ class Histogram extends Visualization{
         let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
         let svgBounds = this.svg.node().getBoundingClientRect();
 
-
-        let value =0;
-
         this.cellHeight = svgBounds.height-margin.bottom;
-        this.cellWidth = svgBounds.width- margin.bottom;
+        this.cellWidth = svgBounds.width- margin.left;
 
         this.x = {},this.y = {},this.bins = {},this.xAxis = {},this.yAxis = {},this.newkey = [];
         this.datak = {};
-        let i = 0;
 
         for(let k of this.keys){
             if(this.domainType[k] === "Categorical"){
@@ -25258,10 +25244,9 @@ class Histogram extends Visualization{
             }
         }
 
-        // this.cellHeight /= this.newkey.length;
         this.cellWidth /= this.newkey.length;
 
-        let keys = this.newkey;
+        this.newkey =[];
 
         let j =0;
         for(let k of this.keys){
@@ -25272,13 +25257,13 @@ class Histogram extends Visualization{
                 for (let i = 0; i <this.d.length ; i++){
                     xvalues.push(this.d[i][k]);
                 }
+                this.newkey.push(k);
                 this.datak[k] = xvalues;
 
                 this.bins[k] = d3.histogram()
                     .domain(this.domain[k])
                     .thresholds(20)
                     (this.datak[k]);
-
 
                 this.x[k] = d3.scaleBand()
                     .domain(this.bins[k].map(d => d.x0))
@@ -25307,20 +25292,30 @@ class Histogram extends Visualization{
 
         let margin = ({top: this.settings.paddingTop , right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
 
+        let draw_Bins = (k, j) => {
 
+            let x = d3.scaleLinear()
+                .domain([0,d3.max(this.datak[k])]).nice()
+                .range([margin.left,this.cellWidth]);
 
-         let rPoints = (k,j) => {
-            this.xAxis[k] = g => g
+            histogram.xAxis[k] = g => g
                 .attr("transform", `translate(0,${this.cellHeight})`)
-                .call(d3.axisBottom(this.x[k])
-                    .tickSizeOuter(10));
+                .call(d3.axisBottom(x)
+                    .tickSizeOuter(0))
+                .call(g => g.append("text")
+                    .attr("x", margin.right)
+                    .attr("y", -4)
+                    .attr("fill", "#000")
+                    .attr("font-weight", "bold")
+                    .attr("text-anchor", "end"));
 
-            this.yAxis[k] = g => g
+            histogram.yAxis[k] = g => g
                 .attr("transform", `translate(${margin.left},0)`)
                 .call(d3.axisLeft(this.y[k]))
                 .call(g => g.select(".domain").remove())
                 .call(g => g.select(".tick:last-of-type text").clone()
                     .attr("x", 5)
+                    .attr("y", -20)
                     .attr("text-anchor", "start")
                     .text("-"+k));
 
@@ -25328,20 +25323,24 @@ class Histogram extends Visualization{
                 .append("g")
                 .attr("class","hChart")
                 .attr("id","data_"+j)
-                .attr("transform",`translate(${(j* histogram.cellWidth)},0)`);
+                .attr("transform",`translate(${(j* this.cellWidth)},0)`);
 
             let dataEnter = chart.selectAll("rect.data")
                 .data(histogram.d)
                 .enter().append("rect")
-                .attr("data-index", function(d,i){ return i; })
                 .attr("class", "data")
                 .data(histogram.bins[k])
+                .attr("data-index", function(d,i){ return i; })
                 .attr("x", d => histogram.x[k](d.x0))
-                .attr("width", histogram.x[k].bandwidth())
+                .attr("width", histogram.x[k].bandwidth()-0.5)
                 .attr("y", d => histogram.y[k](d.length))
                 .attr("height", d => histogram.y[k](0) - histogram.y[k](d.length))
                 .style("fill", histogram.settings.color)
+                .attr("stroke","black")
+                .attr("stroke-width","1px")
                 .attr("key", k);
+
+            this._bindDataMouseEvents(dataEnter);
 
             let enterAxisX = chart.append("g")
                 .attr("class","textLabel")
@@ -25355,9 +25354,8 @@ class Histogram extends Visualization{
             let enterAxisY = chart.append("g")
                 .attr("class","axisY")
                 .call(histogram.yAxis[k]);
-        }
+        };
 
-        // this.foreground.selectAll("g.cellGroup").remove();
         this.foreground.selectAll("g.cellGroup").remove();
 
         let updateChart  = this.foreground
@@ -25370,10 +25368,8 @@ class Histogram extends Visualization{
 
 
 
-        for (let i = 0; i <this.keys.length ; i++) {
-            if(this.domainType[this.keys[i]] ==="Numeric"){
-                rPoints(this.keys[i],i);
-            }
+        for (let i = 0; i <this.newkey.length ; i++) {
+            draw_Bins(this.newkey[i],i);
         }
 
 
@@ -25381,13 +25377,45 @@ class Histogram extends Visualization{
     }
 
     highlight(...args){
+        let highlighted;
 
+        if(args[0] instanceof SVGElement){
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
+
+            highlighted = this.foreground
+                .selectAll('rect[data-index="' + args[1] + '"]')
+                .style("stroke", this.settings.highlightColor)
+                .attr("stroke-width","1px");
+            if(highlighted)
+                super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
+        }
     }
     removeHighlight(...args){
+        if(args[1] instanceof SVGElement){
+
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+            let elem = this.foreground.selectAll('rect[data-index="'+args[1]+'"]')
+                .style("stroke", "black")
+                .attr("stroke-width","1px");
+            this.background.selectAll(".lineHighlight").remove();
+            super.removeHighlight(elem.node(), elem.datum(), args[1]);
+        }
 
     }
+
     getHighlightElement(i){
 
+        this.foreground.selectAll('rect[data-index="'+i+'"]')
+
+        let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        d3.select(group).attr("class", "groupHighlight");
+        let rect = d3.select(document.createElementNS("http://www.w3.org/2000/svg", "rect"))
+            .attr("class", "lineHighlight")
+            .style("fill", "none")
+            .style("stroke", this.settings.highlightColor)
+            .attr("stroke-width","2px");
+        group.appendChild(rect);
+        return group;
     }
 
     setAxisX(args){
@@ -25403,7 +25431,7 @@ class Histogram extends Visualization{
 }
 
 module.exports = Histogram;
-},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],42:[function(require,module,exports){
+},{"./Utils.js":44,"./Visualization.js":45,"d3":33}],39:[function(require,module,exports){
 
 let d3 = require("d3");
 let _ = require("underscore");
@@ -26113,7 +26141,7 @@ class ParallelBundling extends Visualization{
 
 
 module.exports = ParallelBundling;
-},{"./Visualization.js":48,"d3":35,"d3-path":20,"underscore":38}],43:[function(require,module,exports){
+},{"./Visualization.js":45,"d3":33,"d3-path":19,"underscore":35}],40:[function(require,module,exports){
 
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
@@ -26380,7 +26408,7 @@ class ParallelCoordinates extends Visualization{
 }
 
 module.exports = ParallelCoordinates;
-},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],44:[function(require,module,exports){
+},{"./Utils.js":44,"./Visualization.js":45,"d3":33}],41:[function(require,module,exports){
 
 let d3 = require("d3");
 let _ = require("underscore");
@@ -26692,7 +26720,7 @@ class ScatterplotMatrix extends Visualization{
 
 
 module.exports = ScatterplotMatrix;
-},{"./Utils.js":47,"./Visualization.js":48,"d3":35,"underscore":38}],45:[function(require,module,exports){
+},{"./Utils.js":44,"./Visualization.js":45,"d3":33,"underscore":35}],42:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
@@ -26830,13 +26858,38 @@ class Sunburst extends Visualization{
 
             highlighted = this.foreground
                 .selectAll('path[data-index="' + args[1] + '"]')
-                .style("stroke", this.settings.highlightColor)
+                .style("stroke", this.settings.highlightColor);
 
             if(highlighted)
                 super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
         }
     }
 
+    removeHighlight(...args){
+        if(args[1] instanceof SVGElement){
+
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+            let elem = this.foreground.selectAll('path[data-index="'+args[1]+'"]').style("stroke", "black");
+            this.background.selectAll(".lineHighlight").remove();
+            super.removeHighlight(elem.node(), elem.datum(), args[1]);
+        }
+    }
+
+    getHighlightElement(i){
+
+        this.foreground.selectAll('path[data-index="'+i+'"]')
+
+        str = str.substring(0, str.length - 3);
+
+        let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        d3.select(group).attr("class", "groupHighlight");
+        let path = d3.select(document.createElementNS("http://www.w3.org/2000/svg", "path"))
+            .attr("class", "lineHighlight")
+            .style("fill", "none")
+            .style("stroke", this.settings.highlightColor)
+        group.appendChild(path);
+        return group;
+    }
 
 
     select(selection){
@@ -26917,7 +26970,7 @@ let _makeHierarchy = function(obj){
 
 
 module.exports = Sunburst;
-},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],46:[function(require,module,exports){
+},{"./Utils.js":44,"./Visualization.js":45,"d3":33}],43:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
@@ -27224,7 +27277,7 @@ let _makeHierarchy = function(obj){
 
 
 module.exports = Treemap;
-},{"./Utils.js":47,"./Visualization.js":48,"d3":35}],47:[function(require,module,exports){
+},{"./Utils.js":44,"./Visualization.js":45,"d3":33}],44:[function(require,module,exports){
 
 module.exports.lineIntersects = (a,b,c,d,p,q,r,s) => {
     let det, gamma, lambda;
@@ -27325,7 +27378,7 @@ module.exports.parseTranslate = (elem) => {
 //             b2.y2 < b1.y1);
 //     }
 // }
-},{}],48:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 let _ = require("underscore");
 let d3 = require("d3");
 let moment = require('moment');
@@ -27534,5 +27587,5 @@ class Visualization {
 }
 
 module.exports = Visualization;
-},{"d3":35,"moment":37,"underscore":38}]},{},[1])(1)
+},{"d3":33,"moment":34,"underscore":35}]},{},[1])(1)
 });
