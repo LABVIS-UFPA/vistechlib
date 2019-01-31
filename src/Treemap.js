@@ -31,6 +31,25 @@ class Treemap extends Visualization{
     data(d){
 
         super.data(d);
+
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+
+            }
+            if(this.domainType[k] === "Numeric"){
+                console.log(this.domain[k]);
+                let  values= [];
+                for (let i = 0; i <d.length ; i++) {
+                    values.push(d[i][k]);
+                }
+                values = [...new Set(values)];
+                this.domain[k] = values;
+            }
+            if(this.domainType[k] === "Time"){
+
+            }
+        }
+
         if(this.settings.hierarchies){
             _hierarchy.call(this, this.settings.hierarchies);
         }else{
@@ -252,6 +271,8 @@ let _hierarchy = function(attrs){
         if(size){
             this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
         }else{
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+
             this.d_h = d3.hierarchy(hie).count();
         }
 
