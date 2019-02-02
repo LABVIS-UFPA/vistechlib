@@ -33,6 +33,22 @@ class Sunburst extends Visualization{
     data(d){
 
         super.data(d);
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+            }
+            if(this.domainType[k] === "Numeric"){
+                console.log(this.domain[k]);
+                let  values= [];
+                for (let i = 0; i <d.length ; i++) {
+                    values.push(d[i][k]);
+                }
+                values = [...new Set(values)];
+                this.domain[k] = values;
+            }
+            if(this.domainType[k] === "Time"){
+
+            }
+        }
 
         let svgBounds = this.svg.node().getBoundingClientRect();
 

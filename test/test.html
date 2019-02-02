@@ -28,9 +28,7 @@
     parallel = new vistechlib.Treemap(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
 
     parallel.hierarchy(["w","r","x"]);
-    parallel.setSize("x");
-    // parallel.setAxisX(["x"]);
-    // parallel.setAxisY(["x"]);
+    // parallel.setSize("x");
 
 
     parallel.data([
@@ -148,7 +146,7 @@
     parallel.setColor("purple");
 
 
-    parallel.setLabel((d)=>{ return d.w; })
+    parallel//.setLabel((d)=>{ return d.w; })
         .redraw()
         .on("datamouseover", function (d, i) {
             parallel.highlight(d, i);

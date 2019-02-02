@@ -271,9 +271,13 @@ let _hierarchy = function(attrs){
         if(size){
             this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
         }else{
+            for(let k of this.keys){
+                if(this.domainType[k] === "Numeric"){
+                    size = k;
+                    break;
+                }
             this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
-
-            this.d_h = d3.hierarchy(hie).count();
+            
         }
 
     }
