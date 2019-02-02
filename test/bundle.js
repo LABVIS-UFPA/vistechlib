@@ -27268,16 +27268,12 @@ let _hierarchy = function(attrs){
         }else{
             for(let k of this.keys){
                 if(this.domainType[k] === "Numeric"){
-
                     size = k;
                     break;
                 }
             }
-            console.log("key:",size);
-            // size = this.keys[0];
             this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
-
-            // this.d_h = d3.hierarchy(hie).count();
+            
         }
 
     }

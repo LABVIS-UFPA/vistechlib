@@ -276,6 +276,7 @@ let _hierarchy = function(attrs){
                     size = k;
                     break;
                 }
+            }
             this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
             
         }
