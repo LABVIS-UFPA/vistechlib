@@ -88,6 +88,7 @@ class Histogram extends Visualization{
 
         this.x = {},this.y = {},this.bins = {},this.xAxis = {},this.yAxis = {},this.newkey = [];
         this.datak = {};
+        this.y_scale = {};
 
         this.binHeight = {};
         this.binWidth = {};
@@ -136,14 +137,26 @@ class Histogram extends Visualization{
                     .range([0, this.cellWidth]);
 
 
-                let bigger_bin = 0;
+                let bigger_bin = 0, domain_array = [];
                 for(let bin of this.bins[k]){
                     if(bin.length>bigger_bin) bigger_bin=bin.length;
                 }
+                for(let i=0; i<bigger_bin;i++)
+                    domain_array.push(i);
+
                 this.binHeight[k] = this.cellHeight/bigger_bin;
-                this.y[k] =  d3.scaleLinear()
+                this.y[k] =  d3.scaleBand()
+                    .domain(domain_array)
+                    .range([this.cellHeight, 0])
+                    .paddingInner(0)
+                    .paddingOuter(0);
+                // this.y[k] =  d3.scaleLinear()
+                //     .domain([0,+1])
+                //     .range([this.cellHeight, 0]);
+
+                this.y_scale[k] =  d3.scaleLinear()
                     .domain([0,bigger_bin])
-                    .range([this.cellHeight-this.binHeight[k], 0]);
+                    .range([this.cellHeight, 0]);
 
             }
         }
@@ -183,41 +196,11 @@ class Histogram extends Visualization{
                             .style("ry", "2")
                     )
                     .attr("width", histogram.binWidth[k])
-                    .attr("height", histogram.binHeight[k])
+                    .attr("height", histogram.y[k].bandwidth())
                     .attr("x", 0)
                     .attr("y", (d,i) => histogram.y[k](i))
                     .style("fill", histogram.settings.color);
             })
-
-            // let dataEnter = chart.selectAll("rect.data")
-            //     .data(histogram.d)
-            //     .enter().append("rect")
-            //     .attr("class", "data")
-            //     .data(histogram.bins[k])
-            //     .attr("data-index", function(d,i){ return i; })
-            //     .attr("x", d => histogram.x[k](d.x0))
-            //     .attr("width", histogram.x[k].bandwidth()-0.5)
-            //     .attr("y", d => histogram.y[k](d.length))
-            //     .attr("height", d => histogram.y[k](0) - histogram.y[k](d.length))
-            //     .style("fill", histogram.settings.color)
-            //     .attr("stroke","black")
-            //     .attr("stroke-width","1px")
-            //     .attr("key", k);
-            //
-            // this._bindDataMouseEvents(dataEnter);
-            //
-            // let enterAxisX = chart.append("g")
-            //     .attr("class","textLabel")
-            //     .call(histogram.xAxis[k])
-            //     .selectAll("text")
-            //     .style("text-anchor", "end")
-            //     .attr("dx", "-.8em")
-            //     .attr("dy", "-.55em")
-            //     .attr("transform", "translate(10,15)" );
-            //
-            // let enterAxisY = chart.append("g")
-            //     .attr("class","axisY")
-            //     .call(histogram.yAxis[k]);
         };
 
 
@@ -244,8 +227,7 @@ class Histogram extends Visualization{
             gGroup.selectAll("g.y.axis").remove();
             gGroup.append("g")
                 .attr("class", "y axis")
-                .attr("transform", `translate(0,${histogram.binHeight[d]})`)
-                .call(d3.axisLeft(histogram.y[d]).ticks(6));
+                .call(d3.axisLeft(histogram.y_scale[d]).ticks(6));
 
         });
 
