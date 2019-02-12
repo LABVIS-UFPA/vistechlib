@@ -20,60 +20,28 @@ class Histogram extends Visualization{
     }
 
     resize(){
-        // let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
-        // let svgBounds = this.svg.node().getBoundingClientRect();
-        //
-        // this.cellHeight = svgBounds.height-margin.bottom;
-        // this.cellWidth = svgBounds.width- margin.left;
-        //
-        // this.x = {},this.y = {},this.bins = {},this.xAxis = {},this.yAxis = {},this.newkey = [];
-        // this.datak = {};
-        //
-        // for(let k of this.keys){
-        //     if(this.domainType[k] === "Categorical"){
-        //     }else{
-        //         this.newkey.push(k);
-        //     }
-        // }
-        //
-        // this.cellWidth /= this.newkey.length;
-        //
-        // this.newkey =[];
-        //
-        // let j =0;
-        // for(let k of this.keys){
-        //     if(this.domainType[k] === "Categorical"){
-        //
-        //     }else{
-        //         let xvalues = [];
-        //         for (let i = 0; i <this.d.length ; i++){
-        //             xvalues.push(this.d[i][k]);
-        //         }
-        //         this.newkey.push(k);
-        //         this.datak[k] = xvalues;
-        //
-        //         this.bins[k] = d3.histogram()
-        //             .domain(this.domain[k])
-        //             .thresholds(20)
-        //             (this.datak[k]);
-        //
-        //         console.log(this.bins[k]);
-        //
-        //         this.x[k] = d3.scaleBand()
-        //             .domain(this.bins[k].map(d => d.x0))
-        //             .range([margin.left, this.cellWidth]);
-        //
-        //
-        //         this.y[k] =  d3.scaleLinear()
-        //             .domain([0,d3.max(this.bins[k], d => d.length)]).nice()
-        //             .range([this.cellHeight, margin.top]);
-        //
-        //         j++;
-        //     }
-        // }
-        //
-        //
-        // this.redraw();
+        let t0 = performance.now();
+        let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
+        let svgBounds = this.svg.node().getBoundingClientRect();
+
+        this.cellHeight = svgBounds.height-margin.bottom-margin.top;
+        this.cellWidth = svgBounds.width-margin.left-margin.right;
+
+        this.cellWidth-=this.settings.innerPadding*(this.newkey.length-1);
+        this.cellWidth /= this.newkey.length;
+
+        for(let k of this.newkey){
+            this.y[k].range([this.cellHeight, 0]);
+            this.binWidth[k] = this.cellWidth/this.bins[k].length;
+            this.x[k].range([0, this.cellWidth]);
+            //Escala do eixo.
+            this.y_scale[k] =  d3.scaleLinear()
+                .domain([0,this.bigger_bin[k]])
+                .range([this.cellHeight, 0]);
+        }
+        console.log("Histogram-Resize: ",performance.now()-t0);
+
+        this.redraw();
         return this;
     }
 
@@ -89,8 +57,9 @@ class Histogram extends Visualization{
         this.x = {},this.y = {},this.bins = {},this.xAxis = {},this.yAxis = {},this.newkey = [];
         this.datak = {};
         this.y_scale = {};
+        this.x_scale = {};
+        this.bigger_bin = {};
 
-        this.binHeight = {};
         this.binWidth = {};
 
         for(let k of this.keys){
@@ -122,70 +91,49 @@ class Histogram extends Visualization{
                         }
                     }
                 }
-                console.log('teste',this.domain[k]);
-
-                this.bins[k] = d3.histogram()
-                    .domain(this.domain[k])
-                    .thresholds(20)
-                    .value(d => d.data[k])
-                    (this.d_wrapper);
-
-                this.binWidth[k] = this.cellWidth/this.bins[k].length;
-                this.y[k] = d3.scaleBand()
-                    .domain(this.domain[k])
-                    .range([this.cellHeight, 0])
-                    .paddingInner(0)
-                    .paddingOuter(0);
-
-                let bigger_bin = 0;
-                for(let bin of this.bins[k]){
-                    if(bin.length>bigger_bin) bigger_bin=bin.length;
-                }
-                this.binHeight[k] = this.cellHeight/bigger_bin;
-
-                this.y[k] =  d3.scaleLinear()
-                    .domain([0,bigger_bin])
-                    .range([this.cellHeight-this.binHeight[k], 0]);
-
-
-
-                console.log(this.bins[k]);
             }else{
-
                 this.bins[k] = d3.histogram()
                     .domain(this.domain[k])
                     .thresholds(20)
                     .value(d => d.data[k])
                     (this.d_wrapper);
+            }
+            this.binWidth[k] = this.cellWidth/this.bins[k].length;
+            this.x[k] = d3.scaleLinear()
+                .domain([this.bins[k][0].x0,this.bins[k][this.bins[k].length-1].x1])
+                .range([0, this.cellWidth]);
 
-                this.binWidth[k] = this.cellWidth/this.bins[k].length;
-                this.x[k] = d3.scaleLinear()
-                    .domain([this.bins[k][0].x0,this.bins[k][this.bins[k].length-1].x1])
-                    .range([0, this.cellWidth]);
-
-
-                let bigger_bin = 0, domain_array = [];
-                for(let bin of this.bins[k]){
-                    if(bin.length>bigger_bin) bigger_bin=bin.length;
-                }
-                for(let i=0; i<bigger_bin;i++)
-                    domain_array.push(i);
-
-                this.binHeight[k] = this.cellHeight/bigger_bin;
-                this.y[k] =  d3.scaleBand()
-                    .domain(domain_array)
-                    .range([this.cellHeight, 0])
+            if(this.domainType[k] === "Categorical"){
+                this.x_scale[k] = d3.scaleBand()
+                    .domain(this.domain[k])
+                    .range([0, this.cellWidth])
                     .paddingInner(0)
                     .paddingOuter(0);
-                // this.y[k] =  d3.scaleLinear()
-                //     .domain([0,+1])
-                //     .range([this.cellHeight, 0]);
-
-                this.y_scale[k] =  d3.scaleLinear()
-                    .domain([0,bigger_bin])
-                    .range([this.cellHeight, 0]);
-
+            }else{
+                this.x_scale[k] = this.x[k];
             }
+
+            this.bigger_bin[k] = 0;
+            let domain_array = [];
+            for(let bin of this.bins[k]){
+                if(bin.length>this.bigger_bin[k]) this.bigger_bin[k]=bin.length;
+            }
+            for(let i=0; i<this.bigger_bin[k];i++)
+                domain_array.push(i);
+
+            //this.binHeight[k] = this.cellHeight/bigger_bin;
+            this.y[k] =  d3.scaleBand()
+                .domain(domain_array)
+                .range([this.cellHeight, 0])
+                .paddingInner(0)
+                .paddingOuter(0);
+            // this.y[k] =  d3.scaleLinear()
+            //     .domain([0,+1])
+            //     .range([this.cellHeight, 0]);
+
+            this.y_scale[k] =  d3.scaleLinear()
+                .domain([0,this.bigger_bin[k]])
+                .range([this.cellHeight, 0]);
         }
         console.log("Histogram-Data: ",performance.now()-t0);
         return this;
@@ -200,8 +148,6 @@ class Histogram extends Visualization{
         this.foreground.selectAll(".axisY").remove();
         this.foreground.selectAll("rect.data").remove();
         let pad = this.settings.innerPadding;
-
-        let margin = ({top: this.settings.paddingTop , right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
 
         let draw_minibars = (group_select, k) => {
 
@@ -235,11 +181,25 @@ class Histogram extends Visualization{
             .selectAll("g.cellGroup")
             .data(this.newkey)
             .join(
-                enter => enter.append("g")
-                    .attr("class","cellGroup")
-                    .attr("id",d=>"group_"+d)
+                (enter) => {
+                    let enter_result = enter.append("g")
+                        .attr("class","cellGroup")
+                        .attr("id",d=>"group_"+d);
+                    enter_result.append("text")
+                        .attr("class", "axisLabel")
+                        .attr("x", 0)
+                        .attr("y", -10)
+                        .style("fill", "black");
+                    return enter_result;
+                }
+
             )
             .attr("transform",(d,i)=>{return `translate(${(i*histogram.cellWidth+i*pad)},0)`;});
+
+        groups_update.selectAll("text.axisLabel").text(function(d){
+            return d;
+        });
+
 
         histogram.foreground.selectAll("g.cellGroup").each(function(d){
             let gGroup = d3.select(this);
@@ -249,7 +209,7 @@ class Histogram extends Visualization{
             gGroup.append("g")
                 .attr("class", "x axis")
                 .attr("transform", `translate(0,${histogram.cellHeight})`)
-                .call(d3.axisBottom(histogram.x[d]).ticks(6));
+                .call(d3.axisBottom(histogram.x_scale[d]).ticks(6));
 
             gGroup.selectAll("g.y.axis").remove();
             gGroup.append("g")
