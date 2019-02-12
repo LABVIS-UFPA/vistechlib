@@ -130,9 +130,8 @@ class Histogram extends Visualization{
                     (this.d_wrapper);
 
                 this.binWidth[k] = this.cellWidth/this.bins[k].length;
-
                 this.y[k] = d3.scaleBand()
-                    .domain(domain_array)
+                    .domain(this.domain[k])
                     .range([this.cellHeight, 0])
                     .paddingInner(0)
                     .paddingOuter(0);
@@ -142,10 +141,11 @@ class Histogram extends Visualization{
                     if(bin.length>bigger_bin) bigger_bin=bin.length;
                 }
                 this.binHeight[k] = this.cellHeight/bigger_bin;
-                this.y[k] =  d3.scaleBand()
+
+                this.y[k] =  d3.scaleLinear()
                     .domain([0,bigger_bin])
-                    .range([this.cellHeight-this.binHeight[k], 0])
-                    .paddingInner(0);
+                    .range([this.cellHeight-this.binHeight[k], 0]);
+
 
 
                 console.log(this.bins[k]);
@@ -158,12 +158,10 @@ class Histogram extends Visualization{
                     (this.d_wrapper);
 
                 this.binWidth[k] = this.cellWidth/this.bins[k].length;
+                this.x[k] = d3.scaleLinear()
+                    .domain([this.bins[k][0].x0,this.bins[k][this.bins[k].length-1].x1])
+                    .range([0, this.cellWidth]);
 
-                this.y[k] = d3.scaleBand()
-                    .domain(this.domain[k])
-                    .range([this.cellHeight, 0])
-                    .paddingInner(0)
-                    .paddingOuter(0);
 
                 let bigger_bin = 0;
                 for(let bin of this.bins[k]){
