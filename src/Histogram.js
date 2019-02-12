@@ -122,6 +122,33 @@ class Histogram extends Visualization{
                         }
                     }
                 }
+                console.log('teste',this.domain[k]);
+
+                this.bins[k] = d3.histogram()
+                    .domain(this.domain[k])
+                    .thresholds(20)
+                    .value(d => d.data[k])
+                    (this.d_wrapper);
+
+                this.binWidth[k] = this.cellWidth/this.bins[k].length;
+                this.y[k] = d3.scaleBand()
+                    .domain(this.domain[k])
+                    .range([this.cellHeight, 0])
+                    .paddingInner(0)
+                    .paddingOuter(0);
+
+                let bigger_bin = 0;
+                for(let bin of this.bins[k]){
+                    if(bin.length>bigger_bin) bigger_bin=bin.length;
+                }
+                this.binHeight[k] = this.cellHeight/bigger_bin;
+
+                this.y[k] =  d3.scaleLinear()
+                    .domain([0,bigger_bin])
+                    .range([this.cellHeight-this.binHeight[k], 0]);
+
+
+
                 console.log(this.bins[k]);
             }else{
 
