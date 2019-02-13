@@ -84,9 +84,9 @@ class Histogram extends Visualization{
                     this.bins[k].push([]);
                     this.bins[k][this.bins[k].length-1].x0 = cat;
                 }
-                for(let d of this.d){
+                for(let d of this.d_wrapper){
                     for(let bin of this.bins[k]){
-                        if(bin.x0 === d[k]){
+                        if(bin.x0 === d.data[k]){
                             bin.push(d);
                         }
                     }
@@ -161,12 +161,16 @@ class Histogram extends Visualization{
             group_select.selectAll("g.bin_group").each(function(bin_d){
                 d3.select(this).selectAll("rect.data").data(bin_d)
                     .join(
-                        enter => enter.append("rect")
-                            .attr("class", "data")
-                            .attr("data-index", d => d.index)
-                            .style("stroke", "none")
-                            .style("rx", "2")
-                            .style("ry", "2")
+                        enter => {
+                            let enter_result = enter.append("rect")
+                                .attr("class", "data")
+                                .attr("data-index", d => d.index)
+                                .style("stroke", "none")
+                                .style("rx", "2")
+                                .style("ry", "2");
+                            histogram._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
                     )
                     .attr("width", histogram.binWidth[k])
                     .attr("height", histogram.y[k].bandwidth())
@@ -241,43 +245,63 @@ class Histogram extends Visualization{
 
         if(args[0] instanceof SVGElement){
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
-
-            highlighted = this.foreground
-                .selectAll('rect[data-index="' + args[1] + '"]')
-                .style("stroke", this.settings.highlightColor)
-                .attr("stroke-width","1px");
-            if(highlighted)
-                super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
+            let hightlight_group = this.getHighlightElement(args[1]);
+            this.highlightLayer.node().appendChild(hightlight_group);
+            super.highlight(hightlight_group, args[0], args[1], args[2]);
         }
     }
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            let elem = this.foreground.selectAll('rect[data-index="'+args[1]+'"]')
-                .style("stroke", "black")
-                .attr("stroke-width","1px");
-            this.background.selectAll(".lineHighlight").remove();
-            super.removeHighlight(elem.node(), elem.datum(), args[1]);
+            let elem = this.highlightLayer.selectAll('.groupHighlight');
+            if(elem.nodes().length > 0){
+                let node = elem.node();
+                let datum = elem.select("rect")
+                    .datum();
+                elem.remove();
+                super.removeHighlight(node, datum, args[1]);
+            }
         }
 
     }
 
     getHighlightElement(i){
-
-        this.foreground.selectAll('rect[data-index="'+i+'"]')
-
+        let histogram = this;
         let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
         d3.select(group).attr("class", "groupHighlight");
-        let rect = d3.select(document.createElementNS("http://www.w3.org/2000/svg", "rect"))
-            .attr("class", "lineHighlight")
-            .style("fill", "none")
-            .style("stroke", this.settings.highlightColor)
-            .attr("stroke-width","2px");
-        group.appendChild(rect);
+
+        this.foreground.selectAll('rect[data-index="'+i+'"]').each(function(){
+            let t = utils.parseTranslate(this.parentElement);
+            let tp = utils.parseTranslate(this.parentElement.parentElement);
+            let rect_select = d3.select(this);
+
+            let rect = d3.select(document.createElementNS("http://www.w3.org/2000/svg", "rect"))
+                .attr("class", "rectHighlight")
+                .style("fill", "none")
+                .style("stroke", histogram.settings.highlightColor)
+                .attr("stroke-width","2px")
+                .attr("x", (+rect_select.attr("x"))+t.x+tp.x)
+                .attr("y", (+rect_select.attr("y"))+t.y+tp.y)
+                .attr("width", rect_select.attr("width"))
+                .attr("height", rect_select.attr("height"));
+
+            group.appendChild(rect.node());
+        });
+
         return group;
     }
 
+
+    _bindDataMouseEvents(selection, prefix){
+        let vis = this;
+        let _prefix = prefix || "data";
+        selection
+            .on("mouseover", function(d){ vis.event.call(_prefix+"mouseover", this, d.data, d.index); })
+            .on("mouseout", function(d){ vis.event.call(_prefix+"mouseout", this, d.data, d.index); })
+            .on("click", function(d){ vis.event.call(_prefix+"click", this, d.data, d.index); })
+            .on("dblclick", function(d){ vis.event.call(_prefix+"dblclick", this, d.data, d.index); });
+    }
     setAxisX(args){
         this.settings.axisX = args;
         console.log(args);
