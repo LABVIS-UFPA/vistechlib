@@ -106,7 +106,7 @@ class ParallelCoordinates extends Visualization{
             .append("path")
             .attr("class", "data")
             .style("stroke", this.settings.color)
-            .attr("data-index", function(d,i){ return i; });
+            .attr("data-index", (d,i)=>i);
 
         this._bindDataMouseEvents(dataEnter);
 
@@ -142,9 +142,7 @@ class ParallelCoordinates extends Visualization{
 
         this.axis = this.overlay.selectAll(".axis");
 
-        this.event.apply("draw");
-
-        return this;
+        return super.redraw();
     }
 
     updateColors(){

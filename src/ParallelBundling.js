@@ -621,7 +621,7 @@ class ParallelBundling extends Visualization{
 
         axisSelection.exit().remove();
 
-        this.event.apply("draw");
+        return super.redraw();
 
         // Add an axis and title.
         // let labelUpdate = axisSelection.selectAll("text.column_label").data(this.keys);

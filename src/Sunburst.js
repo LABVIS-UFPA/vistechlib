@@ -138,7 +138,7 @@ class Sunburst extends Visualization{
             .attr("dy", "0.35em")
             .text(d => d.data.name);
 
-        return this;
+        return super.redraw();
     }
 
     highlight(...args){

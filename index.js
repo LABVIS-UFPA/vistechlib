@@ -10,3 +10,4 @@ exports.Treemap = require("./src/Treemap.js");
 exports.Histogram = require("./src/Histogram.js");
 exports.BoxPlot = require("./src/BoxPlot.js");
 exports.Sunburst = require("./src/Sunburst.js");
+exports.BarChart = require("./src/BarChart.js");

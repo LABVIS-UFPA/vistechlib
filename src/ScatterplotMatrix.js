@@ -79,7 +79,6 @@ class ScatterplotMatrix extends Visualization{
 
     redraw(){
 
-
         //Atualiza os Eixos
         let y_axes = this.y;
 
@@ -201,9 +200,7 @@ class ScatterplotMatrix extends Visualization{
                 d3.select(this).call(d3.axisLeft(scatterplot.y[d]).ticks(6));
             });
 
-        this.event.apply("draw");
-
-        return this;
+        return super.redraw();
     }
 
     highlight(...args){

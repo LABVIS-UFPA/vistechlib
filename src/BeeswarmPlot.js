@@ -191,9 +191,7 @@ class BeeswarmPlot extends Visualization{
         let t1 = performance.now();
         console.log("TIme: "+(t1-t0));
 
-        this.event.apply("draw");
-
-        return this;
+        return super.redraw();
     }
 
     highlight(...args){

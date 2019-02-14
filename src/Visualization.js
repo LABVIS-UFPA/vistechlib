@@ -115,6 +115,7 @@ class Visualization {
     }
 
     redraw(){
+        this.event.apply("draw");
         return this;
     }
 

@@ -183,7 +183,7 @@ class Histogram extends Visualization{
 
         let groups_update = histogram.foreground
             .selectAll("g.cellGroup")
-            .data(this.newkey)
+            .data(this.newkey, d=>d)
             .join(
                 (enter) => {
                     let enter_result = enter.append("g")
@@ -193,16 +193,17 @@ class Histogram extends Visualization{
                         .attr("class", "axisLabel")
                         .attr("x", 0)
                         .attr("y", -10)
-                        .style("fill", "black");
+                        .style("fill", "black")
+                        .text(d=>d);
                     return enter_result;
                 }
 
             )
             .attr("transform",(d,i)=>{return `translate(${(i*histogram.cellWidth+i*pad)},0)`;});
 
-        groups_update.selectAll("text.axisLabel").text(function(d){
-            return d;
-        });
+        // groups_update.selectAll("text.axisLabel").text(function(d){
+        //     return d;
+        // });
 
 
         histogram.foreground.selectAll("g.cellGroup").each(function(d){
@@ -222,22 +223,8 @@ class Histogram extends Visualization{
 
         });
 
-        // let updateChart  = this.foreground
-        //     .selectAll(".data")
-        //     .data(this.d);
-        //
-        // let groups = this.foreground
-        //     .append("g")
-        //     .attr("class","cellGroup");
-        //
-        //
-        //
-        // for (let i = 0; i <this.newkey.length ; i++) {
-        //     draw_Bins(this.newkey[i],i);
-        // }
-
         console.log("Histogram-Redraw: ",performance.now()-t0);
-        return this;
+        return super.redraw();
     }
 
     highlight(...args){
@@ -245,23 +232,23 @@ class Histogram extends Visualization{
 
         if(args[0] instanceof SVGElement){
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
-            let hightlight_group = this.getHighlightElement(args[1]);
-            this.highlightLayer.node().appendChild(hightlight_group);
-            super.highlight(hightlight_group, args[0], args[1], args[2]);
+            highlighted = this.foreground.selectAll(`.data[data-index="${args[1]}"]`)
+                .style("stroke", this.settings.highlightColor)
+                .style("stroke-width", "2")
+                .each(function(){
+                    this.parentNode.appendChild(this);
+                });
         }
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            let elem = this.highlightLayer.selectAll('.groupHighlight');
-            if(elem.nodes().length > 0){
-                let node = elem.node();
-                let datum = elem.select("rect")
-                    .datum();
-                elem.remove();
-                super.removeHighlight(node, datum, args[1]);
-            }
+            let dataSelect = this.foreground.selectAll(`.data[data-index="${args[1]}"]`)
+                .style("stroke", "none");
+            super.removeHighlight(dataSelect.node(), dataSelect.datum(), args[1]);
         }
 
     }

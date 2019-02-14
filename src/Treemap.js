@@ -163,9 +163,7 @@ class Treemap extends Visualization{
 
         //let t1 = performance.now();
         //console.log("TIme: "+(t1-t0));
-        this.event.apply("draw");
-
-        return this;
+        return super.redraw();
     }
 
     highlight(...args){
@@ -201,7 +199,9 @@ class Treemap extends Visualization{
 
         let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
         d3.select(group).attr("class", "groupHighlight");
-        let path = d3.select(document.createElementNS("http://www.w3.org/2000/svg", "rect"))
+
+        let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        d3.select(rect)
             .attr("class", "rectHighlight")
             .attr("x", d.x0)
             .attr("y", d.y0)
@@ -210,7 +210,7 @@ class Treemap extends Visualization{
             .style("fill", "none")
             .style("stroke", this.settings.highlightColor);
 
-        group.appendChild(path);
+        group.appendChild(rect);
         return group;
     }
 

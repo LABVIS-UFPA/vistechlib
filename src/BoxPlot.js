@@ -224,7 +224,7 @@ class BoxPlot extends Visualization{
             return group;
 
 
-        return this;
+        return super.redraw();
     }
 
     highlight(...args){
