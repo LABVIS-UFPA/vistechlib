@@ -106,6 +106,7 @@ class ParallelCoordinates extends Visualization{
             .append("path")
             .attr("class", "data")
             .style("stroke", this.settings.color)
+            .style("fill", "none")
             .attr("data-index", (d,i)=>i);
 
         this._bindDataMouseEvents(dataEnter);
