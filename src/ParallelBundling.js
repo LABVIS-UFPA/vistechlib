@@ -507,7 +507,7 @@ class ParallelBundling extends Visualization{
                     .attr("data-index", function(d,i){ return i; })
                     .attr("d", this.lineFunction)
                     .style('stroke-width',1)
-                    .style("stroke", d=> this.clusterColor(d[this.clusterOn]))
+                    .style("stroke", this.settings.color)//d=> this.clusterColor(d[this.clusterOn]))
                     .attr('cluster', d=> this.clusterOn === 'all' ? 'all': d[this.clusterOn]);
 
                 this._bindDataMouseEvents(selection);
@@ -680,7 +680,7 @@ class ParallelBundling extends Visualization{
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             let elem = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
-                .style("stroke", function(d) {return self.clusterColor(d[self.clusterOn])})
+                .style("stroke", this.settings.color)//function(d) {return self.clusterColor(d[self.clusterOn])})
                 .style("stroke-width", 1);
             // this.overlay.selectAll(".lineHighlight").remove();
             // this.event.apply("highlightend", null, args);

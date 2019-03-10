@@ -208,7 +208,6 @@ class ParallelCoordinates extends Visualization{
     }
 
     select(selection){
-        console.log("entrou");
         let result = [];
         if(Array.isArray(selection)){
             if(Array.isArray(selection[0])){
