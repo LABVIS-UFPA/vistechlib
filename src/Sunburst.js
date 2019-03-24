@@ -141,11 +141,31 @@ class Sunburst extends Visualization{
         return super.redraw();
     }
 
+    detail(...args){
+        let details;
+        console.log(args[0]);
+        let obj =  Object.entries(args[0].data);
+        let text = "";
+
+        for (let j = 0; j < args[2].length; j++) {
+            for (let i = 0; i < obj.length; i++) {
+                if(args[2][j]===obj[i][0]){
+                    text+= obj[i][0]+" : "+ obj[i][1]+"\n";
+                }
+            }
+        }
+        if(args[0] instanceof SVGElement){
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
+            details = this.foreground
+              .selectAll('path[data-index="' + args[1] + '"]')
+              .style("stroke", this.settings.highlightColor)
+              .append(":title")
+              .text(text);
+        }
+    }
+
     highlight(...args){
         let highlighted;
-
-        console.log("args",args[1]);
-
         if(args[0] instanceof SVGElement){
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
 
