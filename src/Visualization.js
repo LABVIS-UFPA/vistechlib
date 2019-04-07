@@ -182,6 +182,14 @@ class Visualization {
 
     hierarchy(){}
 
+    filterByDimension(){
+        this.filteredDimensions = [];
+    }
+
+    orderByDimension(){
+        this.orderedDimensions = [];
+    }
+
     set autoresize(isAutoResize){
         this.settings.autoresize = isAutoResize;
         window.onresize = isAutoResize ? () => {
