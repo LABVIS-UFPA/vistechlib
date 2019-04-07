@@ -151,6 +151,8 @@ class Treemap extends Visualization{
                 let parentName = rect.attr("parent")
                 foreground.append(()=>
                     rect.node()
+
+
                 )
             })
 
@@ -164,6 +166,39 @@ class Treemap extends Visualization{
         //let t1 = performance.now();
         //console.log("TIme: "+(t1-t0));
         return super.redraw();
+    }
+
+    detail(...args){
+        let details;
+        let dataItens = this.d_h.leaves();
+        let obj =  Object.entries(args[0].data);
+        let text = "";
+        
+        for (let j = 0; j < args[2].length; j++) {
+          for (let i = 0; i < obj.length; i++) {
+            if(args[2][j]===obj[i][0]){
+              text+= obj[i][0]+" : "+ obj[i][1]+"\n";
+            }
+          }
+        }
+
+        if(args[0] instanceof SVGElement){
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < dataItens.length){
+            let d = dataItens[args[1]];
+            this.annotations.selectAll("rect.data-details").remove();
+            details = this.annotations.append("rect")
+              .attr("class", "data-details")
+              .attr("x", d.x0)
+              .attr("y", d.y0)
+              .attr("width", d.x1 - d.x0)
+              .attr("height", d.y1 - d.y0)
+              .style("fill","white")
+              .attr("opacity",0.1)
+              .style("stroke", this.settings.highlightColorColor)
+              .append(":title")
+              .text(text);
+
+        }
     }
 
     highlight(...args){
@@ -208,7 +243,15 @@ class Treemap extends Visualization{
             .attr("width", d.x1 - d.x0)
             .attr("height", d.y1 - d.y0)
             .style("fill", "none")
-            .style("stroke", this.settings.highlightColor);
+            .style("stroke", this.settings.highlightColor)
+          .append("foreignObject")
+          .attr("top", d.x0)
+          .attr("left", d.y0)
+          .attr("width", d.x1 - d.x0)
+          .attr("height", d.y1 - d.y0)
+          .append("input")
+
+
 
         group.appendChild(rect);
         return group;

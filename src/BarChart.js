@@ -157,6 +157,34 @@ class BarChart extends Visualization{
         return super.redraw();
     }
 
+    detail(...args){
+        let details;
+        let obj =  Object.entries(args[0]);
+        let text = "";
+
+        for (let j = 0; j < args[2].length; j++) {
+            for (let i = 0; i < obj.length; i++) {
+                if(args[2][j]===obj[i][0]){
+                    text+= obj[i][0]+" : "+ obj[i][1]+"\n";
+                }
+            }
+        }
+        
+        if(args[0] instanceof SVGElement){
+
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+            details = this.foreground.selectAll(`.data[data-index="${args[1]}"]`)
+              .style("stroke", this.settings.highlightColor)
+              .style("stroke-width", "2")
+              .each(function(){
+                  this.parentNode.appendChild(this);
+              })
+              .append(":title")
+              .text(text);
+        }
+        n
+    }
+
     highlight(...args){
         let highlighted;
         if(args[0] instanceof SVGElement){
