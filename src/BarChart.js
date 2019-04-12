@@ -29,12 +29,12 @@ class BarChart extends Visualization{
         let ip = this.settings.innerPadding;
         let svgBounds = this.svg.node().getBoundingClientRect();
 
-        this.boxHeight = (svgBounds.height-pt-pb-ip*(this.keys.length-1))/this.keys.length;
+        this.boxHeight = (svgBounds.height-pt-pb-ip*(this.keys_filter.length-1))/this.keys_filter.length;
         this.innerWidth = svgBounds.width-pl-pr;
 
         this.x.range([0, this.innerWidth]);
 
-        for(let k of this.keys){
+        for(let k of this.keys_filter){
             let type=this.domainType[k];
             this.y[k].range([
                 this.boxHeight-(type === "Categorical"?10:0),
@@ -54,9 +54,11 @@ class BarChart extends Visualization{
         let ip = this.settings.innerPadding;
         super.data(d);
 
-        let svgBounds = this.svg.node().getBoundingClientRect();
 
-        this.boxHeight = (svgBounds.height-pt-pb-ip*(this.keys.length-1))/this.keys.length;
+        this.keys_filter ? this.filterByDimension(this.keys_filter,this.keys): this.keys_filter = this.keys;
+
+        let svgBounds = this.svg.node().getBoundingClientRect();
+        this.boxHeight = (svgBounds.height-pt-pb-ip*(this.keys_filter.length-1))/this.keys_filter.length;
         this.innerWidth = svgBounds.width-pl-pr;
 
         let xdomain_array = [];
@@ -65,7 +67,7 @@ class BarChart extends Visualization{
         this.x.domain(xdomain_array)
             .range([0, this.innerWidth]);
         this.y = {};
-        for(let k of this.keys){
+        for(let k of this.keys_filter){
             let type=this.domainType[k];
             if(type === "Categorical"){
                 this.y[k] = d3.scalePoint();
@@ -88,7 +90,7 @@ class BarChart extends Visualization{
         let barchart = this;
 
         let group_join = this.foreground.selectAll("g.dataGroup")
-            .data(this.keys, d=>d)
+            .data(this.keys_filter, d=>d)
             .join(
                 enter => {
                     let enter_result = enter.append("g")
@@ -169,18 +171,18 @@ class BarChart extends Visualization{
                 }
             }
         }
-        
+
         if(args[0] instanceof SVGElement){
 
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
             details = this.foreground.selectAll(`.data[data-index="${args[1]}"]`)
-              .style("stroke", this.settings.highlightColor)
-              .style("stroke-width", "2")
-              .each(function(){
-                  this.parentNode.appendChild(this);
-              })
-              .append(":title")
-              .text(text);
+                .style("stroke", this.settings.highlightColor)
+                .style("stroke-width", "2")
+                .each(function(){
+                    this.parentNode.appendChild(this);
+                })
+                .append(":title")
+                .text(text);
         }
         n
     }
@@ -234,6 +236,19 @@ class BarChart extends Visualization{
         });
 
         return group;
+    }
+
+    filterByDimension(args,keys) {
+        this.keys_filter = args;
+
+        if(keys){
+            let arr = this.keys_filter;
+            this.keys_filter = keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+
+        }
+
     }
 
 

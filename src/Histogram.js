@@ -27,10 +27,13 @@ class Histogram extends Visualization{
         this.cellHeight = svgBounds.height-margin.bottom-margin.top;
         this.cellWidth = svgBounds.width-margin.left-margin.right;
 
-        this.cellWidth-=this.settings.innerPadding*(this.newkey.length-1);
-        this.cellWidth /= this.newkey.length;
+        // let keys_filter;
+        // this.keys_filter? keys_filter = this.keys_filter : keys_filter = this.newkey;
 
-        for(let k of this.newkey){
+        this.cellWidth-=this.settings.innerPadding*(this.keys_filter.length-1);
+        this.cellWidth /= this.keys_filter.length;
+
+        for(let k of this.keys_filter){
             this.y[k].range([this.cellHeight, 0]);
             this.binWidth[k] = this.cellWidth/this.bins[k].length;
             this.x[k].range([0, this.cellWidth]);
@@ -61,8 +64,9 @@ class Histogram extends Visualization{
         this.bigger_bin = {};
 
         this.binWidth = {};
+        this.keys_filter? this.filterByDimension(this.keys_filter,this.keys): this.keys_filter = this.keys;
 
-        for(let k of this.keys){
+        for(let k of this.keys_filter){
             if(this.domainType[k] === "Categorical"){
                 this.newkey.push(k);
             }else if(this.domainType[k] === "Numeric"){
@@ -74,8 +78,8 @@ class Histogram extends Visualization{
         for(let i=0;i<this.d.length;i++){
             this.d_wrapper.push({index:i, data: this.d[i]});
         }
-        this.cellWidth-=this.settings.innerPadding*(this.newkey.length-1);
-        this.cellWidth /= this.newkey.length;
+        this.cellWidth-=this.settings.innerPadding*(this.keys_filter.length-1);
+        this.cellWidth /= this.keys_filter.length;
 
         for(let k of this.newkey){
             if(this.domainType[k] === "Categorical"){
@@ -323,6 +327,19 @@ class Histogram extends Visualization{
     setAxisY(args){
         this.settings.axisY = args;
         console.log(args);
+
+    }
+
+    filterByDimension(args,keys) {
+        this.keys_filter = args;
+
+        if(keys){
+            let arr = this.keys_filter;
+            this.keys_filter = keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+
+        }
 
     }
 }

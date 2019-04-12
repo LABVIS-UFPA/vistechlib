@@ -184,6 +184,7 @@ class Visualization {
 
     filterByDimension(){
         this.filteredDimensions = [];
+
     }
 
     orderByDimension(){
