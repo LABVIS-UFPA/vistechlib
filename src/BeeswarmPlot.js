@@ -25,6 +25,14 @@ class BeeswarmPlot extends Visualization{
         let ip = this.settings.innerPadding;
         let svgBounds = this.svg.node().getBoundingClientRect();
 
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
         this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys_filter.length-1))/this.keys_filter.length;
         this.innerHeight = svgBounds.height-pt-pb;
@@ -55,7 +63,15 @@ class BeeswarmPlot extends Visualization{
         super.data(d);
 
         let svgBounds = this.svg.node().getBoundingClientRect();
-        this.keys_filter ? this.filterByDimension(this.keys_filter,this.keys) : this.keys_filter = this.keys;
+
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
         this.dByAxis = {};
         this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys_filter.length-1))/this.keys_filter.length;
@@ -341,15 +357,8 @@ class BeeswarmPlot extends Visualization{
                 this.xPos[k][i] = this.initXPos[k][i];
     }
 
-    filterByDimension(args,keys) {
-        this.keys_filter = args;
-
-        if(keys){
-            let arr = this.keys_filter;
-            this.keys_filter = keys.filter(function (item) {
-                return item != arr[arr.indexOf(item)];
-            });
-        }
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 
 }

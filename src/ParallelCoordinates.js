@@ -27,6 +27,15 @@ class ParallelCoordinates extends Visualization{
         let pr = this.settings.paddingRight;
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
+
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
+
         if(this.x)
             this.x.range([0, this.svg.node().getBoundingClientRect().width-pl-pr]);
         else
@@ -60,7 +69,13 @@ class ParallelCoordinates extends Visualization{
         let pb = this.settings.paddingBottom;
         super.data(d);
 
-        this.keys_filter ? this.filterByDimension(this.keys_filter,this.keys) : this.keys_filter = this.keys;
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
         this.x.domain(this.keys_filter);
         this.y = {};
@@ -295,15 +310,8 @@ class ParallelCoordinates extends Visualization{
         return this.selectionLayer.selectAll("*").nodes();
     }
 
-    filterByDimension(args,keys) {
-        this.keys_filter = args;
-
-        if(keys){
-            let arr = this.keys_filter;
-            this.keys_filter = keys.filter(function (item) {
-                return item != arr[arr.indexOf(item)];
-            });
-        }
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 
 }

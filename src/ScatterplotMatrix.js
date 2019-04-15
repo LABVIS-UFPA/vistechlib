@@ -24,13 +24,19 @@ class ScatterplotMatrix extends Visualization {
         let ip = this.settings.innerPadding;
         let svgBounds = this.svg.node().getBoundingClientRect();
 
-        let keys_filter;
-        this.settings.filter ? keys_filter = this.settings.filter : keys_filter = this.keys;
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
 
-        this.cellWidth = (svgBounds.width - pl - pr - ip * (this.keys.length - 1)) / keys_filter.length;
-        this.cellHeight = (svgBounds.height - pt - pb - ip * (this.keys.length - 1)) / keys_filter.length;
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
-        for (let k of keys_filter) {
+        this.cellWidth = (svgBounds.width - pl - pr - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
+        this.cellHeight = (svgBounds.height - pt - pb - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
+
+        for (let k of this.keys_filter) {
             // if(this.domainType[k] === "Categorical"){
             //     this.x[k].rangePoints([0, this.cellWidth], 0);
             //     this.y[k].rangePoints([0, this.cellHeight], 0);
@@ -52,7 +58,6 @@ class ScatterplotMatrix extends Visualization {
         let ip = this.settings.innerPadding;
         super.data(d);
         let svgBounds = this.svg.node().getBoundingClientRect();
-        let keys_filter;
 
         //verificar instancia do filtro
         if(this.settings.filter){
@@ -61,14 +66,14 @@ class ScatterplotMatrix extends Visualization {
                 return item != arr[arr.indexOf(item)];
             });
         }
-        this.settings.filter ? keys_filter = this.settings.filter : keys_filter = this.keys;
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
-        this.cellWidth = (svgBounds.width - pl - pr - ip * (this.keys.length - 1)) / keys_filter.length;
-        this.cellHeight = (svgBounds.height - pt - pb - ip * (this.keys.length - 1)) / keys_filter.length;
+        this.cellWidth = (svgBounds.width - pl - pr - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
+        this.cellHeight = (svgBounds.height - pt - pb - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
 
         this.x = {};
         this.y = {};
-        for (let k of keys_filter) {
+        for (let k of this.keys_filter) {
             if (this.domainType[k] === "Categorical") {
                 this.x[k] = d3.scalePoint()
                     .domain(this.domain[k])
@@ -93,9 +98,8 @@ class ScatterplotMatrix extends Visualization {
 
         //Atualiza os Eixos
         let y_axes = this.y;
-        let select_keys;
-        this.settings.filter?select_keys= this.settings.filter:select_keys=this.keys;
-        let crossed = ScatterplotMatrix.cross(select_keys, select_keys);
+        this.settings.filter?this.select_keys= this.settings.filter:this.select_keys=this.keys;
+        let crossed = ScatterplotMatrix.cross(this.select_keys, this.select_keys);
 
         let scatterplot = this;
 
@@ -209,7 +213,7 @@ class ScatterplotMatrix extends Visualization {
 
         this.foreground.selectAll(".x.axis").remove();
         this.foreground.selectAll(".x.axis")
-            .data(select_keys)
+            .data(this.select_keys)
             .enter().append("g")
             .attr("class", "x axis")
             .attr("transform", (d, i) => {
@@ -223,7 +227,7 @@ class ScatterplotMatrix extends Visualization {
 
         this.foreground.selectAll(".y.axis").remove();
         this.foreground.selectAll(".y.axis")
-            .data(select_keys)
+            .data(this.select_keys)
             .enter().append("g")
             .attr("class", "y axis")
             .attr("transform", (d, i) => {

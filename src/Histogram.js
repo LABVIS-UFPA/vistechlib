@@ -27,8 +27,14 @@ class Histogram extends Visualization{
         this.cellHeight = svgBounds.height-margin.bottom-margin.top;
         this.cellWidth = svgBounds.width-margin.left-margin.right;
 
-        // let keys_filter;
-        // this.keys_filter? keys_filter = this.keys_filter : keys_filter = this.newkey;
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
+
 
         this.cellWidth-=this.settings.innerPadding*(this.keys_filter.length-1);
         this.cellWidth /= this.keys_filter.length;
@@ -64,7 +70,14 @@ class Histogram extends Visualization{
         this.bigger_bin = {};
 
         this.binWidth = {};
-        this.keys_filter? this.filterByDimension(this.keys_filter,this.keys): this.keys_filter = this.keys;
+
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
         for(let k of this.keys_filter){
             if(this.domainType[k] === "Categorical"){
@@ -330,17 +343,8 @@ class Histogram extends Visualization{
 
     }
 
-    filterByDimension(args,keys) {
-        this.keys_filter = args;
-
-        if(keys){
-            let arr = this.keys_filter;
-            this.keys_filter = keys.filter(function (item) {
-                return item != arr[arr.indexOf(item)];
-            });
-
-        }
-
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 }
 
