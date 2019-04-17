@@ -1,4 +1,15 @@
-
+/**
+ *
+ * @param a x0 line1
+ * @param b y0 line1
+ * @param c x1 line1
+ * @param d y0 line1
+ * @param p x0 line2
+ * @param q y0 line2
+ * @param r x1 line2
+ * @param s y2 line2
+ * @returns {boolean} line1 intersects line2
+ */
 module.exports.lineIntersects = (a,b,c,d,p,q,r,s) => {
     let det, gamma, lambda;
     det = (c - a) * (s - q) - (r - p) * (d - b);

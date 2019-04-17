@@ -20,6 +20,7 @@ class Histogram extends Visualization{
     }
 
     resize(){
+        super.resize();
         let t0 = performance.now();
         let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
         let svgBounds = this.svg.node().getBoundingClientRect();
@@ -31,7 +32,7 @@ class Histogram extends Visualization{
         this.cellWidth /= this.newkey.length;
 
         for(let k of this.newkey){
-            this.y[k].range([this.cellHeight, 0]);
+            this.y[k].range([this.visContentHeight, 0]);
             this.binWidth[k] = this.cellWidth/this.bins[k].length;
             this.x[k].range([0, this.cellWidth]);
             //Escala do eixo.

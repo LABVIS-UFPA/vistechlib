@@ -23,6 +23,7 @@ class ScatterplotMatrix extends Visualization{
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
         let ip = this.settings.innerPadding;
+        //TODO: substituir essa chamada de método por: this.visContentWidth;
         let svgBounds = this.svg.node().getBoundingClientRect();
 
         this.cellWidth = (svgBounds.width-pl-pr-ip*(this.keys.length-1))/this.keys.length;

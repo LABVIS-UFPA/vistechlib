@@ -1,7 +1,7 @@
 
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
-let utils = require("./Utils.js");
+let sel = require("./selections/selections.js");
 
 class ParallelCoordinates extends Visualization{
 
@@ -16,27 +16,23 @@ class ParallelCoordinates extends Visualization{
 
         this.x = d3.scalePoint().range( [
             0,
-            this.svg.node().getBoundingClientRect().width-this.settings.paddingLeft-this.settings.paddingRight
+            this.visContentWidth-this.settings.paddingLeft-this.settings.paddingRight
         ], 0);
 
     }
 
     resize(){
-
-        let pl = this.settings.paddingLeft;
-        let pr = this.settings.paddingRight;
-        let pt = this.settings.paddingTop;
-        let pb = this.settings.paddingBottom;
+        super.resize();
         if(this.x)
-            this.x.range([0, this.svg.node().getBoundingClientRect().width-pl-pr]);
+            this.x.range([0, this.visContentWidth]);
         else
-            this.x = d3.scalePoint().range([0, this.svg.node().getBoundingClientRect().width-pl-pr]);
+            this.x = d3.scalePoint().range([0, this.visContentWidth]);
 
         if(this.y) {
             for (let prop of this.keys) {
                 //TODO: verificar como diferenciar entre scalePonint e Linear Contínuo.
                 // if (typeof this.y[prop].padding === "function")
-                this.y[prop].range([this.svg.node().getBoundingClientRect().height-pt-pb, 0]);
+                this.y[prop].range([this.visContentHeight, 0]);
                 // else
                 //     this.y[prop].range([$(this.svg.node()).height() -pt-pb, 0]);
             }
@@ -55,8 +51,6 @@ class ParallelCoordinates extends Visualization{
     }
 
     data(d){
-        let pt = this.settings.paddingTop;
-        let pb = this.settings.paddingBottom;
         super.data(d);
         this.x.domain(this.keys);
         this.y = {};
@@ -72,7 +66,7 @@ class ParallelCoordinates extends Visualization{
             }
             this.y[k]
                 .domain(this.domain[k])
-                .range([this.svg.node().getBoundingClientRect().height-pt-pb, 0]);
+                .range([this.visContentHeight, 0]);
         }
 
         this.linesCoords =  [];
@@ -211,6 +205,7 @@ class ParallelCoordinates extends Visualization{
         if(highlighted)
             super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
+
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
 
@@ -240,51 +235,13 @@ class ParallelCoordinates extends Visualization{
     }
 
     select(selection){
-        let result = [];
-        if(Array.isArray(selection)){
-            if(Array.isArray(selection[0])){
-                for(let k=0; k<this.linesCoords.length; k++){
-                    data_block: {
-                        let polyLine = this.linesCoords[k];
-                        for (let j = 0; j < polyLine.length - 1; j++) {
-                            for (let i = 0; i < selection.length - 1; i++) {
-                                this.foreground.append("line")
-                                    .attr("x1", selection[i][0]-this.settings.paddingLeft)
-                                    .attr("x2", selection[i + 1][0]-this.settings.paddingLeft)
-                                    .attr("y1", selection[i][1]-this.settings.paddingTop)
-                                    .attr("y2", selection[i + 1][1]-this.settings.paddingTop)
-                                    .style("fill", "none")
-                                    .style("stroke", "red");
-                                let intersect = utils.lineIntersects(selection[i][0]-this.settings.paddingLeft,
-                                    selection[i][1]-this.settings.paddingTop,
-                                    selection[i + 1][0]-this.settings.paddingLeft,
-                                    selection[i + 1][1]-this.settings.paddingTop,
-                                    polyLine[j][0], polyLine[j][1],
-                                    polyLine[j + 1][0], polyLine[j + 1][1]);
-                                if (intersect) {
-                                    result.push(
-                                        this.foreground.select('path.data[data-index="' + k + '"]').node());
-                                    break data_block;
-                                }
-                            }
-                        }
-                    }
-                }
-            }else if(typeof selection[0] === "number"){
-                //seleção através de índices.
-                for(let i of selection){
-                    result.push(
-                        this.foreground.select('path.data[data-index="'+i+'"]').node());
-                }
-
-            }else if(selection[0] instanceof SVGPathElement){
-                for(let i of selection){
-                    result.push(i);
-                }
+        if(selection instanceof sel.Selection) {
+            if(this.foreground.node().hasChildNodes()) {
+                let child_list = this.foreground.node().childNodes;
+                let selected = selection.select(child_list, sel.Selection.Type.STROKE);
+                super.select(selected);
             }
         }
-        console.log(result);
-        super.select(result);
     }
 
     getSelected(){

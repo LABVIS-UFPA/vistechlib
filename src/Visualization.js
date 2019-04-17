@@ -6,12 +6,13 @@ class Visualization {
 
     constructor(parentElement, settings){
         //default configuration
+        let vis = this;
         this.parentElement = parentElement;
         this.settings = {
             color: "#069",//"grey",//"#069",
             highlightColor: "#FF1122",//"#08E700",
             opacity: 1,
-            notSelectedOpacity: 0.3,
+            notSelectedOpacity: 0.15,
             size_type: "fit",//"absolute"
             width: 700,
             height: 300,
@@ -36,7 +37,8 @@ class Visualization {
             "highlightstart", "highlightend",
             "datamouseover","datamouseout", "dataclick", "datadblclick",
             "ancestormouseover", "ancestormouseout",
-            "ancestorclick", "ancestordblclick", "dimensiontitleclick");
+            "ancestorclick", "ancestordblclick", "dimensiontitleclick",
+            "datacanvasmouseup","datacanvasmousemove","datacanvasmousedown");
 
         let fit = this.settings.size_type === "fit";
 
@@ -44,6 +46,17 @@ class Visualization {
             .append("svg")
             .attr("width", fit ? "100%" : this.settings.width)
             .attr("height", fit ? "100%" : this.settings.height);
+        if(fit){
+            let bb = this.svg.node().getBoundingClientRect();
+            this.settings.width = bb.width;
+            this.settings.height = bb.height;
+        }
+        this.visContentWidth = this.settings.width
+            - this.settings.paddingLeft
+            - this.settings.paddingRight;
+        this.visContentHeight = this.settings.height
+            - this.settings.paddingTop
+            - this.settings.paddingBottom;
 
         let translatestr = "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")";
 
@@ -51,6 +64,12 @@ class Visualization {
         this.background = this.canvas.append("g")
             .attr("class", "background")
             .attr("transform", translatestr);
+        this.background.append("rect")
+            .attr("class", "vis_background")
+            .attr("x",0).attr("y",0)
+            .attr("width",this.visContentWidth)
+            .attr("height",this.visContentHeight)
+            .style("fill","#FFFFFF");
 
         this.foreground = this.canvas.append("g")
             .attr("class", "foreground")
@@ -68,6 +87,31 @@ class Visualization {
             .attr("class", "overlay")
             .attr("transform", translatestr);
 
+        this.interactionLayer = this.canvas.append("g")
+            .attr("class", "interactionLayer")
+            .attr("transform", translatestr);
+
+        this.interactionLayer.append("rect")
+            .attr("class", "vis_background")
+            .attr("x",0).attr("y",0)
+            .attr("width",this.visContentWidth)
+            .attr("height",this.visContentHeight)
+            .style("fill","none")
+            .style("opacity", 0)
+            .on("mousedown", interactionEvents("datacanvasmousedown"))
+            .on("mouseover", interactionEvents("datacanvasmousemove"))
+            .on("mouseup", interactionEvents("datacanvasmouseup"));
+
+        function interactionEvents(eventStr){
+            return function () {
+                vis.event.call(eventStr, this, {
+                    innerX: d3.event.layerX-vis.settings.paddingLeft,
+                    innerY: d3.event.layerY-vis.settings.paddingTop,
+                    d3Event: d3.event
+                });
+            }
+        }
+
         this.annotations = this.canvas.append("g")
             .attr("class", "annotations")
             .attr("transform", translatestr);
@@ -75,6 +119,8 @@ class Visualization {
         this.parentElement.__vis__ = this;
 
         this.isHighlighting = false;
+
+        this.setInteractionMode(true);
 
     }
 
@@ -111,6 +157,19 @@ class Visualization {
     }
 
     resize(){
+        let bb = this.svg.node().getBoundingClientRect();
+        this.settings.width = bb.width;
+        this.settings.height = bb.height;
+        this.visContentWidth = this.settings.width
+            - this.settings.paddingLeft
+            - this.settings.paddingRight;
+        this.visContentHeight = this.settings.height
+            - this.settings.paddingTop
+            - this.settings.paddingBottom;
+
+        this.svg.selectAll(".vis_background")
+            .attr("width",this.visContentWidth)
+            .attr("height",this.visContentHeight);
         return this;
     }
 
@@ -160,13 +219,11 @@ class Visualization {
 
 
     select(elems){
-        if(elems[0] instanceof Node){
-            for(let elem of elems){
-                this.selectionLayer.node().appendChild(elem);
-            }
-            this.foreground.selectAll(".data")
-                .style("opacity", this.settings.notSelectedOpacity);
+        for(let elem of elems){
+            this.selectionLayer.node().appendChild(elem);
         }
+        this.foreground.selectAll(".data")
+            .style("opacity", this.settings.notSelectedOpacity);
     }
     removeSelect(){
         let elems = this.selectionLayer.selectAll(".data").nodes();
@@ -188,6 +245,16 @@ class Visualization {
 
     orderByDimension(){
         this.orderedDimensions = [];
+    }
+
+    setInteractionMode(flag){
+        if(flag){
+            this.interactionLayer.select(".vis_background")
+                .style("fill","#FFFFFF");
+        }else{
+            this.interactionLayer.select(".vis_background")
+                .style("fill","none");
+        }
     }
 
     set autoresize(isAutoResize){
