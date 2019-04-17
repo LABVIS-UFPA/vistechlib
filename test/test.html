@@ -24,10 +24,14 @@
     let cate = ["laranja", "maçã", "banana"];
     let tipo = ["polistation", "daynavision", "nitendo 32"];
 
-    console.log(vistechlib);
-    parallel = new vistechlib.Treemap(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
 
-    parallel.hierarchy(["w","r","x"]);
+
+    console.log(vistechlib);
+    parallel = new vistechlib.ParallelBundling(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
+    parallel.filterByDimension(["x"]);
+    // parallel.filterByDimension(["w","r"]);
+
+    // parallel.hierarchy(["w","r","x","z"]);
     // parallel.setSize("x");
 
 
@@ -149,6 +153,7 @@
     parallel//.setLabel((d)=>{ return d.w; })
         .redraw()
         .on("datamouseover", function (d, i) {
+            console.log("d:",d);
             parallel.highlight(d, i);
         })
         .on("datamouseout", function (d, i) {

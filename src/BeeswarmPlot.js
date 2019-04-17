@@ -25,11 +25,20 @@ class BeeswarmPlot extends Visualization{
         let ip = this.settings.innerPadding;
         let svgBounds = this.svg.node().getBoundingClientRect();
 
-        this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys.length-1))/this.keys.length;
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
+
+        this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys_filter.length-1))/this.keys_filter.length;
         this.innerHeight = svgBounds.height-pt-pb;
 
         this.x.range([this.boxWidth/2, svgBounds.width-pl-pr-this.boxWidth/2]);
-        for(let k of this.keys){
+        for(let k of this.keys_filter){
             // if(this.domainType[k] === "Categorical"){
             //     this.y[k].rangePoints([this.innerHeight, 0], 0);
             // }else{
@@ -55,15 +64,24 @@ class BeeswarmPlot extends Visualization{
 
         let svgBounds = this.svg.node().getBoundingClientRect();
 
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
+
         this.dByAxis = {};
-        this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys.length-1))/this.keys.length;
+        this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys_filter.length-1))/this.keys_filter.length;
 
         this.innerHeight = svgBounds.height-pt-pb;
 
-        this.x.domain(this.keys)
+        this.x.domain(this.keys_filter)
             .range([ this.boxWidth/2, svgBounds.width-pl-pr-this.boxWidth/2]);
         this.y = {};
-        for(let k of this.keys){
+        for(let k of this.keys_filter){
             if(this.domainType[k] === "Categorical"){
                 this.y[k] = d3.scalePoint();
             }else{
@@ -95,7 +113,6 @@ class BeeswarmPlot extends Visualization{
         //Atualiza os Eixos
         let beeswarm = this;
 
-
         function redrawDataPoints (k){
             beeswarm.resetXfunction();
 
@@ -122,9 +139,9 @@ class BeeswarmPlot extends Visualization{
                 .style("fill", beeswarm.settings.color);
         }
 
-        console.log(this.keys);
+
         let beegroup = this.foreground.selectAll("g.beeSwarmGroup")
-            .data(this.keys);
+            .data(this.keys_filter);
 
         beegroup.exit().remove();
         let beegroupenter = beegroup.enter()
@@ -296,8 +313,10 @@ class BeeswarmPlot extends Visualization{
         return group;
     }
 
-
     getXfunction(){
+        let keys_filter;
+        this.settings.filter ? keys_filter = this.settings.filter : keys_filter = this.keys;
+
         switch (this.pointXmethod){
             case "center":
                 let binQuant = Math.floor(this.innerHeight/(this.settings.radius*2));
@@ -306,7 +325,7 @@ class BeeswarmPlot extends Visualization{
                 this.initXPos ={};
                 this.xPos ={};
 
-                for(let k of this.keys){
+                for(let k of this.keys_filter){
                     hist[k] = [];
                     this.initXPos[k] = [];
                     this.xPos[k] = [];
@@ -330,9 +349,16 @@ class BeeswarmPlot extends Visualization{
         }
     }
     resetXfunction(){
-        for(let k of this.keys)
+        let keys_filter;
+        this.settings.filter ? keys_filter = this.settings.filter : keys_filter = this.keys;
+
+        for(let k of this.keys_filter)
             for (let i = 0; i < this.initXPos[k].length; i++)
                 this.xPos[k][i] = this.initXPos[k][i];
+    }
+
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 
 }

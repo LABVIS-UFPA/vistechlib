@@ -9,7 +9,7 @@ class ParallelCoordinates extends Visualization{
         super(parentElement, settings);
         this.name = "ParallelCoordinates";
         this.lineFunction = (d) => {
-            return d3.line()(this.keys.map((key) => {
+            return d3.line()(this.keys_filter.map((key) => {
                return [this.x(key), this.y[key](d[key])];
             }))
         };
@@ -23,13 +23,28 @@ class ParallelCoordinates extends Visualization{
 
     resize(){
         super.resize();
+
+        let pl = this.settings.paddingLeft;
+        let pr = this.settings.paddingRight;
+        let pt = this.settings.paddingTop;
+        let pb = this.settings.paddingBottom;
+
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
+
         if(this.x)
             this.x.range([0, this.visContentWidth]);
         else
             this.x = d3.scalePoint().range([0, this.visContentWidth]);
 
+
         if(this.y) {
-            for (let prop of this.keys) {
+            for (let prop of this.keys_filter) {
                 //TODO: verificar como diferenciar entre scalePonint e Linear Contínuo.
                 // if (typeof this.y[prop].padding === "function")
                 this.y[prop].range([this.visContentHeight, 0]);
@@ -42,7 +57,7 @@ class ParallelCoordinates extends Visualization{
 
         this.linesCoords =  [];
         for(let d of this.d){
-            this.linesCoords.push(this.keys.map((key) => {
+            this.linesCoords.push(this.keys_filter.map((key) => {
                 return [this.x(key), this.y[key](d[key])];
             }));
         }
@@ -52,9 +67,18 @@ class ParallelCoordinates extends Visualization{
 
     data(d){
         super.data(d);
-        this.x.domain(this.keys);
+
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
+
+        this.x.domain(this.keys_filter);
         this.y = {};
-        for(let k of this.keys){
+        for(let k of this.keys_filter){
             if(this.domainType[k] === "Categorical") {
                 this.y[k] = d3.scalePoint()
 
@@ -70,8 +94,8 @@ class ParallelCoordinates extends Visualization{
         }
 
         this.linesCoords =  [];
-        for(let d of this.d){
-            this.linesCoords.push(this.keys.map((key) => {
+        for(let d of this.keys_filter){
+            this.linesCoords.push(this.keys_filter.map((key) => {
                 return [this.x(key), this.y[key](d[key])];
             }));
         }
@@ -111,7 +135,7 @@ class ParallelCoordinates extends Visualization{
 
 
 
-        let axisUpdate = this.overlay.selectAll(".axis").data(this.keys);
+        let axisUpdate = this.overlay.selectAll(".axis").data(this.keys_filter);
 
         axisUpdate.exit().remove();
         axisUpdate.selectAll("*").remove();
@@ -140,19 +164,19 @@ class ParallelCoordinates extends Visualization{
         return super.redraw();
     }
 
-    updateColors(){
-        if(this.domainType[this.focus] !== 'Categorical') this.color = "dimgray"
-        else {
-            this.colorScale = d3.scaleOrdinal().domain(this.domain[this.focus]).range(
-                ['firebrick', 'mediumseagreen', 'steelblue', 'gold', 'chocolate', 'magenta']
-            )
-            this.color = d => {
-                let category = d[this.focus]
-                return this.colorScale(category)
-            }
-        }
-        this.redraw()
-    }
+    // updateColors(){
+    //     if(this.domainType[this.focus] !== 'Categorical') this.color = "dimgray"
+    //     else {
+    //         this.colorScale = d3.scaleOrdinal().domain(this.domain[this.focus]).range(
+    //             ['firebrick', 'mediumseagreen', 'steelblue', 'gold', 'chocolate', 'magenta']
+    //         )
+    //         this.color = d => {
+    //             let category = d[this.focus]
+    //             return this.colorScale(category)
+    //         }
+    //     }
+    //     this.redraw()
+    // }
 
     detail(...args){
         let obj =  Object.entries(args[0]);
@@ -246,6 +270,10 @@ class ParallelCoordinates extends Visualization{
 
     getSelected(){
         return this.selectionLayer.selectAll("*").nodes();
+    }
+
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 
 }

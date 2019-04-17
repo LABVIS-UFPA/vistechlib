@@ -28,11 +28,20 @@ class Histogram extends Visualization{
         this.cellHeight = svgBounds.height-margin.bottom-margin.top;
         this.cellWidth = svgBounds.width-margin.left-margin.right;
 
-        this.cellWidth-=this.settings.innerPadding*(this.newkey.length-1);
-        this.cellWidth /= this.newkey.length;
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
-        for(let k of this.newkey){
-            this.y[k].range([this.visContentHeight, 0]);
+
+        this.cellWidth-=this.settings.innerPadding*(this.keys_filter.length-1);
+        this.cellWidth /= this.keys_filter.length;
+
+        for(let k of this.keys_filter){
+            this.y[k].range([this.cellHeight, 0]);
             this.binWidth[k] = this.cellWidth/this.bins[k].length;
             this.x[k].range([0, this.cellWidth]);
             //Escala do eixo.
@@ -63,7 +72,15 @@ class Histogram extends Visualization{
 
         this.binWidth = {};
 
-        for(let k of this.keys){
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
+
+        for(let k of this.keys_filter){
             if(this.domainType[k] === "Categorical"){
                 this.newkey.push(k);
             }else if(this.domainType[k] === "Numeric"){
@@ -75,8 +92,8 @@ class Histogram extends Visualization{
         for(let i=0;i<this.d.length;i++){
             this.d_wrapper.push({index:i, data: this.d[i]});
         }
-        this.cellWidth-=this.settings.innerPadding*(this.newkey.length-1);
-        this.cellWidth /= this.newkey.length;
+        this.cellWidth-=this.settings.innerPadding*(this.keys_filter.length-1);
+        this.cellWidth /= this.keys_filter.length;
 
         for(let k of this.newkey){
             if(this.domainType[k] === "Categorical"){
@@ -325,6 +342,10 @@ class Histogram extends Visualization{
         this.settings.axisY = args;
         console.log(args);
 
+    }
+
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 }
 
