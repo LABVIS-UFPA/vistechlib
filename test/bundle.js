@@ -12,7 +12,8 @@ exports.Histogram = require("./src/Histogram.js");
 exports.BoxPlot = require("./src/BoxPlot.js");
 exports.Sunburst = require("./src/Sunburst.js");
 exports.BarChart = require("./src/BarChart.js");
-},{"./src/BarChart.js":36,"./src/BeeswarmPlot.js":37,"./src/BoxPlot.js":38,"./src/Histogram.js":39,"./src/ParallelBundling.js":40,"./src/ParallelCoordinates.js":41,"./src/ScatterplotMatrix.js":42,"./src/Sunburst.js":43,"./src/Treemap.js":44,"./src/Visualization.js":46}],2:[function(require,module,exports){
+exports.selection = require("./src/selections/selections.js");
+},{"./src/BarChart.js":36,"./src/BeeswarmPlot.js":37,"./src/BoxPlot.js":38,"./src/Histogram.js":39,"./src/ParallelBundling.js":40,"./src/ParallelCoordinates.js":41,"./src/ScatterplotMatrix.js":42,"./src/Sunburst.js":43,"./src/Treemap.js":44,"./src/Visualization.js":46,"./src/selections/selections.js":47}],2:[function(require,module,exports){
 // https://d3js.org/d3-array/ v1.2.4 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -25099,6 +25100,13 @@ class BarChart extends Visualization{
         let ip = this.settings.innerPadding;
         let svgBounds = this.svg.node().getBoundingClientRect();
 
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
         this.boxHeight = (svgBounds.height-pt-pb-ip*(this.keys_filter.length-1))/this.keys_filter.length;
         this.innerWidth = svgBounds.width-pl-pr;
 
@@ -25125,8 +25133,13 @@ class BarChart extends Visualization{
         super.data(d);
 
 
-        this.keys_filter ? this.filterByDimension(this.keys_filter,this.keys): this.keys_filter = this.keys;
-
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
         let svgBounds = this.svg.node().getBoundingClientRect();
         this.boxHeight = (svgBounds.height-pt-pb-ip*(this.keys_filter.length-1))/this.keys_filter.length;
         this.innerWidth = svgBounds.width-pl-pr;
@@ -25308,17 +25321,8 @@ class BarChart extends Visualization{
         return group;
     }
 
-    filterByDimension(args,keys) {
-        this.keys_filter = args;
-
-        if(keys){
-            let arr = this.keys_filter;
-            this.keys_filter = keys.filter(function (item) {
-                return item != arr[arr.indexOf(item)];
-            });
-
-        }
-
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 
 
@@ -25353,6 +25357,14 @@ class BeeswarmPlot extends Visualization{
         let ip = this.settings.innerPadding;
         let svgBounds = this.svg.node().getBoundingClientRect();
 
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
         this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys_filter.length-1))/this.keys_filter.length;
         this.innerHeight = svgBounds.height-pt-pb;
@@ -25383,7 +25395,15 @@ class BeeswarmPlot extends Visualization{
         super.data(d);
 
         let svgBounds = this.svg.node().getBoundingClientRect();
-        this.keys_filter ? this.filterByDimension(this.keys_filter,this.keys) : this.keys_filter = this.keys;
+
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
         this.dByAxis = {};
         this.boxWidth = (svgBounds.width-pl-pr-ip*(this.keys_filter.length-1))/this.keys_filter.length;
@@ -25669,15 +25689,8 @@ class BeeswarmPlot extends Visualization{
                 this.xPos[k][i] = this.initXPos[k][i];
     }
 
-    filterByDimension(args,keys) {
-        this.keys_filter = args;
-
-        if(keys){
-            let arr = this.keys_filter;
-            this.keys_filter = keys.filter(function (item) {
-                return item != arr[arr.indexOf(item)];
-            });
-        }
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 
 }
@@ -25959,6 +25972,7 @@ class Histogram extends Visualization{
     }
 
     resize(){
+        super.resize();
         let t0 = performance.now();
         let margin = ({top: this.settings.paddingTop, right: this.settings.paddingRight, bottom: this.settings.paddingBottom, left: this.settings.paddingLeft});
         let svgBounds = this.svg.node().getBoundingClientRect();
@@ -25966,8 +25980,14 @@ class Histogram extends Visualization{
         this.cellHeight = svgBounds.height-margin.bottom-margin.top;
         this.cellWidth = svgBounds.width-margin.left-margin.right;
 
-        // let keys_filter;
-        // this.keys_filter? keys_filter = this.keys_filter : keys_filter = this.newkey;
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
+
 
         this.cellWidth-=this.settings.innerPadding*(this.keys_filter.length-1);
         this.cellWidth /= this.keys_filter.length;
@@ -26003,7 +26023,14 @@ class Histogram extends Visualization{
         this.bigger_bin = {};
 
         this.binWidth = {};
-        this.keys_filter? this.filterByDimension(this.keys_filter,this.keys): this.keys_filter = this.keys;
+
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
         for(let k of this.keys_filter){
             if(this.domainType[k] === "Categorical"){
@@ -26269,17 +26296,8 @@ class Histogram extends Visualization{
 
     }
 
-    filterByDimension(args,keys) {
-        this.keys_filter = args;
-
-        if(keys){
-            let arr = this.keys_filter;
-            this.keys_filter = keys.filter(function (item) {
-                return item != arr[arr.indexOf(item)];
-            });
-
-        }
-
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 }
 
@@ -27027,7 +27045,7 @@ module.exports = ParallelBundling;
 
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
-let utils = require("./Utils.js");
+let sel = require("./selections/selections.js");
 
 class ParallelCoordinates extends Visualization{
 
@@ -27042,28 +27060,38 @@ class ParallelCoordinates extends Visualization{
 
         this.x = d3.scalePoint().range( [
             0,
-            this.svg.node().getBoundingClientRect().width-this.settings.paddingLeft-this.settings.paddingRight
+            this.visContentWidth-this.settings.paddingLeft-this.settings.paddingRight
         ], 0);
 
     }
 
     resize(){
+        super.resize();
 
         let pl = this.settings.paddingLeft;
         let pr = this.settings.paddingRight;
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
+
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
+
         if(this.x)
-            this.x.range([0, this.svg.node().getBoundingClientRect().width-pl-pr]);
+            this.x.range([0, this.visContentWidth]);
         else
-            this.x = d3.scalePoint().range([0, this.svg.node().getBoundingClientRect().width-pl-pr]);
+            this.x = d3.scalePoint().range([0, this.visContentWidth]);
 
 
         if(this.y) {
             for (let prop of this.keys_filter) {
                 //TODO: verificar como diferenciar entre scalePonint e Linear Contínuo.
                 // if (typeof this.y[prop].padding === "function")
-                this.y[prop].range([this.svg.node().getBoundingClientRect().height-pt-pb, 0]);
+                this.y[prop].range([this.visContentHeight, 0]);
                 // else
                 //     this.y[prop].range([$(this.svg.node()).height() -pt-pb, 0]);
             }
@@ -27082,11 +27110,15 @@ class ParallelCoordinates extends Visualization{
     }
 
     data(d){
-        let pt = this.settings.paddingTop;
-        let pb = this.settings.paddingBottom;
         super.data(d);
 
-        this.keys_filter ? this.filterByDimension(this.keys_filter,this.keys) : this.keys_filter = this.keys;
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
         this.x.domain(this.keys_filter);
         this.y = {};
@@ -27102,7 +27134,7 @@ class ParallelCoordinates extends Visualization{
             }
             this.y[k]
                 .domain(this.domain[k])
-                .range([this.svg.node().getBoundingClientRect().height-pt-pb, 0]);
+                .range([this.visContentHeight, 0]);
         }
 
         this.linesCoords =  [];
@@ -27241,6 +27273,7 @@ class ParallelCoordinates extends Visualization{
         if(highlighted)
             super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
+
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
 
@@ -27270,72 +27303,28 @@ class ParallelCoordinates extends Visualization{
     }
 
     select(selection){
-        let result = [];
-        if(Array.isArray(selection)){
-            if(Array.isArray(selection[0])){
-                for(let k=0; k<this.linesCoords.length; k++){
-                    data_block: {
-                        let polyLine = this.linesCoords[k];
-                        for (let j = 0; j < polyLine.length - 1; j++) {
-                            for (let i = 0; i < selection.length - 1; i++) {
-                                this.foreground.append("line")
-                                    .attr("x1", selection[i][0]-this.settings.paddingLeft)
-                                    .attr("x2", selection[i + 1][0]-this.settings.paddingLeft)
-                                    .attr("y1", selection[i][1]-this.settings.paddingTop)
-                                    .attr("y2", selection[i + 1][1]-this.settings.paddingTop)
-                                    .style("fill", "none")
-                                    .style("stroke", "red");
-                                let intersect = utils.lineIntersects(selection[i][0]-this.settings.paddingLeft,
-                                    selection[i][1]-this.settings.paddingTop,
-                                    selection[i + 1][0]-this.settings.paddingLeft,
-                                    selection[i + 1][1]-this.settings.paddingTop,
-                                    polyLine[j][0], polyLine[j][1],
-                                    polyLine[j + 1][0], polyLine[j + 1][1]);
-                                if (intersect) {
-                                    result.push(
-                                        this.foreground.select('path.data[data-index="' + k + '"]').node());
-                                    break data_block;
-                                }
-                            }
-                        }
-                    }
-                }
-            }else if(typeof selection[0] === "number"){
-                //seleção através de índices.
-                for(let i of selection){
-                    result.push(
-                        this.foreground.select('path.data[data-index="'+i+'"]').node());
-                }
-
-            }else if(selection[0] instanceof SVGPathElement){
-                for(let i of selection){
-                    result.push(i);
-                }
+        if(selection instanceof sel.Selection) {
+            if(this.foreground.node().hasChildNodes()) {
+                let child_list = this.foreground.node().childNodes;
+                let selected = selection.select(child_list, sel.Selection.Type.STROKE);
+                super.select(selected);
             }
         }
-        console.log(result);
-        super.select(result);
     }
 
     getSelected(){
         return this.selectionLayer.selectAll("*").nodes();
     }
 
-    filterByDimension(args,keys) {
-        this.keys_filter = args;
-
-        if(keys){
-            let arr = this.keys_filter;
-            this.keys_filter = keys.filter(function (item) {
-                return item != arr[arr.indexOf(item)];
-            });
-        }
+    filterByDimension(args) {
+        this.settings.filter = args;
     }
 
 }
 
 module.exports = ParallelCoordinates;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":33}],42:[function(require,module,exports){
+},{"./Visualization.js":46,"./selections/selections.js":47,"d3":33}],42:[function(require,module,exports){
+
 let d3 = require("d3");
 let _ = require("underscore");
 let Visualization = require("./Visualization.js");
@@ -27360,15 +27349,22 @@ class ScatterplotMatrix extends Visualization {
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
         let ip = this.settings.innerPadding;
+        //TODO: substituir essa chamada de método por: this.visContentWidth;
         let svgBounds = this.svg.node().getBoundingClientRect();
 
-        let keys_filter;
-        this.settings.filter ? keys_filter = this.settings.filter : keys_filter = this.keys;
+        if(this.settings.filter){
+            let arr = this.settings.filter;
+            this.settings.filter = this.keys.filter(function (item) {
+                return item != arr[arr.indexOf(item)];
+            });
+        }
 
-        this.cellWidth = (svgBounds.width - pl - pr - ip * (this.keys.length - 1)) / keys_filter.length;
-        this.cellHeight = (svgBounds.height - pt - pb - ip * (this.keys.length - 1)) / keys_filter.length;
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
-        for (let k of keys_filter) {
+        this.cellWidth = (svgBounds.width - pl - pr - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
+        this.cellHeight = (svgBounds.height - pt - pb - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
+
+        for (let k of this.keys_filter) {
             // if(this.domainType[k] === "Categorical"){
             //     this.x[k].rangePoints([0, this.cellWidth], 0);
             //     this.y[k].rangePoints([0, this.cellHeight], 0);
@@ -27390,7 +27386,6 @@ class ScatterplotMatrix extends Visualization {
         let ip = this.settings.innerPadding;
         super.data(d);
         let svgBounds = this.svg.node().getBoundingClientRect();
-        let keys_filter;
 
         //verificar instancia do filtro
         if(this.settings.filter){
@@ -27399,14 +27394,14 @@ class ScatterplotMatrix extends Visualization {
                 return item != arr[arr.indexOf(item)];
             });
         }
-        this.settings.filter ? keys_filter = this.settings.filter : keys_filter = this.keys;
+        this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
 
-        this.cellWidth = (svgBounds.width - pl - pr - ip * (this.keys.length - 1)) / keys_filter.length;
-        this.cellHeight = (svgBounds.height - pt - pb - ip * (this.keys.length - 1)) / keys_filter.length;
+        this.cellWidth = (svgBounds.width - pl - pr - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
+        this.cellHeight = (svgBounds.height - pt - pb - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
 
         this.x = {};
         this.y = {};
-        for (let k of keys_filter) {
+        for (let k of this.keys_filter) {
             if (this.domainType[k] === "Categorical") {
                 this.x[k] = d3.scalePoint()
                     .domain(this.domain[k])
@@ -27426,14 +27421,12 @@ class ScatterplotMatrix extends Visualization {
         return this;
     }
 
-
     redraw() {
 
         //Atualiza os Eixos
         let y_axes = this.y;
-        let select_keys;
-        this.settings.filter?select_keys= this.settings.filter:select_keys=this.keys;
-        let crossed = ScatterplotMatrix.cross(select_keys, select_keys);
+        this.settings.filter?this.select_keys= this.settings.filter:this.select_keys=this.keys;
+        let crossed = ScatterplotMatrix.cross(this.select_keys, this.select_keys);
 
         let scatterplot = this;
 
@@ -27547,7 +27540,7 @@ class ScatterplotMatrix extends Visualization {
 
         this.foreground.selectAll(".x.axis").remove();
         this.foreground.selectAll(".x.axis")
-            .data(select_keys)
+            .data(this.select_keys)
             .enter().append("g")
             .attr("class", "x axis")
             .attr("transform", (d, i) => {
@@ -27561,7 +27554,7 @@ class ScatterplotMatrix extends Visualization {
 
         this.foreground.selectAll(".y.axis").remove();
         this.foreground.selectAll(".y.axis")
-            .data(select_keys)
+            .data(this.select_keys)
             .enter().append("g")
             .attr("class", "y axis")
             .attr("transform", (d, i) => {
@@ -27629,6 +27622,7 @@ class ScatterplotMatrix extends Visualization {
         }
 
     }
+
 
     highlight(...args) {
 
@@ -27739,6 +27733,7 @@ class ScatterplotMatrix extends Visualization {
 }
 
 module.exports = ScatterplotMatrix;
+
 },{"./Utils.js":45,"./Visualization.js":46,"d3":33,"underscore":35}],43:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
@@ -28402,7 +28397,18 @@ let _makeHierarchy = function(obj){
 
 module.exports = Treemap;
 },{"./Utils.js":45,"./Visualization.js":46,"d3":33}],45:[function(require,module,exports){
-
+/**
+ *
+ * @param a x0 line1
+ * @param b y0 line1
+ * @param c x1 line1
+ * @param d y0 line1
+ * @param p x0 line2
+ * @param q y0 line2
+ * @param r x1 line2
+ * @param s y2 line2
+ * @returns {boolean} line1 intersects line2
+ */
 module.exports.lineIntersects = (a,b,c,d,p,q,r,s) => {
     let det, gamma, lambda;
     det = (c - a) * (s - q) - (r - p) * (d - b);
@@ -28511,12 +28517,13 @@ class Visualization {
 
     constructor(parentElement, settings){
         //default configuration
+        let vis = this;
         this.parentElement = parentElement;
         this.settings = {
             color: "#069",//"grey",//"#069",
             highlightColor: "#FF1122",//"#08E700",
             opacity: 1,
-            notSelectedOpacity: 0.3,
+            notSelectedOpacity: 0.15,
             size_type: "fit",//"absolute"
             width: 700,
             height: 300,
@@ -28541,7 +28548,8 @@ class Visualization {
             "highlightstart", "highlightend",
             "datamouseover","datamouseout", "dataclick", "datadblclick",
             "ancestormouseover", "ancestormouseout",
-            "ancestorclick", "ancestordblclick", "dimensiontitleclick");
+            "ancestorclick", "ancestordblclick", "dimensiontitleclick",
+            "datacanvasmouseup","datacanvasmousemove","datacanvasmousedown");
 
         let fit = this.settings.size_type === "fit";
 
@@ -28549,6 +28557,17 @@ class Visualization {
             .append("svg")
             .attr("width", fit ? "100%" : this.settings.width)
             .attr("height", fit ? "100%" : this.settings.height);
+        if(fit){
+            let bb = this.svg.node().getBoundingClientRect();
+            this.settings.width = bb.width;
+            this.settings.height = bb.height;
+        }
+        this.visContentWidth = this.settings.width
+            - this.settings.paddingLeft
+            - this.settings.paddingRight;
+        this.visContentHeight = this.settings.height
+            - this.settings.paddingTop
+            - this.settings.paddingBottom;
 
         let translatestr = "translate("+this.settings.paddingLeft+","+this.settings.paddingTop+")";
 
@@ -28556,6 +28575,12 @@ class Visualization {
         this.background = this.canvas.append("g")
             .attr("class", "background")
             .attr("transform", translatestr);
+        this.background.append("rect")
+            .attr("class", "vis_background")
+            .attr("x",0).attr("y",0)
+            .attr("width",this.visContentWidth)
+            .attr("height",this.visContentHeight)
+            .style("fill","#FFFFFF");
 
         this.foreground = this.canvas.append("g")
             .attr("class", "foreground")
@@ -28573,6 +28598,31 @@ class Visualization {
             .attr("class", "overlay")
             .attr("transform", translatestr);
 
+        this.interactionLayer = this.canvas.append("g")
+            .attr("class", "interactionLayer")
+            .attr("transform", translatestr);
+
+        this.interactionLayer.append("rect")
+            .attr("class", "vis_background")
+            .attr("x",0).attr("y",0)
+            .attr("width",this.visContentWidth)
+            .attr("height",this.visContentHeight)
+            .style("fill","none")
+            .style("opacity", 0)
+            .on("mousedown", interactionEvents("datacanvasmousedown"))
+            .on("mouseover", interactionEvents("datacanvasmousemove"))
+            .on("mouseup", interactionEvents("datacanvasmouseup"));
+
+        function interactionEvents(eventStr){
+            return function () {
+                vis.event.call(eventStr, this, {
+                    innerX: d3.event.layerX-vis.settings.paddingLeft,
+                    innerY: d3.event.layerY-vis.settings.paddingTop,
+                    d3Event: d3.event
+                });
+            }
+        }
+
         this.annotations = this.canvas.append("g")
             .attr("class", "annotations")
             .attr("transform", translatestr);
@@ -28580,6 +28630,8 @@ class Visualization {
         this.parentElement.__vis__ = this;
 
         this.isHighlighting = false;
+
+        this.setInteractionMode(true);
 
     }
 
@@ -28616,6 +28668,19 @@ class Visualization {
     }
 
     resize(){
+        let bb = this.svg.node().getBoundingClientRect();
+        this.settings.width = bb.width;
+        this.settings.height = bb.height;
+        this.visContentWidth = this.settings.width
+            - this.settings.paddingLeft
+            - this.settings.paddingRight;
+        this.visContentHeight = this.settings.height
+            - this.settings.paddingTop
+            - this.settings.paddingBottom;
+
+        this.svg.selectAll(".vis_background")
+            .attr("width",this.visContentWidth)
+            .attr("height",this.visContentHeight);
         return this;
     }
 
@@ -28665,13 +28730,11 @@ class Visualization {
 
 
     select(elems){
-        if(elems[0] instanceof Node){
-            for(let elem of elems){
-                this.selectionLayer.node().appendChild(elem);
-            }
-            this.foreground.selectAll(".data")
-                .style("opacity", this.settings.notSelectedOpacity);
+        for(let elem of elems){
+            this.selectionLayer.node().appendChild(elem);
         }
+        this.foreground.selectAll(".data")
+            .style("opacity", this.settings.notSelectedOpacity);
     }
     removeSelect(){
         let elems = this.selectionLayer.selectAll(".data").nodes();
@@ -28685,6 +28748,25 @@ class Visualization {
     }
 
 
+
+    comments(...args) {
+        this.svg.append("foreignObject")
+            .attr('class','boxComment')
+            .attr("width", 130)
+            .attr("height", 100)
+            .attr('x',args[0])
+            .attr('y',args[1])
+            .append("xhtml:div")
+            .attr('class','box')
+            .html("<textarea class='comment' placeholder='enter your comment'></textarea>")
+
+    }
+
+    removeComments(...args) {
+        this.svg.selectAll('.boxComment').remove();
+
+    }
+
     hierarchy(){}
 
     filterByDimension(){
@@ -28694,6 +28776,16 @@ class Visualization {
 
     orderByDimension(){
         this.orderedDimensions = [];
+    }
+
+    setInteractionMode(flag){
+        if(flag){
+            this.interactionLayer.select(".vis_background")
+                .style("fill","#FFFFFF");
+        }else{
+            this.interactionLayer.select(".vis_background")
+                .style("fill","none");
+        }
     }
 
     set autoresize(isAutoResize){
@@ -28721,5 +28813,154 @@ class Visualization {
 }
 
 module.exports = Visualization;
-},{"d3":33,"moment":34,"underscore":35}]},{},[1])(1)
+
+},{"d3":33,"moment":34,"underscore":35}],47:[function(require,module,exports){
+let utils = require("../Utils.js");
+
+class Selection {
+    constructor(){
+
+    }
+
+    select(SVGElements){
+        return (SVGElements instanceof Array || SVGElements instanceof NodeList) && SVGElements[0] instanceof SVGGeometryElement;
+    }
+
+    setSelection(){}
+
+    setPadding(){}
+
+    getSVGElement(){
+        return this.element;
+    }
+
+    // verifyTouch(queryElement, targetElement, type) {
+    //     let method = type === Selection.Type.FILL ? "isPointInFill":"isPointInStroke";
+    //     let l = Math.floor(queryElement.getTotalLength());
+    //     let point = {x:0,y:0};
+    //     console.log("this.verifyTouch() "+l);
+    //     for(let i=0; i<l;i++) {
+    //         let p = queryElement.getPointAtLength(i);
+    //         console.log("tentando: "+point);
+    //         if (targetElement[method](point)) {
+    //             console.log("foi");
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
+}
+
+Selection.Type = {FILL: 0, STROKE: 1};
+
+class LineSelection extends Selection{
+    constructor(line){
+        super();
+        this.element = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        this.setSelection.apply(this, arguments);
+    }
+
+    select(SVGElements, type){
+        let selected = [];
+        if(super.select(SVGElements)){
+            for(let elem of SVGElements){
+                if(this.intersects(elem)){
+                    selected.push(elem);
+                }
+            }
+        }
+        return selected;
+    }
+
+    setSelection(line){
+        if(line instanceof Object){
+            this.x1 = line.x1 || 0;
+            this.x2 = line.x2 || 0;
+            this.y1 = line.y1 || 0;
+            this.y2 = line.y2 || 0;
+        }else if(line instanceof Array){
+            this.x1 = line[0] || 0;
+            this.y1 = line[1] || 0;
+            this.x2 = line[2] || 0;
+            this.y2 = line[3] || 0;
+        }else if(typeof line === "number"){
+            this.x1 = arguments[0];
+            this.y1 = arguments[1];
+            this.x2 = arguments[2];
+            this.y2 = arguments[3];
+        }else{
+            throw "Argumentos Errados... espera-se uma linha, obtido: "
+            +arguments[0]+" "+arguments[1]+" "+arguments[2]+" "+arguments[3];
+        }
+        this.stroke_width = 1;
+        this.stroke_color = "black";
+
+
+        this.element.setAttribute("x1", this.x1);
+        this.element.setAttribute("y1", this.y1);
+        this.element.setAttribute("x2", this.x2);
+        this.element.setAttribute("y2", this.y2);
+        this.element.setAttribute("stroke-width", this.stroke_width);
+        this.element.setAttribute("stroke", this.stroke_color);
+
+    }
+
+    intersects(elem){
+        if(elem instanceof SVGPathElement){
+            let total = Math.floor(elem.getTotalLength()/4)-1;
+            let tp1,tp2;
+            for(let i=0;i<total;i++) {
+                tp1 = elem.getPointAtLength(i*4);
+                tp2 = elem.getPointAtLength((i+1)*4);
+                if (utils.lineIntersects(tp1.x, tp1.y,
+                        tp2.x, tp2.y, this.x1, this.y1,
+                        this.x2, this.y2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+}
+
+class RectSelection extends Selection {
+    constructor(rect){
+        super();
+        if(rect instanceof Object){
+            this.x1 = rect.x1 || 0;
+            this.x2 = rect.x2 || 0;
+            this.y1 = rect.y1 || 0;
+            this.y2 = rect.y2 || 0;
+        }else if(rect instanceof Array){
+            this.x1 = rect[0] || 0;
+            this.y1 = rect[1] || 0;
+            this.x2 = rect[2] || 0;
+            this.y2 = rect[3] || 0;
+        }else if(rect instanceof Number){
+            this.x1 = arguments[0];
+            this.y1 = arguments[1];
+            this.x2 = arguments[2];
+            this.y2 = arguments[3];
+        }
+    }
+}
+
+class FreeDrawingSelection extends Selection {
+
+}
+
+class LassoSelection extends Selection {
+
+}
+
+
+module.exports = {
+    Selection,
+    LineSelection,
+    RectSelection,
+    FreeDrawingSelection,
+    LassoSelection
+};
+},{"../Utils.js":45}]},{},[1])(1)
 });

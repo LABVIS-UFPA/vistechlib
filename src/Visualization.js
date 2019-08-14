@@ -237,6 +237,25 @@ class Visualization {
     }
 
 
+
+    comments(...args) {
+        this.svg.append("foreignObject")
+            .attr('class','boxComment')
+            .attr("width", 130)
+            .attr("height", 100)
+            .attr('x',args[0])
+            .attr('y',args[1])
+            .append("xhtml:div")
+            .attr('class','box')
+            .html("<textarea class='comment' placeholder='enter your comment'></textarea>")
+
+    }
+
+    removeComments(...args) {
+        this.svg.selectAll('.boxComment').remove();
+
+    }
+
     hierarchy(){}
 
     filterByDimension(){

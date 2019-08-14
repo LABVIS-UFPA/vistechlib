@@ -13,7 +13,81 @@
         .axis text{
             user-select: none;
         }
+
+
+        .box:before
+        {
+            border-color: rgba(0, 0, 0, 0);
+            border-style: solid;
+            border-width: 8px 8px 0;
+            bottom: -8px;
+            content: "";
+            display: block;
+            left: 20px;
+            position: absolute;
+            width: 0;
+        }
+        .box:after {
+            border-color: #82822f rgba(0, 0, 0, 0);
+            border-style: solid;
+            border-width: 6px 6px 0;
+            bottom: -6px;
+            content: "";
+            display: block;
+            left: 22px;
+            position: absolute;
+            width: 0;
+        }
+        .box {
+            opacity: 0.9;
+            background:lightgoldenrodyellow;
+            border: 1.9px dashed #4e4e4e;
+            border-radius: 5px;
+            position: relative;
+            width:120px;
+            height:90px;
+
+        }
+
+        .comment{
+            resize: none;
+            border:none;
+            margin:10px;
+            width: 80%;
+            height: 70%;
+            font-size:16px;
+            background: none;
+            color: #404040;
+            font-family: "Ubuntu-Italic", "Lucida Sans", helvetica, sans;
+
+        }
+
+        /* Let's get this party started */
+        .comment::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        /* Track */
+        .comment::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+        }
+
+        /* Handle */
+        .comment::-webkit-scrollbar-thumb {
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            background: rgba(77,166,255,0.8);
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+        }
+        .comment::-webkit-scrollbar-thumb:window-inactive {
+            background: rgba(77,166,255,0.4);
+        }
+
+
     </style>
+
 
 </head>
 <body style="width: 100%;height: 100%;margin: 0">
@@ -27,7 +101,7 @@
 
 
     console.log(vistechlib);
-    parallel = new vistechlib.ParallelBundling(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
+    parallel = new vistechlib.BarChart(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
     parallel.filterByDimension(["x"]);
     // parallel.filterByDimension(["w","r"]);
 
@@ -148,21 +222,24 @@
     let colors = ["#66aa00", "#b82e2e", "#316395", "#994499", "#3b3eac","#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477"];
 
     parallel.setColor("purple");
-
+    parallel.setInteractionMode(false);
 
     parallel//.setLabel((d)=>{ return d.w; })
         .redraw()
         .on("datamouseover", function (d, i) {
             console.log("d:",d);
-            parallel.highlight(d, i);
         })
         .on("datamouseout", function (d, i) {
-            parallel.removeHighlight(d, i);
+            // parallel.removeHighlight(d, i);
+            // parallel.removeComments();
         })
         .on("highlightstart", function (d, i) {
             console.log("highlightstart", this);
         })
-        .on("dimensiontitleclick", function(d){
+        .on("dataclick", function(d,i){
+            parallel.comments(event.clientX,event.clientY);
+            // parallel.highlight(d, i);
+            parallel.highlight(d, i)
             console.log("clicou no titulo", d);
 
         });
