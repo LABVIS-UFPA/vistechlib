@@ -173,7 +173,7 @@ class Treemap extends Visualization{
         let dataItens = this.d_h.leaves();
         let obj =  Object.entries(args[0].data);
         let text = "";
-        
+
         for (let j = 0; j < args[2].length; j++) {
           for (let i = 0; i < obj.length; i++) {
             if(args[2][j]===obj[i][0]){
@@ -321,7 +321,7 @@ let _hierarchy = function(attrs){
                 }
             }
             this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
-            
+
         }
 
     }

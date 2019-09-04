@@ -11,4 +11,5 @@ exports.Histogram = require("./src/Histogram.js");
 exports.BoxPlot = require("./src/BoxPlot.js");
 exports.Sunburst = require("./src/Sunburst.js");
 exports.BarChart = require("./src/BarChart.js");
-exports.selection = require("./src/selections/selections.js");
+exports.CirclePacking = require("./src/CirclePacking.js");
+exports.selection = require("./src/selections/selections.js")

@@ -12,8 +12,9 @@ exports.Histogram = require("./src/Histogram.js");
 exports.BoxPlot = require("./src/BoxPlot.js");
 exports.Sunburst = require("./src/Sunburst.js");
 exports.BarChart = require("./src/BarChart.js");
-exports.selection = require("./src/selections/selections.js");
-},{"./src/BarChart.js":36,"./src/BeeswarmPlot.js":37,"./src/BoxPlot.js":38,"./src/Histogram.js":39,"./src/ParallelBundling.js":40,"./src/ParallelCoordinates.js":41,"./src/ScatterplotMatrix.js":42,"./src/Sunburst.js":43,"./src/Treemap.js":44,"./src/Visualization.js":46,"./src/selections/selections.js":47}],2:[function(require,module,exports){
+exports.CirclePacking = require("./src/CirclePacking.js");
+exports.selection = require("./src/selections/selections.js")
+},{"./src/BarChart.js":36,"./src/BeeswarmPlot.js":37,"./src/BoxPlot.js":38,"./src/CirclePacking.js":39,"./src/Histogram.js":40,"./src/ParallelBundling.js":41,"./src/ParallelCoordinates.js":42,"./src/ScatterplotMatrix.js":43,"./src/Sunburst.js":44,"./src/Treemap.js":45,"./src/Visualization.js":47,"./src/selections/selections.js":48}],2:[function(require,module,exports){
 // https://d3js.org/d3-array/ v1.2.4 Copyright 2018 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -25329,7 +25330,7 @@ class BarChart extends Visualization{
 }
 
 module.exports = BarChart;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":33}],37:[function(require,module,exports){
+},{"./Utils.js":46,"./Visualization.js":47,"d3":33}],37:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
@@ -25696,7 +25697,7 @@ class BeeswarmPlot extends Visualization{
 }
 
 module.exports = BeeswarmPlot;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":33}],38:[function(require,module,exports){
+},{"./Utils.js":46,"./Visualization.js":47,"d3":33}],38:[function(require,module,exports){
 let d3 = require("d3");
 
 let Visualization = require("./Visualization.js");
@@ -25949,7 +25950,268 @@ class BoxPlot extends Visualization{
 }
 
 module.exports = BoxPlot;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":33}],39:[function(require,module,exports){
+},{"./Utils.js":46,"./Visualization.js":47,"d3":33}],39:[function(require,module,exports){
+let d3 = require("d3");
+let Visualization = require("./Visualization.js");
+let utils = require("./Utils.js");
+
+
+class CirclePacking extends Visualization{
+
+    constructor(parentElement, settings){
+        super(parentElement, settings);
+        this.name = "CirclePacking";
+    }
+
+    _putDefaultSettings(){
+        this.settings.labelVAlign = "top";
+        this.settings.labelHAlign = "left";
+        this.settings.paddingTop =0 ;
+        this.settings.paddingBottom =40;
+        this.settings.paddingLeft = 10;
+        this.settings.paddingRight = 10;
+    }
+
+    resize(){
+        _makeHierarchy.call(this, this.d_h);
+        let svgBounds = this.svg.node().getBoundingClientRect();
+        this.h =  Math.min(svgBounds.height,svgBounds.width);
+        this.w = Math.min(svgBounds.height,svgBounds.width);
+        this.r = Math.min(svgBounds.height,svgBounds.width)/2;
+
+        this.redraw();
+        return this;
+    }
+
+    data(d){
+
+        super.data(d);
+        for(let k of this.keys){
+            if(this.domainType[k] === "Categorical"){
+            }
+            if(this.domainType[k] === "Numeric"){
+                console.log(this.domain[k]);
+                let  values= [];
+                for (let i = 0; i <d.length ; i++) {
+                    values.push(d[i][k]);
+                }
+                values = [...new Set(values)];
+                this.domain[k] = values;
+            }
+            if(this.domainType[k] === "Time"){
+
+            }
+        }
+
+        let svgBounds = this.svg.node().getBoundingClientRect();
+
+        this.w = Math.min(svgBounds.height,svgBounds.width);
+        this.h =  Math.min(svgBounds.height,svgBounds.width);
+        this.r = Math.min(this.w, this.h) / 2;
+
+        if(this.settings.hierarchies){
+            _hierarchy.call(this, this.settings.hierarchies);
+        }else{
+            let root = {name:"root", children: d};
+            if(this.settings.size){
+                let size = this.settings.size;
+                this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
+
+
+            }else{
+                this.d_h = d3.hierarchy(root).count();
+            }
+        }
+        _makeHierarchy.call(this, this.d_h);
+
+
+        this.d_parents = [];
+        this.d_h.each((d) => {
+            if(d.height !== 0)
+                this.d_parents.push(d);
+        });
+    }
+
+    redraw(){
+        let circlePacking = this;
+
+        let svgBounds = this.svg.node().getBoundingClientRect();
+        let svg = this.foreground;
+
+
+        let color = d3.scaleLinear()
+            .domain([0, 5])
+            .range(["white", "grey"])
+            .interpolate(d3.interpolateHcl)
+
+        const root =this.d_h;
+
+        let width = svgBounds.width;
+        let height =svgBounds.height;
+
+        svg
+            .attr("transform",`translate(${width/2},${height/2})`)
+            .attr("width",svgBounds.width)
+            .attr("height",svgBounds.height)
+            .style("background", color(0))
+            .style("cursor", "pointer")
+
+
+        d3.selectAll('.circlePacking').remove();
+
+        const node = svg.append("g")
+            .attr("class","circlePacking")
+            .selectAll("circle")
+            .data(root.descendants())
+            .join("circle")
+            .attr('class',d=>d.children?'father':'data')
+            .attr("fill", d => d.children ? color(d.depth) :this.settings.color)
+            .attr("data-index", function(d, i){return i; })
+        //     .style("fill", this.settings.color)
+        //     .style("stroke", "black")
+        //   .attr("pointer-events", d => !d.children ? "none" : null)
+        //.on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
+        //.on("mouseout", function() { d3.select(this).attr("stroke", null); })
+        //.on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
+
+
+        // let enterSelection = node.enter().append("circle")
+        //     .attr("class", "data")
+        //     .attr("data-index", function(d, i){return i; })
+        //     //.attr("parent",d=>d.)
+        //     .style("fill", this.settings.color)
+        //     .style("stroke", "black")
+        //     .style("stroke-width", "0.5px");
+
+        const removelabel = svg.select('.labels').remove();
+        const label = svg.append("g")
+            .attr('class','labels')
+            .style("font", "10px sans-serif")
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle")
+            .selectAll("text")
+            .data(root.descendants().slice(1))
+            .join("text")
+            .style("fill-opacity", d => d.parent === root ? 1 : 0)
+            .style("display", d => d.parent === root ? "inline" : "none")
+          //  .text(d => d.data.data.name);
+
+
+        zoomTo([root.x, root.y, root.r * 2]);
+
+
+        function zoomTo(v) {
+            const k = (svgBounds.height-40) / v[2];
+
+            let view = v;
+
+            label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+            node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+            node.attr("r", d => d.r * k);
+        }
+
+
+        this._bindDataMouseEvents(node);
+        return super.redraw();
+    }
+
+    detail(...args){
+
+    }
+
+    highlight(...args){
+
+    }
+
+    removeHighlight(...args){
+
+    }
+
+    getHighlightElement(i){
+
+    }
+
+
+    select(selection){
+
+    }
+
+    setSize(attrs){
+
+    }
+
+    hierarchy(attrs){
+        this.settings.hierarchies = attrs;
+        if(this.domain)
+            _hierarchy.call(this, attrs);
+        return this;
+    }
+
+    // setLabel(func){
+    //     this.settings.label = func;
+    //     return this;
+    // }
+
+}
+
+let _hierarchy = function(attrs){
+    let size = this.settings.size;
+    let group = (data, index) => {
+        if(index >= attrs.length)
+            return;
+
+        let attr = attrs[index];
+        for(let d of this.domain[attr]){
+            let child = {name: d, children: []};
+            data.children.push(child);
+            group(child, index+1);
+        }
+    };
+
+    let hie = {name: "root", children:[]};
+    if(attrs && attrs.length > 0){
+        group(hie, 0);
+
+        for(let d of this.d){
+            let aux = hie;
+            for(let attr of attrs){
+                for(let c of aux.children){
+                    if(c.name === d[attr]){
+                        aux = c;
+                        break;
+                    }
+                }
+            }
+            aux.children.push(d);
+        }
+        if(size){
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+        }else{
+            this.d_h = d3.hierarchy(hie).count();
+        }
+
+    }
+};
+
+// let _setLabel = function(func){
+// };
+
+let _makeHierarchy = function(obj){
+    let svgBounds = this.svg.node().getBoundingClientRect();
+
+    d3.pack()
+        .size([svgBounds.width,svgBounds.height])
+       // .padding(1)
+     //  (d3.hierarchy(obj)
+       //     .sum(d => d.value)
+    //        .sort((a, b) => b.value - a.value))
+    (obj)
+};
+
+
+module.exports = CirclePacking;
+
+},{"./Utils.js":46,"./Visualization.js":47,"d3":33}],40:[function(require,module,exports){
 let d3 = require("d3");
 
 let Visualization = require("./Visualization.js");
@@ -26303,7 +26565,7 @@ class Histogram extends Visualization{
 
 
 module.exports = Histogram;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":33}],40:[function(require,module,exports){
+},{"./Utils.js":46,"./Visualization.js":47,"d3":33}],41:[function(require,module,exports){
 
 let d3 = require("d3");
 let _ = require("underscore");
@@ -27041,7 +27303,7 @@ class ParallelBundling extends Visualization{
 
 
 module.exports = ParallelBundling;
-},{"./Visualization.js":46,"d3":33,"d3-path":19,"underscore":35}],41:[function(require,module,exports){
+},{"./Visualization.js":47,"d3":33,"d3-path":19,"underscore":35}],42:[function(require,module,exports){
 
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
@@ -27323,7 +27585,7 @@ class ParallelCoordinates extends Visualization{
 }
 
 module.exports = ParallelCoordinates;
-},{"./Visualization.js":46,"./selections/selections.js":47,"d3":33}],42:[function(require,module,exports){
+},{"./Visualization.js":47,"./selections/selections.js":48,"d3":33}],43:[function(require,module,exports){
 
 let d3 = require("d3");
 let _ = require("underscore");
@@ -27734,7 +27996,7 @@ class ScatterplotMatrix extends Visualization {
 
 module.exports = ScatterplotMatrix;
 
-},{"./Utils.js":45,"./Visualization.js":46,"d3":33,"underscore":35}],43:[function(require,module,exports){
+},{"./Utils.js":46,"./Visualization.js":47,"d3":33,"underscore":35}],44:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
@@ -28020,7 +28282,7 @@ let _makeHierarchy = function(obj){
 
 
 module.exports = Sunburst;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":33}],44:[function(require,module,exports){
+},{"./Utils.js":46,"./Visualization.js":47,"d3":33}],45:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
@@ -28196,7 +28458,7 @@ class Treemap extends Visualization{
         let dataItens = this.d_h.leaves();
         let obj =  Object.entries(args[0].data);
         let text = "";
-        
+
         for (let j = 0; j < args[2].length; j++) {
           for (let i = 0; i < obj.length; i++) {
             if(args[2][j]===obj[i][0]){
@@ -28344,7 +28606,7 @@ let _hierarchy = function(attrs){
                 }
             }
             this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
-            
+
         }
 
     }
@@ -28396,7 +28658,8 @@ let _makeHierarchy = function(obj){
 
 
 module.exports = Treemap;
-},{"./Utils.js":45,"./Visualization.js":46,"d3":33}],45:[function(require,module,exports){
+
+},{"./Utils.js":46,"./Visualization.js":47,"d3":33}],46:[function(require,module,exports){
 /**
  *
  * @param a x0 line1
@@ -28508,7 +28771,7 @@ module.exports.parseTranslate = (elem) => {
 //             b2.y2 < b1.y1);
 //     }
 // }
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 let _ = require("underscore");
 let d3 = require("d3");
 let moment = require('moment');
@@ -28747,9 +29010,9 @@ class Visualization {
         return this.selectionLayer.selectAll("*").nodes();
     }
 
-
-
     comments(...args) {
+
+        console.log("si fude");
         this.svg.append("foreignObject")
             .attr('class','boxComment')
             .attr("width", 130)
@@ -28814,7 +29077,7 @@ class Visualization {
 
 module.exports = Visualization;
 
-},{"d3":33,"moment":34,"underscore":35}],47:[function(require,module,exports){
+},{"d3":33,"moment":34,"underscore":35}],48:[function(require,module,exports){
 let utils = require("../Utils.js");
 
 class Selection {
@@ -28962,5 +29225,5 @@ module.exports = {
     FreeDrawingSelection,
     LassoSelection
 };
-},{"../Utils.js":45}]},{},[1])(1)
+},{"../Utils.js":46}]},{},[1])(1)
 });

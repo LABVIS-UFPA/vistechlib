@@ -101,12 +101,12 @@
 
 
     console.log(vistechlib);
-    parallel = new vistechlib.BarChart(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
-    parallel.filterByDimension(["x"]);
-    // parallel.filterByDimension(["w","r"]);
+    parallel = new vistechlib.CirclePacking(document.getElementById("canvasTest"), {labelVAlign: "top", labelHAlign: "right"});
+   // parallel.filterByDimension(["x"]);
+     //parallel.filterByDimension(["w","r"]);
 
-    // parallel.hierarchy(["w","r","x","z"]);
-    // parallel.setSize("x");
+     parallel.hierarchy(["w","r","x"]);
+     parallel.setSize("x");
 
 
     parallel.data([
@@ -221,13 +221,24 @@
     // console.log("------------data:",parallel.d[0]["x"]);
     let colors = ["#66aa00", "#b82e2e", "#316395", "#994499", "#3b3eac","#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477"];
 
-    parallel.setColor("purple");
-    parallel.setInteractionMode(false);
+    parallel.setColor(function (d,i) {
+        return "red"
+        if(d.data['w']){
+            console.log("certo");
+            return "blue";
 
-    parallel//.setLabel((d)=>{ return d.w; })
+        }
+        else{
+            console.log("erraado");
+          //  return "#ccc";
+        }
+    });
+    parallel.setInteractionMode(false);
+    parallel//.setLabel((d)=
+    // >{ return d.w; })
         .redraw()
         .on("datamouseover", function (d, i) {
-            console.log("d:",d);
+            //console.log("d:",d);
         })
         .on("datamouseout", function (d, i) {
             // parallel.removeHighlight(d, i);
@@ -237,9 +248,9 @@
             console.log("highlightstart", this);
         })
         .on("dataclick", function(d,i){
-            parallel.comments(event.clientX,event.clientY);
+          //  parallel.comments(event.clientX,event.clientY);
             // parallel.highlight(d, i);
-            parallel.highlight(d, i)
+            //parallel.highlight(d, i)
             console.log("clicou no titulo", d);
 
         });

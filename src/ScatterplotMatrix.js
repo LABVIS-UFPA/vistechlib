@@ -1,3 +1,4 @@
+
 let d3 = require("d3");
 let _ = require("underscore");
 let Visualization = require("./Visualization.js");
@@ -93,7 +94,6 @@ class ScatterplotMatrix extends Visualization {
         }
         return this;
     }
-
 
     redraw() {
 
@@ -296,6 +296,7 @@ class ScatterplotMatrix extends Visualization {
         }
 
     }
+
 
     highlight(...args) {
 

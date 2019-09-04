@@ -236,9 +236,9 @@ class Visualization {
         return this.selectionLayer.selectAll("*").nodes();
     }
 
-
-
     comments(...args) {
+
+        console.log("si fude");
         this.svg.append("foreignObject")
             .attr('class','boxComment')
             .attr("width", 130)
