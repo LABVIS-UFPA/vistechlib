@@ -802,12 +802,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 },{}],4:[function(require,module,exports){
-// https://d3js.org/d3-brush/ v1.0.6 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-brush/ v1.1.3 Copyright 2019 Mike Bostock
 (function (global, factory) {
-typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-selection'), require('d3-dispatch'), require('d3-drag'), require('d3-interpolate'), require('d3-transition')) :
-typeof define === 'function' && define.amd ? define(['exports', 'd3-selection', 'd3-dispatch', 'd3-drag', 'd3-interpolate', 'd3-transition'], factory) :
-(factory((global.d3 = global.d3 || {}),global.d3,global.d3,global.d3,global.d3,global.d3));
-}(this, (function (exports,d3Selection,d3Dispatch,d3Drag,d3Interpolate,d3Transition) { 'use strict';
+typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-dispatch'), require('d3-drag'), require('d3-interpolate'), require('d3-selection'), require('d3-transition')) :
+typeof define === 'function' && define.amd ? define(['exports', 'd3-dispatch', 'd3-drag', 'd3-interpolate', 'd3-selection', 'd3-transition'], factory) :
+(global = global || self, factory(global.d3 = global.d3 || {}, global.d3, global.d3, global.d3, global.d3, global.d3));
+}(this, function (exports, d3Dispatch, d3Drag, d3Interpolate, d3Selection, d3Transition) { 'use strict';
 
 function constant(x) {
   return function() {
@@ -835,24 +835,38 @@ var MODE_DRAG = {name: "drag"},
     MODE_HANDLE = {name: "handle"},
     MODE_CENTER = {name: "center"};
 
+function number1(e) {
+  return [+e[0], +e[1]];
+}
+
+function number2(e) {
+  return [number1(e[0]), number1(e[1])];
+}
+
+function toucher(identifier) {
+  return function(target) {
+    return d3Selection.touch(target, d3Selection.event.touches, identifier);
+  };
+}
+
 var X = {
   name: "x",
-  handles: ["e", "w"].map(type),
-  input: function(x, e) { return x && [[x[0], e[0][1]], [x[1], e[1][1]]]; },
+  handles: ["w", "e"].map(type),
+  input: function(x, e) { return x == null ? null : [[+x[0], e[0][1]], [+x[1], e[1][1]]]; },
   output: function(xy) { return xy && [xy[0][0], xy[1][0]]; }
 };
 
 var Y = {
   name: "y",
   handles: ["n", "s"].map(type),
-  input: function(y, e) { return y && [[e[0][0], y[0]], [e[1][0], y[1]]]; },
+  input: function(y, e) { return y == null ? null : [[e[0][0], +y[0]], [e[1][0], +y[1]]]; },
   output: function(xy) { return xy && [xy[0][1], xy[1][1]]; }
 };
 
 var XY = {
   name: "xy",
-  handles: ["n", "e", "s", "w", "nw", "ne", "se", "sw"].map(type),
-  input: function(xy) { return xy; },
+  handles: ["n", "w", "e", "s", "nw", "ne", "sw", "se"].map(type),
+  input: function(xy) { return xy == null ? null : number2(xy); },
   output: function(xy) { return xy; }
 };
 
@@ -919,12 +933,20 @@ function type(t) {
 
 // Ignore right-click, since that should open the context menu.
 function defaultFilter() {
-  return !d3Selection.event.button;
+  return !d3Selection.event.ctrlKey && !d3Selection.event.button;
 }
 
 function defaultExtent() {
   var svg = this.ownerSVGElement || this;
+  if (svg.hasAttribute("viewBox")) {
+    svg = svg.viewBox.baseVal;
+    return [[svg.x, svg.y], [svg.x + svg.width, svg.y + svg.height]];
+  }
   return [[0, 0], [svg.width.baseVal.value, svg.height.baseVal.value]];
+}
+
+function defaultTouchable() {
+  return navigator.maxTouchPoints || ("ontouchstart" in this);
 }
 
 // Like d3.local, but with the name “__brush” rather than auto-generated.
@@ -958,6 +980,8 @@ function brush() {
 function brush$1(dim) {
   var extent = defaultExtent,
       filter = defaultFilter,
+      touchable = defaultTouchable,
+      keys = true,
       listeners = d3Dispatch.dispatch(brush, "start", "brush", "end"),
       handleSize = 6,
       touchending;
@@ -1005,8 +1029,13 @@ function brush$1(dim) {
         .each(redraw)
         .attr("fill", "none")
         .attr("pointer-events", "all")
-        .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)")
-        .on("mousedown.brush touchstart.brush", started);
+        .on("mousedown.brush", started)
+      .filter(touchable)
+        .on("touchstart.brush", started)
+        .on("touchmove.brush", touchmoved)
+        .on("touchend.brush touchcancel.brush", touchended)
+        .style("touch-action", "none")
+        .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
   }
 
   brush.move = function(group, selection) {
@@ -1023,12 +1052,12 @@ function brush$1(dim) {
                 i = d3Interpolate.interpolate(selection0, selection1);
 
             function tween(t) {
-              state.selection = t === 1 && empty(selection1) ? null : i(t);
+              state.selection = t === 1 && selection1 === null ? null : i(t);
               redraw.call(that);
               emit.brush();
             }
 
-            return selection0 && selection1 ? tween : tween(1);
+            return selection0 !== null && selection1 !== null ? tween : tween(1);
           });
     } else {
       group
@@ -1040,11 +1069,15 @@ function brush$1(dim) {
                 emit = emitter(that, args).beforestart();
 
             d3Transition.interrupt(that);
-            state.selection = selection1 == null || empty(selection1) ? null : selection1;
+            state.selection = selection1 === null ? null : selection1;
             redraw.call(that);
             emit.start().brush().end();
           });
     }
+  };
+
+  brush.clear = function(group) {
+    brush.move(group, null);
   };
 
   function redraw() {
@@ -1077,8 +1110,8 @@ function brush$1(dim) {
     }
   }
 
-  function emitter(that, args) {
-    return that.__brush.emitter || new Emitter(that, args);
+  function emitter(that, args, clean) {
+    return (!clean && that.__brush.emitter) || new Emitter(that, args);
   }
 
   function Emitter(that, args) {
@@ -1095,6 +1128,7 @@ function brush$1(dim) {
     },
     start: function() {
       if (this.starting) this.starting = false, this.emit("start");
+      else this.emit("brush");
       return this;
     },
     brush: function() {
@@ -1111,13 +1145,12 @@ function brush$1(dim) {
   };
 
   function started() {
-    if (d3Selection.event.touches) { if (d3Selection.event.changedTouches.length < d3Selection.event.touches.length) return noevent(); }
-    else if (touchending) return;
+    if (touchending && !d3Selection.event.touches) return;
     if (!filter.apply(this, arguments)) return;
 
     var that = this,
         type = d3Selection.event.target.__data__.type,
-        mode = (d3Selection.event.metaKey ? type = "overlay" : type) === "selection" ? MODE_DRAG : (d3Selection.event.altKey ? MODE_CENTER : MODE_HANDLE),
+        mode = (keys && d3Selection.event.metaKey ? type = "overlay" : type) === "selection" ? MODE_DRAG : (keys && d3Selection.event.altKey ? MODE_CENTER : MODE_HANDLE),
         signX = dim === Y ? null : signsX[type],
         signY = dim === X ? null : signsY[type],
         state = local(that),
@@ -1127,17 +1160,19 @@ function brush$1(dim) {
         N = extent[0][1], n0, n1,
         E = extent[1][0], e0, e1,
         S = extent[1][1], s0, s1,
-        dx,
-        dy,
+        dx = 0,
+        dy = 0,
         moving,
-        shifting = signX && signY && d3Selection.event.shiftKey,
+        shifting = signX && signY && keys && d3Selection.event.shiftKey,
         lockX,
         lockY,
-        point0 = d3Selection.mouse(that),
+        pointer = d3Selection.event.touches ? toucher(d3Selection.event.changedTouches[0].identifier) : d3Selection.mouse,
+        point0 = pointer(that),
         point = point0,
-        emit = emitter(that, arguments).beforestart();
+        emit = emitter(that, arguments, true).beforestart();
 
     if (type === "overlay") {
+      if (selection) moving = true;
       state.selection = selection = [
         [w0 = dim === Y ? W : point0[0], n0 = dim === X ? N : point0[1]],
         [e0 = dim === Y ? E : w0, s0 = dim === X ? S : n0]
@@ -1161,15 +1196,15 @@ function brush$1(dim) {
         .attr("cursor", cursors[type]);
 
     if (d3Selection.event.touches) {
-      group
-          .on("touchmove.brush", moved, true)
-          .on("touchend.brush touchcancel.brush", ended, true);
+      emit.moved = moved;
+      emit.ended = ended;
     } else {
       var view = d3Selection.select(d3Selection.event.view)
-          .on("keydown.brush", keydowned, true)
-          .on("keyup.brush", keyupped, true)
           .on("mousemove.brush", moved, true)
           .on("mouseup.brush", ended, true);
+      if (keys) view
+          .on("keydown.brush", keydowned, true)
+          .on("keyup.brush", keyupped, true);
 
       d3Drag.dragDisable(d3Selection.event.view);
     }
@@ -1180,7 +1215,7 @@ function brush$1(dim) {
     emit.start();
 
     function moved() {
-      var point1 = d3Selection.mouse(that);
+      var point1 = pointer(that);
       if (shifting && !lockX && !lockY) {
         if (Math.abs(point1[0] - point[0]) > Math.abs(point1[1] - point[1])) lockY = true;
         else lockX = true;
@@ -1252,7 +1287,6 @@ function brush$1(dim) {
         if (d3Selection.event.touches.length) return;
         if (touchending) clearTimeout(touchending);
         touchending = setTimeout(function() { touchending = null; }, 500); // Ghost clicks are delayed!
-        group.on("touchmove.brush touchend.brush touchcancel.brush", null);
       } else {
         d3Drag.dragEnable(d3Selection.event.view, moving);
         view.on("keydown.brush keyup.brush mousemove.brush mouseup.brush", null);
@@ -1334,15 +1368,23 @@ function brush$1(dim) {
     }
   }
 
+  function touchmoved() {
+    emitter(this, arguments).moved();
+  }
+
+  function touchended() {
+    emitter(this, arguments).ended();
+  }
+
   function initialize() {
     var state = this.__brush || {selection: null};
-    state.extent = extent.apply(this, arguments);
+    state.extent = number2(extent.apply(this, arguments));
     state.dim = dim;
     return state;
   }
 
   brush.extent = function(_) {
-    return arguments.length ? (extent = typeof _ === "function" ? _ : constant([[+_[0][0], +_[0][1]], [+_[1][0], +_[1][1]]]), brush) : extent;
+    return arguments.length ? (extent = typeof _ === "function" ? _ : constant(number2(_)), brush) : extent;
   };
 
   brush.filter = function(_) {
@@ -1351,6 +1393,10 @@ function brush$1(dim) {
 
   brush.handleSize = function(_) {
     return arguments.length ? (handleSize = +_, brush) : handleSize;
+  };
+
+  brush.keyModifiers = function(_) {
+    return arguments.length ? (keys = !!_, brush) : keys;
   };
 
   brush.on = function() {
@@ -1362,13 +1408,13 @@ function brush$1(dim) {
 }
 
 exports.brush = brush;
+exports.brushSelection = brushSelection;
 exports.brushX = brushX;
 exports.brushY = brushY;
-exports.brushSelection = brushSelection;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 
 },{"d3-dispatch":9,"d3-drag":10,"d3-interpolate":18,"d3-selection":25,"d3-transition":30}],5:[function(require,module,exports){
 // https://d3js.org/d3-chord/ v1.0.6 Copyright 2018 Mike Bostock
@@ -1822,12 +1868,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 },{}],7:[function(require,module,exports){
-// https://d3js.org/d3-color/ v1.2.3 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-color/ v1.3.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 typeof define === 'function' && define.amd ? define(['exports'], factory) :
-(factory((global.d3 = global.d3 || {})));
-}(this, (function (exports) { 'use strict';
+(global = global || self, factory(global.d3 = global.d3 || {}));
+}(this, function (exports) { 'use strict';
 
 function define(constructor, factory, prototype) {
   constructor.prototype = factory.prototype = prototype;
@@ -2009,16 +2055,30 @@ var named = {
 };
 
 define(Color, color, {
+  copy: function(channels) {
+    return Object.assign(new this.constructor, this, channels);
+  },
   displayable: function() {
     return this.rgb().displayable();
   },
-  hex: function() {
-    return this.rgb().hex();
-  },
-  toString: function() {
-    return this.rgb() + "";
-  }
+  hex: color_formatHex, // Deprecated! Use color.formatHex.
+  formatHex: color_formatHex,
+  formatHsl: color_formatHsl,
+  formatRgb: color_formatRgb,
+  toString: color_formatRgb
 });
+
+function color_formatHex() {
+  return this.rgb().formatHex();
+}
+
+function color_formatHsl() {
+  return hslConvert(this).formatHsl();
+}
+
+function color_formatRgb() {
+  return this.rgb().formatRgb();
+}
 
 function color(format) {
   var m;
@@ -2031,7 +2091,7 @@ function color(format) {
       : (m = reRgbaPercent.exec(format)) ? rgba(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, m[4]) // rgb(100%, 0%, 0%, 1)
       : (m = reHslPercent.exec(format)) ? hsla(m[1], m[2] / 100, m[3] / 100, 1) // hsl(120, 50%, 50%)
       : (m = reHslaPercent.exec(format)) ? hsla(m[1], m[2] / 100, m[3] / 100, m[4]) // hsla(120, 50%, 50%, 1)
-      : named.hasOwnProperty(format) ? rgbn(named[format])
+      : named.hasOwnProperty(format) ? rgbn(named[format]) // eslint-disable-line no-prototype-builtins
       : format === "transparent" ? new Rgb(NaN, NaN, NaN, 0)
       : null;
 }
@@ -2076,23 +2136,29 @@ define(Rgb, rgb, extend(Color, {
     return this;
   },
   displayable: function() {
-    return (0 <= this.r && this.r <= 255)
-        && (0 <= this.g && this.g <= 255)
-        && (0 <= this.b && this.b <= 255)
+    return (-0.5 <= this.r && this.r < 255.5)
+        && (-0.5 <= this.g && this.g < 255.5)
+        && (-0.5 <= this.b && this.b < 255.5)
         && (0 <= this.opacity && this.opacity <= 1);
   },
-  hex: function() {
-    return "#" + hex(this.r) + hex(this.g) + hex(this.b);
-  },
-  toString: function() {
-    var a = this.opacity; a = isNaN(a) ? 1 : Math.max(0, Math.min(1, a));
-    return (a === 1 ? "rgb(" : "rgba(")
-        + Math.max(0, Math.min(255, Math.round(this.r) || 0)) + ", "
-        + Math.max(0, Math.min(255, Math.round(this.g) || 0)) + ", "
-        + Math.max(0, Math.min(255, Math.round(this.b) || 0))
-        + (a === 1 ? ")" : ", " + a + ")");
-  }
+  hex: rgb_formatHex, // Deprecated! Use color.formatHex.
+  formatHex: rgb_formatHex,
+  formatRgb: rgb_formatRgb,
+  toString: rgb_formatRgb
 }));
+
+function rgb_formatHex() {
+  return "#" + hex(this.r) + hex(this.g) + hex(this.b);
+}
+
+function rgb_formatRgb() {
+  var a = this.opacity; a = isNaN(a) ? 1 : Math.max(0, Math.min(1, a));
+  return (a === 1 ? "rgb(" : "rgba(")
+      + Math.max(0, Math.min(255, Math.round(this.r) || 0)) + ", "
+      + Math.max(0, Math.min(255, Math.round(this.g) || 0)) + ", "
+      + Math.max(0, Math.min(255, Math.round(this.b) || 0))
+      + (a === 1 ? ")" : ", " + a + ")");
+}
 
 function hex(value) {
   value = Math.max(0, Math.min(255, Math.round(value) || 0));
@@ -2169,6 +2235,14 @@ define(Hsl, hsl, extend(Color, {
     return (0 <= this.s && this.s <= 1 || isNaN(this.s))
         && (0 <= this.l && this.l <= 1)
         && (0 <= this.opacity && this.opacity <= 1);
+  },
+  formatHsl: function() {
+    var a = this.opacity; a = isNaN(a) ? 1 : Math.max(0, Math.min(1, a));
+    return (a === 1 ? "hsl(" : "hsla(")
+        + (this.h || 0) + ", "
+        + (this.s || 0) * 100 + "%, "
+        + (this.l || 0) * 100 + "%"
+        + (a === 1 ? ")" : ", " + a + ")");
   }
 }));
 
@@ -2183,7 +2257,7 @@ function hsl2rgb(h, m1, m2) {
 var deg2rad = Math.PI / 180;
 var rad2deg = 180 / Math.PI;
 
-// https://beta.observablehq.com/@mbostock/lab-and-rgb
+// https://observablehq.com/@mbostock/lab-and-rgb
 var K = 18,
     Xn = 0.96422,
     Yn = 1,
@@ -2195,11 +2269,7 @@ var K = 18,
 
 function labConvert(o) {
   if (o instanceof Lab) return new Lab(o.l, o.a, o.b, o.opacity);
-  if (o instanceof Hcl) {
-    if (isNaN(o.h)) return new Lab(o.l, 0, 0, o.opacity);
-    var h = o.h * deg2rad;
-    return new Lab(o.l, Math.cos(h) * o.c, Math.sin(h) * o.c, o.opacity);
-  }
+  if (o instanceof Hcl) return hcl2lab(o);
   if (!(o instanceof Rgb)) o = rgbConvert(o);
   var r = rgb2lrgb(o.r),
       g = rgb2lrgb(o.g),
@@ -2269,7 +2339,7 @@ function rgb2lrgb(x) {
 function hclConvert(o) {
   if (o instanceof Hcl) return new Hcl(o.h, o.c, o.l, o.opacity);
   if (!(o instanceof Lab)) o = labConvert(o);
-  if (o.a === 0 && o.b === 0) return new Hcl(NaN, 0, o.l, o.opacity);
+  if (o.a === 0 && o.b === 0) return new Hcl(NaN, 0 < o.l && o.l < 100 ? 0 : NaN, o.l, o.opacity);
   var h = Math.atan2(o.b, o.a) * rad2deg;
   return new Hcl(h < 0 ? h + 360 : h, Math.sqrt(o.a * o.a + o.b * o.b), o.l, o.opacity);
 }
@@ -2289,6 +2359,12 @@ function Hcl(h, c, l, opacity) {
   this.opacity = +opacity;
 }
 
+function hcl2lab(o) {
+  if (isNaN(o.h)) return new Lab(o.l, 0, 0, o.opacity);
+  var h = o.h * deg2rad;
+  return new Lab(o.l, Math.cos(h) * o.c, Math.sin(h) * o.c, o.opacity);
+}
+
 define(Hcl, hcl, extend(Color, {
   brighter: function(k) {
     return new Hcl(this.h, this.c, this.l + K * (k == null ? 1 : k), this.opacity);
@@ -2297,7 +2373,7 @@ define(Hcl, hcl, extend(Color, {
     return new Hcl(this.h, this.c, this.l - K * (k == null ? 1 : k), this.opacity);
   },
   rgb: function() {
-    return labConvert(this).rgb();
+    return hcl2lab(this).rgb();
   }
 }));
 
@@ -2360,17 +2436,17 @@ define(Cubehelix, cubehelix, extend(Color, {
 }));
 
 exports.color = color;
-exports.rgb = rgb;
+exports.cubehelix = cubehelix;
+exports.gray = gray;
+exports.hcl = hcl;
 exports.hsl = hsl;
 exports.lab = lab;
-exports.hcl = hcl;
 exports.lch = lch;
-exports.gray = gray;
-exports.cubehelix = cubehelix;
+exports.rgb = rgb;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 
 },{}],8:[function(require,module,exports){
 // https://d3js.org/d3-contour/ v1.3.2 Copyright 2018 Mike Bostock
@@ -2903,12 +2979,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 },{}],10:[function(require,module,exports){
-// https://d3js.org/d3-drag/ v1.2.3 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-drag/ v1.2.4 Copyright 2019 Mike Bostock
 (function (global, factory) {
-typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-selection'), require('d3-dispatch')) :
-typeof define === 'function' && define.amd ? define(['exports', 'd3-selection', 'd3-dispatch'], factory) :
-(factory((global.d3 = global.d3 || {}),global.d3,global.d3));
-}(this, (function (exports,d3Selection,d3Dispatch) { 'use strict';
+typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-dispatch'), require('d3-selection')) :
+typeof define === 'function' && define.amd ? define(['exports', 'd3-dispatch', 'd3-selection'], factory) :
+(global = global || self, factory(global.d3 = global.d3 || {}, global.d3, global.d3));
+}(this, function (exports, d3Dispatch, d3Selection) { 'use strict';
 
 function nopropagation() {
   d3Selection.event.stopImmediatePropagation();
@@ -2971,7 +3047,7 @@ DragEvent.prototype.on = function() {
 
 // Ignore right-click, since that should open the context menu.
 function defaultFilter() {
-  return !d3Selection.event.button;
+  return !d3Selection.event.ctrlKey && !d3Selection.event.button;
 }
 
 function defaultContainer() {
@@ -2983,7 +3059,7 @@ function defaultSubject(d) {
 }
 
 function defaultTouchable() {
-  return "ontouchstart" in this;
+  return navigator.maxTouchPoints || ("ontouchstart" in this);
 }
 
 function drag() {
@@ -3136,7 +3212,7 @@ exports.dragEnable = yesdrag;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 
 },{"d3-dispatch":9,"d3-selection":25}],11:[function(require,module,exports){
 // https://d3js.org/d3-dsv/ v1.1.1 Copyright 2019 Mike Bostock
@@ -3723,7 +3799,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 },{"d3-dsv":11}],14:[function(require,module,exports){
-// https://d3js.org/d3-force/ v1.2.0 Copyright 2019 Mike Bostock
+// https://d3js.org/d3-force/ v1.2.1 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-quadtree'), require('d3-collection'), require('d3-dispatch'), require('d3-timer')) :
 typeof define === 'function' && define.amd ? define(['exports', 'd3-quadtree', 'd3-collection', 'd3-dispatch', 'd3-timer'], factory) :
@@ -4045,8 +4121,8 @@ function simulation(nodes) {
   function initializeNodes() {
     for (var i = 0, n = nodes.length, node; i < n; ++i) {
       node = nodes[i], node.index = i;
-      if (!isNaN(node.fx)) node.x = node.fx;
-      if (!isNaN(node.fy)) node.y = node.fy;
+      if (node.fx != null) node.x = node.fx;
+      if (node.fy != null) node.y = node.fy;
       if (isNaN(node.x) || isNaN(node.y)) {
         var radius = initialRadius * Math.sqrt(i), angle = i * initialAngle;
         node.x = radius * Math.cos(angle);
@@ -4393,12 +4469,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 },{"d3-collection":6,"d3-dispatch":9,"d3-quadtree":21,"d3-timer":29}],15:[function(require,module,exports){
-// https://d3js.org/d3-format/ v1.3.2 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-format/ v1.4.1 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 typeof define === 'function' && define.amd ? define(['exports'], factory) :
-(factory((global.d3 = global.d3 || {})));
-}(this, (function (exports) { 'use strict';
+(global = global || self, factory(global.d3 = global.d3 || {}));
+}(this, function (exports) { 'use strict';
 
 // Computes the decimal coefficient and exponent of the specified number x with
 // significant digits p, where x is positive and p is in [1, 21] or undefined.
@@ -4450,24 +4526,35 @@ function formatNumerals(numerals) {
 var re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
 
 function formatSpecifier(specifier) {
-  return new FormatSpecifier(specifier);
+  if (!(match = re.exec(specifier))) throw new Error("invalid format: " + specifier);
+  var match;
+  return new FormatSpecifier({
+    fill: match[1],
+    align: match[2],
+    sign: match[3],
+    symbol: match[4],
+    zero: match[5],
+    width: match[6],
+    comma: match[7],
+    precision: match[8] && match[8].slice(1),
+    trim: match[9],
+    type: match[10]
+  });
 }
 
 formatSpecifier.prototype = FormatSpecifier.prototype; // instanceof
 
 function FormatSpecifier(specifier) {
-  if (!(match = re.exec(specifier))) throw new Error("invalid format: " + specifier);
-  var match;
-  this.fill = match[1] || " ";
-  this.align = match[2] || ">";
-  this.sign = match[3] || "-";
-  this.symbol = match[4] || "";
-  this.zero = !!match[5];
-  this.width = match[6] && +match[6];
-  this.comma = !!match[7];
-  this.precision = match[8] && +match[8].slice(1);
-  this.trim = !!match[9];
-  this.type = match[10] || "";
+  this.fill = specifier.fill === undefined ? " " : specifier.fill + "";
+  this.align = specifier.align === undefined ? ">" : specifier.align + "";
+  this.sign = specifier.sign === undefined ? "-" : specifier.sign + "";
+  this.symbol = specifier.symbol === undefined ? "" : specifier.symbol + "";
+  this.zero = !!specifier.zero;
+  this.width = specifier.width === undefined ? undefined : +specifier.width;
+  this.comma = !!specifier.comma;
+  this.precision = specifier.precision === undefined ? undefined : +specifier.precision;
+  this.trim = !!specifier.trim;
+  this.type = specifier.type === undefined ? "" : specifier.type + "";
 }
 
 FormatSpecifier.prototype.toString = function() {
@@ -4476,9 +4563,9 @@ FormatSpecifier.prototype.toString = function() {
       + this.sign
       + this.symbol
       + (this.zero ? "0" : "")
-      + (this.width == null ? "" : Math.max(1, this.width | 0))
+      + (this.width === undefined ? "" : Math.max(1, this.width | 0))
       + (this.comma ? "," : "")
-      + (this.precision == null ? "" : "." + Math.max(0, this.precision | 0))
+      + (this.precision === undefined ? "" : "." + Math.max(0, this.precision | 0))
       + (this.trim ? "~" : "")
       + this.type;
 };
@@ -4540,14 +4627,18 @@ function identity(x) {
   return x;
 }
 
-var prefixes = ["y","z","a","f","p","n","µ","m","","k","M","G","T","P","E","Z","Y"];
+var map = Array.prototype.map,
+    prefixes = ["y","z","a","f","p","n","µ","m","","k","M","G","T","P","E","Z","Y"];
 
 function formatLocale(locale) {
-  var group = locale.grouping && locale.thousands ? formatGroup(locale.grouping, locale.thousands) : identity,
-      currency = locale.currency,
-      decimal = locale.decimal,
-      numerals = locale.numerals ? formatNumerals(locale.numerals) : identity,
-      percent = locale.percent || "%";
+  var group = locale.grouping === undefined || locale.thousands === undefined ? identity : formatGroup(map.call(locale.grouping, Number), locale.thousands + ""),
+      currencyPrefix = locale.currency === undefined ? "" : locale.currency[0] + "",
+      currencySuffix = locale.currency === undefined ? "" : locale.currency[1] + "",
+      decimal = locale.decimal === undefined ? "." : locale.decimal + "",
+      numerals = locale.numerals === undefined ? identity : formatNumerals(map.call(locale.numerals, String)),
+      percent = locale.percent === undefined ? "%" : locale.percent + "",
+      minus = locale.minus === undefined ? "-" : locale.minus + "",
+      nan = locale.nan === undefined ? "NaN" : locale.nan + "";
 
   function newFormat(specifier) {
     specifier = formatSpecifier(specifier);
@@ -4567,15 +4658,15 @@ function formatLocale(locale) {
     if (type === "n") comma = true, type = "g";
 
     // The "" type, and any invalid type, is an alias for ".12~g".
-    else if (!formatTypes[type]) precision == null && (precision = 12), trim = true, type = "g";
+    else if (!formatTypes[type]) precision === undefined && (precision = 12), trim = true, type = "g";
 
     // If zero fill is specified, padding goes after sign and before digits.
     if (zero || (fill === "0" && align === "=")) zero = true, fill = "0", align = "=";
 
     // Compute the prefix and suffix.
     // For SI-prefix, the suffix is lazily computed.
-    var prefix = symbol === "$" ? currency[0] : symbol === "#" && /[boxX]/.test(type) ? "0" + type.toLowerCase() : "",
-        suffix = symbol === "$" ? currency[1] : /[%p]/.test(type) ? percent : "";
+    var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type) ? "0" + type.toLowerCase() : "",
+        suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type) ? percent : "";
 
     // What format function should we use?
     // Is this an integer type?
@@ -4587,7 +4678,7 @@ function formatLocale(locale) {
     // or clamp the specified precision to the supported range.
     // For significant precision, it must be in [1, 21].
     // For fixed precision, it must be in [0, 20].
-    precision = precision == null ? 6
+    precision = precision === undefined ? 6
         : /[gprs]/.test(type) ? Math.max(1, Math.min(21, precision))
         : Math.max(0, Math.min(20, precision));
 
@@ -4604,7 +4695,7 @@ function formatLocale(locale) {
 
         // Perform the initial formatting.
         var valueNegative = value < 0;
-        value = formatType(Math.abs(value), precision);
+        value = isNaN(value) ? nan : formatType(Math.abs(value), precision);
 
         // Trim insignificant zeros.
         if (trim) value = formatTrim(value);
@@ -4613,7 +4704,8 @@ function formatLocale(locale) {
         if (valueNegative && +value === 0) valueNegative = false;
 
         // Compute the prefix and suffix.
-        valuePrefix = (valueNegative ? (sign === "(" ? sign : "-") : sign === "-" || sign === "(" ? "" : sign) + valuePrefix;
+        valuePrefix = (valueNegative ? (sign === "(" ? sign : minus) : sign === "-" || sign === "(" ? "" : sign) + valuePrefix;
+
         valueSuffix = (type === "s" ? prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign === "(" ? ")" : "");
 
         // Break the formatted value into the integer “value” part that can be
@@ -4680,7 +4772,8 @@ defaultLocale({
   decimal: ".",
   thousands: ",",
   grouping: [3],
-  currency: ["$", ""]
+  currency: ["$", ""],
+  minus: "-"
 });
 
 function defaultLocale(definition) {
@@ -4703,6 +4796,7 @@ function precisionRound(step, max) {
   return Math.max(0, exponent(max) - exponent(step)) + 1;
 }
 
+exports.FormatSpecifier = FormatSpecifier;
 exports.formatDefaultLocale = defaultLocale;
 exports.formatLocale = formatLocale;
 exports.formatSpecifier = formatSpecifier;
@@ -4712,10 +4806,10 @@ exports.precisionRound = precisionRound;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 
 },{}],16:[function(require,module,exports){
-// https://d3js.org/d3-geo/ v1.11.3 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-geo/ v1.11.6 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-array')) :
 typeof define === 'function' && define.amd ? define(['exports', 'd3-array'], factory) :
@@ -5000,6 +5094,9 @@ var boundsStream = {
     else if (deltaSum > epsilon) phi1 = 90;
     else if (deltaSum < -epsilon) phi0 = -90;
     range[0] = lambda0$1, range[1] = lambda1;
+  },
+  sphere: function() {
+    lambda0$1 = -(lambda1 = 180), phi0 = -(phi1 = 90);
   }
 };
 
@@ -5570,8 +5667,15 @@ function link(array) {
 
 var sum = adder();
 
+function longitude(point) {
+  if (abs(point[0]) <= pi)
+    return point[0];
+  else
+    return sign(point[0]) * ((abs(point[0]) + pi) % tau - pi);
+}
+
 function polygonContains(polygon, point) {
-  var lambda = point[0],
+  var lambda = longitude(point),
       phi = point[1],
       sinPhi = sin(phi),
       normal = [sin(lambda), -cos(lambda), 0],
@@ -5588,14 +5692,14 @@ function polygonContains(polygon, point) {
     var ring,
         m,
         point0 = ring[m - 1],
-        lambda0 = point0[0],
+        lambda0 = longitude(point0),
         phi0 = point0[1] / 2 + quarterPi,
         sinPhi0 = sin(phi0),
         cosPhi0 = cos(phi0);
 
     for (var j = 0; j < m; ++j, lambda0 = lambda1, sinPhi0 = sinPhi1, cosPhi0 = cosPhi1, point0 = point1) {
       var point1 = ring[j],
-          lambda1 = point1[0],
+          lambda1 = longitude(point1),
           phi1 = point1[1] / 2 + quarterPi,
           sinPhi1 = sin(phi1),
           cosPhi1 = cos(phi1),
@@ -6387,10 +6491,23 @@ function containsPoint(coordinates, point) {
 }
 
 function containsLine(coordinates, point) {
-  var ab = distance(coordinates[0], coordinates[1]),
-      ao = distance(coordinates[0], point),
-      ob = distance(point, coordinates[1]);
-  return ao + ob <= ab + epsilon;
+  var ao, bo, ab;
+  for (var i = 0, n = coordinates.length; i < n; i++) {
+    bo = distance(coordinates[i], point);
+    if (bo === 0) return true;
+    if (i > 0) {
+      ab = distance(coordinates[i], coordinates[i - 1]);
+      if (
+        ab > 0 &&
+        ao <= ab &&
+        bo <= ab &&
+        (ao + bo - ab) * (1 - Math.pow((ao - bo) / ab, 2)) < epsilon2 * ab
+      )
+        return true;
+    }
+    ao = bo;
+  }
+  return false;
 }
 
 function containsPolygon(coordinates, point) {
@@ -9686,12 +9803,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 },{"d3-color":7}],19:[function(require,module,exports){
-// https://d3js.org/d3-path/ v1.0.7 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-path/ v1.0.8 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 typeof define === 'function' && define.amd ? define(['exports'], factory) :
-(factory((global.d3 = global.d3 || {})));
-}(this, (function (exports) { 'use strict';
+(global = global || self, factory(global.d3 = global.d3 || {}));
+}(this, function (exports) { 'use strict';
 
 var pi = Math.PI,
     tau = 2 * pi,
@@ -9777,7 +9894,7 @@ Path.prototype = path.prototype = {
     }
   },
   arc: function(x, y, r, a0, a1, ccw) {
-    x = +x, y = +y, r = +r;
+    x = +x, y = +y, r = +r, ccw = !!ccw;
     var dx = r * Math.cos(a0),
         dy = r * Math.sin(a0),
         x0 = x + dx,
@@ -9826,7 +9943,7 @@ exports.path = path;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 
 },{}],20:[function(require,module,exports){
 // https://d3js.org/d3-polygon/ v1.0.5 Copyright 2018 Mike Bostock
@@ -10519,12 +10636,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 },{}],23:[function(require,module,exports){
-// https://d3js.org/d3-scale-chromatic/ v1.3.3 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-scale-chromatic/ v1.5.0 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-interpolate'), require('d3-color')) :
 typeof define === 'function' && define.amd ? define(['exports', 'd3-interpolate', 'd3-color'], factory) :
-(factory((global.d3 = global.d3 || {}),global.d3,global.d3));
-}(this, (function (exports,d3Interpolate,d3Color) { 'use strict';
+(global = global || self, factory(global.d3 = global.d3 || {}, global.d3, global.d3));
+}(this, function (exports, d3Interpolate, d3Color) { 'use strict';
 
 function colors(specifier) {
   var n = specifier.length / 6 | 0, colors = new Array(n), i = 0;
@@ -10549,6 +10666,8 @@ var Set1 = colors("e41a1c377eb84daf4a984ea3ff7f00ffff33a65628f781bf999999");
 var Set2 = colors("66c2a5fc8d628da0cbe78ac3a6d854ffd92fe5c494b3b3b3");
 
 var Set3 = colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9bc80bdccebc5ffed6f");
+
+var Tableau10 = colors("4e79a7f28e2ce1575976b7b259a14fedc949af7aa1ff9da79c755fbab0ab");
 
 function ramp(scheme) {
   return d3Interpolate.interpolateRgbBasis(scheme[scheme.length - 1]);
@@ -10896,6 +11015,15 @@ var scheme$q = new Array(3).concat(
 
 var Oranges = ramp(scheme$q);
 
+function cividis(t) {
+  t = Math.max(0, Math.min(1, t));
+  return "rgb("
+      + Math.max(0, Math.min(255, Math.round(-4.54 - t * (35.34 - t * (2381.73 - t * (6402.7 - t * (7024.72 - t * 2710.57))))))) + ", "
+      + Math.max(0, Math.min(255, Math.round(32.49 + t * (170.73 + t * (52.82 - t * (131.46 - t * (176.58 - t * 67.37))))))) + ", "
+      + Math.max(0, Math.min(255, Math.round(81.24 + t * (442.36 - t * (2482.43 - t * (6167.24 - t * (6614.94 - t * 2475.67)))))))
+      + ")";
+}
+
 var cubehelix = d3Interpolate.interpolateCubehelixLong(d3Color.cubehelix(300, 0.5, 0.0), d3Color.cubehelix(-240, 0.5, 1.0));
 
 var warm = d3Interpolate.interpolateCubehelixLong(d3Color.cubehelix(-100, 0.75, 0.35), d3Color.cubehelix(80, 1.50, 0.8));
@@ -10926,6 +11054,15 @@ function sinebow(t) {
   return c$1 + "";
 }
 
+function turbo(t) {
+  t = Math.max(0, Math.min(1, t));
+  return "rgb("
+      + Math.max(0, Math.min(255, Math.round(34.61 + t * (1172.33 - t * (10793.56 - t * (33300.12 - t * (38394.49 - t * 14825.05))))))) + ", "
+      + Math.max(0, Math.min(255, Math.round(23.31 + t * (557.33 + t * (1225.33 - t * (3574.96 - t * (1073.77 + t * 707.56))))))) + ", "
+      + Math.max(0, Math.min(255, Math.round(27.2 + t * (3211.1 - t * (15327.97 - t * (27814 - t * (22569.18 - t * 6838.66)))))))
+      + ")";
+}
+
 function ramp$1(range) {
   var n = range.length;
   return function(t) {
@@ -10941,82 +11078,85 @@ var inferno = ramp$1(colors("00000401000501010601010802010a02020c02020e030210040
 
 var plasma = ramp$1(colors("0d088710078813078916078a19068c1b068d1d068e20068f2206902406912605912805922a05932c05942e05952f059631059733059735049837049938049a3a049a3c049b3e049c3f049c41049d43039e44039e46039f48039f4903a04b03a14c02a14e02a25002a25102a35302a35502a45601a45801a45901a55b01a55c01a65e01a66001a66100a76300a76400a76600a76700a86900a86a00a86c00a86e00a86f00a87100a87201a87401a87501a87701a87801a87a02a87b02a87d03a87e03a88004a88104a78305a78405a78606a68707a68808a68a09a58b0aa58d0ba58e0ca48f0da4910ea3920fa39410a29511a19613a19814a099159f9a169f9c179e9d189d9e199da01a9ca11b9ba21d9aa31e9aa51f99a62098a72197a82296aa2395ab2494ac2694ad2793ae2892b02991b12a90b22b8fb32c8eb42e8db52f8cb6308bb7318ab83289ba3388bb3488bc3587bd3786be3885bf3984c03a83c13b82c23c81c33d80c43e7fc5407ec6417dc7427cc8437bc9447aca457acb4679cc4778cc4977cd4a76ce4b75cf4c74d04d73d14e72d24f71d35171d45270d5536fd5546ed6556dd7566cd8576bd9586ada5a6ada5b69db5c68dc5d67dd5e66de5f65de6164df6263e06363e16462e26561e26660e3685fe4695ee56a5de56b5de66c5ce76e5be76f5ae87059e97158e97257ea7457eb7556eb7655ec7754ed7953ed7a52ee7b51ef7c51ef7e50f07f4ff0804ef1814df1834cf2844bf3854bf3874af48849f48948f58b47f58c46f68d45f68f44f79044f79143f79342f89441f89540f9973ff9983ef99a3efa9b3dfa9c3cfa9e3bfb9f3afba139fba238fca338fca537fca636fca835fca934fdab33fdac33fdae32fdaf31fdb130fdb22ffdb42ffdb52efeb72dfeb82cfeba2cfebb2bfebd2afebe2afec029fdc229fdc328fdc527fdc627fdc827fdca26fdcb26fccd25fcce25fcd025fcd225fbd324fbd524fbd724fad824fada24f9dc24f9dd25f8df25f8e125f7e225f7e425f6e626f6e826f5e926f5eb27f4ed27f3ee27f3f027f2f227f1f426f1f525f0f724f0f921"));
 
-exports.schemeCategory10 = category10;
+exports.interpolateBlues = Blues;
+exports.interpolateBrBG = BrBG;
+exports.interpolateBuGn = BuGn;
+exports.interpolateBuPu = BuPu;
+exports.interpolateCividis = cividis;
+exports.interpolateCool = cool;
+exports.interpolateCubehelixDefault = cubehelix;
+exports.interpolateGnBu = GnBu;
+exports.interpolateGreens = Greens;
+exports.interpolateGreys = Greys;
+exports.interpolateInferno = inferno;
+exports.interpolateMagma = magma;
+exports.interpolateOrRd = OrRd;
+exports.interpolateOranges = Oranges;
+exports.interpolatePRGn = PRGn;
+exports.interpolatePiYG = PiYG;
+exports.interpolatePlasma = plasma;
+exports.interpolatePuBu = PuBu;
+exports.interpolatePuBuGn = PuBuGn;
+exports.interpolatePuOr = PuOr;
+exports.interpolatePuRd = PuRd;
+exports.interpolatePurples = Purples;
+exports.interpolateRainbow = rainbow;
+exports.interpolateRdBu = RdBu;
+exports.interpolateRdGy = RdGy;
+exports.interpolateRdPu = RdPu;
+exports.interpolateRdYlBu = RdYlBu;
+exports.interpolateRdYlGn = RdYlGn;
+exports.interpolateReds = Reds;
+exports.interpolateSinebow = sinebow;
+exports.interpolateSpectral = Spectral;
+exports.interpolateTurbo = turbo;
+exports.interpolateViridis = viridis;
+exports.interpolateWarm = warm;
+exports.interpolateYlGn = YlGn;
+exports.interpolateYlGnBu = YlGnBu;
+exports.interpolateYlOrBr = YlOrBr;
+exports.interpolateYlOrRd = YlOrRd;
 exports.schemeAccent = Accent;
+exports.schemeBlues = scheme$l;
+exports.schemeBrBG = scheme;
+exports.schemeBuGn = scheme$9;
+exports.schemeBuPu = scheme$a;
+exports.schemeCategory10 = category10;
 exports.schemeDark2 = Dark2;
+exports.schemeGnBu = scheme$b;
+exports.schemeGreens = scheme$m;
+exports.schemeGreys = scheme$n;
+exports.schemeOrRd = scheme$c;
+exports.schemeOranges = scheme$q;
+exports.schemePRGn = scheme$1;
 exports.schemePaired = Paired;
 exports.schemePastel1 = Pastel1;
 exports.schemePastel2 = Pastel2;
+exports.schemePiYG = scheme$2;
+exports.schemePuBu = scheme$e;
+exports.schemePuBuGn = scheme$d;
+exports.schemePuOr = scheme$3;
+exports.schemePuRd = scheme$f;
+exports.schemePurples = scheme$o;
+exports.schemeRdBu = scheme$4;
+exports.schemeRdGy = scheme$5;
+exports.schemeRdPu = scheme$g;
+exports.schemeRdYlBu = scheme$6;
+exports.schemeRdYlGn = scheme$7;
+exports.schemeReds = scheme$p;
 exports.schemeSet1 = Set1;
 exports.schemeSet2 = Set2;
 exports.schemeSet3 = Set3;
-exports.interpolateBrBG = BrBG;
-exports.schemeBrBG = scheme;
-exports.interpolatePRGn = PRGn;
-exports.schemePRGn = scheme$1;
-exports.interpolatePiYG = PiYG;
-exports.schemePiYG = scheme$2;
-exports.interpolatePuOr = PuOr;
-exports.schemePuOr = scheme$3;
-exports.interpolateRdBu = RdBu;
-exports.schemeRdBu = scheme$4;
-exports.interpolateRdGy = RdGy;
-exports.schemeRdGy = scheme$5;
-exports.interpolateRdYlBu = RdYlBu;
-exports.schemeRdYlBu = scheme$6;
-exports.interpolateRdYlGn = RdYlGn;
-exports.schemeRdYlGn = scheme$7;
-exports.interpolateSpectral = Spectral;
 exports.schemeSpectral = scheme$8;
-exports.interpolateBuGn = BuGn;
-exports.schemeBuGn = scheme$9;
-exports.interpolateBuPu = BuPu;
-exports.schemeBuPu = scheme$a;
-exports.interpolateGnBu = GnBu;
-exports.schemeGnBu = scheme$b;
-exports.interpolateOrRd = OrRd;
-exports.schemeOrRd = scheme$c;
-exports.interpolatePuBuGn = PuBuGn;
-exports.schemePuBuGn = scheme$d;
-exports.interpolatePuBu = PuBu;
-exports.schemePuBu = scheme$e;
-exports.interpolatePuRd = PuRd;
-exports.schemePuRd = scheme$f;
-exports.interpolateRdPu = RdPu;
-exports.schemeRdPu = scheme$g;
-exports.interpolateYlGnBu = YlGnBu;
-exports.schemeYlGnBu = scheme$h;
-exports.interpolateYlGn = YlGn;
+exports.schemeTableau10 = Tableau10;
 exports.schemeYlGn = scheme$i;
-exports.interpolateYlOrBr = YlOrBr;
+exports.schemeYlGnBu = scheme$h;
 exports.schemeYlOrBr = scheme$j;
-exports.interpolateYlOrRd = YlOrRd;
 exports.schemeYlOrRd = scheme$k;
-exports.interpolateBlues = Blues;
-exports.schemeBlues = scheme$l;
-exports.interpolateGreens = Greens;
-exports.schemeGreens = scheme$m;
-exports.interpolateGreys = Greys;
-exports.schemeGreys = scheme$n;
-exports.interpolatePurples = Purples;
-exports.schemePurples = scheme$o;
-exports.interpolateReds = Reds;
-exports.schemeReds = scheme$p;
-exports.interpolateOranges = Oranges;
-exports.schemeOranges = scheme$q;
-exports.interpolateCubehelixDefault = cubehelix;
-exports.interpolateRainbow = rainbow;
-exports.interpolateWarm = warm;
-exports.interpolateCool = cool;
-exports.interpolateSinebow = sinebow;
-exports.interpolateViridis = viridis;
-exports.interpolateMagma = magma;
-exports.interpolateInferno = inferno;
-exports.interpolatePlasma = plasma;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 
 },{"d3-color":7,"d3-interpolate":18}],24:[function(require,module,exports){
 // https://d3js.org/d3-scale/ v2.2.2 Copyright 2019 Mike Bostock
@@ -13175,7 +13315,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 },{}],26:[function(require,module,exports){
-// https://d3js.org/d3-shape/ v1.3.4 Copyright 2019 Mike Bostock
+// https://d3js.org/d3-shape/ v1.3.5 Copyright 2019 Mike Bostock
 (function (global, factory) {
 typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-path')) :
 typeof define === 'function' && define.amd ? define(['exports', 'd3-path'], factory) :
@@ -14968,7 +15108,7 @@ function expand(series, order) {
 }
 
 function diverging(series, order) {
-  if (!((n = series.length) > 1)) return;
+  if (!((n = series.length) > 0)) return;
   for (var i, j = 0, d, dy, yp, yn, n, m = series[order[0]].length; j < m; ++j) {
     for (yp = yn = 0, i = 0; i < n; ++i) {
       if ((dy = (d = series[order[i]][j])[1] - d[0]) >= 0) {
@@ -18193,12 +18333,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })));
 
 },{}],32:[function(require,module,exports){
-// https://d3js.org/d3-zoom/ v1.7.3 Copyright 2018 Mike Bostock
+// https://d3js.org/d3-zoom/ v1.8.3 Copyright 2019 Mike Bostock
 (function (global, factory) {
-typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-selection'), require('d3-dispatch'), require('d3-drag'), require('d3-interpolate'), require('d3-transition')) :
-typeof define === 'function' && define.amd ? define(['exports', 'd3-selection', 'd3-dispatch', 'd3-drag', 'd3-interpolate', 'd3-transition'], factory) :
-(factory((global.d3 = global.d3 || {}),global.d3,global.d3,global.d3,global.d3,global.d3));
-}(this, (function (exports,d3Selection,d3Dispatch,d3Drag,d3Interpolate,d3Transition) { 'use strict';
+typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-dispatch'), require('d3-drag'), require('d3-interpolate'), require('d3-selection'), require('d3-transition')) :
+typeof define === 'function' && define.amd ? define(['exports', 'd3-dispatch', 'd3-drag', 'd3-interpolate', 'd3-selection', 'd3-transition'], factory) :
+(global = global || self, factory(global.d3 = global.d3 || {}, global.d3, global.d3, global.d3, global.d3, global.d3));
+}(this, function (exports, d3Dispatch, d3Drag, d3Interpolate, d3Selection, d3Transition) { 'use strict';
 
 function constant(x) {
   return function() {
@@ -18260,7 +18400,8 @@ var identity = new Transform(1, 0, 0);
 transform.prototype = Transform.prototype;
 
 function transform(node) {
-  return node.__zoom || identity;
+  while (!node.__zoom) if (!(node = node.parentNode)) return identity;
+  return node.__zoom;
 }
 
 function nopropagation() {
@@ -18274,20 +18415,20 @@ function noevent() {
 
 // Ignore right-click, since that should open the context menu.
 function defaultFilter() {
-  return !d3Selection.event.button;
+  return !d3Selection.event.ctrlKey && !d3Selection.event.button;
 }
 
 function defaultExtent() {
-  var e = this, w, h;
+  var e = this;
   if (e instanceof SVGElement) {
     e = e.ownerSVGElement || e;
-    w = e.width.baseVal.value;
-    h = e.height.baseVal.value;
-  } else {
-    w = e.clientWidth;
-    h = e.clientHeight;
+    if (e.hasAttribute("viewBox")) {
+      e = e.viewBox.baseVal;
+      return [[e.x, e.y], [e.x + e.width, e.y + e.height]];
+    }
+    return [[0, 0], [e.width.baseVal.value, e.height.baseVal.value]];
   }
-  return [[0, 0], [w, h]];
+  return [[0, 0], [e.clientWidth, e.clientHeight]];
 }
 
 function defaultTransform() {
@@ -18295,19 +18436,19 @@ function defaultTransform() {
 }
 
 function defaultWheelDelta() {
-  return -d3Selection.event.deltaY * (d3Selection.event.deltaMode ? 120 : 1) / 500;
+  return -d3Selection.event.deltaY * (d3Selection.event.deltaMode === 1 ? 0.05 : d3Selection.event.deltaMode ? 1 : 0.002);
 }
 
 function defaultTouchable() {
-  return "ontouchstart" in this;
+  return navigator.maxTouchPoints || ("ontouchstart" in this);
 }
 
-function defaultConstrain(transform$$1, extent, translateExtent) {
-  var dx0 = transform$$1.invertX(extent[0][0]) - translateExtent[0][0],
-      dx1 = transform$$1.invertX(extent[1][0]) - translateExtent[1][0],
-      dy0 = transform$$1.invertY(extent[0][1]) - translateExtent[0][1],
-      dy1 = transform$$1.invertY(extent[1][1]) - translateExtent[1][1];
-  return transform$$1.translate(
+function defaultConstrain(transform, extent, translateExtent) {
+  var dx0 = transform.invertX(extent[0][0]) - translateExtent[0][0],
+      dx1 = transform.invertX(extent[1][0]) - translateExtent[1][0],
+      dy0 = transform.invertY(extent[0][1]) - translateExtent[0][1],
+      dy1 = transform.invertY(extent[1][1]) - translateExtent[1][1];
+  return transform.translate(
     dx1 > dx0 ? (dx0 + dx1) / 2 : Math.min(0, dx0) || Math.max(0, dx1),
     dy1 > dy0 ? (dy0 + dy1) / 2 : Math.min(0, dy0) || Math.max(0, dy1)
   );
@@ -18323,7 +18464,6 @@ function zoom() {
       translateExtent = [[-Infinity, -Infinity], [Infinity, Infinity]],
       duration = 250,
       interpolate = d3Interpolate.interpolateZoom,
-      gestures = [],
       listeners = d3Dispatch.dispatch("start", "zoom", "end"),
       touchstarting,
       touchending,
@@ -18345,38 +18485,38 @@ function zoom() {
         .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
   }
 
-  zoom.transform = function(collection, transform$$1) {
+  zoom.transform = function(collection, transform, point) {
     var selection = collection.selection ? collection.selection() : collection;
     selection.property("__zoom", defaultTransform);
     if (collection !== selection) {
-      schedule(collection, transform$$1);
+      schedule(collection, transform, point);
     } else {
       selection.interrupt().each(function() {
         gesture(this, arguments)
             .start()
-            .zoom(null, typeof transform$$1 === "function" ? transform$$1.apply(this, arguments) : transform$$1)
+            .zoom(null, typeof transform === "function" ? transform.apply(this, arguments) : transform)
             .end();
       });
     }
   };
 
-  zoom.scaleBy = function(selection, k) {
+  zoom.scaleBy = function(selection, k, p) {
     zoom.scaleTo(selection, function() {
       var k0 = this.__zoom.k,
           k1 = typeof k === "function" ? k.apply(this, arguments) : k;
       return k0 * k1;
-    });
+    }, p);
   };
 
-  zoom.scaleTo = function(selection, k) {
+  zoom.scaleTo = function(selection, k, p) {
     zoom.transform(selection, function() {
       var e = extent.apply(this, arguments),
           t0 = this.__zoom,
-          p0 = centroid(e),
+          p0 = p == null ? centroid(e) : typeof p === "function" ? p.apply(this, arguments) : p,
           p1 = t0.invert(p0),
           k1 = typeof k === "function" ? k.apply(this, arguments) : k;
       return constrain(translate(scale(t0, k1), p0, p1), e, translateExtent);
-    });
+    }, p);
   };
 
   zoom.translateBy = function(selection, x, y) {
@@ -18388,33 +18528,33 @@ function zoom() {
     });
   };
 
-  zoom.translateTo = function(selection, x, y) {
+  zoom.translateTo = function(selection, x, y, p) {
     zoom.transform(selection, function() {
       var e = extent.apply(this, arguments),
           t = this.__zoom,
-          p = centroid(e);
-      return constrain(identity.translate(p[0], p[1]).scale(t.k).translate(
+          p0 = p == null ? centroid(e) : typeof p === "function" ? p.apply(this, arguments) : p;
+      return constrain(identity.translate(p0[0], p0[1]).scale(t.k).translate(
         typeof x === "function" ? -x.apply(this, arguments) : -x,
         typeof y === "function" ? -y.apply(this, arguments) : -y
       ), e, translateExtent);
-    });
+    }, p);
   };
 
-  function scale(transform$$1, k) {
+  function scale(transform, k) {
     k = Math.max(scaleExtent[0], Math.min(scaleExtent[1], k));
-    return k === transform$$1.k ? transform$$1 : new Transform(k, transform$$1.x, transform$$1.y);
+    return k === transform.k ? transform : new Transform(k, transform.x, transform.y);
   }
 
-  function translate(transform$$1, p0, p1) {
-    var x = p0[0] - p1[0] * transform$$1.k, y = p0[1] - p1[1] * transform$$1.k;
-    return x === transform$$1.x && y === transform$$1.y ? transform$$1 : new Transform(transform$$1.k, x, y);
+  function translate(transform, p0, p1) {
+    var x = p0[0] - p1[0] * transform.k, y = p0[1] - p1[1] * transform.k;
+    return x === transform.x && y === transform.y ? transform : new Transform(transform.k, x, y);
   }
 
   function centroid(extent) {
     return [(+extent[0][0] + +extent[1][0]) / 2, (+extent[0][1] + +extent[1][1]) / 2];
   }
 
-  function schedule(transition, transform$$1, center) {
+  function schedule(transition, transform, point) {
     transition
         .on("start.zoom", function() { gesture(this, arguments).start(); })
         .on("interrupt.zoom end.zoom", function() { gesture(this, arguments).end(); })
@@ -18423,10 +18563,10 @@ function zoom() {
               args = arguments,
               g = gesture(that, args),
               e = extent.apply(that, args),
-              p = center || centroid(e),
+              p = point == null ? centroid(e) : typeof point === "function" ? point.apply(that, args) : point,
               w = Math.max(e[1][0] - e[0][0], e[1][1] - e[0][1]),
               a = that.__zoom,
-              b = typeof transform$$1 === "function" ? transform$$1.apply(that, args) : transform$$1,
+              b = typeof transform === "function" ? transform.apply(that, args) : transform,
               i = interpolate(a.invert(p).concat(w / a.k), b.invert(p).concat(w / b.k));
           return function(t) {
             if (t === 1) t = b; // Avoid rounding error on end.
@@ -18436,43 +18576,37 @@ function zoom() {
         });
   }
 
-  function gesture(that, args) {
-    for (var i = 0, n = gestures.length, g; i < n; ++i) {
-      if ((g = gestures[i]).that === that) {
-        return g;
-      }
-    }
-    return new Gesture(that, args);
+  function gesture(that, args, clean) {
+    return (!clean && that.__zooming) || new Gesture(that, args);
   }
 
   function Gesture(that, args) {
     this.that = that;
     this.args = args;
-    this.index = -1;
     this.active = 0;
     this.extent = extent.apply(that, args);
+    this.taps = 0;
   }
 
   Gesture.prototype = {
     start: function() {
       if (++this.active === 1) {
-        this.index = gestures.push(this) - 1;
+        this.that.__zooming = this;
         this.emit("start");
       }
       return this;
     },
-    zoom: function(key, transform$$1) {
-      if (this.mouse && key !== "mouse") this.mouse[1] = transform$$1.invert(this.mouse[0]);
-      if (this.touch0 && key !== "touch") this.touch0[1] = transform$$1.invert(this.touch0[0]);
-      if (this.touch1 && key !== "touch") this.touch1[1] = transform$$1.invert(this.touch1[0]);
-      this.that.__zoom = transform$$1;
+    zoom: function(key, transform) {
+      if (this.mouse && key !== "mouse") this.mouse[1] = transform.invert(this.mouse[0]);
+      if (this.touch0 && key !== "touch") this.touch0[1] = transform.invert(this.touch0[0]);
+      if (this.touch1 && key !== "touch") this.touch1[1] = transform.invert(this.touch1[0]);
+      this.that.__zoom = transform;
       this.emit("zoom");
       return this;
     },
     end: function() {
       if (--this.active === 0) {
-        gestures.splice(this.index, 1);
-        this.index = -1;
+        delete this.that.__zooming;
         this.emit("end");
       }
       return this;
@@ -18520,7 +18654,7 @@ function zoom() {
 
   function mousedowned() {
     if (touchending || !filter.apply(this, arguments)) return;
-    var g = gesture(this, arguments),
+    var g = gesture(this, arguments, true),
         v = d3Selection.select(d3Selection.event.view).on("mousemove.zoom", mousemoved, true).on("mouseup.zoom", mouseupped, true),
         p = d3Selection.mouse(this),
         x0 = d3Selection.event.clientX,
@@ -18564,44 +18698,37 @@ function zoom() {
 
   function touchstarted() {
     if (!filter.apply(this, arguments)) return;
-    var g = gesture(this, arguments),
-        touches = d3Selection.event.changedTouches,
-        started,
-        n = touches.length, i, t, p;
+    var touches = d3Selection.event.touches,
+        n = touches.length,
+        g = gesture(this, arguments, d3Selection.event.changedTouches.length === n),
+        started, i, t, p;
 
     nopropagation();
     for (i = 0; i < n; ++i) {
       t = touches[i], p = d3Selection.touch(this, touches, t.identifier);
       p = [p, this.__zoom.invert(p), t.identifier];
-      if (!g.touch0) g.touch0 = p, started = true;
-      else if (!g.touch1) g.touch1 = p;
+      if (!g.touch0) g.touch0 = p, started = true, g.taps = 1 + !!touchstarting;
+      else if (!g.touch1 && g.touch0[2] !== p[2]) g.touch1 = p, g.taps = 0;
     }
 
-    // If this is a dbltap, reroute to the (optional) dblclick.zoom handler.
-    if (touchstarting) {
-      touchstarting = clearTimeout(touchstarting);
-      if (!g.touch1) {
-        g.end();
-        p = d3Selection.select(this).on("dblclick.zoom");
-        if (p) p.apply(this, arguments);
-        return;
-      }
-    }
+    if (touchstarting) touchstarting = clearTimeout(touchstarting);
 
     if (started) {
-      touchstarting = setTimeout(function() { touchstarting = null; }, touchDelay);
+      if (g.taps < 2) touchstarting = setTimeout(function() { touchstarting = null; }, touchDelay);
       d3Transition.interrupt(this);
       g.start();
     }
   }
 
   function touchmoved() {
+    if (!this.__zooming) return;
     var g = gesture(this, arguments),
         touches = d3Selection.event.changedTouches,
         n = touches.length, i, t, p, l;
 
     noevent();
     if (touchstarting) touchstarting = clearTimeout(touchstarting);
+    g.taps = 0;
     for (i = 0; i < n; ++i) {
       t = touches[i], p = d3Selection.touch(this, touches, t.identifier);
       if (g.touch0 && g.touch0[2] === t.identifier) g.touch0[0] = p;
@@ -18623,6 +18750,7 @@ function zoom() {
   }
 
   function touchended() {
+    if (!this.__zooming) return;
     var g = gesture(this, arguments),
         touches = d3Selection.event.changedTouches,
         n = touches.length, i, t;
@@ -18637,7 +18765,14 @@ function zoom() {
     }
     if (g.touch1 && !g.touch0) g.touch0 = g.touch1, delete g.touch1;
     if (g.touch0) g.touch0[1] = this.__zoom.invert(g.touch0[0]);
-    else g.end();
+    else {
+      g.end();
+      // If this was a dbltap, reroute to the (optional) dblclick.zoom handler.
+      if (g.taps === 2) {
+        var p = d3Selection.select(this).on("dblclick.zoom");
+        if (p) p.apply(this, arguments);
+      }
+    }
   }
 
   zoom.wheelDelta = function(_) {
@@ -18689,12 +18824,12 @@ function zoom() {
 }
 
 exports.zoom = zoom;
-exports.zoomTransform = transform;
 exports.zoomIdentity = identity;
+exports.zoomTransform = transform;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 
 },{"d3-dispatch":9,"d3-drag":10,"d3-interpolate":18,"d3-selection":25,"d3-transition":30}],33:[function(require,module,exports){
 'use strict';
@@ -18733,41 +18868,257 @@ var d3Transition = require('d3-transition');
 var d3Voronoi = require('d3-voronoi');
 var d3Zoom = require('d3-zoom');
 
-var version = "5.9.1";
+var version = "5.12.0";
 
-Object.keys(d3Array).forEach(function (key) { exports[key] = d3Array[key]; });
-Object.keys(d3Axis).forEach(function (key) { exports[key] = d3Axis[key]; });
-Object.keys(d3Brush).forEach(function (key) { exports[key] = d3Brush[key]; });
-Object.keys(d3Chord).forEach(function (key) { exports[key] = d3Chord[key]; });
-Object.keys(d3Collection).forEach(function (key) { exports[key] = d3Collection[key]; });
-Object.keys(d3Color).forEach(function (key) { exports[key] = d3Color[key]; });
-Object.keys(d3Contour).forEach(function (key) { exports[key] = d3Contour[key]; });
-Object.keys(d3Dispatch).forEach(function (key) { exports[key] = d3Dispatch[key]; });
-Object.keys(d3Drag).forEach(function (key) { exports[key] = d3Drag[key]; });
-Object.keys(d3Dsv).forEach(function (key) { exports[key] = d3Dsv[key]; });
-Object.keys(d3Ease).forEach(function (key) { exports[key] = d3Ease[key]; });
-Object.keys(d3Fetch).forEach(function (key) { exports[key] = d3Fetch[key]; });
-Object.keys(d3Force).forEach(function (key) { exports[key] = d3Force[key]; });
-Object.keys(d3Format).forEach(function (key) { exports[key] = d3Format[key]; });
-Object.keys(d3Geo).forEach(function (key) { exports[key] = d3Geo[key]; });
-Object.keys(d3Hierarchy).forEach(function (key) { exports[key] = d3Hierarchy[key]; });
-Object.keys(d3Interpolate).forEach(function (key) { exports[key] = d3Interpolate[key]; });
-Object.keys(d3Path).forEach(function (key) { exports[key] = d3Path[key]; });
-Object.keys(d3Polygon).forEach(function (key) { exports[key] = d3Polygon[key]; });
-Object.keys(d3Quadtree).forEach(function (key) { exports[key] = d3Quadtree[key]; });
-Object.keys(d3Random).forEach(function (key) { exports[key] = d3Random[key]; });
-Object.keys(d3Scale).forEach(function (key) { exports[key] = d3Scale[key]; });
-Object.keys(d3ScaleChromatic).forEach(function (key) { exports[key] = d3ScaleChromatic[key]; });
-Object.keys(d3Selection).forEach(function (key) { exports[key] = d3Selection[key]; });
-Object.keys(d3Shape).forEach(function (key) { exports[key] = d3Shape[key]; });
-Object.keys(d3Time).forEach(function (key) { exports[key] = d3Time[key]; });
-Object.keys(d3TimeFormat).forEach(function (key) { exports[key] = d3TimeFormat[key]; });
-Object.keys(d3Timer).forEach(function (key) { exports[key] = d3Timer[key]; });
-Object.keys(d3Transition).forEach(function (key) { exports[key] = d3Transition[key]; });
-Object.keys(d3Voronoi).forEach(function (key) { exports[key] = d3Voronoi[key]; });
-Object.keys(d3Zoom).forEach(function (key) { exports[key] = d3Zoom[key]; });
+Object.keys(d3Array).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Array[k];
+		}
+	});
+});
+Object.keys(d3Axis).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Axis[k];
+		}
+	});
+});
+Object.keys(d3Brush).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Brush[k];
+		}
+	});
+});
+Object.keys(d3Chord).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Chord[k];
+		}
+	});
+});
+Object.keys(d3Collection).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Collection[k];
+		}
+	});
+});
+Object.keys(d3Color).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Color[k];
+		}
+	});
+});
+Object.keys(d3Contour).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Contour[k];
+		}
+	});
+});
+Object.keys(d3Dispatch).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Dispatch[k];
+		}
+	});
+});
+Object.keys(d3Drag).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Drag[k];
+		}
+	});
+});
+Object.keys(d3Dsv).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Dsv[k];
+		}
+	});
+});
+Object.keys(d3Ease).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Ease[k];
+		}
+	});
+});
+Object.keys(d3Fetch).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Fetch[k];
+		}
+	});
+});
+Object.keys(d3Force).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Force[k];
+		}
+	});
+});
+Object.keys(d3Format).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Format[k];
+		}
+	});
+});
+Object.keys(d3Geo).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Geo[k];
+		}
+	});
+});
+Object.keys(d3Hierarchy).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Hierarchy[k];
+		}
+	});
+});
+Object.keys(d3Interpolate).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Interpolate[k];
+		}
+	});
+});
+Object.keys(d3Path).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Path[k];
+		}
+	});
+});
+Object.keys(d3Polygon).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Polygon[k];
+		}
+	});
+});
+Object.keys(d3Quadtree).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Quadtree[k];
+		}
+	});
+});
+Object.keys(d3Random).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Random[k];
+		}
+	});
+});
+Object.keys(d3Scale).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Scale[k];
+		}
+	});
+});
+Object.keys(d3ScaleChromatic).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3ScaleChromatic[k];
+		}
+	});
+});
+Object.keys(d3Selection).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Selection[k];
+		}
+	});
+});
+Object.keys(d3Shape).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Shape[k];
+		}
+	});
+});
+Object.keys(d3Time).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Time[k];
+		}
+	});
+});
+Object.keys(d3TimeFormat).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3TimeFormat[k];
+		}
+	});
+});
+Object.keys(d3Timer).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Timer[k];
+		}
+	});
+});
+Object.keys(d3Transition).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Transition[k];
+		}
+	});
+});
+Object.keys(d3Voronoi).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Voronoi[k];
+		}
+	});
+});
+Object.keys(d3Zoom).forEach(function (k) {
+	if (k !== 'default') Object.defineProperty(exports, k, {
+		enumerable: true,
+		get: function () {
+			return d3Zoom[k];
+		}
+	});
+});
 exports.version = version;
-Object.defineProperty(exports, "event", {get: function() { return d3Selection.event; }});
 
 },{"d3-array":2,"d3-axis":3,"d3-brush":4,"d3-chord":5,"d3-collection":6,"d3-color":7,"d3-contour":8,"d3-dispatch":9,"d3-drag":10,"d3-dsv":11,"d3-ease":12,"d3-fetch":13,"d3-force":14,"d3-format":15,"d3-geo":16,"d3-hierarchy":17,"d3-interpolate":18,"d3-path":19,"d3-polygon":20,"d3-quadtree":21,"d3-random":22,"d3-scale":24,"d3-scale-chromatic":23,"d3-selection":25,"d3-shape":26,"d3-time":28,"d3-time-format":27,"d3-timer":29,"d3-transition":30,"d3-voronoi":31,"d3-zoom":32}],34:[function(require,module,exports){
 //! moment.js
@@ -25977,7 +26328,6 @@ class CirclePacking extends Visualization{
         let svgBounds = this.svg.node().getBoundingClientRect();
         this.h =  Math.min(svgBounds.height,svgBounds.width);
         this.w = Math.min(svgBounds.height,svgBounds.width);
-        this.r = Math.min(svgBounds.height,svgBounds.width)/2;
 
         this.redraw();
         return this;
@@ -25990,7 +26340,6 @@ class CirclePacking extends Visualization{
             if(this.domainType[k] === "Categorical"){
             }
             if(this.domainType[k] === "Numeric"){
-                console.log(this.domain[k]);
                 let  values= [];
                 for (let i = 0; i <d.length ; i++) {
                     values.push(d[i][k]);
@@ -26007,17 +26356,15 @@ class CirclePacking extends Visualization{
 
         this.w = Math.min(svgBounds.height,svgBounds.width);
         this.h =  Math.min(svgBounds.height,svgBounds.width);
-        this.r = Math.min(this.w, this.h) / 2;
 
+        let root = {_name_:"root", children: d};
         if(this.settings.hierarchies){
             _hierarchy.call(this, this.settings.hierarchies);
         }else{
-            let root = {name:"root", children: d};
             if(this.settings.size){
                 let size = this.settings.size;
-                this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
-
-
+                this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.height - a.height; });
+                _hierarchy.call(this, this.settings.hierarchies);
             }else{
                 this.d_h = d3.hierarchy(root).count();
             }
@@ -26033,86 +26380,103 @@ class CirclePacking extends Visualization{
     }
 
     redraw(){
-        let circlePacking = this;
+            let circlePacking = this;
 
-        let svgBounds = this.svg.node().getBoundingClientRect();
-        let svg = this.foreground;
-
-
-        let color = d3.scaleLinear()
-            .domain([0, 5])
-            .range(["white", "grey"])
-            .interpolate(d3.interpolateHcl)
-
-        const root =this.d_h;
-
-        let width = svgBounds.width;
-        let height =svgBounds.height;
-
-        svg
-            .attr("transform",`translate(${width/2},${height/2})`)
-            .attr("width",svgBounds.width)
-            .attr("height",svgBounds.height)
-            .style("background", color(0))
-            .style("cursor", "pointer")
+            let svgBounds = this.svg.node().getBoundingClientRect();
+            let svg = this.foreground;
 
 
-        d3.selectAll('.circlePacking').remove();
+            let color = d3.scaleLinear()
+                .domain([0, 5])
+                .range(["white", "grey"])
+                .interpolate(d3.interpolateHcl)
 
-        const node = svg.append("g")
-            .attr("class","circlePacking")
-            .selectAll("circle")
-            .data(root.descendants())
-            .join("circle")
-            .attr('class',d=>d.children?'father':'data')
-            .attr("fill", d => d.children ? color(d.depth) :this.settings.color)
+            const root =this.d_h;
+
+            let width = svgBounds.width;
+            let height =svgBounds.height;
+
+            svg
+                .attr("transform",`translate(${width/2},${height/2})`)
+                .attr("width",svgBounds.width)
+                .attr("height",svgBounds.height)
+                .style("background", color(0))
+                .style("cursor", "pointer")
+
+            this.background
+                .attr("transform",`translate(${width/2},${height/2})`)
+                .attr("width",svgBounds.width)
+                .attr("height",svgBounds.height)
+                .style("background", color(0))
+                .style("cursor", "pointer")
+
+            this.background.selectAll('.circlePacking').remove();
+
+
+            const node = this.background.append("g")
+                .attr("class","circlePacking")
+                .selectAll("circle")
+                .data(this.d_parents)
+                .join("circle")
+                .attr('class','data-parent')
+                .attr("fill", d =>color(d.depth))
+
+      //this._bindDataMouseEvents(node, "ancestor");
+
+        //this.foreground.selectAll(".data").exit().remove();
+        let updateSelection = this.foreground.selectAll(".data")
+            .data(this.d_h.leaves());
+        updateSelection.exit().remove();
+
+        let enterSelection = updateSelection.enter().append("circle")
+            .attr("class", "data")
             .attr("data-index", function(d, i){return i; })
-        //     .style("fill", this.settings.color)
-        //     .style("stroke", "black")
-        //   .attr("pointer-events", d => !d.children ? "none" : null)
-        //.on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
-        //.on("mouseout", function() { d3.select(this).attr("stroke", null); })
-        //.on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
+            .style("stroke", "black")
+            .style("stroke-width", "0.5px");
 
+        this._bindDataMouseEvents(enterSelection);
 
-        // let enterSelection = node.enter().append("circle")
-        //     .attr("class", "data")
-        //     .attr("data-index", function(d, i){return i; })
-        //     //.attr("parent",d=>d.)
-        //     .style("fill", this.settings.color)
-        //     .style("stroke", "black")
-        //     .style("stroke-width", "0.5px");
+        let v = [root.x, root.y, root.r * 2]
+        const r =  Math.min(svgBounds.height,svgBounds.width);
+        const k = r / v[2];
+
+        enterSelection.merge(updateSelection)
+            .attr('parent', d=>d.parent.data._name_)
+            .style("fill", this.settings.color)
+            .attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`)
+            .attr("r", d => d.r * k);
 
         const removelabel = svg.select('.labels').remove();
-        const label = svg.append("g")
-            .attr('class','labels')
-            .style("font", "10px sans-serif")
-            .attr("pointer-events", "none")
-            .attr("text-anchor", "middle")
-            .selectAll("text")
-            .data(root.descendants().slice(1))
-            .join("text")
-            .style("fill-opacity", d => d.parent === root ? 1 : 0)
-            .style("display", d => d.parent === root ? "inline" : "none")
-          //  .text(d => d.data.data.name);
+            const label = svg.append("g")
+                .attr('class','labels')
+                .style("font", "10px sans-serif")
+                .attr("pointer-events", "none")
+                .attr("text-anchor", "middle")
+                .selectAll("text")
+                .data(root.descendants().slice(1))
+                .join("text")
+                .style("fill-opacity", d => d.parent === root ? 1 : 0)
+                .style("display", d => d.parent === root ? "inline" : "none")
+               .text(d => d.data._name_);
 
 
-        zoomTo([root.x, root.y, root.r * 2]);
+            zoomTo([root.x, root.y, root.r * 2]);
+
+            function zoomTo(v) {
+                const r =  Math.min(svgBounds.height,svgBounds.width);
+                const k = r / v[2];
+
+                label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                node.attr("r", d => d.r * k);
+                enterSelection.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                enterSelection.attr("r", d => d.r * k);
+            }
 
 
-        function zoomTo(v) {
-            const k = (svgBounds.height-40) / v[2];
+            this._bindDataMouseEvents(enterSelection);
+            return super.redraw();
 
-            let view = v;
-
-            label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            node.attr("r", d => d.r * k);
-        }
-
-
-        this._bindDataMouseEvents(node);
-        return super.redraw();
     }
 
     detail(...args){
@@ -26120,14 +26484,43 @@ class CirclePacking extends Visualization{
     }
 
     highlight(...args){
+        this.highlightLayer.append("circle")
+        .attr('class','data-highlight')
+        .attr("cx", args[0].x-10)
+        .attr("cy",  args[0].y)
+        .attr("r",  args[0].r)
+        .style("fill", "none")
+        .style("stroke", this.settings.highlightColor);
+
+
+        //return group;
 
     }
 
     removeHighlight(...args){
+        let remove =this.highlightLayer.selectAll('.data-highlight').remove();
+
+        return remove;
 
     }
 
     getHighlightElement(i){
+        let d = this.d_h.children[i];
+
+        let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        d3.select(group).attr("class", "groupHighlight");
+
+        let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        d3.select(circle)
+            .attr("class", "circleHighlight")
+            .attr("cx", d.x-10)
+            .attr("cy", d.y)
+            .attr("r", d.r)
+            .style("fill", "none")
+            .style("stroke", this.settings.highlightColor)
+
+        group.appendChild(circle);
+        return group;
 
     }
 
@@ -26137,7 +26530,7 @@ class CirclePacking extends Visualization{
     }
 
     setSize(attrs){
-
+        this.settings.size = attrs;
     }
 
     hierarchy(attrs){
@@ -26161,14 +26554,20 @@ let _hierarchy = function(attrs){
             return;
 
         let attr = attrs[index];
+        // for (let i = 0; i <this.domain[attr].length ; i++) {
+        //     let child = {_name_: this.d, children: []};
+        //     data.children.push(child);
+        //     group(child, index+1);
+        // }
+
         for(let d of this.domain[attr]){
-            let child = {name: d, children: []};
+            let child = {_name_: d, children: []};
             data.children.push(child);
             group(child, index+1);
         }
     };
 
-    let hie = {name: "root", children:[]};
+    let hie = {_name_: "root", children:[]};
     if(attrs && attrs.length > 0){
         group(hie, 0);
 
@@ -26176,7 +26575,7 @@ let _hierarchy = function(attrs){
             let aux = hie;
             for(let attr of attrs){
                 for(let c of aux.children){
-                    if(c.name === d[attr]){
+                    if(c._name_ === d[attr]){
                         aux = c;
                         break;
                     }
@@ -26185,9 +26584,16 @@ let _hierarchy = function(attrs){
             aux.children.push(d);
         }
         if(size){
-            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
         }else{
-            this.d_h = d3.hierarchy(hie).count();
+            for(let k of this.keys){
+                if(this.domainType[k] === "Numeric"){
+                    size = k;
+                    break;
+                }
+            }
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
+
         }
 
     }
@@ -26201,11 +26607,7 @@ let _makeHierarchy = function(obj){
 
     d3.pack()
         .size([svgBounds.width,svgBounds.height])
-       // .padding(1)
-     //  (d3.hierarchy(obj)
-       //     .sum(d => d.value)
-    //        .sort((a, b) => b.value - a.value))
-    (obj)
+        (obj)
 };
 
 
@@ -27322,7 +27724,7 @@ class ParallelCoordinates extends Visualization{
 
         this.x = d3.scalePoint().range( [
             0,
-            this.visContentWidth-this.settings.paddingLeft-this.settings.paddingRight
+            this.visContentWidth
         ], 0);
 
     }
@@ -27511,7 +27913,7 @@ class ParallelCoordinates extends Visualization{
               })
               .append(":title")
               .text(text);
-        
+
         }
     }
 
@@ -27585,6 +27987,7 @@ class ParallelCoordinates extends Visualization{
 }
 
 module.exports = ParallelCoordinates;
+
 },{"./Visualization.js":47,"./selections/selections.js":48,"d3":33}],43:[function(require,module,exports){
 
 let d3 = require("d3");
@@ -27747,6 +28150,8 @@ class ScatterplotMatrix extends Visualization {
 
         let scatterGroupEnter = scatterGroups.enter()
             .append("g")
+            .attr("line",d =>d.i)
+            .attr("collumn",d=>d.j)
             .attr("class", "cellGroup")
             .attr("transform", (d) => {
                 return "translate(" +
@@ -27885,7 +28290,6 @@ class ScatterplotMatrix extends Visualization {
 
     }
 
-
     highlight(...args) {
 
         let highlighted;
@@ -27989,6 +28393,11 @@ class ScatterplotMatrix extends Visualization {
         return c;
     }
 
+    driwdown(){
+
+
+    }
+
     filterByDimension(args) {
         this.settings.filter = args;
     }
@@ -28008,7 +28417,7 @@ class Sunburst extends Visualization{
         super(parentElement, settings);
         this.name = "Sunburst";
     }
-    
+
     _putDefaultSettings(){
         this.settings.labelVAlign = "top";
         this.settings.labelHAlign = "left";
@@ -28058,7 +28467,7 @@ class Sunburst extends Visualization{
         if(this.settings.hierarchies){
             _hierarchy.call(this, this.settings.hierarchies);
         }else{
-            let root = {name:"root", children: d};
+            let root = {_name_:"root", children: d};
             if(this.settings.size){
                 let size = this.settings.size;
                 this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
@@ -28079,22 +28488,26 @@ class Sunburst extends Visualization{
     }
 
     redraw(){
-
         let sunbust = this;
 
         let radius = this.w/ 2;
 
-        let svgBounds = this.svg.node().getBoundingClientRect();
-        this.foreground.selectAll("#sun").remove();
+        let svgBounds = sunbust.svg.node().getBoundingClientRect();
+        this.background.selectAll("#sun").remove();
 
-        let Parens = this.foreground
+        let color = d3.scaleLinear()
+            .domain([0, 5])
+            .range(["white", "grey"])
+            .interpolate(d3.interpolateHcl);
+
+        let Parents = sunbust.background
             .append("g")
             .attr("id","sun")
             .attr("transform", "translate(" + svgBounds.width/ 2 + "," + svgBounds.height/ 2 + ")");
 
-        let upParents = Parens
+        let updateParents = Parents
             .selectAll(".g")
-            .data(this.d_h.descendants().filter(d => d.depth));
+            .data(this.d_h.descendants());
 
         let arc = d3.arc()
             .startAngle(d => d.x0)
@@ -28104,26 +28517,49 @@ class Sunburst extends Visualization{
             .innerRadius(d => d.y0)
             .outerRadius(d => d.y1 - 1);
 
-        upParents.exit().remove();
-        let enterParents = upParents.enter()
+        updateParents.exit().remove();
+        let enterParents = updateParents.enter()
             .append("g")
-            .attr("class", "data");
 
         let format = d3.format(",d");
 
-        let ArcEnter = enterParents.append("path")
+        let ArcParentEnter = enterParents.append("path")
             .attr("d", arc)
-            .attr("class", "data")
-            .attr("data-index", function(d, i){return i; })
-            .style("fill",  this.settings.color )
+            .attr("class",'data-parent')
+            .attr('id', d=>d.data._name_)
+            .style("fill", d=>color(d.depth))
             .style("stroke", "black")
-            .style("stroke-width", "1.4px");
-            // .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
-            // .attr('id', d=>d.data.name);
+            .style("stroke-width", "0.5px")
+        //.text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
 
-        this._bindDataMouseEvents(ArcEnter);
 
-        let letterEnter =  d3.select("#sun").append("g")
+        this._bindDataMouseEvents(ArcParentEnter, "ancestor");
+
+        console.log("leaves",this.d_h.leaves());
+        console.log("leaves",this.d_h);
+
+
+        let updateSelection = this.foreground.selectAll(".data")
+            .data(this.d_h.leaves().filter((d,i)=>!d.data.children));
+        updateSelection.exit().remove();
+
+        let enterArcSelection = updateSelection.enter().append("path")
+            .attr("class",d=>!d.children?"data":null)
+            .attr("data-index",(d,i)=>!d.children?i:null)
+            .attr("d", arc)
+            .style('fill',this.settings.color)
+            .style("stroke", "black")
+            .style("stroke-width", "0.3px");
+
+        updateSelection.merge(enterArcSelection)
+            .attr("d", arc)
+            .attr('parent', d=>d.parent.data._name_)
+            .attr("transform", "translate(" + svgBounds.width/ 2 + "," + svgBounds.height/ 2 + ")")
+            .style("fill", this.settings.color)
+
+       this._bindDataMouseEvents(enterArcSelection);
+
+        const letterEnter =  d3.select("#sun").append("g")
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle")
             .selectAll("text")
@@ -28135,7 +28571,7 @@ class Sunburst extends Visualization{
                 return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
             })
             .attr("dy", "0.35em")
-            .text(d => d.data.name);
+            .text(d => d.data._name_);
 
         return super.redraw();
     }
@@ -28156,25 +28592,15 @@ class Sunburst extends Visualization{
         if(args[0] instanceof SVGElement){
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
             details = this.foreground
-              .selectAll('path[data-index="' + args[1] + '"]')
-              .style("stroke", this.settings.highlightColor)
-              .append(":title")
-              .text(text);
+                .selectAll('path[data-index="' + args[1] + '"]')
+                .style("stroke", this.settings.highlightColor)
+                .append(":title")
+                .text(text);
         }
     }
 
     highlight(...args){
-        let highlighted;
-        if(args[0] instanceof SVGElement){
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
 
-            highlighted = this.foreground
-                .selectAll('path[data-index="' + args[1] + '"]')
-                .style("stroke", this.settings.highlightColor);
-
-            if(highlighted)
-                super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
-        }
     }
 
     removeHighlight(...args){
@@ -28191,7 +28617,7 @@ class Sunburst extends Visualization{
 
         this.foreground.selectAll('path[data-index="'+i+'"]')
 
-        str = str.substring(0, str.length - 3);
+        //str = str.substring(0, str.length - 3);
 
         let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
         d3.select(group).attr("class", "groupHighlight");
@@ -28202,7 +28628,6 @@ class Sunburst extends Visualization{
         group.appendChild(path);
         return group;
     }
-
 
     select(selection){
         if(Array.isArray(selection)){
@@ -28236,13 +28661,13 @@ let _hierarchy = function(attrs){
 
         let attr = attrs[index];
         for(let d of this.domain[attr]){
-            let child = {name: d, children: []};
+            let child = {_name_: d, children: []};
             data.children.push(child);
             group(child, index+1);
         }
     };
 
-    let hie = {name: "root", children:[]};
+    let hie = {_name_: "root", children:[]};
     if(attrs && attrs.length > 0){
         group(hie, 0);
 
@@ -28250,7 +28675,7 @@ let _hierarchy = function(attrs){
             let aux = hie;
             for(let attr of attrs){
                 for(let c of aux.children){
-                    if(c.name === d[attr]){
+                    if(c._name_ === d[attr]){
                         aux = c;
                         break;
                     }
@@ -28282,6 +28707,7 @@ let _makeHierarchy = function(obj){
 
 
 module.exports = Sunburst;
+
 },{"./Utils.js":46,"./Visualization.js":47,"d3":33}],45:[function(require,module,exports){
 let d3 = require("d3");
 let Visualization = require("./Visualization.js");
@@ -28338,7 +28764,7 @@ class Treemap extends Visualization{
         if(this.settings.hierarchies){
             _hierarchy.call(this, this.settings.hierarchies);
         }else{
-            let root = {name:"root", children: d};
+            let root = {_name_:"root", children: d};
             if(this.settings.size){
                 let size = this.settings.size;
                 this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
@@ -28362,6 +28788,8 @@ class Treemap extends Visualization{
         //let t0 = performance.now();
         let treemap = this;
 
+        console.log("th",this.d_h);
+
         let updateParents = this.foreground
             .selectAll(".data-parent")
             .data(this.d_parents);
@@ -28371,7 +28799,7 @@ class Treemap extends Visualization{
         let enterParents = updateParents.enter()
             .append("g")
             .attr("class", "data-parent")
-            .attr('id', d=>d.data.name)
+            .attr('id', d=>d.data._name_)
 
         ;
 
@@ -28396,7 +28824,7 @@ class Treemap extends Visualization{
             .attr("height", (d)=>{return d.y1 - d.y0;});
 
         mergeParents.select("text")
-            .text((d)=>{return d.data.name;})
+            .text((d)=>{return d.data._name_;})
             .attr("x", 2)
             .attr("y", function(){ return this.getBoundingClientRect().height - 3; });
 
@@ -28406,21 +28834,18 @@ class Treemap extends Visualization{
             .data(this.d_h.leaves());
         updateSelection.exit().remove();
 
-
-
         let enterSelection = updateSelection.enter().append("rect")
             .attr("class", "data")
             .attr("data-index", function(d, i){return i; })
-            //.attr("parent",d=>d.)
+            .attr("parent",d=>d._name_)
             .style("fill", this.settings.color)
             .style("stroke", "black")
             .style("stroke-width", "0.5px");
 
         this._bindDataMouseEvents(enterSelection);
 
-
         enterSelection.merge(updateSelection)
-            .attr('parent', d=>d.parent.data.name)
+            .attr('parent', d=>d.parent.data._name_)
             .attr("x", (d)=>{return d.x0;})
             .attr("y", (d)=>{return d.y0;})
             .style("fill", this.settings.color)
@@ -28428,7 +28853,7 @@ class Treemap extends Visualization{
             .attr("height", (d)=>{return d.y1 - d.y0;});
 
         let foreground = this.foreground
-        foreground.selectAll('rect.data').attr('parent', d=>d.parent.data.name)
+        foreground.selectAll('rect.data').attr('parent', d=>d.parent.data._name_)
             .each(function(){
                 let rect = d3.select(this)
                     .attr("x", (d)=>{return d.x0;})
@@ -28528,15 +28953,7 @@ class Treemap extends Visualization{
             .attr("width", d.x1 - d.x0)
             .attr("height", d.y1 - d.y0)
             .style("fill", "none")
-            .style("stroke", this.settings.highlightColor)
-          .append("foreignObject")
-          .attr("top", d.x0)
-          .attr("left", d.y0)
-          .attr("width", d.x1 - d.x0)
-          .attr("height", d.y1 - d.y0)
-          .append("input")
-
-
+            .style("stroke", this.settings.highlightColor);
 
         group.appendChild(rect);
         return group;
@@ -28574,21 +28991,21 @@ let _hierarchy = function(attrs){
 
         let attr = attrs[index];
         for(let d of this.domain[attr]){
-            let child = {name: d, children: []};
+            let child = {_name_: d, children: []};
             data.children.push(child);
             group(child, index+1);
         }
     };
 
-    let hie = {name: "root", children:[]};
+    let hie = {_name_: "root", children:[]};
     if(attrs && attrs.length > 0){
         group(hie, 0);
-
+        
         for(let d of this.d){
             let aux = hie;
             for(let attr of attrs){
                 for(let c of aux.children){
-                    if(c.name === d[attr]){
+                    if(c._name_ === d[attr]){
                         aux = c;
                         break;
                     }
@@ -28597,7 +29014,7 @@ let _hierarchy = function(attrs){
             aux.children.push(d);
         }
         if(size){
-            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
         }else{
             for(let k of this.keys){
                 if(this.domainType[k] === "Numeric"){
@@ -28605,7 +29022,7 @@ let _hierarchy = function(attrs){
                     break;
                 }
             }
-            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
 
         }
 

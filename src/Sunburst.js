@@ -9,7 +9,7 @@ class Sunburst extends Visualization{
         super(parentElement, settings);
         this.name = "Sunburst";
     }
-    
+
     _putDefaultSettings(){
         this.settings.labelVAlign = "top";
         this.settings.labelHAlign = "left";
@@ -59,7 +59,7 @@ class Sunburst extends Visualization{
         if(this.settings.hierarchies){
             _hierarchy.call(this, this.settings.hierarchies);
         }else{
-            let root = {name:"root", children: d};
+            let root = {_name_:"root", children: d};
             if(this.settings.size){
                 let size = this.settings.size;
                 this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
@@ -80,22 +80,26 @@ class Sunburst extends Visualization{
     }
 
     redraw(){
-
         let sunbust = this;
 
         let radius = this.w/ 2;
 
-        let svgBounds = this.svg.node().getBoundingClientRect();
-        this.foreground.selectAll("#sun").remove();
+        let svgBounds = sunbust.svg.node().getBoundingClientRect();
+        this.background.selectAll("#sun").remove();
 
-        let Parens = this.foreground
+        let color = d3.scaleLinear()
+            .domain([0, 5])
+            .range(["white", "grey"])
+            .interpolate(d3.interpolateHcl);
+
+        let Parents = sunbust.background
             .append("g")
             .attr("id","sun")
             .attr("transform", "translate(" + svgBounds.width/ 2 + "," + svgBounds.height/ 2 + ")");
 
-        let upParents = Parens
+        let updateParents = Parents
             .selectAll(".g")
-            .data(this.d_h.descendants().filter(d => d.depth));
+            .data(this.d_h.descendants());
 
         let arc = d3.arc()
             .startAngle(d => d.x0)
@@ -105,26 +109,49 @@ class Sunburst extends Visualization{
             .innerRadius(d => d.y0)
             .outerRadius(d => d.y1 - 1);
 
-        upParents.exit().remove();
-        let enterParents = upParents.enter()
+        updateParents.exit().remove();
+        let enterParents = updateParents.enter()
             .append("g")
-            .attr("class", "data");
 
         let format = d3.format(",d");
 
-        let ArcEnter = enterParents.append("path")
+        let ArcParentEnter = enterParents.append("path")
             .attr("d", arc)
-            .attr("class", "data")
-            .attr("data-index", function(d, i){return i; })
-            .style("fill",  this.settings.color )
+            .attr("class",'data-parent')
+            .attr('id', d=>d.data._name_)
+            .style("fill", d=>color(d.depth))
             .style("stroke", "black")
-            .style("stroke-width", "1.4px");
-            // .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
-            // .attr('id', d=>d.data.name);
+            .style("stroke-width", "0.5px")
+        //.text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
 
-        this._bindDataMouseEvents(ArcEnter);
 
-        let letterEnter =  d3.select("#sun").append("g")
+        this._bindDataMouseEvents(ArcParentEnter, "ancestor");
+
+        console.log("leaves",this.d_h.leaves());
+        console.log("leaves",this.d_h);
+
+
+        let updateSelection = this.foreground.selectAll(".data")
+            .data(this.d_h.leaves().filter((d,i)=>!d.data.children));
+        updateSelection.exit().remove();
+
+        let enterArcSelection = updateSelection.enter().append("path")
+            .attr("class",d=>!d.children?"data":null)
+            .attr("data-index",(d,i)=>!d.children?i:null)
+            .attr("d", arc)
+            .style('fill',this.settings.color)
+            .style("stroke", "black")
+            .style("stroke-width", "0.3px");
+
+        updateSelection.merge(enterArcSelection)
+            .attr("d", arc)
+            .attr('parent', d=>d.parent.data._name_)
+            .attr("transform", "translate(" + svgBounds.width/ 2 + "," + svgBounds.height/ 2 + ")")
+            .style("fill", this.settings.color)
+
+       this._bindDataMouseEvents(enterArcSelection);
+
+        const letterEnter =  d3.select("#sun").append("g")
             .attr("pointer-events", "none")
             .attr("text-anchor", "middle")
             .selectAll("text")
@@ -136,7 +163,7 @@ class Sunburst extends Visualization{
                 return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
             })
             .attr("dy", "0.35em")
-            .text(d => d.data.name);
+            .text(d => d.data._name_);
 
         return super.redraw();
     }
@@ -157,25 +184,15 @@ class Sunburst extends Visualization{
         if(args[0] instanceof SVGElement){
         }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
             details = this.foreground
-              .selectAll('path[data-index="' + args[1] + '"]')
-              .style("stroke", this.settings.highlightColor)
-              .append(":title")
-              .text(text);
+                .selectAll('path[data-index="' + args[1] + '"]')
+                .style("stroke", this.settings.highlightColor)
+                .append(":title")
+                .text(text);
         }
     }
 
     highlight(...args){
-        let highlighted;
-        if(args[0] instanceof SVGElement){
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
 
-            highlighted = this.foreground
-                .selectAll('path[data-index="' + args[1] + '"]')
-                .style("stroke", this.settings.highlightColor);
-
-            if(highlighted)
-                super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
-        }
     }
 
     removeHighlight(...args){
@@ -192,7 +209,7 @@ class Sunburst extends Visualization{
 
         this.foreground.selectAll('path[data-index="'+i+'"]')
 
-        str = str.substring(0, str.length - 3);
+        //str = str.substring(0, str.length - 3);
 
         let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
         d3.select(group).attr("class", "groupHighlight");
@@ -203,7 +220,6 @@ class Sunburst extends Visualization{
         group.appendChild(path);
         return group;
     }
-
 
     select(selection){
         if(Array.isArray(selection)){
@@ -237,13 +253,13 @@ let _hierarchy = function(attrs){
 
         let attr = attrs[index];
         for(let d of this.domain[attr]){
-            let child = {name: d, children: []};
+            let child = {_name_: d, children: []};
             data.children.push(child);
             group(child, index+1);
         }
     };
 
-    let hie = {name: "root", children:[]};
+    let hie = {_name_: "root", children:[]};
     if(attrs && attrs.length > 0){
         group(hie, 0);
 
@@ -251,7 +267,7 @@ let _hierarchy = function(attrs){
             let aux = hie;
             for(let attr of attrs){
                 for(let c of aux.children){
-                    if(c.name === d[attr]){
+                    if(c._name_ === d[attr]){
                         aux = c;
                         break;
                     }

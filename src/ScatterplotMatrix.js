@@ -159,6 +159,8 @@ class ScatterplotMatrix extends Visualization {
 
         let scatterGroupEnter = scatterGroups.enter()
             .append("g")
+            .attr("line",d =>d.i)
+            .attr("collumn",d=>d.j)
             .attr("class", "cellGroup")
             .attr("transform", (d) => {
                 return "translate(" +
@@ -297,7 +299,6 @@ class ScatterplotMatrix extends Visualization {
 
     }
 
-
     highlight(...args) {
 
         let highlighted;
@@ -399,6 +400,11 @@ class ScatterplotMatrix extends Visualization {
         let c = [], n = a.length, m = b.length, i, j;
         for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i], i: i, y: b[j], j: j});
         return c;
+    }
+
+    driwdown(){
+
+
     }
 
     filterByDimension(args) {

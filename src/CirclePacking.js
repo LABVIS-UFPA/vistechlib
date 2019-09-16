@@ -24,7 +24,6 @@ class CirclePacking extends Visualization{
         let svgBounds = this.svg.node().getBoundingClientRect();
         this.h =  Math.min(svgBounds.height,svgBounds.width);
         this.w = Math.min(svgBounds.height,svgBounds.width);
-        this.r = Math.min(svgBounds.height,svgBounds.width)/2;
 
         this.redraw();
         return this;
@@ -37,7 +36,6 @@ class CirclePacking extends Visualization{
             if(this.domainType[k] === "Categorical"){
             }
             if(this.domainType[k] === "Numeric"){
-                console.log(this.domain[k]);
                 let  values= [];
                 for (let i = 0; i <d.length ; i++) {
                     values.push(d[i][k]);
@@ -54,17 +52,15 @@ class CirclePacking extends Visualization{
 
         this.w = Math.min(svgBounds.height,svgBounds.width);
         this.h =  Math.min(svgBounds.height,svgBounds.width);
-        this.r = Math.min(this.w, this.h) / 2;
 
+        let root = {_name_:"root", children: d};
         if(this.settings.hierarchies){
             _hierarchy.call(this, this.settings.hierarchies);
         }else{
-            let root = {name:"root", children: d};
             if(this.settings.size){
                 let size = this.settings.size;
-                this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
-
-
+                this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.height - a.height; });
+                _hierarchy.call(this, this.settings.hierarchies);
             }else{
                 this.d_h = d3.hierarchy(root).count();
             }
@@ -80,86 +76,103 @@ class CirclePacking extends Visualization{
     }
 
     redraw(){
-        let circlePacking = this;
+            let circlePacking = this;
 
-        let svgBounds = this.svg.node().getBoundingClientRect();
-        let svg = this.foreground;
-
-
-        let color = d3.scaleLinear()
-            .domain([0, 5])
-            .range(["white", "grey"])
-            .interpolate(d3.interpolateHcl)
-
-        const root =this.d_h;
-
-        let width = svgBounds.width;
-        let height =svgBounds.height;
-
-        svg
-            .attr("transform",`translate(${width/2},${height/2})`)
-            .attr("width",svgBounds.width)
-            .attr("height",svgBounds.height)
-            .style("background", color(0))
-            .style("cursor", "pointer")
+            let svgBounds = this.svg.node().getBoundingClientRect();
+            let svg = this.foreground;
 
 
-        d3.selectAll('.circlePacking').remove();
+            let color = d3.scaleLinear()
+                .domain([0, 5])
+                .range(["white", "grey"])
+                .interpolate(d3.interpolateHcl)
 
-        const node = svg.append("g")
-            .attr("class","circlePacking")
-            .selectAll("circle")
-            .data(root.descendants())
-            .join("circle")
-            .attr('class',d=>d.children?'father':'data')
-            .attr("fill", d => d.children ? color(d.depth) :this.settings.color)
+            const root =this.d_h;
+
+            let width = svgBounds.width;
+            let height =svgBounds.height;
+
+            svg
+                .attr("transform",`translate(${width/2},${height/2})`)
+                .attr("width",svgBounds.width)
+                .attr("height",svgBounds.height)
+                .style("background", color(0))
+                .style("cursor", "pointer")
+
+            this.background
+                .attr("transform",`translate(${width/2},${height/2})`)
+                .attr("width",svgBounds.width)
+                .attr("height",svgBounds.height)
+                .style("background", color(0))
+                .style("cursor", "pointer")
+
+            this.background.selectAll('.circlePacking').remove();
+
+
+            const node = this.background.append("g")
+                .attr("class","circlePacking")
+                .selectAll("circle")
+                .data(this.d_parents)
+                .join("circle")
+                .attr('class','data-parent')
+                .attr("fill", d =>color(d.depth))
+
+      //this._bindDataMouseEvents(node, "ancestor");
+
+        //this.foreground.selectAll(".data").exit().remove();
+        let updateSelection = this.foreground.selectAll(".data")
+            .data(this.d_h.leaves());
+        updateSelection.exit().remove();
+
+        let enterSelection = updateSelection.enter().append("circle")
+            .attr("class", "data")
             .attr("data-index", function(d, i){return i; })
-        //     .style("fill", this.settings.color)
-        //     .style("stroke", "black")
-        //   .attr("pointer-events", d => !d.children ? "none" : null)
-        //.on("mouseover", function() { d3.select(this).attr("stroke", "#000"); })
-        //.on("mouseout", function() { d3.select(this).attr("stroke", null); })
-        //.on("click", d => focus !== d && (zoom(d), d3.event.stopPropagation()));
+            .style("stroke", "black")
+            .style("stroke-width", "0.5px");
 
+        this._bindDataMouseEvents(enterSelection);
 
-        // let enterSelection = node.enter().append("circle")
-        //     .attr("class", "data")
-        //     .attr("data-index", function(d, i){return i; })
-        //     //.attr("parent",d=>d.)
-        //     .style("fill", this.settings.color)
-        //     .style("stroke", "black")
-        //     .style("stroke-width", "0.5px");
+        let v = [root.x, root.y, root.r * 2]
+        const r =  Math.min(svgBounds.height,svgBounds.width);
+        const k = r / v[2];
+
+        enterSelection.merge(updateSelection)
+            .attr('parent', d=>d.parent.data._name_)
+            .style("fill", this.settings.color)
+            .attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`)
+            .attr("r", d => d.r * k);
 
         const removelabel = svg.select('.labels').remove();
-        const label = svg.append("g")
-            .attr('class','labels')
-            .style("font", "10px sans-serif")
-            .attr("pointer-events", "none")
-            .attr("text-anchor", "middle")
-            .selectAll("text")
-            .data(root.descendants().slice(1))
-            .join("text")
-            .style("fill-opacity", d => d.parent === root ? 1 : 0)
-            .style("display", d => d.parent === root ? "inline" : "none")
-          //  .text(d => d.data.data.name);
+            const label = svg.append("g")
+                .attr('class','labels')
+                .style("font", "10px sans-serif")
+                .attr("pointer-events", "none")
+                .attr("text-anchor", "middle")
+                .selectAll("text")
+                .data(root.descendants().slice(1))
+                .join("text")
+                .style("fill-opacity", d => d.parent === root ? 1 : 0)
+                .style("display", d => d.parent === root ? "inline" : "none")
+               .text(d => d.data._name_);
 
 
-        zoomTo([root.x, root.y, root.r * 2]);
+            zoomTo([root.x, root.y, root.r * 2]);
+
+            function zoomTo(v) {
+                const r =  Math.min(svgBounds.height,svgBounds.width);
+                const k = r / v[2];
+
+                label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                node.attr("r", d => d.r * k);
+                enterSelection.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+                enterSelection.attr("r", d => d.r * k);
+            }
 
 
-        function zoomTo(v) {
-            const k = (svgBounds.height-40) / v[2];
+            this._bindDataMouseEvents(enterSelection);
+            return super.redraw();
 
-            let view = v;
-
-            label.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
-            node.attr("r", d => d.r * k);
-        }
-
-
-        this._bindDataMouseEvents(node);
-        return super.redraw();
     }
 
     detail(...args){
@@ -168,13 +181,47 @@ class CirclePacking extends Visualization{
 
     highlight(...args){
 
+        console.log(args[0]);
+        console.log(args[1]);
+
+
+        this.highlightLayer.append("circle")
+            .attr('class','data-highlight')
+              .attr("cx", args[0].x-10)
+              .attr("cy",  args[0].y)
+              .attr("r",  args[0].r)
+              .style("fill", "none")
+              .style("stroke", this.settings.highlightColor);
+
+        //return group;
+
     }
 
+
     removeHighlight(...args){
+        let remove =this.highlightLayer.selectAll('.data-highlight').remove();
+
+        return remove;
 
     }
 
     getHighlightElement(i){
+        let d = this.d_h.children[i];
+
+        let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        d3.select(group).attr("class", "groupHighlight");
+
+        let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        d3.select(circle)
+            .attr("class", "circleHighlight")
+            .attr("cx", d.x-10)
+            .attr("cy", d.y)
+            .attr("r", d.r)
+            .style("fill", "none")
+            .style("stroke", this.settings.highlightColor)
+
+        group.appendChild(circle);
+        return group;
 
     }
 
@@ -184,7 +231,7 @@ class CirclePacking extends Visualization{
     }
 
     setSize(attrs){
-
+        this.settings.size = attrs;
     }
 
     hierarchy(attrs){
@@ -209,13 +256,13 @@ let _hierarchy = function(attrs){
 
         let attr = attrs[index];
         for(let d of this.domain[attr]){
-            let child = {name: d, children: []};
+            let child = {_name_: d, children: []};
             data.children.push(child);
             group(child, index+1);
         }
     };
 
-    let hie = {name: "root", children:[]};
+    let hie = {_name_: "root", children:[]};
     if(attrs && attrs.length > 0){
         group(hie, 0);
 
@@ -223,7 +270,7 @@ let _hierarchy = function(attrs){
             let aux = hie;
             for(let attr of attrs){
                 for(let c of aux.children){
-                    if(c.name === d[attr]){
+                    if(c._name_ === d[attr]){
                         aux = c;
                         break;
                     }
@@ -232,9 +279,16 @@ let _hierarchy = function(attrs){
             aux.children.push(d);
         }
         if(size){
-            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
         }else{
-            this.d_h = d3.hierarchy(hie).count();
+            for(let k of this.keys){
+                if(this.domainType[k] === "Numeric"){
+                    size = k;
+                    break;
+                }
+            }
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
+
         }
 
     }
@@ -248,11 +302,7 @@ let _makeHierarchy = function(obj){
 
     d3.pack()
         .size([svgBounds.width,svgBounds.height])
-       // .padding(1)
-     //  (d3.hierarchy(obj)
-       //     .sum(d => d.value)
-    //        .sort((a, b) => b.value - a.value))
-    (obj)
+        (obj)
 };
 
 

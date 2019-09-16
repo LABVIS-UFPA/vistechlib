@@ -53,7 +53,7 @@ class Treemap extends Visualization{
         if(this.settings.hierarchies){
             _hierarchy.call(this, this.settings.hierarchies);
         }else{
-            let root = {name:"root", children: d};
+            let root = {_name_:"root", children: d};
             if(this.settings.size){
                 let size = this.settings.size;
                 this.d_h = d3.hierarchy(root).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
@@ -77,6 +77,8 @@ class Treemap extends Visualization{
         //let t0 = performance.now();
         let treemap = this;
 
+        console.log("th",this.d_h);
+
         let updateParents = this.foreground
             .selectAll(".data-parent")
             .data(this.d_parents);
@@ -86,7 +88,7 @@ class Treemap extends Visualization{
         let enterParents = updateParents.enter()
             .append("g")
             .attr("class", "data-parent")
-            .attr('id', d=>d.data.name)
+            .attr('id', d=>d.data._name_)
 
         ;
 
@@ -111,7 +113,7 @@ class Treemap extends Visualization{
             .attr("height", (d)=>{return d.y1 - d.y0;});
 
         mergeParents.select("text")
-            .text((d)=>{return d.data.name;})
+            .text((d)=>{return d.data._name_;})
             .attr("x", 2)
             .attr("y", function(){ return this.getBoundingClientRect().height - 3; });
 
@@ -121,21 +123,18 @@ class Treemap extends Visualization{
             .data(this.d_h.leaves());
         updateSelection.exit().remove();
 
-
-
         let enterSelection = updateSelection.enter().append("rect")
             .attr("class", "data")
             .attr("data-index", function(d, i){return i; })
-            //.attr("parent",d=>d.)
+            .attr("parent",d=>d._name_)
             .style("fill", this.settings.color)
             .style("stroke", "black")
             .style("stroke-width", "0.5px");
 
         this._bindDataMouseEvents(enterSelection);
 
-
         enterSelection.merge(updateSelection)
-            .attr('parent', d=>d.parent.data.name)
+            .attr('parent', d=>d.parent.data._name_)
             .attr("x", (d)=>{return d.x0;})
             .attr("y", (d)=>{return d.y0;})
             .style("fill", this.settings.color)
@@ -143,7 +142,7 @@ class Treemap extends Visualization{
             .attr("height", (d)=>{return d.y1 - d.y0;});
 
         let foreground = this.foreground
-        foreground.selectAll('rect.data').attr('parent', d=>d.parent.data.name)
+        foreground.selectAll('rect.data').attr('parent', d=>d.parent.data._name_)
             .each(function(){
                 let rect = d3.select(this)
                     .attr("x", (d)=>{return d.x0;})
@@ -243,15 +242,7 @@ class Treemap extends Visualization{
             .attr("width", d.x1 - d.x0)
             .attr("height", d.y1 - d.y0)
             .style("fill", "none")
-            .style("stroke", this.settings.highlightColor)
-          .append("foreignObject")
-          .attr("top", d.x0)
-          .attr("left", d.y0)
-          .attr("width", d.x1 - d.x0)
-          .attr("height", d.y1 - d.y0)
-          .append("input")
-
-
+            .style("stroke", this.settings.highlightColor);
 
         group.appendChild(rect);
         return group;
@@ -289,21 +280,21 @@ let _hierarchy = function(attrs){
 
         let attr = attrs[index];
         for(let d of this.domain[attr]){
-            let child = {name: d, children: []};
+            let child = {_name_: d, children: []};
             data.children.push(child);
             group(child, index+1);
         }
     };
 
-    let hie = {name: "root", children:[]};
+    let hie = {_name_: "root", children:[]};
     if(attrs && attrs.length > 0){
         group(hie, 0);
-
+        
         for(let d of this.d){
             let aux = hie;
             for(let attr of attrs){
                 for(let c of aux.children){
-                    if(c.name === d[attr]){
+                    if(c._name_ === d[attr]){
                         aux = c;
                         break;
                     }
@@ -312,7 +303,7 @@ let _hierarchy = function(attrs){
             aux.children.push(d);
         }
         if(size){
-            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
         }else{
             for(let k of this.keys){
                 if(this.domainType[k] === "Numeric"){
@@ -320,7 +311,7 @@ let _hierarchy = function(attrs){
                     break;
                 }
             }
-            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });;
+            this.d_h = d3.hierarchy(hie).sum(function(d) {return d[size]}).sort(function(a, b) { return b.height - a.height || b.value - a.value; });
 
         }
 

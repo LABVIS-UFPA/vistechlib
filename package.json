@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "start":"browserify index.js --standalone vistechlib -o test/bundle.js"
+    "start": "browserify index.js --standalone vistechlib -o test/bundle.js"
   },
   "repository": {
     "type": "git",
@@ -19,8 +19,6 @@
     "Visualization",
     "Technique"
   ],
-
-
   "author": "LABVIS - UFPA",
   "license": "Apache-2.0",
   "bugs": {
@@ -28,7 +26,8 @@
   },
   "homepage": "https://github.com/LABVIS-UFPA/vistechlib#readme",
   "dependencies": {
-    "d3": "^5.9.1",
+    "d3": "^5.12.0",
+    "d3-array": "^2.3.1",
     "d3-path": "^1.0.7",
     "moment": "^2.24.0",
     "underscore": "^1.9.1"

@@ -16,7 +16,7 @@ class ParallelCoordinates extends Visualization{
 
         this.x = d3.scalePoint().range( [
             0,
-            this.visContentWidth-this.settings.paddingLeft-this.settings.paddingRight
+            this.visContentWidth
         ], 0);
 
     }
@@ -205,7 +205,7 @@ class ParallelCoordinates extends Visualization{
               })
               .append(":title")
               .text(text);
-        
+
         }
     }
 
