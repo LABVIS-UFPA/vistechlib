@@ -24,4 +24,4 @@ use the library on the front end with the help of browserify, use the command
 npm start
 ```
 
-[Api reference](https://www.google.com "Google's Homepage")
+[Api reference](http://labvis.ufpa.br/vistechlib/documentation "documentation")
