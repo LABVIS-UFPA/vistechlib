@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Utils.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Utils.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ *
+ * @param a x0 line1
+ * @param b y0 line1
+ * @param c x1 line1
+ * @param d y0 line1
+ * @param p x0 line2
+ * @param q y0 line2
+ * @param r x1 line2
+ * @param s y2 line2
+ * @returns {boolean} line1 intersects line2
+ */
+module.exports.lineIntersects = (a,b,c,d,p,q,r,s) => {
+    let det, gamma, lambda;
+    det = (c - a) * (s - q) - (r - p) * (d - b);
+    if (det === 0) {
+        return false;
+    } else {
+        lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+        gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+        return (0 &lt; lambda &amp;&amp; lambda &lt; 1) &amp;&amp; (0 &lt; gamma &amp;&amp; gamma &lt; 1);
+    }
+};
+
+
+module.exports.parseTranslate = (elem) => {
+    let m = elem.transform.baseVal.consolidate().matrix;
+    return {
+        x: m.e,
+        y: m.f
+    };
+};
+
+// class QuadTree{
+//
+//     constructor(){
+//         this.root = {};
+//     }
+//
+//     insert(bound, node){
+//         let _insert = function (root, bound, node) {
+//             if(root.isLeaf){
+//                 let brother = {isLeaf:true, bound: root.bound, node: root.node};
+//                 let inserted = {isLeaf:true, bound: bound, node: node};
+//                 root.bound = QuadTree.unionBound(brother.bound, bound);
+//                 root.isLeaf = false;
+//                 root.node = undefined;
+//                 root.child1 = brother;
+//                 root.child2 = inserted;
+//                 return root.bound;
+//             }else{
+//                 let mb1 = QuadTree.unionBound(root.child1.bound, bound);
+//                 let mb2 = QuadTree.unionBound(root.child2.bound, bound);
+//                 let resultBound;
+//                 if(QuadTree.boundArea(mb1) > QuadTree.boundArea(mb2)){
+//                     resultBound = _insert(root.child2, bound, node);
+//                 }else{
+//                     resultBound = _insert(root.child1, bound, node);
+//                 }
+//                 root.bound = QuadTree.unionBound(root.bound, resultBound);
+//                 return root.bound;
+//             }
+//         };
+//         if(!this.root.bound){
+//             this.root.bound = bound;
+//             this.root.node = node;
+//             this.root.isLeaf = true;
+//         }else{
+//             _insert(this.root, bound, node);
+//         }
+//     }
+//
+//     getCollisions(bound){
+//
+//         let _getCollisions = (root, bound, array) => {
+//             if(QuadTree.isColliding(root.bound, bound)){
+//                 if(root.isLeaf){
+//                     array.push(root.node);
+//                 }else{
+//                     _getCollisions(root.child1, bound, array);
+//                     _getCollisions(root.child2, bound, array);
+//                 }
+//             }
+//         };
+//
+//         if(this.root.bound){
+//             let collisions = [];
+//             _getCollisions(this.root, bound, collisions);
+//             return collisions;
+//         }
+//         return [];
+//     }
+//
+//     static unionBound(b1, b2){
+//         return {
+//             x1: Math.min(b1.x1, b2.x1),
+//             y1: Math.min(b1.y1, b2.y1),
+//             x2: Math.max(b1.x2, b2.x2),
+//             y2: Math.max(b1.y2, b2.y2)
+//         };
+//     }
+//     static boundArea(b){
+//         return (b.x2-b.x1)*(b.y2-b.y1);
+//     }
+//     static isColliding(b1, b2){
+//         return !(b2.x1 > b1.x2 ||
+//             b2.x2 &lt; b1.x1 ||
+//             b2.y1 > b1.y2 ||
+//             b2.y2 &lt; b1.y1);
+//     }
+// }</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BarChart.html">BarChart</a></li><li><a href="BeeswarmPlot.html">BeeswarmPlot</a></li><li><a href="CirclePacking.html">CirclePacking</a></li><li><a href="Histogram.html">Histogram</a></li><li><a href="ParallelBundling.html">ParallelBundling</a></li><li><a href="ParallelCoordinates.html">ParallelCoordinates</a></li><li><a href="ScatterplotMatrix.html">ScatterplotMatrix</a></li><li><a href="Sunburst.html">Sunburst</a></li><li><a href="Treemap.html">Treemap</a></li><li><a href="Visualization.html">Visualization</a></li></ul><h3>Global</h3><ul><li><a href="global.html#lineIntersects">lineIntersects</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Jan 10 2020 00:01:52 GMT-0300 (GMT-03:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

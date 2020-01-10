@@ -1,4 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ParallelBundling.js</title>
 
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ParallelBundling.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
 let d3 = require("d3");
 let _ = require("underscore");
 let Visualization = require("./Visualization.js");
@@ -43,9 +71,9 @@ class ParallelBundling extends Visualization{
                 const nextKey = this.keys[keyIndex + 1];
 
 
-                const co_co = !isCategorical(key) && !isCategorical(nextKey);
-                const co_ca = !isCategorical(key) && isCategorical(nextKey);
-                const ca_co = isCategorical(key) && !isCategorical(nextKey);
+                const co_co = !isCategorical(key) &amp;&amp; !isCategorical(nextKey);
+                const co_ca = !isCategorical(key) &amp;&amp; isCategorical(nextKey);
+                const ca_co = isCategorical(key) &amp;&amp; !isCategorical(nextKey);
 
                 let displacement;
                 if (isCategorical(nextKey)) {
@@ -532,7 +560,7 @@ class ParallelBundling extends Visualization{
 
             let mergeSelection = linesUpdateSelection.enter().append("path")
                 .merge(linesUpdateSelection);
-            if (this.animation && withAnimation)
+            if (this.animation &amp;&amp; withAnimation)
                 updateAllLinesWithAnimation(mergeSelection);
             else
                 updateAllLinesWithoutAnimation(mergeSelection);
@@ -660,8 +688,8 @@ class ParallelBundling extends Visualization{
         let obj =  Object.entries(args[0]);
         let text = "";
 
-        for (let j = 0; j < args[2].length; j++) {
-            for (let i = 0; i < obj.length; i++) {
+        for (let j = 0; j &lt; args[2].length; j++) {
+            for (let i = 0; i &lt; obj.length; i++) {
                 if(args[2][j]===obj[i][0]){
                     text+= obj[i][0]+" : "+ obj[i][1]+"\n";
                 }
@@ -669,7 +697,7 @@ class ParallelBundling extends Visualization{
         }
         if(args[0] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+        }else if(typeof args[1] === "number" &amp;&amp; args[1] >= 0 &amp;&amp; args[1] &lt; this.d.length){
             this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
               .style("stroke", parallelcoordinates.settings.highlightColor)
               .style("stroke-width", "2")
@@ -687,7 +715,7 @@ class ParallelBundling extends Visualization{
 
         if(args[0] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+        }else if(typeof args[1] === "number" &amp;&amp; args[1] >= 0 &amp;&amp; args[1] &lt; this.d.length){
             // this.foreground.select
             // d3.select(args[0])
             this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
@@ -710,7 +738,7 @@ class ParallelBundling extends Visualization{
         let self = this;
         if(args[1] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+        }else if(typeof args[1] === "number" &amp;&amp; args[1] >= 0 &amp;&amp; args[1] &lt; this.d.length){
             let elem = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
                 .style("stroke", this.settings.color)//function(d) {return self.clusterColor(d[self.clusterOn])})
                 .style("stroke-width", 1);
@@ -739,3 +767,26 @@ class ParallelBundling extends Visualization{
 
 
 module.exports = ParallelBundling;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="BarChart.html">BarChart</a></li><li><a href="BeeswarmPlot.html">BeeswarmPlot</a></li><li><a href="CirclePacking.html">CirclePacking</a></li><li><a href="Histogram.html">Histogram</a></li><li><a href="ParallelBundling.html">ParallelBundling</a></li><li><a href="ParallelCoordinates.html">ParallelCoordinates</a></li><li><a href="ScatterplotMatrix.html">ScatterplotMatrix</a></li><li><a href="Sunburst.html">Sunburst</a></li><li><a href="Treemap.html">Treemap</a></li><li><a href="Visualization.html">Visualization</a></li></ul><h3>Global</h3><ul><li><a href="global.html#lineIntersects">lineIntersects</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Jan 10 2020 00:01:52 GMT-0300 (GMT-03:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
