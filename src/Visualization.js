@@ -5,10 +5,11 @@ let moment = require('moment');
 class Visualization {
     /**
      * @class
-     * Abstract visualization class which extends all available visualizations in lib
+     * @description Abstract visualization class which extends all available visualizations in lib
      * @constructor
      * @param {string} parentElement - Parent element where view will be added
      * @param {object} settings - basic configuration parameters in the view such as margins, opacity, color
+     * @returns  {object} included object or svg chart and settings
      */
 
     constructor(parentElement, settings){
@@ -41,7 +42,7 @@ class Visualization {
         this.autoresize = this.settings.autoresize;
 
         /**
-         * > dispatch event available for visualization elements, where it will be active when using outside the library **this.event()**
+         * >@description dispatch event available for visualization elements, where it will be active when using outside the library **this.event()**
          *
          *  brush
          * * draw
@@ -71,7 +72,7 @@ class Visualization {
         let fit = this.settings.size_type === "fit";
 
         /**
-         * main svg element for use
+         *@description main svg element for use
          */
 
         this.svg = d3.select(parentElement).style("overflow", "hidden")
@@ -85,14 +86,14 @@ class Visualization {
         }
 
         /**
-         * visContentWidth contains the width  svg element with margin and pagging subtractions
+         * @description visContentWidth contains the width  svg element with margin and pagging subtractions
          */
         this.visContentWidth = this.settings.width
             - this.settings.paddingLeft
             - this.settings.paddingRight;
 
         /**
-         * visContentHeight contains the height svg element with margin and pagging subtractions
+         *@description visContentHeight contains the height svg element with margin and pagging subtractions
          */
         this.visContentHeight = this.settings.height
             - this.settings.paddingTop
@@ -102,7 +103,7 @@ class Visualization {
 
         this.canvas = this.svg.append("g");
         /**
-         * Selectable view background layer with d3
+         * @description Selectable view background layer with d3
          */
         this.background = this.canvas.append("g")
             .attr("class", "background")
@@ -115,7 +116,7 @@ class Visualization {
             .style("fill","#FFFFFF");
 
          /**
-         * selectable layer foreground with d3
+         * @description selectable layer foreground with d3
          */
         this.foreground = this.canvas.append("g")
             .attr("class", "foreground")
@@ -123,14 +124,14 @@ class Visualization {
 
 
          /**
-         * highlight layer Layer of view selectable with d3
+         * @description highlight layer Layer of view selectable with d3
          */
         this.highlightLayer = this.canvas.append("g")
             .attr("class", "highlightLayer")
             .attr("transform", translatestr);
 
          /**
-         * selection layer Selectable visualization layer with d3
+         * @description selection layer Selectable visualization layer with d3
          */
         this.selectionLayer = this.canvas.append("g")
             .attr("class", "selectionLayer")
@@ -138,13 +139,13 @@ class Visualization {
 
 
         /**
-         * selectable view overlay layer with d3
+         * @description selectable view overlay layer with d3
          */
         this.overlay = this.canvas.append("g")
             .attr("class", "overlay")
             .attr("transform", translatestr);
         /**
-         * selectable view interactionLayer layer with d3
+         * @description selectable view interactionLayer layer with d3
          */
         this.interactionLayer = this.canvas.append("g")
             .attr("class", "interactionLayer")
@@ -172,7 +173,7 @@ class Visualization {
         }
 
         /**
-         * view annotations layer selectable with d3
+         * @description view annotations layer selectable with d3
          */
         this.annotations = this.canvas.append("g")
             .attr("class", "annotations")
@@ -190,7 +191,7 @@ class Visualization {
 
 
     /**
-     * data processing function, creation of visualization data domains as categorical, continuous and temporal
+     * @description data processing function, creation of visualization data domains as categorical, continuous and temporal
      * @param d - dataset in json format
      */
     data(d){
@@ -224,7 +225,7 @@ class Visualization {
 
 
     /**
-     * function of calculating visualization space size
+     * @description function of calculating visualization space size
      */
     resize(){
         let bb = this.svg.node().getBoundingClientRect();
@@ -244,7 +245,7 @@ class Visualization {
     }
 
     /**
-     * function with all visualization drawing logic
+     * @description function with all visualization drawing logic
      */
     redraw(){
         this.event.apply("draw");
@@ -252,7 +253,7 @@ class Visualization {
     }
 
      /**
-     * get color function of the visualization can be used  Callback  **getcolor(function(d    ,i  ){    })**
+     * @description get color function of the visualization can be used  Callback  **getcolor(function(d    ,i  ){    })**
      */
     getColor(){
         let color = this.settings.color;
@@ -260,7 +261,7 @@ class Visualization {
     }
 
      /**
-     * get color function of the visualization can be used  Callback  **setColor(function( d,  i){    })**
+     * @description get color function of the visualization can be used  Callback  **setColor(function( d,  i){    })**
      * @param {string} color - cor em hexadecimal, rbg , ou string
      */
     setColor(color){
@@ -271,7 +272,7 @@ class Visualization {
     }
 
     /**
-     * listen event in items of visualization
+     * @description listen event in items of visualization
      * @param {string} e - event selected  exemple: dataclick
      * @param {string} fun - callback function with desired behavior
      */
@@ -281,7 +282,7 @@ class Visualization {
     };
 
 
-    /** criar highlight em um item da visaulização
+    /**@description  criar highlight em um item da visaulização
      * @param {object} element - data element with itens
      * @param {array} args - variable that can be used for other attributes like data = d, index = i, color etc ..
      */
@@ -292,7 +293,7 @@ class Visualization {
         }
     }
 
-    /** highlight removal on a preview item
+    /** @description highlight removal on a preview item
      * @param {object} element - data element in visualization
      * @param {array} args - variable that can be used for other attributes like data = d, index = i, color etc ..
      */
@@ -304,14 +305,14 @@ class Visualization {
     }
 
     /**
-     * get element is with Highlight
+     * @description get element is with Highlight
      * @param {number} i - view element index
      */
     getHighlightElement(i){ }
 
 
     /**
-     * add anotation in element
+     * @description add anotation in element
      * @param {object} svgElement - svg element where annotation can be added
      */
     annotate(svgElement){
@@ -319,14 +320,14 @@ class Visualization {
     }
 
     /**
-     * clears added notes
+     * @description clears added notes
      */
     clearAnnotations(){
         this.annotations.selectAll("*").remove();
     }
 
     /**
-     * visualization element selection function
+     * @description  visualization element selection function
      * @param {array<object>} elems - elements which should be selected in the visualization
      */
     select(elems){
@@ -338,7 +339,7 @@ class Visualization {
     }
 
      /**
-     * remove created selection
+     * @description remove created selection
      */
     removeSelect(){
         let elems = this.selectionLayer.selectAll(".data").nodes();
@@ -349,14 +350,14 @@ class Visualization {
     }
 
     /**
-     * get items selected in visualization
+     * @description get items selected in visualization
      */
     getSelected(){
         return this.selectionLayer.selectAll("*").nodes();
     }
 
     /**
-     * comment creation function
+     * @description comment creation function
      * @param {array<string>}  args - array with text values
      */
     comments(...args) {
@@ -373,7 +374,7 @@ class Visualization {
     }
 
      /**
-     * function to remove comments
+     * @description function to remove comments
      */
     removeComments() {
         this.svg.selectAll('.boxComment').remove();
@@ -381,12 +382,12 @@ class Visualization {
     }
 
     /**
-     * abstract function for hierarchy creation
+     * @description abstract function for hierarchy creation
      */
     hierarchy(){}
 
     /**
-     * abstract function for dimension filter
+     * @description abstract function for dimension filter
      */
 
     filterByDimension(){
@@ -395,14 +396,14 @@ class Visualization {
     }
 
     /**
-     * abstract function for dimensioning
+     * @description abstract function for dimensioning
      */
     orderByDimension(){
         this.orderedDimensions = [];
     }
 
     /**
-    * invisible layer to enable and disable view interactions
+    * @description invisible layer to enable and disable view interactions
     * @param {boolean} flag - flag to enable and disable invisible layer
     */
     setInteractionMode(flag){
@@ -427,7 +428,7 @@ class Visualization {
     }
 
     /**
-     *
+     *@description bind events available to items
      * @param {string} selection - bind interaction that will be available
      * @param {object} prefix - selected element date and index
      */

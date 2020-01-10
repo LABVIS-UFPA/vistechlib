@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "browserify index.js --standalone vistechlib -o test/bundle.js",
-    "doc": "jsdoc -c jsdoc.json"
+    "doc": "jsdoc -c jsdoc.json",
   },
   "repository": {
     "type": "git",
@@ -34,6 +34,7 @@
     "underscore": "^1.9.1"
   },
   "devDependencies": {
+    "doxdox": "^3.0.0",
     "jsdoc": "^3.6.3"
   }
 }
