@@ -5,6 +5,7 @@ let Visualization = require("./Visualization.js");
 
 /**
  * @class
+ * @description fusion Parallel coordinates and edge building
  * @augments Visualization
  * */
 class ParallelBundling extends Visualization{

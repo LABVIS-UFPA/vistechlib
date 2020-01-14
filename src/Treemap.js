@@ -4,6 +4,7 @@ let utils = require("./Utils.js");
 
 /**
  * @class
+ * @description A treemap is a visual method for displaying hierarchical data that uses nested rectangles to represent the branches of a tree diagram. Each rectangles has an area proportional to the amount of data it represents.
  * @augments Visualization
  * */
 class Treemap extends Visualization{

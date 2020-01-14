@@ -4,6 +4,7 @@ let utils = require("./Utils.js");
 
 /**
  * @class
+ * @description The bar chart is a chart with rectangular bars and length proportional to the values it represents. Bars can be drawn vertically or horizontally. The vertical bar chart is sometimes called the column chart.
  * @augments Visualization
  * */
 class BarChart extends Visualization{

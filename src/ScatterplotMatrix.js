@@ -5,6 +5,7 @@ let utils = require("./Utils.js");
 
 /**
  * @class
+ * @description For a set of data variables (dimensions) X1, X2, ... , Xk, the scatter plot matrix shows all the pairwise scatter plots of the variables on a single view with multiple scatterplots in a matrix format. For k variables, the scatterplot matrix will contain k rows and k columns. A plot located on the intersection of i-th row and j-th column is a plot of variables Xi versus Xj. This means that each row and column is one dimension, and each cell plots a scatter plot of two dimensions.
  * @augments Visualization
  * */
 class ScatterplotMatrix extends Visualization {
