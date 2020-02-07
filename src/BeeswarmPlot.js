@@ -4,8 +4,24 @@ let utils = require("./Utils.js");
 
 /**
  * @class
- * @description A bee swarm plot is a one-dimensional scatter plot similar to stripchart , but with various methods to separate coincident points such that each point is visible. Also, beeswarm introduces additional features unavailable in stripchart , such as the ability to control the color and plotting character of each point.
- * @augments Visualization
+ * @description A bee swarm plot is a one-dimensional scatter plot similar to stripchart , but with various methods to separate coincident points such that each point is visible. Also, beeswarm introduces additional features unavailable in stripchart , such as the ability to control the color and plotting character of each point.  
+ * extends Visualization and its methods and internal variables.
+ * @constructor
+ * @param {string} parentElement - Parent element where view will be added
+ * @param {object} [settings={
+        color: "#069",
+        highlightColor: "#FF1122",
+        opacity: 1,
+        notSelectedOpacity: 0.15,
+        size_type: "fit",
+        width: 700,
+        height: 300,
+        paddingTop: 25,
+        paddingLeft: 50,
+        paddingRight: 50,
+        paddingBottom: 30,
+        autoresize: true
+    }] - basic configuration parameters in the view such as margins, opacity, color
  * */
 class BeeswarmPlot extends Visualization{
 
@@ -58,6 +74,9 @@ class BeeswarmPlot extends Visualization{
         return this;
     }
 
+    /**
+     * @none
+     */
     data(d){
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;

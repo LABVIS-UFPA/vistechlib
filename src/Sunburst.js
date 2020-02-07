@@ -4,9 +4,25 @@ let utils = require("./Utils.js");
 
 /**
  * @class
- * @description  A sunburst chart or a multilevel pie chart, is used to visualize hierarchical data, depicted by concentric circles.The circle in the center represents the root node, with the hierarchy moving outward from the center. A segment of the inner circle bears a hierarchical relationship to those segments of the outer circle which lie within the angular sweep of the parent segment.
- * @augments Visualization
- * */
+ * @description The Sunburst extends visualization and its methods and internal variables.   
+ * A sunburst chart or a multilevel pie chart, is used to visualize hierarchical data, depicted by concentric circles.The circle in the center represents the root node, with the hierarchy moving outward from the center. A segment of the inner circle bears a hierarchical relationship to those segments of the outer circle which lie within the angular sweep of the parent segment.
+ * @constructor
+ * @param {string} parentElement - Parent element where view will be added
+ * @param {object} [settings={
+        color: "#069",
+        highlightColor: "#FF1122",
+        opacity: 1,
+        notSelectedOpacity: 0.15,
+        size_type: "fit",
+        width: 700,
+        height: 300,
+        paddingTop: 25,
+        paddingLeft: 50,
+        paddingRight: 50,
+        paddingBottom: 30,
+        autoresize: true
+    }] - basic configuration parameters in the view such as margins, opacity, color
+ */
 
 class Sunburst extends Visualization{
 

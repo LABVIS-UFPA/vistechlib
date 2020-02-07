@@ -5,10 +5,24 @@ let moment = require('moment');
 class Visualization {
     /**
      * @class
-     * @description Abstract visualization class which extends all available visualizations in lib
+     * @abstract
+     * @description Abstract view class that extends all available views in the lib, with methods that must be adapted for other views
      * @constructor
      * @param {string} parentElement - Parent element where view will be added
-     * @param {object} settings - basic configuration parameters in the view such as margins, opacity, color
+     * @param {object} [settings={
+            color: "#069",
+            highlightColor: "#FF1122",
+            opacity: 1,
+            notSelectedOpacity: 0.15,
+            size_type: "fit",
+            width: 700,
+            height: 300,
+            paddingTop: 25,
+            paddingLeft: 50,
+            paddingRight: 50,
+            paddingBottom: 30,
+            autoresize: true
+        }] - basic configuration parameters in the view such as margins, opacity, color
      * @returns  {object} included object or svg chart and settings
      */
 
@@ -193,6 +207,20 @@ class Visualization {
     /**
      * @description data processing function, creation of visualization data domains as categorical, continuous and temporal
      * @param d - dataset in json format
+     * @example super.data(d);
+     * for(let k of this.keys_filter){
+            if(this.domainType[k] === "Categorical") {
+                this.y[k] = d3.scalePoint()
+
+            }else if(this.domainType[k] === "Time"){
+                this.y[k] =  d3.scaleTime();
+            } else {
+                this.y[k] =  d3.scaleLinear();
+            }
+            this.y[k]
+                .domain(this.domain[k])
+                .range([this.visContentHeight, 0]);
+        }
      */
     data(d){
         this.d = d;
@@ -245,7 +273,18 @@ class Visualization {
     }
 
     /**
-     * @description function with all visualization drawing logic
+     * @description function with all visualization drawing logic.each item referring to a database record must have the class "data" with the attr "data-index" with i referring to the record line
+     * @example  let dataUpdate = this.foreground.selectAll("path.data").data(this.d);
+     *  dataUpdate.exit().remove();
+        let dataEnter = dataUpdate
+            .enter()
+            .append("path")
+            .attr("class", "data")
+            .style("stroke", this.settings.color)
+            .style("fill", "none")
+            .attr("data-index", (d,i)=>i);
+
+        this._bindDataMouseEvents(dataEnter);
      */
     redraw(){
         this.event.apply("draw");
@@ -254,6 +293,14 @@ class Visualization {
 
      /**
      * @description get color function of the visualization can be used  Callback  **getcolor(function(d    ,i  ){    })**
+     * @example 
+     * Visualization.getColor();
+     * or
+     * Visuaçization.getColor(function(d,i){
+     *      if(condition...)
+     *          return d.settings.color
+     * }) 
+     * 
      */
     getColor(){
         let color = this.settings.color;
@@ -263,6 +310,13 @@ class Visualization {
      /**
      * @description get color function of the visualization can be used  Callback  **setColor(function( d,  i){    })**
      * @param {string} color - cor em hexadecimal, rbg , ou string
+     * @example Visualization.setColor("red") 
+     * //or use callback
+     *  let colors = [corlor1,color2,color3]
+        Visualization.setColor(function(d,i){
+            if(d.x > 10 )
+                return "red"
+        })
      */
     setColor(color){
         if(arguments.length === 0)
@@ -275,6 +329,10 @@ class Visualization {
      * @description listen event in items of visualization
      * @param {string} e - event selected  exemple: dataclick
      * @param {string} fun - callback function with desired behavior
+     * @example visualization.on("mouseover",function(){
+     *      ...
+     *      ...
+     * })
      */
     on(e, func) {
         this.event.on(e, func);
@@ -282,10 +340,27 @@ class Visualization {
     };
 
 
-    /**@description  criar highlight em um item da visaulização
+    /**@description  highlight a visa item
      * @param {object} element - data element with itens
      * @param {array} args - variable that can be used for other attributes like data = d, index = i, color etc ..
+     * @example let parallelcoordinates = this;
+
+        let highlighted;
+        if(args[0] instanceof SVGElement){
+
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+            highlighted = this.foreground
+                .selectAll('path.data[data-index="'+args[1]+'"]')
+                .style("stroke", this.settings.highlightColor)
+                .style("stroke-width", "2")
+                .each(function(){
+                    this.parentNode.appendChild(this);
+                });
+        }
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
      */
+
     highlight(element, ...args){
         if(!this.isHighlighting){
             this.isHighlighting = true;
@@ -296,7 +371,16 @@ class Visualization {
     /** @description highlight removal on a preview item
      * @param {object} element - data element in visualization
      * @param {array} args - variable that can be used for other attributes like data = d, index = i, color etc ..
-     */
+     *@example if(args[1] instanceof SVGElement){
+        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+            let dataSelect = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
+                .style("stroke", this.settings.color)
+                .style("stroke-width", "1");
+           
+            super.removeHighlight(dataSelect.node(), dataSelect.datum(), args[1]);
+        }
+        */
+    
     removeHighlight(element, ...args){
         if(this.isHighlighting){
             this.isHighlighting = false;
@@ -307,6 +391,23 @@ class Visualization {
     /**
      * @description get element is with Highlight
      * @param {number} i - view element index
+     * @exemple let d = this.d_h.children[i];
+
+        let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        d3.select(group).attr("class", "groupHighlight");
+
+        let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        d3.select(rect)
+            .attr("class", "rectHighlight")
+            .attr("x", d.x0)
+            .attr("y", d.y0)
+            .attr("width", d.x1 - d.x0)
+            .attr("height", d.y1 - d.y0)
+            .style("fill", "none")
+            .style("stroke", this.settings.highlightColor);
+
+        group.appendChild(rect);
+        return group;
      */
     getHighlightElement(i){ }
 
@@ -329,6 +430,15 @@ class Visualization {
     /**
      * @description  visualization element selection function
      * @param {array<object>} elems - elements which should be selected in the visualization
+     * @example select(selection){
+        if(selection instanceof sel.Selection) {
+            if(this.foreground.node().hasChildNodes()) {
+                let child_list = this.foreground.node().childNodes;
+                let selected = selection.select(child_list, sel.Selection.Type.STROKE);
+                super.select(selected);
+            }
+        }
+    }
      */
     select(elems){
         for(let elem of elems){
@@ -351,6 +461,7 @@ class Visualization {
 
     /**
      * @description get items selected in visualization
+     * @example return this.selectionLayer.selectAll("*").nodes();
      */
     getSelected(){
         return this.selectionLayer.selectAll("*").nodes();

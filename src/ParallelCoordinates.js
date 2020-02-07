@@ -4,10 +4,25 @@ let Visualization = require("./Visualization.js");
 let sel = require("./selections/selections.js");
 /**
  * @class
- * @description Parallel coordinates are a common way of visualizing high-dimensional geometry and analyzing multivariate data.
-
+ * @description Parallel coordinates are a common way of visualizing high-dimensional geometry and analyzing multivariate data.  
+ * extends Visualization and its methods and internal variables.
  To show a set of points in an n-dimensional space, a backdrop is drawn consisting of n parallel lines, typically vertical and equally spaced. A point in n-dimensional space is represented as a polyline with vertices on the parallel axes; the position of the vertex on the i-th axis corresponds to the i-th coordinate of the point.
- * @augments Visualization
+ * @constructor
+ * @param {string} parentElement - Parent element where view will be added
+ * @param {object} [settings={
+        color: "#069",
+        highlightColor: "#FF1122",
+        opacity: 1,
+        notSelectedOpacity: 0.15,
+        size_type: "fit",
+        width: 700,
+        height: 300,
+        paddingTop: 25,
+        paddingLeft: 50,
+        paddingRight: 50,
+        paddingBottom: 30,
+        autoresize: true
+    }] - basic configuration parameters in the view such as margins, opacity, color
  * */
 class ParallelCoordinates extends Visualization{
 

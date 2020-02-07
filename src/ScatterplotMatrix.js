@@ -5,8 +5,24 @@ let utils = require("./Utils.js");
 
 /**
  * @class
- * @description For a set of data variables (dimensions) X1, X2, ... , Xk, the scatter plot matrix shows all the pairwise scatter plots of the variables on a single view with multiple scatterplots in a matrix format. For k variables, the scatterplot matrix will contain k rows and k columns. A plot located on the intersection of i-th row and j-th column is a plot of variables Xi versus Xj. This means that each row and column is one dimension, and each cell plots a scatter plot of two dimensions.
- * @augments Visualization
+ * @description For a set of data variables (dimensions) X1, X2, ... , Xk, the scatter plot matrix shows all the pairwise scatter plots of the variables on a single view with multiple scatterplots in a matrix format. For k variables, the scatterplot matrix will contain k rows and k columns. A plot located on the intersection of i-th row and j-th column is a plot of variables Xi versus Xj. This means that each row and column is one dimension, and each cell plots a scatter plot of two dimensions.  
+ * extends Visualization and its methods and internal variables.
+ * @constructor
+ * @param {string} parentElement - Parent element where view will be added
+ * @param {object} [settings={
+        color: "#069",
+        highlightColor: "#FF1122",
+        opacity: 1,
+        notSelectedOpacity: 0.15,
+        size_type: "fit",
+        width: 700,
+        height: 300,
+        paddingTop: 25,
+        paddingLeft: 50,
+        paddingRight: 50,
+        paddingBottom: 30,
+        autoresize: true
+    }] - basic configuration parameters in the view such as margins, opacity, color
  * */
 class ScatterplotMatrix extends Visualization {
 

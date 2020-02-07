@@ -4,9 +4,26 @@ let utils = require("./Utils.js");
 
 /**
  * @class
- * @description A treemap is a visual method for displaying hierarchical data that uses nested rectangles to represent the branches of a tree diagram. Each rectangles has an area proportional to the amount of data it represents.
- * @augments Visualization
- * */
+ * @description The treemap extends Visualization and its methods and internal variables.  
+ *  A treemap is a visual method for displaying hierarchical data that uses nested rectangles to represent the branches of a tree diagram. Each rectangles has an area proportional to the amount of data it represents.
+ * @constructor
+ * @param {string} parentElement - Parent element where view will be added
+ * @param {object} [settings={
+        color: "#069",
+        highlightColor: "#FF1122",
+        opacity: 1,
+        notSelectedOpacity: 0.15,
+        size_type: "fit",
+        width: 700,
+        height: 300,
+        paddingTop: 25,
+        paddingLeft: 50,
+        paddingRight: 50,
+        paddingBottom: 30,
+        autoresize: true
+    }] - basic configuration parameters in the view such as margins, opacity, color
+ */
+
 class Treemap extends Visualization{
 
     constructor(parentElement, settings){
@@ -25,6 +42,7 @@ class Treemap extends Visualization{
             = this.settings.paddingLeft = this.settings.paddingRight = 20;
     }
 
+ 
     resize(){
         _makeHierarchy.call(this, this.d_h);
 
@@ -32,7 +50,9 @@ class Treemap extends Visualization{
         return this;
     }
 
-
+    /**
+     * @method
+     */
     data(d){
 
         super.data(d);
@@ -77,8 +97,10 @@ class Treemap extends Visualization{
     }
 
 
+    /**
+     * @method
+     */
     redraw(){
-
         //let t0 = performance.now();
         let treemap = this;
 
@@ -233,6 +255,7 @@ class Treemap extends Visualization{
                 this.d[args[1]], args[1]);
         }
     }
+
     getHighlightElement(i){
         let d = this.d_h.children[i];
 

@@ -4,8 +4,24 @@ let utils = require("./Utils.js");
 
 /**
  * @class
- * @description Circle Packing is a method to visualize large amounts of hierarchically structured data. Tangent circles represent brother nodes at the same level; to visualize the hierarchy, all children of a node are packed into that node (and thus determine its size).
- * @augments Visualization
+ * @description Circle Packing is a method to visualize large amounts of hierarchically structured data. Tangent circles represent brother nodes at the same level; to visualize the hierarchy, all children of a node are packed into that node (and thus determine its size).  
+ * extends Visualization and its methods and internal variables.
+ * @constructor
+ * @param {string} parentElement - Parent element where view will be added
+ * @param {object} [settings={
+        color: "#069",
+        highlightColor: "#FF1122",
+        opacity: 1,
+        notSelectedOpacity: 0.15,
+        size_type: "fit",
+        width: 700,
+        height: 300,
+        paddingTop: 25,
+        paddingLeft: 50,
+        paddingRight: 50,
+        paddingBottom: 30,
+        autoresize: true
+    }] - basic configuration parameters in the view such as margins, opacity, color
  * */
 
 class CirclePacking extends Visualization{
