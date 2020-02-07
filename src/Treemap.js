@@ -50,9 +50,6 @@ class Treemap extends Visualization{
         return this;
     }
 
-    /**
-     * @method
-     */
     data(d){
 
         super.data(d);
@@ -96,10 +93,6 @@ class Treemap extends Visualization{
         });
     }
 
-
-    /**
-     * @method
-     */
     redraw(){
         //let t0 = performance.now();
         let treemap = this;

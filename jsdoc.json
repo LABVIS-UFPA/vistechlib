@@ -16,7 +16,7 @@
     "monospaceLinks": false
   },
   "opts": {
-    "template": "templates/default",
+    "template": "node_modules/docdash",
     "encoding": "utf8",
     "destination": "./documentation/",
     "recurse": true,

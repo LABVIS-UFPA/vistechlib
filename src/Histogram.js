@@ -6,7 +6,10 @@ let utils = require("./Utils.js");
 
 /**
  * @class
- * @description  histogram is an accurate representation of the distribution of numerical data. It is an estimate of the probability distribution of a continuous variable and was first introduced by Karl Pearson. It differs from a bar graph, in the sense that a bar graph relates two variables, but a histogram relates only one.  
+ * @description  histogram is an accurate representation of the distribution of numerical data.
+ *  It is an estimate of the probability distribution of a continuous variable and was first
+ *  introduced by Karl Pearson. It differs from a bar graph, in the sense that a bar graph relates two variables,
+ *  but a histogram relates only one.  
  * extends Visualization and its methods and internal variables.
  * @constructor
  * @param {string} parentElement - Parent element where view will be added
