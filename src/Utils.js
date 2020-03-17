@@ -31,6 +31,15 @@ module.exports.parseTranslate = (elem) => {
     };
 };
 
+module.exports.fold_modulo = (value, min, max) => {
+    let dif = Math.abs(max - min);
+    let pos = Math.abs(value - min);
+    let par = Math.floor(pos/dif)%2;
+    // return (pos%dif) + min;
+    return par===0 ? (pos%dif) + min : dif - (pos%dif) + min;
+};
+
+
 // class QuadTree{
 //
 //     constructor(){

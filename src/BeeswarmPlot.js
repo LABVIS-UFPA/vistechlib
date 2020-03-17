@@ -31,12 +31,25 @@ class BeeswarmPlot extends Visualization{
         super(parentElement, settings);
 
         this.name = "BeeswarmPlot";
+        switch (this.settings.overflowType) {
+            case "fold":
+                this.overflowMethod = utils.fold_modulo;
+                break;
+            case "none":
+                this.overflowMethod = (a) => {return a};
+                break;
+            default:
+                this.overflowMethod = utils.fold_modulo;
+                break;
+        }
 
         this.x = d3.scalePoint()
     }
     _putDefaultSettings(){
         this.settings.innerPadding = 10;
         this.settings.radius = 2;
+        this.settings.overflowType = "fold"; //"none", "minmax", "random"
+        this.settings.opacity = 0.4;
     }
 
     resize(){
@@ -147,16 +160,17 @@ class BeeswarmPlot extends Visualization{
                 .append("circle")
                 .attr("class", "data")
                 .attr("data-index", function(d, i){ return i; })
-                .style("fill-opacity", ".6")
-                .attr("cx", (d) => { return beeswarm.xPoints(d, k); })
+                .style("fill-opacity", beeswarm.settings.opacity)
+                .attr("cx", (d) => { return beeswarm.overflowMethod(beeswarm.xPoints(d, k), -beeswarm.boxWidth/2,beeswarm.boxWidth/2); })
                 .attr("cy", (d) => { return beeswarm.yPoints(d, k); })
                 .style("fill", beeswarm.settings.color)
                 .attr("r", beeswarm.settings.radius);
 
             beeswarm._bindDataMouseEvents(dataEnter);
 
+            console.log(beeswarm.boxWidth);
             dataSelection
-                .attr("cx", (d) => { return beeswarm.xPoints(d, k); })
+                .attr("cx", (d) => { return beeswarm.overflowMethod(beeswarm.xPoints(d, k), -beeswarm.boxWidth/2,beeswarm.boxWidth/2); })
                 .attr("cy", (d) => { return beeswarm.yPoints(d, k); })
                 .style("fill", beeswarm.settings.color);
         }
@@ -190,7 +204,7 @@ class BeeswarmPlot extends Visualization{
         beegroupenter.append("g")
             .attr("class", "axis")
             .attr("transform", "translate("+(-beeswarm.boxWidth/2)+",0)")
-            .each(function(k) { d3.select(this).call(d3.axisRight(beeswarm.y[k]).tickSizeInner(0)); });
+            .each(function(k) { d3.select(this).call(d3.axisLeft(beeswarm.y[k]).tickSizeInner(0)); });
         beegroupenter.append("text")
             .attr("class", "axisLabel")
             .attr("x", 0)
@@ -207,7 +221,7 @@ class BeeswarmPlot extends Visualization{
         // beegroup.selectAll("")
         beegroup
             .each(function(k) {
-                d3.select(this).selectAll("g.axis").call(d3.axisRight(beeswarm.y[k]).tickSizeInner(0));
+                d3.select(this).selectAll("g.axis").call(d3.axisLeft(beeswarm.y[k]).tickSizeInner(0));
             })
             .selectAll("g.axis")
             .attr("transform", "translate("+(-beeswarm.boxWidth/2)+",0)");
