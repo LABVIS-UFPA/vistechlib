@@ -293,14 +293,14 @@ class Visualization {
 
      /**
      * @description get color function of the visualization can be used  Callback  **getcolor(function(d    ,i  ){    })**
-     * @example 
+     * @example
      * Visualization.getColor();
      * or
      * Visuaçization.getColor(function(d,i){
      *      if(condition...)
      *          return d.settings.color
-     * }) 
-     * 
+     * })
+     *
      */
     getColor(){
         let color = this.settings.color;
@@ -310,7 +310,7 @@ class Visualization {
      /**
      * @description get color function of the visualization can be used  Callback  **setColor(function( d,  i){    })**
      * @param {string} color - cor em hexadecimal, rbg , ou string
-     * @example Visualization.setColor("red") 
+     * @example Visualization.setColor("red")
      * //or use callback
      *  let colors = [corlor1,color2,color3]
         Visualization.setColor(function(d,i){
@@ -376,11 +376,11 @@ class Visualization {
             let dataSelect = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
                 .style("stroke", this.settings.color)
                 .style("stroke-width", "1");
-           
+
             super.removeHighlight(dataSelect.node(), dataSelect.datum(), args[1]);
         }
         */
-    
+
     removeHighlight(element, ...args){
         if(this.isHighlighting){
             this.isHighlighting = false;
@@ -537,6 +537,11 @@ class Visualization {
     get autoresize(){
         return this.settings.autoresize;
     }
+
+    setSize(attrs){
+        this.settings.size = attrs;
+    }
+
 
     /**
      *@description bind events available to items
