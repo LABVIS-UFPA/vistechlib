@@ -116,7 +116,7 @@ class BarChart extends Visualization{
 
 
     redraw(){
-        let t0 = performance.now();
+        // let t0 = performance.now();
 
         let ip = this.settings.innerPadding;
         let barchart = this;
@@ -185,8 +185,8 @@ class BarChart extends Visualization{
 
 
 
-        let t1 = performance.now();
-        console.log("TIme: "+(t1-t0));
+        // let t1 = performance.now();
+        // console.log("TIme: "+(t1-t0));
 
         return super.redraw();
     }

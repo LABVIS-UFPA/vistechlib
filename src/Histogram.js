@@ -1,5 +1,4 @@
 let d3 = require("d3");
-
 let Visualization = require("./Visualization.js");
 let utils = require("./Utils.js");
 

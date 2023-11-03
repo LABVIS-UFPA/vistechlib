@@ -1,4 +1,3 @@
-let _ = require("underscore");
 let d3 = require("d3");
 let moment = require('moment');
 
@@ -177,11 +176,13 @@ class Visualization {
             .on("mouseup", interactionEvents("datacanvasmouseup"));
 
         function interactionEvents(eventStr){
-            return function () {
+            
+            return  (e) => {
+                
                 vis.event.call(eventStr, this, {
-                    innerX: d3.event.layerX-vis.settings.paddingLeft,
-                    innerY: d3.event.layerY-vis.settings.paddingTop,
-                    d3Event: d3.event
+                    innerX: e.layerX-vis.settings.paddingLeft,
+                    innerY: e.layerY-vis.settings.paddingTop,
+                    d3Event: e
                 });
             }
         }
@@ -238,7 +239,7 @@ class Visualization {
                         this.domainType[k] = "Time";
                         this.domain[k] = d3.extent(this.d, (obj) => {return obj[k];});
                     }else{
-                        this.domain[k] = _.uniq(_.pluck(this.d, k));
+                        this.domain[k] = [...new Set(this.d.map(v=>v[k]))];
                         this.domainType[k] = "Categorical";
                     }
                 } else {
