@@ -6,10 +6,10 @@ let utils = require("./Utils.js");
 /**
  * @class
  * @description For a set of data variables (dimensions) X1, X2, ... , Xk, the scatter
- *  plot matrix shows all the pairwise scatter plots of the variables on a single view with multiple 
+ *  plot matrix shows all the pairwise scatter plots of the variables on a single view with multiple
  * scatterplots in a matrix format. For k variables, the scatterplot matrix will contain k rows and k columns.
  *  A plot located on the intersection of i-th row and j-th column is a plot of variables Xi versus Xj.
- *  This means that each row and column is one dimension, and each cell plots a scatter plot of two dimensions.  
+ *  This means that each row and column is one dimension, and each cell plots a scatter plot of two dimensions.
  * extends Visualization and its methods and internal variables.
  * @constructor
  * @param {string} parentElement - Parent element where view will be added
@@ -227,15 +227,15 @@ class ScatterplotMatrix extends Visualization {
             });
 
 
-        // this.foreground.selectAll("g.cellGroup").selectAll("text.axisLabel").remove();
-        // this.foreground.selectAll("g.cellGroup")
-        //     .filter(function(d) { return d.i === d.j; })
-        //     .append("text")
-        //     .attr("class", "axisLabel")
-        //     .attr("x", scatterplot.settings.innerPadding)
-        //     .attr("y", scatterplot.settings.innerPadding)
-        //     .attr("dy", ".71em")
-        //     .text(function(d) { return d.x; });
+        this.foreground.selectAll("g.cellGroup").selectAll("text.axisLabel").remove();
+        this.foreground.selectAll("g.cellGroup")
+            .filter(function(d) { return d.i === d.j; })
+            .append("text")
+            .attr("class", "axisLabel")
+            .attr("x", scatterplot.settings.innerPadding)
+            .attr("y", scatterplot.settings.innerPadding)
+            .attr("dy", ".71em")
+            .text(function(d) { return d.x; });
 
         this.foreground.selectAll(".x.axis").remove();
         this.foreground.selectAll(".x.axis")
