@@ -1,6 +1,6 @@
-let d3 = require("d3");
-let Visualization = require("./Visualization.js");
-let utils = require("./Utils.js");
+// let d3 = require("d3");
+// let Visualization = require("./Visualization.js");
+// let utils = require("./Utils.js");
 
 /**
  * @class
@@ -28,8 +28,11 @@ class BarChart extends Visualization{
     constructor(parentElement, settings){
         super(parentElement, settings);
 
+
+        this.drawStrategy = BarChart.strategies[this.settings.drawStrategy];
+
         this.name = "BarChart";
-        this.x = d3.scaleBand().paddingInner(0).paddingOuter(0);
+        this.x = d3.scaleBand().paddingInner(0.1).paddingOuter(0.1);
     }
     _putDefaultSettings(){
         this.settings.innerPadding = 20;
@@ -38,7 +41,10 @@ class BarChart extends Visualization{
         this.settings.paddingBottom = 10;
         this.settings.paddingLeft = 55;
         this.settings.paddingRight = 10;
-        this.negativeMode = "disabled";
+        this.settings.negativeMode = "disabled"; //TODO: fazer funcionar
+        this.settings.startZero = true;
+        this.settings.drawStrategy = "default"; // "scale-break", "perspective"
+
     }
 
     resize(){
@@ -81,6 +87,7 @@ class BarChart extends Visualization{
         let ip = this.settings.innerPadding;
         super.data(d);
 
+        
 
         if(this.settings.filter){
             let arr = this.settings.filter;
@@ -88,6 +95,11 @@ class BarChart extends Visualization{
                 return item != arr[arr.indexOf(item)];
             });
         }
+
+
+
+        
+
         this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
         let svgBounds = this.svg.node().getBoundingClientRect();
         this.boxHeight = (svgBounds.height-pt-pb-ip*(this.keys_filter.length-1))/this.keys_filter.length;
@@ -99,6 +111,15 @@ class BarChart extends Visualization{
         this.x.domain(xdomain_array)
             .range([0, this.innerWidth]);
         this.y = {};
+
+
+
+        if(this.settings.startZero){
+            for(let k of this.keys_filter){
+                if(this.domain[k][0]>0) this.domain[k][0] = 0;
+            }
+        }
+
         for(let k of this.keys_filter){
             let type=this.domainType[k];
             if(type === "Categorical"){
@@ -106,10 +127,13 @@ class BarChart extends Visualization{
             }else{
                 this.y[k] = d3.scaleLinear();
             }
+
             this.y[k].domain(this.domain[k]).range([
                 this.boxHeight-(type === "Categorical"?10:0),
                 0
             ]);
+
+            //this.y[k].domain()
         }
         return this;
     }
@@ -123,7 +147,7 @@ class BarChart extends Visualization{
 
         let group_join = this.foreground.selectAll("g.dataGroup")
             .data(this.keys_filter, d=>d)
-            .join(
+            .join(  //alterado
                 enter => {
                     let enter_result = enter.append("g")
                         .attr("class", "dataGroup");
@@ -275,6 +299,20 @@ class BarChart extends Visualization{
     }
 
 
+
+
+}
+
+BarChart.strategies = {
+    "default": () => {
+
+    },
+    "scale-break":  () => {
+
+    },
+    "perspective": () => {
+
+    }
 }
 
 module.exports = BarChart;
