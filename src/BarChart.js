@@ -23,9 +23,9 @@
         autoresize: true
     }] - basic configuration parameters in the view such as margins, opacity, color
  * */
-class BarChart extends Visualization{
+class BarChart extends Visualization {
 
-    constructor(parentElement, settings){
+    constructor(parentElement, settings) {
         super(parentElement, settings);
 
 
@@ -34,7 +34,7 @@ class BarChart extends Visualization{
         this.name = "BarChart";
         this.x = d3.scaleBand().paddingInner(0.1).paddingOuter(0.1);
     }
-    _putDefaultSettings(){
+    _putDefaultSettings() {
         this.settings.innerPadding = 20;
         this.settings.radius = 2;
         this.settings.paddingTop = 15;
@@ -47,7 +47,7 @@ class BarChart extends Visualization{
 
     }
 
-    resize(){
+    resize() {
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
         let pl = this.settings.paddingLeft;
@@ -55,22 +55,22 @@ class BarChart extends Visualization{
         let ip = this.settings.innerPadding;
         let svgBounds = this.svg.node().getBoundingClientRect();
 
-        if(this.settings.filter){
+        if (this.settings.filter) {
             let arr = this.settings.filter;
             this.settings.filter = this.keys.filter(function (item) {
                 return item != arr[arr.indexOf(item)];
             });
         }
         this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
-        this.boxHeight = (svgBounds.height-pt-pb-ip*(this.keys_filter.length-1))/this.keys_filter.length;
-        this.innerWidth = svgBounds.width-pl-pr;
+        this.boxHeight = (svgBounds.height - pt - pb - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
+        this.innerWidth = svgBounds.width - pl - pr;
 
         this.x.range([0, this.innerWidth]);
 
-        for(let k of this.keys_filter){
-            let type=this.domainType[k];
+        for (let k of this.keys_filter) {
+            let type = this.domainType[k];
             this.y[k].range([
-                this.boxHeight-(type === "Categorical"?10:0),
+                this.boxHeight - (type === "Categorical" ? 10 : 0),
                 0
             ]);
         }
@@ -79,7 +79,7 @@ class BarChart extends Visualization{
         return this;
     }
 
-    data(d){
+    data(d) {
         let pt = this.settings.paddingTop;
         let pb = this.settings.paddingBottom;
         let pl = this.settings.paddingLeft;
@@ -87,67 +87,66 @@ class BarChart extends Visualization{
         let ip = this.settings.innerPadding;
         super.data(d);
 
-        
 
-        if(this.settings.filter){
+
+        if (this.settings.filter) {
             let arr = this.settings.filter;
             this.settings.filter = this.keys.filter(function (item) {
                 return item != arr[arr.indexOf(item)];
             });
         }
 
-
-
-        
-
         this.settings.filter ? this.keys_filter = this.settings.filter : this.keys_filter = this.keys;
         let svgBounds = this.svg.node().getBoundingClientRect();
-        this.boxHeight = (svgBounds.height-pt-pb-ip*(this.keys_filter.length-1))/this.keys_filter.length;
-        this.innerWidth = svgBounds.width-pl-pr;
+        this.boxHeight = (svgBounds.height - pt - pb - ip * (this.keys_filter.length - 1)) / this.keys_filter.length;
+        this.innerWidth = svgBounds.width - pl - pr;
 
         let xdomain_array = [];
-        for(let i=0;i<this.d.length;i++)
+        for (let i = 0; i < this.d.length; i++)
             xdomain_array.push(i);
         this.x.domain(xdomain_array)
             .range([0, this.innerWidth]);
         this.y = {};
 
-
-
-        if(this.settings.startZero){
-            for(let k of this.keys_filter){
-                if(this.domain[k][0]>0) this.domain[k][0] = 0;
+        
+        for (let k of this.keys_filter) {
+            let type = this.domainType[k];
+            
+            if (this.settings.startZero) {
+                for (let k of this.keys_filter) {
+                    if (this.domain[k][0] > 0) this.domain[k][0] = 0;
+                }
             }
-        }
-
-        for(let k of this.keys_filter){
-            let type=this.domainType[k];
-            if(type === "Categorical"){
+            
+            if (type === "Categorical") {
                 this.y[k] = d3.scalePoint();
-            }else{
+            } else {
                 this.y[k] = d3.scaleLinear();
             }
 
             this.y[k].domain(this.domain[k]).range([
-                this.boxHeight-(type === "Categorical"?10:0),
+                this.boxHeight - (type === "Categorical" ? 10 : 0),
                 0
             ]);
 
-            //this.y[k].domain()
+        this.y[k].domain()
         }
         return this;
     }
 
 
-    redraw(){
+    redraw() {
         // let t0 = performance.now();
 
         let ip = this.settings.innerPadding;
         let barchart = this;
+        let estraegy = this.settings.drawStrategy;
+
+        //console.log(xp);
 
         let group_join = this.foreground.selectAll("g.dataGroup")
-            .data(this.keys_filter, d=>d)
-            .join(  //alterado
+            .data(this.keys_filter, d => d)
+            .join(  
                 enter => {
                     let enter_result = enter.append("g")
                         .attr("class", "dataGroup");
@@ -156,7 +155,7 @@ class BarChart extends Visualization{
                         .attr("x", 0)
                         .attr("y", -2)
                         .style("fill", "black")
-                        .text(d=>d);
+                        .text(d => d);
                     enter_result
                         .append("line")
                         .attr("class", "rule top")
@@ -170,42 +169,16 @@ class BarChart extends Visualization{
                     return enter_result;
                 }
             )
-            .attr("transform", (d,i) => `translate(0,${i*this.boxHeight+i*ip})`);
+            .attr("transform", (d, i) => `translate(0,${i * this.boxHeight + i * ip})`);
 
         group_join.selectAll(".rule.top")
-            .attr("x1","0").attr("y1","0")
-            .attr("x2",barchart.innerWidth).attr("y2","0");
+            .attr("x1", "0").attr("y1", "0")
+            .attr("x2", barchart.innerWidth).attr("y2", "0");
         group_join.selectAll(".rule.bottom")
-            .attr("x1","0").attr("y1",barchart.boxHeight)
-            .attr("x2",barchart.innerWidth).attr("y2",barchart.boxHeight);
+            .attr("x1", "0").attr("y1", barchart.boxHeight)
+            .attr("x2", barchart.innerWidth).attr("y2", barchart.boxHeight);
 
-        this.foreground.selectAll("g.dataGroup").each(function (key){
-            let g = d3.select(this);
-            g.selectAll(".data")
-                .data(barchart.d)
-                .join(
-                    enter => {
-                        let enter_result = enter.append("rect")
-                            .attr("class", "data")
-                            .style("stroke","none")
-                            .attr("data-index", (d,i)=>i);
-                        barchart._bindDataMouseEvents(enter_result);
-                        return enter_result;
-                    }
-                )
-                .style("fill", barchart.settings.color)
-                .attr("x", (d,i) => barchart.x(i))
-                .attr("y", (d) => barchart.y[key](d[key]))
-                .attr("width", barchart.x.bandwidth())
-                .attr("height", (d) => barchart.boxHeight - barchart.y[key](d[key]));
-
-            g.selectAll("g.y.axis").remove();
-            g.append("g")
-                .attr("class", "y axis")
-                .call(d3.axisLeft(barchart.y[key]).ticks(6));
-
-
-        });
+        BarChart.strategies[estraegy](barchart); // chama a estrategia default
 
 
 
@@ -215,26 +188,26 @@ class BarChart extends Visualization{
         return super.redraw();
     }
 
-    detail(...args){
+    detail(...args) {
         let details;
-        let obj =  Object.entries(args[0]);
+        let obj = Object.entries(args[0]);
         let text = "";
 
         for (let j = 0; j < args[2].length; j++) {
             for (let i = 0; i < obj.length; i++) {
-                if(args[2][j]===obj[i][0]){
-                    text+= obj[i][0]+" : "+ obj[i][1]+"\n";
+                if (args[2][j] === obj[i][0]) {
+                    text += obj[i][0] + " : " + obj[i][1] + "\n";
                 }
             }
         }
 
-        if(args[0] instanceof SVGElement){
+        if (args[0] instanceof SVGElement) {
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+        } else if (typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
             details = this.foreground.selectAll(`.data[data-index="${args[1]}"]`)
                 .style("stroke", this.settings.highlightColor)
                 .style("stroke-width", "2")
-                .each(function(){
+                .each(function () {
                     this.parentNode.appendChild(this);
                 })
                 .append(":title")
@@ -243,37 +216,37 @@ class BarChart extends Visualization{
         n
     }
 
-    highlight(...args){
+    highlight(...args) {
         let highlighted;
-        if(args[0] instanceof SVGElement){
+        if (args[0] instanceof SVGElement) {
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+        } else if (typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
             highlighted = this.foreground.selectAll(`.data[data-index="${args[1]}"]`)
                 .style("stroke", this.settings.highlightColor)
                 .style("stroke-width", "2")
-                .each(function(){
+                .each(function () {
                     this.parentNode.appendChild(this);
                 });
         }
-        if(highlighted)
+        if (highlighted)
             super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
-    removeHighlight(...args){
-        if(args[1] instanceof SVGElement){
+    removeHighlight(...args) {
+        if (args[1] instanceof SVGElement) {
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+        } else if (typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
             let dataSelect = this.foreground.selectAll(`.data[data-index="${args[1]}"]`)
                 .style("stroke", "none");
-            if(dataSelect.nodes().length > 0)
+            if (dataSelect.nodes().length > 0)
                 super.removeHighlight(dataSelect.node(), dataSelect.datum(), args[1]);
         }
     }
-    getHighlightElement(i){
+    getHighlightElement(i) {
         let histogram = this;
         let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
         d3.select(group).attr("class", "groupHighlight");
 
-        this.foreground.selectAll('rect[data-index="'+i+'"]').each(function(){
+        this.foreground.selectAll('rect[data-index="' + i + '"]').each(function () {
             let t = utils.parseTranslate(this.parentElement);
             //let tp = utils.parseTranslate(this.parentElement.parentElement);
             let rect_select = d3.select(this);
@@ -282,9 +255,9 @@ class BarChart extends Visualization{
                 .attr("class", "rectHighlight")
                 .style("fill", "none")
                 .style("stroke", histogram.settings.highlightColor)
-                .attr("stroke-width","2px")
-                .attr("x", (+rect_select.attr("x"))+t.x)
-                .attr("y", (+rect_select.attr("y"))+t.y)
+                .attr("stroke-width", "2px")
+                .attr("x", (+rect_select.attr("x")) + t.x)
+                .attr("y", (+rect_select.attr("y")) + t.y)
                 .attr("width", rect_select.attr("width"))
                 .attr("height", rect_select.attr("height"));
 
@@ -299,15 +272,41 @@ class BarChart extends Visualization{
     }
 
 
-
-
 }
 
 BarChart.strategies = {
-    "default": () => {
+    "default": (barchart) => {
+        console.log("To aqui")
+        barchart.foreground.selectAll("g.dataGroup").each(function (key) {
+            let g = d3.select(this);
+            g.selectAll(".data")
+                .data(barchart.d)
+                .join(
+                    enter => {
+                        let enter_result = enter.append("rect")
+                            .attr("class", "data")
+                            .style("stroke", "none")
+                            .attr("data-index", (d, i) => i);
+                        barchart._bindDataMouseEvents(enter_result);
+                        return enter_result;
+                    }
+                )
+                .style("fill", barchart.settings.color)
+                .attr("x", (d, i) => barchart.x(i))
+                .attr("y", (d) => barchart.y[key](d[key]))
+                .attr("width", barchart.x.bandwidth())
+                .attr("height", (d) => barchart.boxHeight - barchart.y[key](d[key]));
+
+            g.selectAll("g.y.axis").remove();
+            g.append("g")
+                .attr("class", "y axis")
+                .call(d3.axisLeft(barchart.y[key]).ticks(6));
+
+
+        });
 
     },
-    "scale-break":  () => {
+    "scale-break": () => {
 
     },
     "perspective": () => {

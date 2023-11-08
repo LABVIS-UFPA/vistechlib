@@ -16,19 +16,14 @@
             let barchart = new BarChart(layout);
             var sayings = [
                 {value:5, value2:53},
-                {value:-2, value2:52},
-                {value:10, value2:51}
+                {value:8, value2:52},
+                {value:10, value2:40},
+                {value:20, value2:38},
+                {value:100, value2:30}
             ]
             let dados = barchart.data(sayings);
             barchart.redraw();
-
-            barchart.data([
-                {value:5, value2:53},
-                {value:-2, value2:52}
-            ]);
-            barchart.redraw();
-
-            
+                    
             console.log(dados);
 
 
