@@ -30,6 +30,7 @@ class BarChart extends Visualization {
 
 
         this.drawStrategy = BarChart.strategies[this.settings.drawStrategy];
+        
 
         this.name = "BarChart";
         this.x = d3.scaleBand().paddingInner(0.1).paddingOuter(0.1);
@@ -43,7 +44,8 @@ class BarChart extends Visualization {
         this.settings.paddingRight = 10;
         this.settings.negativeMode = "disabled"; //TODO: fazer funcionar
         this.settings.startZero = true;
-        this.settings.drawStrategy = "default"; // "scale-break", "perspective"
+        this.settings.drawStrategy = "scale-break"; // "default" "scale-break", "perspective"
+        this.settings.breakPoint = 0.7;
 
     }
 
@@ -113,24 +115,23 @@ class BarChart extends Visualization {
             let type = this.domainType[k];
             
             if (this.settings.startZero) {
-                for (let k of this.keys_filter) {
-                    if (this.domain[k][0] > 0) this.domain[k][0] = 0;
-                }
+                if (this.domain[k][0] > 0) this.domain[k][0] = 0;
             }
             
             if (type === "Categorical") {
                 this.y[k] = d3.scalePoint();
             } else {
                 this.y[k] = d3.scaleLinear();
+
             }
 
             this.y[k].domain(this.domain[k]).range([
                 this.boxHeight - (type === "Categorical" ? 10 : 0),
                 0
             ]);
-
-        this.y[k].domain()
         }
+        this.drawStrategy.data(this);
+
         return this;
     }
 
@@ -140,7 +141,7 @@ class BarChart extends Visualization {
 
         let ip = this.settings.innerPadding;
         let barchart = this;
-        let estraegy = this.settings.drawStrategy;
+        
 
         //console.log(xp);
 
@@ -178,7 +179,7 @@ class BarChart extends Visualization {
             .attr("x1", "0").attr("y1", barchart.boxHeight)
             .attr("x2", barchart.innerWidth).attr("y2", barchart.boxHeight);
 
-        BarChart.strategies[estraegy](barchart); // chama a estrategia default
+        this.drawStrategy.draw(barchart); // chama a estrategia default
 
 
 
@@ -275,39 +276,113 @@ class BarChart extends Visualization {
 }
 
 BarChart.strategies = {
-    "default": (barchart) => {
-        console.log("To aqui")
-        barchart.foreground.selectAll("g.dataGroup").each(function (key) {
-            let g = d3.select(this);
-            g.selectAll(".data")
-                .data(barchart.d)
-                .join(
-                    enter => {
-                        let enter_result = enter.append("rect")
-                            .attr("class", "data")
-                            .style("stroke", "none")
-                            .attr("data-index", (d, i) => i);
-                        barchart._bindDataMouseEvents(enter_result);
-                        return enter_result;
-                    }
-                )
-                .style("fill", barchart.settings.color)
-                .attr("x", (d, i) => barchart.x(i))
-                .attr("y", (d) => barchart.y[key](d[key]))
-                .attr("width", barchart.x.bandwidth())
-                .attr("height", (d) => barchart.boxHeight - barchart.y[key](d[key]));
+    "default": {
+        draw: (barchart) => {
+            console.log("To aqui")
+            barchart.foreground.selectAll("g.dataGroup").each(function (key) {
+                let g = d3.select(this);
+                g.selectAll(".data")
+                    .data(barchart.d)
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("rect")
+                                .attr("class", "data")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
+                    .style("fill", barchart.settings.color)
+                    .attr("x", (d, i) => barchart.x(i))
+                    .attr("y", (d) => barchart.y[key](d[key]))
+                    .attr("width", barchart.x.bandwidth())
+                    .attr("height", (d) => barchart.boxHeight - barchart.y[key](d[key]));
 
-            g.selectAll("g.y.axis").remove();
-            g.append("g")
-                .attr("class", "y axis")
-                .call(d3.axisLeft(barchart.y[key]).ticks(6));
+                g.selectAll("g.y.axis").remove();
+                g.append("g")
+                    .attr("class", "y axis")
+                    .call(d3.axisLeft(barchart.y[key]).ticks(6));
 
 
-        });
+            });
 
+        },
+        data: (barchart)=>{
+            
+        }
     },
-    "scale-break": () => {
+    "scale-break":{
+        data: (barchart) =>{
 
+            
+            barchart.ybreak = {};
+            for (let k of barchart.keys_filter) {
+                let dado = barchart.d;
+                let maximo = barchart.domain[k][1];
+                // let segundo_maior = d3.max(dado, (d) => d[k] === maximo ? NaN : d[k])
+                let segundo_maior = 30;
+                
+                console.log(barchart.boxHeight,segundo_maior)
+
+
+                barchart.breakPoint = 0.2;
+                barchart.gapSize = 10;
+
+                barchart.y[k] = d3.scaleLinear().domain([0, segundo_maior]).range([barchart.boxHeight, barchart.boxHeight*barchart.breakPoint+barchart.gapSize/2]);
+                barchart.ybreak[k] = d3.scaleLinear().domain([segundo_maior, maximo]).range([barchart.boxHeight*barchart.breakPoint-barchart.gapSize/2, 0]);
+                
+                barchart.boxHeightBreak =barchart.boxHeight*barchart.breakPoint-barchart.gapSize/2;
+
+                // barchart.boxHeight = barchart.boxHeight*(1-breakPoint)-gapSize/2;                
+                // barchart.ybreak = 
+            }
+        },
+        draw: (barchart) => {
+                       
+            barchart.foreground.selectAll("g.dataGroup").each(function (key) {
+                let miny = barchart.boxHeight*barchart.breakPoint+barchart.gapSize/2
+                let maxh = barchart.boxHeight- miny;
+                let g = d3.select(this);
+                g.selectAll("rect.lower")
+                    .data(barchart.d)
+                    .enter()
+                    .append("rect")
+                    .attr("class", "lower")
+                    .attr("x", (d, i) => barchart.x(i))
+                    .attr("y", (d) => Math.max(barchart.y[key](d[key]),miny))
+                    .attr("width", barchart.x.bandwidth())
+                    .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]),maxh ))
+                    .style("fill", barchart.settings.color);
+
+                // Crie retângulos "upper" com cores diferentes
+                g.selectAll("rect.upper")
+                    .data(barchart.d)
+                    .enter()
+                    .append("rect")
+                    .attr("class", "upper")
+                    .attr("x", (d, i) => barchart.x(i))
+                    .attr("width", barchart.x.bandwidth())
+                    .attr("y", (d) => barchart.ybreak[key](d[key]))
+                    .attr("height", (d) => Math.max(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), 0))
+                    .style("fill", barchart.settings.color);
+
+                g.append("g")
+                    .attr("class", "y upperaxis")
+                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(4));
+
+                g.append("g")
+                    .attr("class", "y loweraxis")
+                    .call(d3.axisLeft(barchart.y[key]).ticks(4));
+
+                // g.append("g")
+                //     .attr("class", "y axis")
+                //     .call(d3.axisLeft(barchart.y[key]).ticks(6));
+
+
+            });
+
+        }
     },
     "perspective": () => {
 
