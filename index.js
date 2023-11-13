@@ -10,5 +10,6 @@ exports.Treemap = require("./src/Treemap.js");
 exports.Histogram = require("./src/Histogram.js");
 exports.Sunburst = require("./src/Sunburst.js");
 exports.BarChart = require("./src/BarChart.js");
+exports.PieChart = require("./src/PieChart.js");
 exports.CirclePacking = require("./src/CirclePacking.js");
 exports.selection = require("./src/selections/selections.js")

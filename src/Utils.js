@@ -10,7 +10,7 @@
  * @param s y2 line2
  * @returns {boolean} line1 intersects line2
  */
-module.exports.lineIntersects = (a,b,c,d,p,q,r,s) => {
+module.exports.lineIntersects = (a, b, c, d, p, q, r, s) => {
     let det, gamma, lambda;
     det = (c - a) * (s - q) - (r - p) * (d - b);
     if (det === 0) {
@@ -118,3 +118,45 @@ module.exports.fold_modulo = (value, min, max) => {
 //             b2.y2 < b1.y1);
 //     }
 // }
+
+/**
+ * @description function to reduce arrays and count their frequencies
+ * @param {string} domainInput - Data domain 
+ */
+module.exports.reduce_and_count = (domainInput) => {
+    domain = domainInput.reduce(function (domainCount, currentDomain) {
+        if (typeof domainCount[currentDomain] !== "undefined") {
+            domainCount[currentDomain]++;
+            return domainCount;
+        } else {
+            domainCount[currentDomain] = 1;
+            return domainCount;
+        }
+    }, {});
+
+    let domainsArray = [];
+    for (let x in domain) {
+        domainsArray.push({ name: x, value: domain[x] });
+    }
+
+    return domainsArray;
+}
+
+/**
+ * @description function to define positions on the screen for the pie chart
+ * @param {string} width - width display
+ */
+module.exports.define_layout_positions = (width, height, numberViews) => {
+    let containerBounds = Math.min(width, height);
+    if (width < 2 * height && width <= 500) {
+        return 'height';
+    }
+    else if (height < 2 * width && height <= 500) {
+        return 'width';
+    }
+    else{
+        return 'none'
+    }
+
+
+}

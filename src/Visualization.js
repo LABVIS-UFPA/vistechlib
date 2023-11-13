@@ -37,10 +37,10 @@ class Visualization {
             size_type: "fit",//"absolute"
             width: 700,
             height: 300,
-            paddingTop: 25,
+            paddingTop: 50,
             paddingLeft: 50,
             paddingRight: 50,
-            paddingBottom: 30,
+            paddingBottom: 50,
             autoresize: true
         };
         this._putDefaultSettings();
