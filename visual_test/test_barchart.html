@@ -15,11 +15,16 @@
             let layout = document.querySelector("#chart");
             let barchart = new BarChart(layout);
             var sayings = [
-                {value:5,},
-                {value:8,},
-                {value:10,},
-                {value:20,},
-                {value:100,}
+                // {value:5,value1:5},
+                // {value:8,value1:50},
+                // {value:10,value1:500},
+                // {value:20,value1:5000},
+                // {value:100,value1:50000}
+                {value:5},
+                {value:8},
+                {value:10},
+                {value:20},
+                {value:100}
             ]
             let dados = barchart.data(sayings);
             barchart.redraw();

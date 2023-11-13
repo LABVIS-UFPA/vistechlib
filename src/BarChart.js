@@ -44,7 +44,7 @@ class BarChart extends Visualization {
         this.settings.paddingRight = 10;
         this.settings.negativeMode = "disabled"; //TODO: fazer funcionar
         this.settings.startZero = true;
-        this.settings.drawStrategy = "scale-break"; // "default" "scale-break", "perspective"
+        this.settings.drawStrategy = "default"; // "default" "scale-break", "perspective"
         this.settings.breakPoint = 0.7;
 
     }
