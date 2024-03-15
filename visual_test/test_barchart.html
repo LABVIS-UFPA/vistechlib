@@ -11,42 +11,37 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
 
-
             let layout = document.querySelector("#chart");
-            let barchart = new BarChart(layout);
-            var sayings = [
-                // {value:5,value1:5},
-                // {value:8,value1:50},
-                // {value:10,value1:500},
-                // {value:20,value1:5000},
-                // {value:100,value1:50000}
-                {value:5},
-                {value:8},
-                {value:10},
-                {value:20},
-                {value:100}
+            let barchart = new BarChart(layout);           
+            var valores = [
+                { valor: 5, },
+                { valor: 8 },
+                { valor: 10 },
+                { valor: 240 },
+                { valor: 250 },
+                { valor: 350 },
+                { valor: 400 }
             ]
-            let dados = barchart.data(sayings);
+            barchart.data(valores);           
             barchart.redraw();
-                    
-            console.log(dados);
-
-
         });
     </script>
-
+    <script src="https://cdn.tailwindcss.com"></script>
 
 </head>
 
 <body>
-    <h1>My First Heading</h1>
+    <header class="bg-slate-200 p-2 ">
+        <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
+    </header>
 
-    <p>My first paragraph.</p>
+    <main>
+        <h1 class="p-4">Gráfico de barras otimizado</h1>
+        <p class="p-4">Mitigando problemas de Outliers.</p>
 
-    <div id="chart" style="height: 300px; width: 100%;">
+        <div id="chart" style="height: 300px; width: 80%;"></div>
 
-
-    </div>
+    </main>
 </body>
 
 </html>
