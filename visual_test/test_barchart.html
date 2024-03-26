@@ -10,11 +10,16 @@
     <script src="../src/BarChart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-
             let layout = document.querySelector("#chart");
-            let barchart = new BarChart(layout);           
+
+            let config = {
+                drawStrategy: "scale break perspective"
+            };
+
+            let barchart = new BarChart(layout, config);
+
             var valores = [
-                { valor: 5, },
+                { valor: 5 },
                 { valor: 8 },
                 { valor: 10 },
                 { valor: 240 },
@@ -22,9 +27,11 @@
                 { valor: 350 },
                 { valor: 400 }
             ]
-            barchart.data(valores);           
+            barchart.data(valores);
             barchart.redraw();
+
         });
+
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -40,6 +47,17 @@
         <p class="p-4">Mitigando problemas de Outliers.</p>
 
         <div id="chart" style="height: 300px; width: 80%;"></div>
+
+
+        <div class="bg-slate-200 p-1">
+            <label>Escolha uma estratégeia:</label>
+            <select id="estrategia" class="bg-slate-200 p-1">
+                <option value="default">Default</option>
+                <option value="scale-break">Scale-Break</option>
+                <option value="perspective escalonada">Perspective Escalonada</option>
+                <option value="scale break perspective">Scale-Break Perspective</option>
+            </select>
+        </div>
 
     </main>
 </body>

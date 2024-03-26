@@ -43,12 +43,13 @@ class BarChart extends Visualization {
         this.settings.paddingBottom = 10;
         this.settings.paddingLeft = 55;
         this.settings.paddingRight = 10;
-        this.settings.negativeMode = "disabled"; //TODO: fazer funcionar
+        this.settings.negativeMode = "disabled";
         this.settings.startZero = true;
-        this.settings.drawStrategy = "scale break perspective";// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
+        this.settings.drawStrategy = " ";// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
         this.settings.breakPoint = 0.6;
-        this.settings.breakPoint2 = 0.5;
+        this.settings.breakPoint2 = 0.5;        
         this.settings.cols = {};
+
     }
 
     resize() {
@@ -183,11 +184,15 @@ class BarChart extends Visualization {
         group_join.selectAll(".rule.bottom")
             .attr("x1", "0").attr("y1", barchart.boxHeight)
             .attr("x2", barchart.innerWidth).attr("y2", barchart.boxHeight);
-        group_join.selectAll(".rule.rigth")
-            .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
-            .attr("x2", barchart.innerWidth).attr("y2", 0);
+        // group_join.selectAll(".rule.rigth")
+        //     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
+        //     .attr("x2", barchart.innerWidth).attr("y2", 0);
 
+        // this.drawStrategy = estrategia
+        
         this.drawStrategy.draw(barchart); // chama a estrategia
+
+        
 
 
 
@@ -520,6 +525,8 @@ BarChart.strategies = {
             barchart.ybreak2 = {};
             barchart.ybreak3 = {};
             barchart.ybreak4 = {};
+            barchart.z = 40;
+
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
 
@@ -545,7 +552,7 @@ BarChart.strategies = {
                 barchart.ybreak[k] = d3.scaleLinear().domain([corte1, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
                 barchart.ybreak2[k] = d3.scaleLinear().domain([corte2, corte3]).range([barchart.boxHeightBreak2, barchart.boxHeightBreak3]);
                 barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, corte4]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
-                barchart.ybreak4[k] = d3.scaleLinear().domain([corte4, maximo]).range([barchart.boxHeightBreak4, 10]);
+                barchart.ybreak4[k] = d3.scaleLinear().domain([corte4, maximo]).range([barchart.boxHeightBreak4, 0]);
 
             }
         },
@@ -577,8 +584,8 @@ BarChart.strategies = {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
                         let y = Math.max(barchart.ybreak[key](d[key]), barchart.boxHeightBreak2);
-                        let height = Math.max(Math.min((barchart.boxHeightBreak) - barchart.ybreak[key](d[key]), maxh2), 0);                        
-                        return `M${x + (width / 4)},${y} L${x + (width - (width / 3))},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
+                        let height = Math.max(Math.min((barchart.boxHeightBreak) - barchart.ybreak[key](d[key]), maxh2), 0);
+                        return `M${x + (barchart.z)},${y} L${x + (width - (barchart.z))},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
                     });
 
 
@@ -594,7 +601,7 @@ BarChart.strategies = {
                         let width = barchart.x.bandwidth();
                         let y = Math.max(barchart.ybreak2[key](d[key]), barchart.boxHeightBreak3);
                         let height = Math.max(Math.min((barchart.boxHeightBreak2) - barchart.ybreak2[key](d[key]), maxh3), 0);
-                        return `M${x + (width / 4)},${y} L${x + (width - (width / 3))},${y} L${x + (width - (width / 3))},${y + height} L${x + (width / 4)},${y + height} Z`;
+                        return `M${x + (barchart.z)},${y} L${x + (width - (barchart.z))},${y} L${x + (width - (barchart.z))},${y + height} L${x + (barchart.z)},${y + height} Z`;
                     });
 
                 let maxh4 = barchart.boxHeightBreak3 - barchart.boxHeightBreak4;
@@ -609,7 +616,7 @@ BarChart.strategies = {
                         let width = barchart.x.bandwidth();
                         let y = Math.max(barchart.ybreak3[key](d[key]), barchart.boxHeightBreak4);
                         let height = Math.max(Math.min((barchart.boxHeightBreak3) - barchart.ybreak3[key](d[key]), maxh4), 0);
-                        return `M${x},${y} L${x + width},${y} L${x + (width - (width / 3))},${y + height} L${x + (width / 4)},${y + height} Z`;
+                        return `M${x},${y} L${x + width},${y} L${x + (width - (barchart.z))},${y + height} L${x + (barchart.z)},${y + height} Z`;
                     });
 
                 g.selectAll("path.upper")
@@ -627,21 +634,10 @@ BarChart.strategies = {
 
                     });
 
+                // Axis
                 g.append("g")
                     .attr("class", "y loweraxis")
                     .call(d3.axisLeft(barchart.y[key]).ticks(3));
-
-                // g.append("g")
-                //     .attr("class", "y meio1")
-                //     .call(d3.axisLeft(barchart.ybreak[key]).ticks(1));
-
-                // g.append("g")
-                //     .attr("class", "y meio2")
-                //     .call(d3.axisLeft(barchart.ybreak2[key]).ticks(1));
-
-                // g.append("g")
-                //     .attr("class", "y meio3")
-                //     .call(d3.axisLeft(barchart.ybreak3[key]).ticks(1));
 
                 g.append("path")
                     .attr("stroke", "black")
@@ -650,7 +646,7 @@ BarChart.strategies = {
                         let x = 0;
                         let y = barchart.boxHeightBreak;
                         let heigth = barchart.boxHeightBreak2;
-                        return `M${x},${y} L${x + (36)},${heigth} Z`;
+                        return `M${x},${y} L${x + (barchart.z)},${heigth} Z`;
                     });
 
                 g.append("path")
@@ -660,22 +656,147 @@ BarChart.strategies = {
                         let x = 0;
                         let y = barchart.boxHeightBreak2;
                         let heigth = barchart.boxHeightBreak3;
-                        return `M${x + (36)},${y} L${x + (36)},${heigth} Z`;
+                        return `M${x + (barchart.z)},${y} L${x + (barchart.z)},${heigth} Z`;
                     });
 
                 g.append("path")
-                    .attr("stroke", "black")                    
-                    .attr("class", "y meio2")
+                    .attr("stroke", "black")
+                    .attr("class", "y meio3")
                     .attr("d", (d, i) => {
                         let x = 0;
                         let y = barchart.boxHeightBreak3;
                         let heigth = barchart.boxHeightBreak4;
-                        return `M${x + (36)},${y} L${x},${heigth} Z`;
+                        return `M${x + (barchart.z)},${y} L${x},${heigth} Z`;
                     });
 
                 g.append("g")
                     .attr("class", "y upper")
-                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(4));
+                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(6));
+
+                //Line rigth
+                g.append("path")
+                    .attr("stroke", "black")
+                    .attr("class", "Axisrigth.meio1")
+                    .attr("d", (d, i) => {
+                        let x = barchart.innerWidth;
+                        let y = barchart.boxHeight;
+                        let heigth = barchart.boxHeightBreak;
+                        return `M${x},${y} L${x},${heigth} Z`;
+                    });
+
+                g.append("path")
+                    .attr("stroke", "black")
+                    .attr("class", "Axisrigth.meio1")
+                    .attr("d", (d, i) => {
+                        let x = barchart.innerWidth;
+                        let x2 = barchart.innerWidth - (barchart.z);
+                        let y = barchart.boxHeightBreak;
+                        let heigth = barchart.boxHeightBreak2;
+                        let width = barchart.x.bandwidth;
+                        return `M${x},${y} L${x2},${heigth} Z`;
+                    });
+
+                g.append("path")
+                    .attr("stroke", "black")
+                    .attr("class", "Axis rigth.meio2")
+                    .attr("d", (d, i) => {
+                        let x = barchart.innerWidth - (barchart.z);
+                        let y = barchart.boxHeightBreak2;
+                        let heigth = barchart.boxHeightBreak3;
+                        return `M${x},${y} L${x},${heigth} Z`;
+                    });
+
+                g.append("path")
+                    .attr("stroke", "black")
+                    .attr("class", "Axis rigth.meio3")
+                    .attr("d", (d, i) => {
+                        let x = barchart.innerWidth - (barchart.z);
+                        let x2 = barchart.innerWidth;
+                        let y = barchart.boxHeightBreak3;
+                        let heigth = barchart.boxHeightBreak4;
+                        return `M${x},${y} L${x2},${heigth} Z`;
+                    });
+
+                g.append("path")
+                    .attr("stroke", "black")
+                    .attr("class", "Axisrigth.meio1")
+                    .attr("d", (d, i) => {
+                        let x = barchart.innerWidth;
+                        let y = barchart.boxHeightBreak4;
+                        let heigth = 0;
+                        return `M${x},${y} L${x},${heigth} Z`;
+                    });
+
+
+                // Texture
+
+                for (j = 0; j < 2; j++) {
+                    g.append("path")
+                        .attr("stroke", "black")
+                        .attr("class", "Line1")
+                        .attr("d", (d, i) => {
+                            let x = 0;
+                            let x2 = barchart.innerWidth;
+                            let y = barchart.boxHeight - j * 27;
+                            return `M${x},${y} L${x2},${y} Z`;
+                        });
+                }
+
+                let xbreak = 0;
+                for (j = 0; j < 4; j++) {
+                    g.append("path")
+                        .attr("stroke", "black")
+                        .attr("stroke-width", (1 - (j * 30) / 100))
+                        .attr("class", "Line2")
+                        .attr("d", (d, i) => {                        
+                            let x2 = barchart.innerWidth - (xbreak)
+                            let y = barchart.boxHeightBreak - j * 6;
+                            return `M${xbreak},${y} L${x2},${y} Z`;                            
+                        });
+                        xbreak = xbreak + (barchart.z)/3
+                }
+
+                for (j = 0; j < 3; j++) {
+                    g.append("path")
+                        .attr("stroke", "black")
+                        .attr("stroke-width", (0.19))
+                        .attr("class", "Line3")                        
+                        .attr("d", (d, i) => {
+                            let x = barchart.z;
+                            let x2 = barchart.innerWidth - (barchart.z);
+                            let y = barchart.boxHeightBreak2 - (5) - j * 4;
+                            return `M${x},${y} L${x2},${y} Z`;
+                        })
+                        .attr("filter", "url(#dropshadow)")
+                }
+
+                let xbreak3 = barchart.z;
+                for (j = 0; j < 4; j++) {
+                    g.append("path")
+                        .attr("stroke", "black")
+                        .attr("stroke-width", (0.19 + (j * 27) / 100))
+                        .attr("class", "Line4")
+                        .attr("d", (d, i) => {                            
+                            let x2 = (barchart.innerWidth ) - (xbreak3)
+                            let y = barchart.boxHeightBreak3 - j * 5.5;
+                            console.log((0.19 + (j * 27) / 100))
+                            return `M${xbreak3},${y} L${x2},${y} Z`;
+                        });
+                        xbreak3 = xbreak3 - (barchart.z)/3
+                }
+
+                for (j = 0; j < 4; j++) {
+                    g.append("path")
+                        .attr("stroke", "black")
+                        .attr("class", "Line5")
+                        .attr("d", (d, i) => {
+                            let x = 0;
+                            let x2 = barchart.innerWidth;
+                            let y = barchart.boxHeightBreak4 - (10) - j * 39.3;
+                            return `M${x},${y} L${x2},${y} Z`;
+                        });
+                }
+
             });
 
         }
