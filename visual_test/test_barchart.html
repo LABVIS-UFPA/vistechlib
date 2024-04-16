@@ -9,29 +9,66 @@
     <script src="../src/Visualization.js"></script>
     <script src="../src/BarChart.js"></script>
     <script>
+
         document.addEventListener("DOMContentLoaded", () => {
             let layout = document.querySelector("#chart");
+            let strategySelect = document.querySelector("#estrategia");
+            let inputElement = document.getElementById('breakpointInput');
 
-            let config = {
-                drawStrategy: "scale break perspective"
-            };
+            let barchart = null; // Inicialmente, o gráfico é nulo
 
-            let barchart = new BarChart(layout, config);
+            function salvarUltimaEstrategia(estrategia) {
+                localStorage.setItem('ultimaEstrategia', estrategia);
+            }
 
-            var valores = [
-                { valor: 5 },
-                { valor: 8 },
-                { valor: 10 },
-                { valor: 240 },
-                { valor: 250 },
-                { valor: 350 },
-                { valor: 400 }
-            ]
-            barchart.data(valores);
-            barchart.redraw();
+            // Função para carregar a última estratégia utilizada
+            function carregarUltimaEstrategia() {
+                return localStorage.getItem('ultimaEstrategia');
+            }
+
+            // Função para criar ou atualizar o BarChart
+            function createOrUpdateBarChart(strategy) {
+                if (barchart) {
+                    // Se o gráfico já existe, remova-o do DOM
+                    layout.innerHTML = '';
+                }
+                // Crie um novo BarChart com a nova estratégia
+                let config = { drawStrategy: strategy };
+                barchart = new BarChart(layout, config);
+                // Dados de exemplo
+                var valores = [
+                    { valor: 5 },
+                    { valor: 8 },
+                    { valor: 10 },
+                    { valor: 240 },
+                    { valor: 250 },
+                    { valor: 350 },
+                    { valor: 400 }
+                ];
+                barchart.data(valores);
+                barchart.redraw();
+            }
+            // Adiciona um evento de escuta para detectar quando o valor da lista suspensa for alterado
+            strategySelect.addEventListener("change", () => {
+                salvarUltimaEstrategia(strategySelect.value);
+                // Atualiza o gráfico com a nova estratégia
+                createOrUpdateBarChart(strategySelect.value);
+
+            });
+
+            inputElement.addEventListener('input', function () {
+                // Quando o valor é alterado, atualiza a propriedade this.settings.breakPoint com o novo valor
+                salvarUltimaEstrategia(strategySelect.value);
+                // Atualiza o gráfico com a nova estratégia
+                createOrUpdateBarChart(strategySelect.value);
+            });
+
+            var ultimaEstrategiaSalva = carregarUltimaEstrategia();
+            // Crie o gráfico inicialmente com a estratégia padrão 
+            strategySelect.value = ultimaEstrategiaSalva;
+            createOrUpdateBarChart(ultimaEstrategiaSalva);
 
         });
-
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -48,15 +85,19 @@
 
         <div id="chart" style="height: 300px; width: 80%;"></div>
 
-
         <div class="bg-slate-200 p-1">
-            <label>Escolha uma estratégeia:</label>
+            <label>Escolha uma estratégia:</label>
             <select id="estrategia" class="bg-slate-200 p-1">
                 <option value="default">Default</option>
                 <option value="scale-break">Scale-Break</option>
                 <option value="perspective escalonada">Perspective Escalonada</option>
                 <option value="scale break perspective">Scale-Break Perspective</option>
             </select>
+        </div>
+
+        <div class="bg-slate-200 p-1">
+        <label>Escolha o valor para o break:</label>
+        <input type="number" id="breakpointInput" step="0.1" min="0" max="1" value="0.0">
         </div>
 
     </main>
