@@ -46,7 +46,10 @@ class BarChart extends Visualization {
         this.settings.startZero = true;
         this.settings.drawStrategy = '';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
         this.settings.breakPoint = parseFloat(document.getElementById('breakpointInput').value) || 0.7;
-        this.settings.breakPoint2 = 0.5;
+        this.settings.breakPoint2 = parseFloat(document.getElementById('breakpointInput2').value) || 0.9;
+        this.settings.breakPoint3 = parseFloat(document.getElementById('breakpointInput3').value) || 0.86;
+        this.settings.breakPoint4 = parseFloat(document.getElementById('breakpointInput4').value) || 0.9;
+        this.settings.z = parseFloat(document.getElementById('inputz').value) || 0.28;
         this.settings.cols = {};
     }
 
@@ -278,7 +281,7 @@ class BarChart extends Visualization {
         this.settings.filter = args;
     }
 
-
+ 
 }
 
 BarChart.strategies = {
@@ -329,7 +332,7 @@ BarChart.strategies = {
                 console.log(barchart.boxHeight, segundo_maior)
 
                 barchart.breakPoint = barchart.settings.breakPoint;
-                barchart.gapSize = 10;
+                barchart.gapSize = 15;
 
                 // barchart.breaksize = 40;
                 // barchart.settings.cols[k]={};
@@ -518,15 +521,21 @@ BarChart.strategies = {
             barchart.ybreak2 = {};
             barchart.ybreak3 = {};
             barchart.ybreak4 = {};
-            barchart.z = 0.27;
+            barchart.z = barchart.settings.z;
 
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
 
-                barchart.breakPoint = 0.8;
-                barchart.breakPoint2 = 0.92;
-                barchart.breakPoint3 = 0.91;
-                barchart.breakPoint4 = 0.91;
+
+                barchart.breakPoint = barchart.settings.breakPoint;
+                barchart.breakPoint2 = barchart.settings.breakPoint2;
+                barchart.breakPoint3 = barchart.settings.breakPoint3;
+                barchart.breakPoint4 = barchart.settings.breakPoint4;
+
+                // barchart.breakPoint = 0.8;
+                // barchart.breakPoint2 = 0.92;
+                // barchart.breakPoint3 = 0.91;
+                // barchart.breakPoint4 = 0.91;
 
                 let corte1 = 10;
                 let corte2 = 100;
@@ -735,34 +744,35 @@ BarChart.strategies = {
 
 
                 // Texture
-
-                for (j = 0; j < 2; j++) {
+                for (let j = 1; j < 2; j++) {
                     g.append("path")
                         .attr("stroke", "black")
                         .attr("class", "Line1")
                         .attr("d", (d, i) => {
                             let x = 0;
                             let x2 = barchart.innerWidth;
-                            let y = barchart.boxHeight - j * 27;
-                            return `M${x},${y} L${x2},${y} Z`;
+                            let y1 = barchart.boxHeight + j * (barchart.boxHeightBreak - barchart.boxHeight) / 2;
+                            let y2 = barchart.boxHeightBreak - j * (barchart.boxHeightBreak - barchart.boxHeight) / 2;
+                            return `M${x},${y1} L${x2},${y2}`;
                         });
                 }
 
                 let xbreak = 0;
-                for (j = 0; j < 4; j++) {
+                for (let j = 0; j < 4; j++) {
                     g.append("path")
                         .attr("stroke", "black")
                         .attr("stroke-width", (1 - (j * 30.3) / 100))
                         .attr("class", "Line2")
                         .attr("d", (d, i) => {
-                            let x2 = barchart.innerWidth - (xbreak)
-                            let y = barchart.boxHeightBreak - j * 6;
-                            return `M${xbreak},${y} L${x2},${y} Z`;
+                            x2 = barchart.innerWidth - (xbreak) 
+                            y = barchart.boxHeightBreak + j * ((barchart.boxHeightBreak2 - barchart.boxHeightBreak) / 3);
+                            return `M${xbreak},${y} L${x2},${y}`;
                         });
-                    xbreak = xbreak + (barchart.x.bandwidth() * barchart.z) / 3
+                    xbreak += (barchart.x.bandwidth() * barchart.z) / 3;
                 }
 
-                for (j = 0; j < 3; j++) {
+
+                for (j = 1; j < 6; j++) {
                     g.append("path")
                         .attr("stroke", "black")
                         .attr("stroke-width", (0.10))
@@ -770,10 +780,10 @@ BarChart.strategies = {
                         .attr("d", (d, i) => {
                             let x = (barchart.x.bandwidth() * barchart.z);
                             let x2 = barchart.innerWidth - ((barchart.x.bandwidth() * barchart.z));
-                            let y = barchart.boxHeightBreak2 - (0) - j * 6;
+                            let y = barchart.boxHeightBreak2 + j * ((barchart.boxHeightBreak3 - barchart.boxHeightBreak2) / 5);
                             return `M${x},${y} L${x2},${y} Z`;
                         })
-                        .style("filter", "drop-shadow(2px 8px 2px rgba(0, 0, 0, 0.5))");
+                        
                 }
 
                 let xbreak3 = (barchart.x.bandwidth() * barchart.z);
@@ -784,20 +794,20 @@ BarChart.strategies = {
                         .attr("class", "Line4")
                         .attr("d", (d, i) => {
                             let x2 = (barchart.innerWidth) - (xbreak3)
-                            let y = barchart.boxHeightBreak3 - j * 4.9;
+                            let y = barchart.boxHeightBreak3 + j * ((barchart.boxHeightBreak4 - barchart.boxHeightBreak3) / 3);
                             return `M${xbreak3},${y} L${x2},${y} Z`;
                         });
                     xbreak3 = xbreak3 - ((barchart.x.bandwidth() * barchart.z)) / 3
                 }
 
-                for (j = 0; j < 4; j++) {
+                for (j = 1; j < 5; j++) {
                     g.append("path")
                         .attr("stroke", "black")
                         .attr("class", "Line5")
                         .attr("d", (d, i) => {
                             let x = 0;
                             let x2 = barchart.innerWidth;
-                            let y = barchart.boxHeightBreak4 - (10) - j * 39.3;
+                            let y = barchart.boxHeightBreak4 + j * ((0 - barchart.boxHeightBreak4) / 5);
                             return `M${x},${y} L${x2},${y} Z`;
                         });
                 }

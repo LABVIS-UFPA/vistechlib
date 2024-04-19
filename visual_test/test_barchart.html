@@ -13,7 +13,12 @@
         document.addEventListener("DOMContentLoaded", () => {
             let layout = document.querySelector("#chart");
             let strategySelect = document.querySelector("#estrategia");
-            let inputElement = document.getElementById('breakpointInput');
+            let slider = document.getElementById('slider');
+            let slider2 = document.getElementById('slider2');
+            let slider3 = document.getElementById('slider3');
+            var button = document.getElementById('read-more');
+            var closeButton = document.getElementById('fechar'); 
+            var configuracaoDiv = document.getElementById('configuracao');
 
             let barchart = null; // Inicialmente, o gráfico é nulo
 
@@ -32,6 +37,7 @@
                     // Se o gráfico já existe, remova-o do DOM
                     layout.innerHTML = '';
                 }
+
                 // Crie um novo BarChart com a nova estratégia
                 let config = { drawStrategy: strategy };
                 barchart = new BarChart(layout, config);
@@ -39,11 +45,12 @@
                 var valores = [
                     { valor: 5 },
                     { valor: 8 },
-                    { valor: 10 },
+                    { valor: 9 },
                     { valor: 240 },
                     { valor: 250 },
                     { valor: 350 },
                     { valor: 400 }
+                    // ajustar para valores dentro do break
                 ];
                 barchart.data(valores);
                 barchart.redraw();
@@ -56,17 +63,61 @@
 
             });
 
-            inputElement.addEventListener('input', function () {
+            //Lista suspensa com estrategias
+            // Seleciona todos os elementos de entrada
+            var inputs = document.querySelectorAll('input[type="number"]');
+            // Adiciona um ouvinte de evento para cada elemento de entrada
+            inputs.forEach(function (inputElement) {
+                inputElement.addEventListener('input', function () {
+                    // Quando o valor é alterado, atualiza a propriedade this.settings.breakPoint com o novo valor
+                    salvarUltimaEstrategia(strategySelect.value);
+                    // Atualiza o gráfico com a nova estratégia
+                    createOrUpdateBarChart(strategySelect.value);
+                });
+            });
+
+            //slider com breakpoint 2 e 4
+            slider.addEventListener('input', function () {
+                breakpointInput2.value = slider.value; // ou atualize para outro valor, se necessário
+                breakpointInput4.value = slider.value; // ou atualize para outro valor, se necessário                
                 // Quando o valor é alterado, atualiza a propriedade this.settings.breakPoint com o novo valor
                 salvarUltimaEstrategia(strategySelect.value);
                 // Atualiza o gráfico com a nova estratégia
                 createOrUpdateBarChart(strategySelect.value);
             });
 
+
+            //slider com breakpoint 3
+            slider2.addEventListener('input', function () {
+                breakpointInput3.value = slider2.value;
+                salvarUltimaEstrategia(strategySelect.value);                
+                createOrUpdateBarChart(strategySelect.value);
+            });
+
+            //slider com breakpoint 1
+            slider3.addEventListener('input', function () {
+                breakpointInput.value = slider3.value;  
+                salvarUltimaEstrategia(strategySelect.value);
+                createOrUpdateBarChart(strategySelect.value);
+            });
+
+
+            // Crie o gráfico inicialmente com a ultima estrategia utilizada
             var ultimaEstrategiaSalva = carregarUltimaEstrategia();
-            // Crie o gráfico inicialmente com a estratégia padrão 
             strategySelect.value = ultimaEstrategiaSalva;
-            createOrUpdateBarChart(ultimaEstrategiaSalva);
+            createOrUpdateBarChart(ultimaEstrategiaSalva);            
+
+            // Evento botão configuração
+            button.addEventListener('click', function () {
+                // Adiciona ou remove a classe 'hidden' para mostrar ou esconder a div
+                configuracaoDiv.classList.toggle('hidden');
+            });
+
+           // Eevnto botão fechar
+            closeButton.addEventListener('click', function () {
+                // Esconde a div de configuração quando o botão "Fechar" é clicado
+                configuracaoDiv.classList.add('hidden');
+            });
 
         });
     </script>
@@ -83,22 +134,77 @@
         <h1 class="p-4">Gráfico de barras otimizado</h1>
         <p class="p-4">Mitigando problemas de Outliers.</p>
 
-        <div id="chart" style="height: 300px; width: 80%;"></div>
+        <div id="chart" style="height: 500px; width: 80%;"></div>
 
-        <div class="bg-slate-200 p-1">
+        <div id="lista" class="bg-slate-200 p-3 fixed top-28 bottom-0 right-0 w-1/5" style="position: fixed; top
+        :28; bottom: 0; right: 0;">
             <label>Escolha uma estratégia:</label>
-            <select id="estrategia" class="bg-slate-200 p-1">
+            <select id="estrategia" class="bg-slate-200 p-1" style="margin-bottom: 20px;">
                 <option value="default">Default</option>
                 <option value="scale-break">Scale-Break</option>
                 <option value="perspective escalonada">Perspective Escalonada</option>
                 <option value="scale break perspective">Scale-Break Perspective</option>
             </select>
+
+            <br>
+            <label>Altere os valores de BreakPoints</label>
+            <br>
+
+            <input type="range" id="slider" min="0.7" max="1" step="0.01" value="0.96"
+                style="margin-right: 65px; margin-bottom: 20px;">
+
+            <br>
+            <label>Altere o BreakPoint3</label>
+            <input type="range" id="slider2" min="0.7" max="1" step="0.01" value="0.96"
+                style="margin-right: 65px; margin-bottom: 20px;">
+
+            <br>
+            <label>Altere os BreakPoint1</label>
+            <input type="range" id="slider3" min="0.0" max="1" step="0.01" value="0.96"
+                style="margin-right: 65px; margin-bottom: 20px;">
+
+            <br>
+
+            <button id="read-more"
+                class="bg-gray-300 hover:bg-gray-400 text-gray-600 py-0.3 px-2 rounded inline-flex items-center">
+                <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 33">
+                    <path
+                        d="m 14,1 c -0.43057,-2.2524e-4 -0.812955,0.2751544 -0.949219,0.6835938 l -1.015625,3.046875 c -0.410051,0.1443778 -0.81115,0.3099019 -1.203125,0.4980468 L 7.9589844,3.7929688 c -0.385025,-0.192405 -0.8499682,-0.1168812 -1.1542969,0.1875 l -2.828125,2.828125 c -0.3043812,0.3043287 -0.379905,0.7692719 -0.1875,1.1542968 l 1.4335937,2.8671874 c -0.1885794,0.39394 -0.3554568,0.796828 -0.5,1.208984 l -3.0429687,1.015626 c -0.4084391,0.136264 -0.68381856,0.518648 -0.68359375,0.949218 v 4 c -2.2524e-4,0.43057 0.27515435,0.812955 0.68359375,0.949219 l 3.0527344,1.017578 c 0.1438828,0.407584 0.3090971,0.805606 0.4960937,1.195313 l -1.4394531,2.878906 c -0.1924051,0.385025 -0.1168813,0.849968 0.1875,1.154297 l 2.828125,2.830078 c 0.3043287,0.304381 0.7692719,0.379905 1.1542969,0.1875 l 2.8730466,-1.4375 c 0.391573,0.187086 0.791637,0.352283 1.201172,0.496094 l 1.017578,3.050781 C 13.187045,30.734612 13.56943,31.009991 14,31.009766 h 4 c 0.43057,2.25e-4 0.812955,-0.275154 0.949219,-0.683594 l 1.017578,-3.056641 c 0.406496,-0.143244 0.804637,-0.308036 1.193359,-0.49414 l 2.88086,1.441406 c 0.385025,0.192405 0.849967,0.116881 1.154296,-0.1875 l 2.828126,-2.830078 c 0.304381,-0.304329 0.379905,-0.769272 0.1875,-1.154297 l -1.435547,-2.871094 c 0.188179,-0.392579 0.353616,-0.794395 0.498047,-1.205078 l 3.046874,-1.015625 c 0.40844,-0.136264 0.683819,-0.518649 0.683594,-0.949219 v -4 c 2.25e-4,-0.43057 -0.275155,-0.812954 -0.683594,-0.949218 L 27.271484,12.039062 C 27.127133,11.629665 26.96127,11.229223 26.773438,10.837891 l 1.4375,-2.8750004 c 0.192405,-0.3850249 0.116881,-0.8499681 -0.1875,-1.1542968 L 25.195312,3.9804688 C 24.890983,3.676088 24.426041,3.6005642 24.041016,3.7929688 l -2.865235,1.4316406 c -0.395249,-0.1889764 -0.799375,-0.3552819 -1.21289,-0.5 L 18.949219,1.6835938 C 18.812955,1.2751544 18.43057,0.99977476 18,1 Z m 1.996094,7.9980469 c 3.854148,0 7.005859,3.1516861 7.005859,7.0058591 0,3.854136 -3.151711,6.998047 -7.005859,6.998047 -3.854149,0 -6.9980471,-3.143911 -6.9980471,-6.998047 0,-3.854173 3.1438981,-7.0058591 6.9980471,-7.0058591 z" />
+                </svg>
+                <span>Configuração</span>
+            </button>
+            <div id="configuracao" class="hidden bg-white shadow-md rounded-md p-4 mt-2">
+                <label for="breakpointInput" style="margin-right: 65px;">BreakPoint:</label>
+                <label for="breakpointInput2">BreakPoint 2:</label>
+                <br>
+                <input type="number" id="breakpointInput" step="0.01" min="0" max="1" value="0.7"
+                    style="margin-right: 65px;" style="margin-bottom: 20px;">
+                <input type="number" id="breakpointInput2" step="0.01" min="0" max="1" value="0.96"
+                    style="margin-bottom: 20px;">
+
+                <br>
+
+                <label for="breakpointInput3" style="margin-right: 50px;">BreakPoint 3:</label>
+                <label for="breakpointInput4">BreakPoint 4:</label>
+                <br>
+                <input type="number" id="breakpointInput3" step="0.01" min="0" max="1" value="0.9"
+                    style="margin-right: 65px;">
+                <input type="number" id="breakpointInput4" step="0.01" min="0" max="1" value="0.96">
+
+
+                <button id="fechar"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-600 py-0.3 px-2 rounded inline-flex items-center mt-2" style="margin-top: 20px;">
+                    <span>Fechar</span>
+                </button>
+
+            </div>
+
+            <br> <br>
+
+            <label style="margin-right: 13px;">Altere o valor de z: </label>
+            <input type="number" id="inputz" step="0.01" min="0" max="0.5" value="0.26" style="margin-bottom: 20px;">
         </div>
 
-        <div class="bg-slate-200 p-1">
-        <label>Escolha o valor para o break:</label>
-        <input type="number" id="breakpointInput" step="0.1" min="0" max="1" value="0.0">
-        </div>
 
     </main>
 </body>
