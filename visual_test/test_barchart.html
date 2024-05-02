@@ -39,7 +39,7 @@
                 }
 
                 // Crie um novo BarChart com a nova estratégia
-                let config = { drawStrategy: strategy };
+                let config = { drawStrategy: 'default' };
                 barchart = new BarChart(layout, config);
                 // Dados de exemplo
                 var valores = [
@@ -155,7 +155,7 @@
 
             <br>
             <label>Altere o BreakPoint3</label>
-            <input type="range" id="slider2" min="0.7" max="1" step="0.01" value="0.96"
+            <input type="range" id="slider2" min="0.7" max="1" step="0.01" value="0.9"
                 style="margin-right: 65px; margin-bottom: 20px;">
 
             <br>

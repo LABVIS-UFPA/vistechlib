@@ -1,0 +1,40 @@
+.checkbox-form {
+    display: flex;
+    justify-content: space-between;
+}
+
+.checkbox-container input.first-input {
+    margin-left: 30px;
+    /* Adicione a margem esquerda para o primeiro input */
+}
+
+.checkbox-container input.last-input {
+    margin-right: 30px;
+    /* Adicione a margem direita para o último input */
+}
+
+fieldset {
+    margin-left: 50px;
+    /*Adiciona margem à esquerda no fieldset */
+    margin-right: 5px;
+}
+
+img {
+    width: 90px;
+    height: 90px;
+
+}
+
+header {
+    background: rgba(119, 136, 153);
+    margin-left: -8px;
+    /* Adiciona margem à esquerda no fieldset */
+    margin-right: -8px;
+    /* Adiciona margem à esquerda no fieldset */
+}
+
+
+div#chart {
+    height: 600px;
+    width: 100%;
+}
