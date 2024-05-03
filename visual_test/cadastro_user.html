@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- pagina de cadastro informçõe usuario -->
+    <div id="paginaInicial">
+        <header>
+            <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
+        </header>
+        <div class="centro">
+            <h1>Bem-vindo ao teste </h1>
+            <form>
+                <div class="primaria">
+                    <h2>Formulário de Informações do Usuário</h2>
+                    <input type="text" id="nome" class="input-largo" placeholder="Nome"><br>
+                    <input type="email" id="email" class="input-largo" placeholder="Email"><br>
+                    <input type="number" id="idade" class="input-largo" placeholder="Idade"><br>
+                    <input type="text" id="grauEscolaridade" class="input-largo" placeholder="Grau de escolaridade"><br>
+                    <input type="text" id="curso" class="input-largo" placeholder="Curso"><br>
+                    <div class="interna">
+                        <!-- Questionario dia do cara -->
+                        <label for="pergunta1">Por favor, responda as seguintes perguntas:</label><br><br>
+                        <div class="input-likert">
+                            <label>Como está seu dia ?: <br><br></label>
+                            <label for="likert1">1</label>
+                            <input type="radio" id="likert1" name="likert1" value="1">
+                            <input type="radio" name="likert1" value="2">
+                            <input type="radio" name="likert1" value="3">
+                            <input type="radio" name="likert1" value="4">
+                            <input type="radio" name="likert1" value="5">
+                            <label for="likert1">5</label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <button type="button" onclick="capturarDados(); irParaPagina2();"
+                style="margin-bottom: 20px;">Concluir</button>
+
+        </div>
+    </div>
+
+    <script>
+        function capturarDados() {
+            var nome = document.getElementById("nome").value;
+            var email = document.getElementById("email").value;
+            var idade = document.getElementById("idade").value;
+            var grauEscolaridade = document.getElementById("grauEscolaridade").value;
+            var curso = document.getElementById("curso").value;
+            // Capturar o valor selecionado
+            var valorlikert = document.querySelector('input[name="likert1"]:checked').value;
+            // Armazenar dados no localStorage
+            localStorage.setItem("nome", nome);
+            localStorage.setItem("email", email);
+            localStorage.setItem("idade", idade);
+            localStorage.setItem("grauEscolaridade", grauEscolaridade);
+            localStorage.setItem("curso", curso);
+            // Armazenar o valor no localStorage
+            localStorage.setItem("respostaLikert", valorlikert);
+        }
+        function irParaPagina2() {
+            // Redirecionar para a página 2
+            window.location.href = "test_user_barchart.html";
+        }
+    </script>
+
+</body>
+
+</html>

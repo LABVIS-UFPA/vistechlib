@@ -5,9 +5,12 @@ class Respostas {
         this.carObjects = [];
     }
 
-    createCarObject(Id,combination1, combination2,tarefa,checkbox,tempo, resposta_correta) {
+    createCarObject(nome, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa,checkbox, tempo, resposta_correta) {
         return {
-            "Id-user": Id,
+            "Id-user": nome,
+            "Idade": idade,
+            "grauEscolaridade": grauEscolaridade,
+            "valorlikert": valorlikert,
             "estrategia": combination1,
             "base":combination2,
             "Pergunta": tarefa,
@@ -17,7 +20,7 @@ class Respostas {
         };
     }
 
-    saveCheckedCheckboxesToJson(Id,combination1, combination2,tarefa,tempo, resposta_correta) {
+    saveCheckedCheckboxesToJson(nome, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa,checkbox, tempo, resposta_correta) {
         var checkboxes = document.querySelectorAll(this.checkboxSelector);
         var checkedCheckboxes = [];
         checkboxes.forEach(function (checkbox) {
@@ -26,7 +29,7 @@ class Respostas {
             }
         });
         // Corrigido para usar this.createCarObject
-        this.carObjects.push(this.createCarObject(Id,combination1, combination2,tarefa,checkedCheckboxes,tempo, resposta_correta));
+        this.carObjects.push(this.createCarObject(nome, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa,checkbox, tempo, resposta_correta));
         
     }
 

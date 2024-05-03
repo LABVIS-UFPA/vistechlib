@@ -14,8 +14,29 @@
     <script src="../visual_test/Tarefa.js"></script>
     <script src="../visual_test/Respostas.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/json2csv/dist/json2csv.umd.min.js"></script>
-    <!-- <script src="../visual_test/json_csv.js"></script> -->
     <script>
+        function capturarDados() {
+            var nome = document.getElementById("nome").value;
+            var email = document.getElementById("email").value;
+            var idade = document.getElementById("idade").value;
+            var grauEscolaridade = document.getElementById("grauEscolaridade").value;
+            var curso = document.getElementById("curso").value;
+            // Capturar o valor selecionado
+            var valorlikert = document.querySelector('input[name="likert1"]:checked').value;
+            // Armazenar dados no localStorage
+            localStorage.setItem("nome", nome);
+            localStorage.setItem("email", email);
+            localStorage.setItem("idade", idade);
+            localStorage.setItem("grauEscolaridade", grauEscolaridade);
+            localStorage.setItem("curso", curso);
+            // Armazenar o valor no localStorage
+            localStorage.setItem("respostaLikert", valorlikert);
+        }
+        function mostrarPagina() {
+
+            document.getElementById("paginaInicial").style.display = "none";
+            document.getElementById("paginaSecundaria").style.visibility = "visible";
+        }
         document.addEventListener("DOMContentLoaded", () => {
             let layout = document.querySelector("#chart");
             var continuarBotao = document.getElementById("continuarBotao");
@@ -74,7 +95,6 @@
 
             const resposta = new Respostas();
 
-
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
                 let combinations = [];
@@ -116,7 +136,7 @@
                         t0 = performance.now();
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
-                        if(tarefa.perg === 'Liste as barras com valores menores que X?') {
+                        if (tarefa.perg === 'Liste as barras com valores menores que X?') {
                             createresp(combination.value, true);
                         } else {
                             createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
@@ -136,9 +156,17 @@
                     let tempoFormatado = tempoDecorrido.toLocaleString('pt-BR', { minimumFractionDigits: 3 });
                     console.log(tempoFormatado)
 
+                    // Recuperar dados do localStorage
+                    var nome = localStorage.getItem("nome");
+                    var email = localStorage.getItem("email");
+                    var idade = localStorage.getItem("idade");
+                    var grauEscolaridade = localStorage.getItem("grauEscolaridade");
+                    var valorlikert = localStorage.getItem("respostaLikert");
+                    console.log(nome);
+
                     //salvar resposta ussuario por pergunta
-                    resposta.saveCheckedCheckboxesToJson(0, combination.strategy, combination.varName, tarefa.pergId, tempoFormatado, 0);
-                    resposta.exportToCSV();
+                    resposta.saveCheckedCheckboxesToJson(nome, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, tempoFormatado, 0);
+                    // resposta.exportToCSV();
 
                     // Limpa as variáveis de tempo para a próxima medição
                     t0 = undefined;
@@ -179,14 +207,14 @@
                     // Adicionar o container ao fieldset
                     f.appendChild(container);
 
-                    // // Adicionar classe específica para o primeiro input
-                    // if (index === 0) {
-                    //     input.style.marginLeft = (barchart.x.bandwidth()) / 2 + 'px';
-                    // }
-                    // // Adicionar classe específica para o último input
-                    // if (index === dados.length - 1) {
-                    //     input.style.marginRight = (barchart.x.bandwidth()) / 2 + 'px';
-                    // }
+                    // Adicionar classe específica para o primeiro input
+                    if (index === 0) {
+                        input.style.marginLeft = (barchart.x.bandwidth()) / 2 + 'px';
+                    }
+                    // Adicionar classe específica para o último input
+                    if (index === dados.length - 1) {
+                        input.style.marginRight = (barchart.x.bandwidth()) / 2 + 'px';
+                    }
 
                 });
 
@@ -211,29 +239,64 @@
 </head>
 
 <body>
-    <header>
-        <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
-    </header>
+    <!-- pagina de cadastro informçõe usuario -->
+    <div id="paginaInicial">
+        <header>
+            <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
+        </header>
+        <div class="centro">
+            <h1>Bem-vindo ao teste </h1>
+            <form>
+                <div class="primaria">
+                    <h2>Formulário de Informações do Usuário</h2>
+                    <input type="text" id="nome" class="input-largo" placeholder="Nome"><br>
+                    <input type="email" id="email" class="input-largo" placeholder="Email"><br>
+                    <input type="number" id="idade" class="input-largo" placeholder="Idade"><br>
+                    <input type="text" id="grauEscolaridade" class="input-largo" placeholder="Grau de escolaridade"><br>
+                    <input type="text" id="curso" class="input-largo" placeholder="Curso"><br>
+                    <div class="interna">
+                        <!-- Questionario dia do cara -->
+                        <label for="pergunta1">Por favor, responda as seguintes perguntas:</label><br><br>
+                        <div class="input-likert">
+                            <label>Como está seu dia ?: <br><br></label>
+                            <label for="likert1">1</label>
+                            <input type="radio" id="likert1" name="likert1" value="1">
+                            <input type="radio" name="likert1" value="2">
+                            <input type="radio" name="likert1" value="3">
+                            <input type="radio" name="likert1" value="4">
+                            <input type="radio" name="likert1" value="5">
+                            <label for="likert1">5</label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <button type="button" onclick="capturarDados(); mostrarPagina();"
+                style="margin-bottom: 20px;">Concluir</button>
 
-    <main>
-        <div id="chart"></div>
-    </main>>
-
-    <div id="perguntaContainer" style="margin-bottom: 15px;"></div>
-    <div id="fimPerguntas" style="display: none;">
-        <p style="margin-bottom: 15px;">Fim das perguntas, deseja continuar ?</p>
-        <button id="continuarBotao" style="margin-bottom: 15px;">Continuar</button>
+        </div>
     </div>
 
-
-    <form style="height: 70px; width: 100%;">
-        <fieldset>
-            <legend>Resposta</legend>
-        </fieldset>
-    </form>
-
-    <div>
-        <button id="proximoBotao">Enviar</button>
+    <!-- pagina de teste -->
+    <div id="paginaSecundaria" style="visibility: hidden;">
+        <header>
+            <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
+        </header>
+        <main>
+            <div id="chart"></div>
+        </main>>
+        <div id="perguntaContainer" style="margin-bottom: 15px;"></div>
+        <div id="fimPerguntas" style="display: none;">
+            <p style="margin-bottom: 15px;">Fim das perguntas, deseja continuar ?</p>
+            <button id="continuarBotao" style="margin-bottom: 15px;">Continuar</button>
+        </div>
+        <form style="height: 70px; width: 100%;">
+            <fieldset>
+                <legend>Resposta</legend>
+            </fieldset>
+        </form>
+        <div>
+            <button id="proximoBotao">Enviar</button>
+        </div>
     </div>
 
 </body>
