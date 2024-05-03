@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="styles2.css">
 </head>
 
 <body>
@@ -16,47 +17,60 @@
         <div class="centro">
             <h1>Bem-vindo ao teste </h1>
             <form>
-                <div class="primaria">
+                <div class="form">
                     <h2>Formulário de Informações do Usuário</h2>
-                    <input type="text" id="nome" class="input-largo" placeholder="Nome"><br>
-                    <input type="email" id="email" class="input-largo" placeholder="Email"><br>
-                    <input type="number" id="idade" class="input-largo" placeholder="Idade"><br>
+                    <!-- <input type="text" id="id_user" class="input-largo" placeholder="id"><br>
+                    <input type="email" id="email" class="input-largo" placeholder="Email"><br> -->
+                    <select id="idade" class="select-largo">
+                        <option value="">Selecione a faixa etária</option>
+                        <option value="0-18">0 - 18 anos</option>
+                        <option value="19-30">19 - 30 anos</option>
+                        <option value="31-45">31 - 45 anos</option>
+                        <option value="46-60">46 - 60 anos</option>
+                        <option value="61+">61+ anos</option>
+                    </select>
                     <input type="text" id="grauEscolaridade" class="input-largo" placeholder="Grau de escolaridade"><br>
                     <input type="text" id="curso" class="input-largo" placeholder="Curso"><br>
-                    <div class="interna">
-                        <!-- Questionario dia do cara -->
-                        <label for="pergunta1">Por favor, responda as seguintes perguntas:</label><br><br>
-                        <div class="input-likert">
-                            <label>Como está seu dia ?: <br><br></label>
-                            <label for="likert1">1</label>
-                            <input type="radio" id="likert1" name="likert1" value="1">
-                            <input type="radio" name="likert1" value="2">
-                            <input type="radio" name="likert1" value="3">
-                            <input type="radio" name="likert1" value="4">
-                            <input type="radio" name="likert1" value="5">
-                            <label for="likert1">5</label>
-                        </div>
+                    <!-- Questionario dia do cara -->
+                    <label>Por favor, responda a seguinte pergunta:</label>
+                    <div class="likert">
+                        <label>Como está seu dia ?: <br><br></label>
+                        <label for="likert1">Mutio ruim</label>
+                        <input type="radio" id="likert1" class="input-likert" name="likert1" value="1">
+                        <input type="radio" name="likert1" class="input-likert" value="2">
+                        <input type="radio" name="likert1" class="input-likert" value="3">
+                        <input type="radio" name="likert1" class="input-likert" value="4">
+                        <input type="radio" name="likert1" class="input-likert" value="5">
+                        <label for="likert1">Muito bom</label>
                     </div>
                 </div>
             </form>
             <button type="button" onclick="capturarDados(); irParaPagina2();"
-                style="margin-bottom: 20px;">Concluir</button>
+                style="margin-top: 20px;">Concluir</button>
 
         </div>
     </div>
 
     <script>
         function capturarDados() {
-            var nome = document.getElementById("nome").value;
-            var email = document.getElementById("email").value;
+            var id = localStorage.getItem("id");
+            // Verifica se corte foi passado como argumento e define seu valor
+            if (id == undefined) {
+                id = 1;
+            } else {
+                id = id + 1
+            }
+
+            // var nome = document.getElementById("nome").value;
+            // var email = document.getElementById("email").value;
             var idade = document.getElementById("idade").value;
             var grauEscolaridade = document.getElementById("grauEscolaridade").value;
             var curso = document.getElementById("curso").value;
             // Capturar o valor selecionado
             var valorlikert = document.querySelector('input[name="likert1"]:checked').value;
             // Armazenar dados no localStorage
-            localStorage.setItem("nome", nome);
-            localStorage.setItem("email", email);
+            localStorage.setItem("id", id);
+            // localStorage.setItem("email", email);
             localStorage.setItem("idade", idade);
             localStorage.setItem("grauEscolaridade", grauEscolaridade);
             localStorage.setItem("curso", curso);

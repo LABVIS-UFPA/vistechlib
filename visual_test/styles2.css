@@ -1,0 +1,43 @@
+.centro {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px; /* ou o tamanho desejado */
+    height: 500px; /* ou o tamanho desejado */
+    background-color: #e0dfdf; /* apenas para visualização */
+    text-align: center;
+  }
+
+.input-largo{
+    width: 60%;
+    height: 20px;
+    margin-bottom: 5px;
+}
+
+.select-largo{
+    width: 61.9%;
+    height: 25px;
+    margin-bottom: 5px;
+
+}
+
+.likert{
+    margin-top: 20px;    
+}
+
+
+
+img {
+    width: 90px;
+    height: 90px;
+
+}
+
+header {
+    background: rgba(119, 136, 153);
+    margin-left: -8px;
+    /* Adiciona margem à esquerda no fieldset */
+    margin-right: -8px;
+    /* Adiciona margem à esquerda no fieldset */
+}

@@ -12,88 +12,46 @@
     <script src="../src/Visualization.js"></script>
     <script src="../src/BarChart.js"></script>
     <script src="../visual_test/Tarefa.js"></script>
+    <script src="../visual_test/BaseDeDados.js"></script>
     <script src="../visual_test/Respostas.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/json2csv/dist/json2csv.umd.min.js"></script>
     <script>
-        function capturarDados() {
-            var nome = document.getElementById("nome").value;
-            var email = document.getElementById("email").value;
-            var idade = document.getElementById("idade").value;
-            var grauEscolaridade = document.getElementById("grauEscolaridade").value;
-            var curso = document.getElementById("curso").value;
-            // Capturar o valor selecionado
-            var valorlikert = document.querySelector('input[name="likert1"]:checked').value;
-            // Armazenar dados no localStorage
-            localStorage.setItem("nome", nome);
-            localStorage.setItem("email", email);
-            localStorage.setItem("idade", idade);
-            localStorage.setItem("grauEscolaridade", grauEscolaridade);
-            localStorage.setItem("curso", curso);
-            // Armazenar o valor no localStorage
-            localStorage.setItem("respostaLikert", valorlikert);
-        }
-        function mostrarPagina() {
-
-            document.getElementById("paginaInicial").style.display = "none";
-            document.getElementById("paginaSecundaria").style.visibility = "visible";
-        }
         document.addEventListener("DOMContentLoaded", () => {
             let layout = document.querySelector("#chart");
             var continuarBotao = document.getElementById("continuarBotao");
             var campoResposta = document.querySelector('fieldset');
             let t0, t1;
 
+
             let barchart = null; // Inicialmente, o gráfico é nulo
             // Função para criar e exibir o gráfico com uma estratégia específica e uma base de dados
-            function createAndDisplayChart(strategy, data) {
+            function createAndDisplayChart(strategy, data, break_inicial, breakfinal) {
                 // Limpa o gráfico anterior se existir
                 if (barchart) {
                     layout.innerHTML = '';
                 }
                 // Cria um novo gráfico com a estratégia fornecida
                 let config = { drawStrategy: strategy };
-                barchart = new BarChart(layout, config);
+                barchart = new BarChart(layout, config, break_inicial,breakfinal);                               
                 // Define os dados
                 barchart.data(data);
                 // Redesenha o gráfico
                 barchart.redraw();
+                
             }
 
-            // Bases de dados
-            var valores = [
-                { valor: 5 },
-                { valor: 8 },
-                { valor: 9 },
-                { valor: 240 },
-                { valor: 250 },
-                { valor: 350 },
-                { valor: 400 }
-            ];
-            var valores2 = [
-                { valor: 2 },
-                { valor: 3 },
-                { valor: 5 },
-                { valor: 8 },
-                { valor: 9 },
-                { valor: 10 },
-                { valor: 240 },
-                { valor: 245 },
-                { valor: 290 },
-                { valor: 350 },
-                { valor: 360 },
-                { valor: 390 },
-                { valor: 270 },
-                { valor: 260 },
-                { valor: 400 }
-            ];
-
-            // Estratégias de desenho
-            var strategies = ["default", "scale-break", "scale break perspective"];
+            const minhaBaseDeDados = new BaseDeDados();
+            var strategies = ["default","scale-break","scale break perspective"];
 
             // Instanciando a classe Tarefa
             const tarefa = new Tarefa();
-
             const resposta = new Respostas();
+
+
+
+
+            // console.log("Os 10 menores valores são:");
+            // console.log(minhaBaseDeDados.encontrarMenores(minhaBaseDeDados.base2, 50));
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -101,14 +59,12 @@
                 // Loop pelas estratégias
                 for (let strategy of strategies) {
                     // Loop pelos valores
-                    for (let [varName, values] of [['1', valores], ['2', valores2]]) {
+                    for (let [varName, values] of [['1', minhaBaseDeDados.base1],['2', minhaBaseDeDados.base2],['3', minhaBaseDeDados.base3],['4', minhaBaseDeDados.base4]]) {
                         // Adiciona a combinação com o nome da variável
                         combinations.push({ value: values, strategy, varName });
                     }
-                }
-                return combinations;
+                } return combinations;
             }
-
 
             // Função para embaralhar um array
             function shuffle(array) {
@@ -129,9 +85,9 @@
                 // Função recursiva para exibir as combinações uma por uma
                 function displayNextCombination() {
                     if (index < combinations.length) {
-                        combination = combinations[index++];
-                        console.log(combination)
-                        createAndDisplayChart(combination.strategy, combination.value);
+                        combination = combinations[index++];                        
+                        let break_dados = minhaBaseDeDados.breakdados(combination.varName);
+                        createAndDisplayChart(combination.strategy, combination.value, break_dados[0],break_dados[1]);
                         tarefa.reset();
                         t0 = performance.now();
                         // Limpa o conteúdo do campo
@@ -157,15 +113,15 @@
                     console.log(tempoFormatado)
 
                     // Recuperar dados do localStorage
-                    var nome = localStorage.getItem("nome");
-                    var email = localStorage.getItem("email");
+                    // var nome = localStorage.getItem("nome");
+                    // var email = localStorage.getItem("email");
+                    var id = localStorage.getItem("id");
                     var idade = localStorage.getItem("idade");
                     var grauEscolaridade = localStorage.getItem("grauEscolaridade");
                     var valorlikert = localStorage.getItem("respostaLikert");
-                    console.log(nome);
-
+                    
                     //salvar resposta ussuario por pergunta
-                    resposta.saveCheckedCheckboxesToJson(nome, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, tempoFormatado, 0);
+                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, tempoFormatado, 0);
                     // resposta.exportToCSV();
 
                     // Limpa as variáveis de tempo para a próxima medição
@@ -207,14 +163,14 @@
                     // Adicionar o container ao fieldset
                     f.appendChild(container);
 
-                    // Adicionar classe específica para o primeiro input
-                    if (index === 0) {
-                        input.style.marginLeft = (barchart.x.bandwidth()) / 2 + 'px';
-                    }
-                    // Adicionar classe específica para o último input
-                    if (index === dados.length - 1) {
-                        input.style.marginRight = (barchart.x.bandwidth()) / 2 + 'px';
-                    }
+                    // // Adicionar classe específica para o primeiro input
+                    // if (index === 0) {
+                    //     input.style.marginLeft = (barchart.x.bandwidth()) / 2 + 'px';
+                    // }
+                    // // Adicionar classe específica para o último input
+                    // if (index === dados.length - 1) {
+                    //     input.style.marginRight = (barchart.x.bandwidth()) / 2 + 'px';
+                    // }
 
                 });
 
@@ -239,61 +195,25 @@
 </head>
 
 <body>
-    <!-- pagina de cadastro informçõe usuario -->
-    <div id="paginaInicial">
-        <header>
-            <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
-        </header>
-        <div class="centro">
-            <h1>Bem-vindo ao teste </h1>
-            <form>
-                <div class="primaria">
-                    <h2>Formulário de Informações do Usuário</h2>
-                    <input type="text" id="nome" class="input-largo" placeholder="Nome"><br>
-                    <input type="email" id="email" class="input-largo" placeholder="Email"><br>
-                    <input type="number" id="idade" class="input-largo" placeholder="Idade"><br>
-                    <input type="text" id="grauEscolaridade" class="input-largo" placeholder="Grau de escolaridade"><br>
-                    <input type="text" id="curso" class="input-largo" placeholder="Curso"><br>
-                    <div class="interna">
-                        <!-- Questionario dia do cara -->
-                        <label for="pergunta1">Por favor, responda as seguintes perguntas:</label><br><br>
-                        <div class="input-likert">
-                            <label>Como está seu dia ?: <br><br></label>
-                            <label for="likert1">1</label>
-                            <input type="radio" id="likert1" name="likert1" value="1">
-                            <input type="radio" name="likert1" value="2">
-                            <input type="radio" name="likert1" value="3">
-                            <input type="radio" name="likert1" value="4">
-                            <input type="radio" name="likert1" value="5">
-                            <label for="likert1">5</label>
-                        </div>
-                    </div>
-                </div>
-            </form>
-            <button type="button" onclick="capturarDados(); mostrarPagina();"
-                style="margin-bottom: 20px;">Concluir</button>
-
-        </div>
-    </div>
-
-    <!-- pagina de teste -->
-    <div id="paginaSecundaria" style="visibility: hidden;">
+    <div>
         <header>
             <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
         </header>
         <main>
             <div id="chart"></div>
         </main>>
+
+        <form>
+            <fieldset>
+                <legend>Resposta</legend>
+            </fieldset>
+        </form>
         <div id="perguntaContainer" style="margin-bottom: 15px;"></div>
         <div id="fimPerguntas" style="display: none;">
             <p style="margin-bottom: 15px;">Fim das perguntas, deseja continuar ?</p>
             <button id="continuarBotao" style="margin-bottom: 15px;">Continuar</button>
         </div>
-        <form style="height: 70px; width: 100%;">
-            <fieldset>
-                <legend>Resposta</legend>
-            </fieldset>
-        </form>
+
         <div>
             <button id="proximoBotao">Enviar</button>
         </div>

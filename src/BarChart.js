@@ -1,3 +1,9 @@
+
+// if(module) {
+//     var d3 = require("d3");
+//     var Visualization = require("./Visualization.js");
+//     var utils = require("./Utils.js");
+// }
 // let d3 = require("d3");
 // let Visualization = require("./Visualization.js");
 // let utils = require("./Utils.js");
@@ -26,13 +32,19 @@
 class BarChart extends Visualization {
 
 
-    constructor(parentElement, settings, config) {
+    constructor(parentElement, settings, corte, cortefinal) {
         super(parentElement, settings);
 
         this.drawStrategy = BarChart.strategies[this.settings.drawStrategy];
 
         this.name = "BarChart";
         this.x = d3.scaleBand().paddingInner(0.1).paddingOuter(0.1);
+
+
+        console.log(corte)
+        this.settings.corte = corte;
+        this.settings.cortefinal = cortefinal;
+
     }
 
     _putDefaultSettings() {
@@ -44,11 +56,13 @@ class BarChart extends Visualization {
         this.settings.paddingRight = 10;
         this.settings.negativeMode = "disabled";
         this.settings.startZero = true;
-        this.settings.drawStrategy = '';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
-        this.settings.breakPoint = 0.7; //"parseFloat(document.getElementById('breakpointInput').value) ||"
+        this.settings.drawStrategy = 'default';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
+        this.settings.breakPoint = 0.2; //"parseFloat(document.getElementById('breakpointInput').value) ||"
         this.settings.breakPoint2 = 0.98; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
-        this.settings.breakPoint3 = 0.94; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
-        this.settings.breakPoint4 = 0.98; //"parseFloat(document.getElementById('breakpointInput4').value) ||"
+        this.settings.breakPoint3 = 0.85; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
+        this.settings.breakPoint4 = 0.98;
+        this.settings.corte; //"parseFloat(document.getElementById('breakpointInput4').value) ||"
+        this.settings.cortefinal;
         this.settings.z = 0.28; //"parseFloat(document.getElementById('inputz').value) ||"
         this.settings.cols = {};
     }
@@ -334,19 +348,18 @@ BarChart.strategies = {
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
                 // let segundo_maior = d3.max(dado, (d) => d[k] === maximo ? NaN : d[k])
-                let segundo_maior = 20;
+                // let segundo_maior = 10000;
+                // let terceiro = (segundo_maior*40)/100+segundo_maior;
+
+                let corte = barchart.settings.corte;
+                let cortefinal = barchart.settings.cortefinal;
 
                 barchart.breakPoint = barchart.settings.breakPoint;
-                barchart.gapSize = 15;
-
-                // barchart.breaksize = 40;
-                // barchart.settings.cols[k]={};
-                // barchart.settings.cols[k].barchart.breaksize;                
-                // console.log(barchart.settings.cols[k].breaksize)
+                barchart.gapSize = 25;
 
 
-                barchart.y[k] = d3.scaleLinear().domain([0, segundo_maior]).range([barchart.boxHeight, barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([segundo_maior, maximo]).range([barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2, 10]);
+                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2]);
+                barchart.ybreak[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2, 10]);
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2;
             }
@@ -399,11 +412,11 @@ BarChart.strategies = {
 
                 g.append("g")
                     .attr("class", "y upperaxis")
-                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(4));
+                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(8));
 
                 g.append("g")
                     .attr("class", "y loweraxis")
-                    .call(d3.axisLeft(barchart.y[key]).ticks(4));
+                    .call(d3.axisLeft(barchart.y[key]).ticks(8));
 
                 g.selectAll(".rule.rigth")
                     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
@@ -549,6 +562,17 @@ BarChart.strategies = {
             barchart.ybreak4 = {};
             barchart.z = barchart.settings.z;
 
+            let corte = barchart.settings.corte;
+            let cortefinal = barchart.settings.cortefinal;
+            let diferença = cortefinal - corte;
+
+            let corte2 = corte + (diferença*40)/100
+           
+            let corte3 = corte2 + (diferença*20)/100;
+            console.log(corte3)
+
+
+
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
 
@@ -558,15 +582,15 @@ BarChart.strategies = {
                 barchart.breakPoint3 = barchart.settings.breakPoint3;
                 barchart.breakPoint4 = barchart.settings.breakPoint4;
 
-                // barchart.breakPoint = 0.8;
+                barchart.breakPoint = 0.5;
                 // barchart.breakPoint2 = 0.92;
                 // barchart.breakPoint3 = 0.91;
                 // barchart.breakPoint4 = 0.91;
 
-                let corte1 = 10;
-                let corte2 = 100;
-                let corte3 = 130;
-                let corte4 = 230;
+                // let corte1 = 10;
+                // let corte2 = 100;
+                // let corte3 = 130;
+                // let corte4 = 230;
 
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint;
@@ -576,11 +600,11 @@ BarChart.strategies = {
 
 
 
-                barchart.y[k] = d3.scaleLinear().domain([0, corte1]).range([barchart.boxHeight, barchart.boxHeightBreak]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([corte1, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
+                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
+                barchart.ybreak[k] = d3.scaleLinear().domain([corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
                 barchart.ybreak2[k] = d3.scaleLinear().domain([corte2, corte3]).range([barchart.boxHeightBreak2, barchart.boxHeightBreak3]);
-                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, corte4]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
-                barchart.ybreak4[k] = d3.scaleLinear().domain([corte4, maximo]).range([barchart.boxHeightBreak4, 10]);
+                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
+                barchart.ybreak4[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
 
             }
         },
