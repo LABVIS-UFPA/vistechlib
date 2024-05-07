@@ -4,7 +4,7 @@ class Tarefa {
             "Selecione a menor barra?",
             "Selecione a segunda menor barra?",
             "Selecione a segunda maior barra? ",
-            "Liste as barras com valores menores que X?"
+            "Liste as quatro barras com menores valores?"
         ];
         this.perguntasSelecionadas = [];
         this.perguntaContainer = document.getElementById("perguntaContainer");
@@ -13,8 +13,10 @@ class Tarefa {
         this.continuarBotao = document.getElementById("continuarBotao");
         this.campoResposta = document.querySelector('fieldset');
 
-        this.perg='';
-        this.pergId='';
+        this.checkboxSelector = 'input[type="checkbox"][name="resposta"]';
+
+        // this.perg='';
+        this.pergId = '';
         this.tempoLimite = 15000; // Tempo limite padrão em milissegundos
         this.timerId = null; // Variável para armazenar o ID do temporizador
 
@@ -31,6 +33,12 @@ class Tarefa {
     }
 
     exibirProximaPergunta() {
+
+        // Limpar todos os checkboxes marcados
+        this.campoResposta.querySelectorAll(this.checkboxSelector).forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+
         const perguntaSelecionada = this.selecionarPerguntaAleatoria();
 
         //TEMPORIZADO DE 15S
@@ -38,16 +46,12 @@ class Tarefa {
         this.tempoLimite = 15000; // Reset the time limit
         this.iniciarTemporizador(); // Start a new timer for the next round of questions
 
-                
-        this.perg = perguntaSelecionada
-        this.pergId=this.id_pergunta(perguntaSelecionada);; 
 
-        
-        if (perguntaSelecionada === "Quão maior é a X barra em comparação com a primeira(Por exemplo, 2x maior, 3x maior)? ") {
-            this.perguntaContainer.textContent = perguntaSelecionada;
-            this.vezes.style.display = "block";
-            this.campoResposta.style.display = "none";
-        } else if (perguntaSelecionada !== null) {
+        // this.perg = perguntaSelecionada
+        this.pergId = this.id_pergunta(perguntaSelecionada);;
+
+
+        if (perguntaSelecionada !== null) {
             this.perguntaContainer.textContent = perguntaSelecionada;
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
         } else {
@@ -70,17 +74,17 @@ class Tarefa {
     }
 
 
+    // e passado no  exibir pergunta o que rotorna o id da pergunta
     id_pergunta(pergunta) {
-
-        if(pergunta === "Selecione a menor barra?"){
+        if (pergunta === "Selecione a menor barra?") {
             return 1;
-        }else if(pergunta === "Selecione a segunda menor barra?"){
+        } else if (pergunta === "Selecione a segunda menor barra?") {
             return 2;
-        }else if(pergunta === "Selecione a segunda maior barra? "){
+        } else if (pergunta === "Selecione a segunda maior barra? ") {
             return 3;
-        }else if(pergunta === "Liste as barras com valores menores que X?"){
+        } else if (pergunta === "Liste as quatro barras com menores valores?") {
             return 4;
-        }        
+        }
     }
 
     //Tempo maximo de 15s para responde cada tarefa

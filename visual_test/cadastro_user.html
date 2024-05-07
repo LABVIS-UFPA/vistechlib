@@ -52,14 +52,17 @@
     </div>
 
     <script>
+
         function capturarDados() {
-            var id = localStorage.getItem("id");
-            // Verifica se corte foi passado como argumento e define seu valor
-            if (id == undefined) {
-                id = 1;
-            } else {
-                id = id + 1
-            }
+            // var id = 0;
+            // localStorage.setItem("id", id);
+
+            var id = parseInt(localStorage.getItem("id")) || 0;
+            // Incrementa o ID
+            id++;
+            // Salva o novo valor do ID no localStorage
+            localStorage.setItem("id", id);
+            console.log(id);
 
             // var nome = document.getElementById("nome").value;
             // var email = document.getElementById("email").value;

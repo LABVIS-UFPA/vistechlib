@@ -22,7 +22,6 @@
             var campoResposta = document.querySelector('fieldset');
             let t0, t1;
 
-
             let barchart = null; // Inicialmente, o gráfico é nulo
             // Função para criar e exibir o gráfico com uma estratégia específica e uma base de dados
             function createAndDisplayChart(strategy, data, break_inicial, breakfinal) {
@@ -32,16 +31,16 @@
                 }
                 // Cria um novo gráfico com a estratégia fornecida
                 let config = { drawStrategy: strategy };
-                barchart = new BarChart(layout, config, break_inicial,breakfinal);                               
+                barchart = new BarChart(layout, config, break_inicial, breakfinal);
                 // Define os dados
                 barchart.data(data);
                 // Redesenha o gráfico
                 barchart.redraw();
-                
+
             }
 
             const minhaBaseDeDados = new BaseDeDados();
-            var strategies = ["default","scale-break","scale break perspective"];
+            var strategies = ["default", "scale-break", "scale break perspective"];
 
             // Instanciando a classe Tarefa
             const tarefa = new Tarefa();
@@ -50,8 +49,8 @@
 
 
 
-            // console.log("Os 10 menores valores são:");
-            // console.log(minhaBaseDeDados.encontrarMenores(minhaBaseDeDados.base2, 50));
+            console.log("Os 10 menores valores são:");
+            console.log((minhaBaseDeDados.base2));
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -85,14 +84,14 @@
                 // Função recursiva para exibir as combinações uma por uma
                 function displayNextCombination() {
                     if (index < combinations.length) {
-                        combination = combinations[index++];                        
+                        combination = combinations[index++];
                         let break_dados = minhaBaseDeDados.breakdados(combination.varName);
-                        createAndDisplayChart(combination.strategy, combination.value, break_dados[0],break_dados[1]);
+                        createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
                         tarefa.reset();
                         t0 = performance.now();
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
-                        if (tarefa.perg === 'Liste as barras com valores menores que X?') {
+                        if (tarefa.pergId == 4) {
                             createresp(combination.value, true);
                         } else {
                             createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
@@ -105,24 +104,29 @@
                 }
                 // Inicia a exibição das combinações
                 displayNextCombination();
+                let tempo_total = 0;
 
                 this.proximoBotao.addEventListener("click", function () {
+
                     t1 = performance.now();
                     let tempoDecorrido = (t1 - t0) / 1000;
                     let tempoFormatado = tempoDecorrido.toLocaleString('pt-BR', { minimumFractionDigits: 3 });
-                    console.log(tempoFormatado)
+                    tempo_total = tempo_total + tempoDecorrido;
+                    let tempo = tempo_total.toLocaleString('pt-BR', { minimumFractionDigits: 3 })
 
-                    // Recuperar dados do localStorage
-                    // var nome = localStorage.getItem("nome");
-                    // var email = localStorage.getItem("email");
+
                     var id = localStorage.getItem("id");
                     var idade = localStorage.getItem("idade");
                     var grauEscolaridade = localStorage.getItem("grauEscolaridade");
                     var valorlikert = localStorage.getItem("respostaLikert");
-                    
+
+                    var res = minhaBaseDeDados.respostacorreta(combination.varName);
+                    var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1]
+
+
                     //salvar resposta ussuario por pergunta
-                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, tempoFormatado, 0);
-                    // resposta.exportToCSV();
+                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, resposta_correta, tempoFormatado, tempo);
+
 
                     // Limpa as variáveis de tempo para a próxima medição
                     t0 = undefined;
@@ -131,7 +135,7 @@
                     t0 = performance.now(); // Marca o tempo inicial
 
                     campoResposta.innerHTML = '';
-                    if (tarefa.perg === 'Liste as barras com valores menores que X?') {
+                    if (tarefa.pergId == 4) {
                         createresp(combination.value, true);
                     } else {
                         createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
@@ -146,32 +150,50 @@
             // Chama a função para exibir as combinações
             displayCombinations();
 
-            function createresp(dados, allowMultipleSelection) {
-                var f = document.querySelector("fieldset");
-                f.classList.add("checkbox-form");
 
+            //alinhar fieldset ao grafico
+            var ban = d3.select("svg .background .vis_background").node().getBoundingClientRect();
+            campoResposta.style.width = ban.width + "px";
+            campoResposta.style.marginLeft = ban.left - 10 + "px";
+            campoResposta.style.marginRight = 0 + "px";
+            campoResposta.style.padding = 0 + 'px';
+
+
+
+            function createresp(dados, allowMultipleSelection) {
+                campoResposta.classList.add("checkbox-form");
+                var gap = barchart.settings.gap;
+                
+                
                 dados.forEach((valor, index) => {
-                    // Criar o container para o checkbox e o label
-                    var container = document.createElement("div");
-                    container.classList.add("checkbox-container");
+
                     var input = document.createElement("input");
+                    input.classList.add("checkbox-container");
                     input.type = "checkbox";
                     input.name = "resposta";
                     input.value = "bar" + (index + 1);
                     input.id = "resp" + (index + 1);
-                    container.appendChild(input);
-                    // Adicionar o container ao fieldset
-                    f.appendChild(container);
+                    input.style.marginLeft = 0;
+                    input.style.marginRight = ((gap) * 4) + 'px';
+                    input.style.marginTop = 0;
+                    input.style.marginBottom = 0;
+                    campoResposta.appendChild(input);
 
-                    // // Adicionar classe específica para o primeiro input
-                    // if (index === 0) {
-                    //     input.style.marginLeft = (barchart.x.bandwidth()) / 2 + 'px';
-                    // }
-                    // // Adicionar classe específica para o último input
-                    // if (index === dados.length - 1) {
-                    //     input.style.marginRight = (barchart.x.bandwidth()) / 2 + 'px';
-                    // }
-
+                    if (dados.length > 15) {
+                        //  para o primeiro e o ultimo input
+                        if (index === 0) {
+                            input.style.marginLeft = barchart.x.bandwidth() / 3 + 'px';
+                        } else if (index === dados.length - 1) {
+                            input.style.marginRight = (barchart.x.bandwidth()) / 5 + 'px';
+                        }// if (index > 0) {
+                        //     input.style.marginRight = 109794;
+                    } else {
+                        if (index === 0) {
+                            input.style.marginLeft = barchart.x.bandwidth() / 2 + 'px';
+                        } else if (index === dados.length - 1) {
+                            input.style.marginRight = (barchart.x.bandwidth()) / 2 + 'px';
+                        }
+                    }
                 });
 
                 if (!allowMultipleSelection) {
@@ -188,6 +210,7 @@
                     });
                 }
             }
+
         });
 
     </script>
@@ -203,11 +226,11 @@
             <div id="chart"></div>
         </main>>
 
-        <form>
-            <fieldset>
-                <legend>Resposta</legend>
-            </fieldset>
-        </form>
+
+        <fieldset>
+            <legend>Resposta</legend>
+        </fieldset>
+
         <div id="perguntaContainer" style="margin-bottom: 15px;"></div>
         <div id="fimPerguntas" style="display: none;">
             <p style="margin-bottom: 15px;">Fim das perguntas, deseja continuar ?</p>

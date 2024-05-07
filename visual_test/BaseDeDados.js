@@ -19,7 +19,7 @@ class BaseDeDados {
             { valor: 360.21610099901187 },
             { valor: 18997.109084083513 },
             { valor: 5.09641405192875929 },
-            { valor: 45.193331677145714 },
+            { valor: 65.193331677145714 },
             { valor: 83531.87846236755 },
             { valor: 84.26251910441042 },
             { valor: 156.7182257592612 },
@@ -54,7 +54,7 @@ class BaseDeDados {
         ];
 
         this.base2 = [
-            { valor: 83988.81079163871 },
+            { valor: 63988.81079163871 },
             { valor: 209.38307189262196 },
             { valor: 230.79785060359484 },
             { valor: 453.3535951099017 },
@@ -65,7 +65,7 @@ class BaseDeDados {
             { valor: 43808.664455947815 },
             { valor: 75323.70849999078 },
             { valor: 13.777280557836391 },
-            { valor: 51.37710125735538 },
+            { valor: 61.37710125735538 },
             { valor: 2749.2702740180252 },
             { valor: 40857.472711137016 },
             { valor: 2183.5206465604597 },
@@ -113,7 +113,7 @@ class BaseDeDados {
             { valor: 467.32832540960135 },
             { valor: 135.63251796040137 },
             { valor: 53272.24836602453 },
-            { valor: 46.473347599523876 },
+            { valor: 52.473347599523876 },
             { valor: 178.764540340363 },
             { valor: 204.6218549227469 },
             { valor: 40.13964252133324 },
@@ -128,17 +128,17 @@ class BaseDeDados {
         this.base4 = [
             { valor: 2086.788469112473 },
             { valor: 77412.47462722816 },
-            { valor: 114.87765686746255 },
+            { valor: 798.87765686746255 },
             { valor: 85685.42065542887 },
-            { valor: 475.6592439886408 },
-            { valor: 57.341495589178564 },
-            { valor: 355.6272574356251 },
+            { valor: 875.6592439886408 },
+            { valor: 680.341495589178564 },
+            { valor: 555.6272574356251 },
             { valor: 9878.030571097508 },
-            { valor: 374.07647618035685 },
+            { valor: 420.07647618035685 },
             { valor: 10858.416405323893 },
-            { valor: 454.4914334661673 },
-            { valor: 86.267786914083707 },
-            { valor: 222.77761749210134 },
+            { valor: 634.4914334661673 },
+            { valor: 302.267786914083707 },
+            { valor: 396.77761749210134 },
             { valor: 7398.659925373594 },
             { valor: 5661.633142901761 }
         ];
@@ -169,11 +169,78 @@ class BaseDeDados {
     }
 
 
+    // encontrarMenores(base,50)
     encontrarMenores(array, n) {
         // Ordenar o array em ordem crescente com base nos valores
         array.sort((a, b) => a.valor - b.valor);
 
         // Retornar os primeiros n elementos do array
         return array.slice(0, n);
+    }
+
+
+    respostacorreta(base){
+        if (base == 1) {
+            let x1 = 'bar18';
+            let x2 = 'bar48';
+            let x3 = 'bar17';
+            let x4 = 'bar18,bar48,bar12,bar49';
+            return [x1, x2, x3, x4];
+        } else if (base == 2) {
+            let x1 = 'bar42';
+            let x2 = 'bar11';
+            let x3 = 'bar10';
+            let x4 = 'bar42,bar11,bar30,bar16';
+            return [x1, x2, x3, x4];
+        } else if (base == 3) {
+            let x1 = 'bar3';
+            let x2 = 'bar10';
+            let x3 = 'bar2';
+            let x4 = 'bar3, bar10,bar7, bar1';
+            return [x1, x2, x3, x4];
+        } else if (base == 4) {
+            let x1 = 'bar12';
+            let x2 = 'bar13';
+            let x3 = 'bar2';
+            let x4 = 'bar12, bar13, bar9 ,bar7';
+            return [x1, x2, x3, x4];
+        } else {
+            console.log('erro ao carregar o corte')
+        }     
+        
+        // if(base ==='1' & tarefa === '1'){
+        // }else if(base ==='1' & tarefa === '2'){
+        //     return ;
+        // }else if(base ==='1' & tarefa === '3'){
+        //     return ;
+        // }else if(base ==='1' & tarefa === '4'){
+        //     return ;
+        // }else if(base ==='2' & tarefa === '1'){
+        //     return ;
+        // }else if(base ==='2' & tarefa === '2'){
+        //     return ;
+        // }else if(base ==='2' & tarefa === '3'){
+        //     return ;
+        // }else if(base ==='2' & tarefa === '4'){
+        //     return ;
+        // }else if(base ==='3' & tarefa === '1'){
+        //     return ;
+        // }else if(base ==='3' & tarefa === '2'){
+        //     return ;
+        // }else if(base ==='3' & tarefa === '3'){
+        //     return ;
+        // }else if(base ==='3' & tarefa === '4'){
+        //     return ;
+        // }else if(base ==='4' & tarefa === '1'){
+        //     return ;
+        // }else if(base ==='4' & tarefa === '2'){
+        //     return ;
+        // }else if(base ==='4' & tarefa === '3'){
+        //     return ;
+        // }else if(base ==='4' & tarefa === '4'){
+        //     return ;
+        // }else{
+        //     return ;
+        // }
     }
 }

@@ -1,14 +1,13 @@
 .checkbox-form {
-    display: flex;
+    display: flex;       
     justify-content: space-between;
-}
+} 
 
 
-fieldset {
+/* fieldset {
     margin-left: 2.5%;
-    /*Adiciona margem à esquerda no fieldset */
     width: 93.5%;
-}
+} */
 
 img {
     width: 90px;

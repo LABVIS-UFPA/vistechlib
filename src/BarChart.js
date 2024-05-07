@@ -40,8 +40,6 @@ class BarChart extends Visualization {
         this.name = "BarChart";
         this.x = d3.scaleBand().paddingInner(0.1).paddingOuter(0.1);
 
-
-        console.log(corte)
         this.settings.corte = corte;
         this.settings.cortefinal = cortefinal;
 
@@ -58,13 +56,14 @@ class BarChart extends Visualization {
         this.settings.startZero = true;
         this.settings.drawStrategy = 'default';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
         this.settings.breakPoint = 0.2; //"parseFloat(document.getElementById('breakpointInput').value) ||"
-        this.settings.breakPoint2 = 0.98; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
-        this.settings.breakPoint3 = 0.85; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
-        this.settings.breakPoint4 = 0.98;
+        this.settings.breakPoint2 = 0.978; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
+        this.settings.breakPoint3 = 0.92; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
+        this.settings.breakPoint4 = 0.97;
         this.settings.corte; //"parseFloat(document.getElementById('breakpointInput4').value) ||"
         this.settings.cortefinal;
         this.settings.z = 0.28; //"parseFloat(document.getElementById('inputz').value) ||"
         this.settings.cols = {};
+        this.settings.gap;
     }
 
     resize() {
@@ -110,8 +109,6 @@ class BarChart extends Visualization {
         let pr = this.settings.paddingRight;
         let ip = this.settings.innerPadding;
         super.data(d);
-
-
 
         if (this.settings.filter) {
             let arr = this.settings.filter;
@@ -207,8 +204,7 @@ class BarChart extends Visualization {
         //     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
         //     .attr("x2", barchart.innerWidth).attr("y2", 0);
 
-        // this.drawStrategy = estrategia
-
+        
         this.drawStrategy.draw(barchart); // chama a estrategia
         // let t1 = performance.now();
         // console.log("TIme: "+(t1-t0));
@@ -324,6 +320,7 @@ BarChart.strategies = {
                     .attr("y", (d) => barchart.y[key](d[key]))  //fazer Math.min
                     .attr("width", barchart.x.bandwidth())
                     .attr("height", (d) => barchart.boxHeight - barchart.y[key](d[key]));
+                    barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
                 g.selectAll("g.y.axis").remove();
                 g.append("g")
@@ -406,6 +403,7 @@ BarChart.strategies = {
                     .attr("y", (d) => barchart.ybreak[key](d[key]))
                     .attr("height", (d) => Math.max(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), 0))
                     .style("fill", barchart.settings.color);
+                    barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
                 g.selectAll("g.y.upperaxis").remove();
                 g.selectAll("g.y.loweraxis").remove();
@@ -569,10 +567,7 @@ BarChart.strategies = {
             let corte2 = corte + (diferença*40)/100
            
             let corte3 = corte2 + (diferença*20)/100;
-            console.log(corte3)
-
-
-
+            
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
 
@@ -624,6 +619,7 @@ BarChart.strategies = {
                     .attr("width", barchart.x.bandwidth())
                     .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
                     .style("fill", barchart.settings.color);
+                    barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
                 let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
                 let z = 2;

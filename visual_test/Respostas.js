@@ -3,24 +3,26 @@ class Respostas {
         this.checkboxSelector = 'input[type="checkbox"][name="resposta"]';
         this.data = [];
         this.carObjects = [];
+        
     }
 
-    createCarObject(nome, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa,checkbox, tempo, resposta_correta) {
+    createCarObject(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa,checkbox, resposta_correta, tempo_resposta, tempo_total) {
         return {
-            "Id-user": nome,
+            "Id-user": id,
             "Idade": idade,
             "grauEscolaridade": grauEscolaridade,
             "valorlikert": valorlikert,
             "estrategia": combination1,
             "base":combination2,
             "Pergunta": tarefa,
-            "resposta_marcada": checkbox,
-            "Tempo": tempo,
+            "resposta_marcada": checkbox,            
             "resposta_correta": resposta_correta,
+            "Tempo_resposta": tempo_resposta,
+            "Tempo_total": tempo_total,
         };
     }
 
-    saveCheckedCheckboxesToJson(nome, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa,checkbox, tempo, resposta_correta) {
+    saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, resposta_correta, tempo_resposta, tempo_total) {
         var checkboxes = document.querySelectorAll(this.checkboxSelector);
         var checkedCheckboxes = [];
         checkboxes.forEach(function (checkbox) {
@@ -29,7 +31,7 @@ class Respostas {
             }
         });
         // Corrigido para usar this.createCarObject
-        this.carObjects.push(this.createCarObject(nome, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa,checkbox, tempo, resposta_correta));
+        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, checkedCheckboxes, resposta_correta, tempo_resposta, tempo_total));
         
     }
 
