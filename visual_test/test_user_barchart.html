@@ -45,7 +45,7 @@
             const minhaBaseDeDados = new BaseDeDados();
             // Instanciando a classe Tarefa
             const tarefa = new Tarefa();
-            const resposta = new Respostas();           
+            const resposta = new Respostas();
 
             var strategies = ["default", "scale-break", "scale break perspective"];
             var tarefas = ["1", "2", "3", "4"];
@@ -90,12 +90,12 @@
                 function displayNextCombination() {
                     if (index < combinations.length) {
                         combination = combinations[index++];
-                        console.log(combination)
+
+                        //valores dos breaks
                         let break_dados = minhaBaseDeDados.breakdados(combination.varName);
                         createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
-                        tarefa.reset();
+                        tarefa.reset(combination.tarefa);
                         temp_visualizaçãoi = performance.now();
-                        t0 = performance.now();
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
                         if (tarefa.pergId == 4) {
@@ -103,26 +103,17 @@
                         } else {
                             createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
                         }
-
                     } else {
                         // Todas as combinações foram exibidas, agora exporte para CSV
                         resposta.exportToCSV();
-
                     }
                 }
                 // Inicia a exibição das combinações
                 displayNextCombination();
+
                 let tempo_total = 0;
-                let tempoincicial;
-                let tempofinal;
 
                 this.proximoBotao.addEventListener("click", function () {
-                    t1 = performance.now();
-                    let tempoDecorrido = (t1 - t0) / 1000;
-                    let tempoFormatado = tempoDecorrido.toLocaleString('pt-BR', { minimumFractionDigits: 3 });
-                    tempo_total = tempo_total + tempoDecorrido;
-                    let tempo = tempo_total.toLocaleString('pt-BR', { minimumFractionDigits: 3 })
-
                     var id = localStorage.getItem("id");
                     var idade = localStorage.getItem("idade");
                     var grauEscolaridade = localStorage.getItem("grauEscolaridade");
@@ -131,47 +122,27 @@
                     var res = minhaBaseDeDados.respostacorreta(combination.varName);
                     var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1];
 
+                    temp_visualizaçãof = performance.now();
+                    let temp_D = (temp_visualizaçãof - temp_visualizaçãoi) / 1000;
+                    let temp_janela_incicial = (temp_visualizaçãoi) / 1000
+                    let temp_janela_final = temp_janela_incicial + temp_D
+                    console.log('Inicio', temp_janela_incicial, 'Fim', temp_janela_final)
+                    let tempoincicial = temp_janela_incicial.toLocaleString('pt-BR', { minimumFractionDigits: 3 })
+                    let tempofinal = temp_janela_final.toLocaleString('pt-BR', { minimumFractionDigits: 3 })
+
                     //salvar resposta ussuario por pergunta
-                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, resposta_correta, tempoFormatado, tempo);
+                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, resposta_correta, tempoincicial, tempofinal);
+                    tarefa.enviarpergunta()
 
-
-                    // Limpa as variáveis de tempo para a próxima medição
-                    t0 = undefined;
-                    t1 = undefined;
-
-                    tarefa.exibirProximaPergunta();
-
-                    if (tarefa.temp_visualizacao == 1) {
-                        temp_visualizaçãof = performance.now();
-                        let temp_D = (temp_visualizaçãof - temp_visualizaçãoi) / 1000;
-                        let temp_janela_incicial = (temp_visualizaçãoi) / 1000
-                        let temp_janela_final = temp_janela_incicial + temp_D
-                        console.log(temp_janela_incicial, temp_janela_final)
-                        tempoincicial = temp_janela_incicial.toLocaleString('pt-BR', { minimumFractionDigits: 3 })
-                        tempofinal = temp_janela_final.toLocaleString('pt-BR', { minimumFractionDigits: 3 })
-                        //salvar resposta ussuario por pergunta
-                        resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, '', '', '', tempoincicial, tempofinal);
-                    }
-
-
-                    t0 = performance.now(); // Marca o tempo inicial
-                    campoResposta.innerHTML = '';
-                    if (tarefa.pergId == 4) {
-                        createresp(combination.value, true);
-                    } else {
-                        createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
-                    }
                 });
 
-                continuarBotao.addEventListener('click', function () {
-                    resposta.exportToCSV();
+                continuarBotao.addEventListener('click', function () {                                       
                     displayNextCombination();
                 });
-            }
 
+            }
             // Chama a função para exibir as combinações
             displayCombinations();
-
 
             //alinhar fieldset ao grafico
             var ban = d3.select("svg .background .vis_background").node().getBoundingClientRect();
@@ -179,7 +150,6 @@
             campoResposta.style.marginLeft = ban.left - 10 + "px";
             campoResposta.style.marginRight = 0 + "px";
             campoResposta.style.padding = 0 + 'px';
-
 
 
             function createresp(dados, allowMultipleSelection) {

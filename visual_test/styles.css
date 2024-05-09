@@ -1,7 +1,7 @@
 .checkbox-form {
-    display: flex;       
+    display: flex;
     justify-content: space-between;
-} 
+}
 
 
 /* fieldset {
@@ -28,3 +28,5 @@ div#chart {
     height: 600px;
     width: 98%;
 }
+
+

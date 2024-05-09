@@ -6,7 +6,7 @@ class Respostas {
 
     }
 
-    createCarObject(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, checkbox, resposta_correta, tempo_resposta, tempo_total, Tempo_incical_janela, Tempo_final_janela) {
+    createCarObject(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, checkbox, resposta_correta, Tempo_incical_janela, Tempo_final_janela) {
         return {
             "Id-user": id,
             "Idade": idade,
@@ -16,15 +16,13 @@ class Respostas {
             "base": combination2,
             "Pergunta": tarefa,
             "resposta_marcada": checkbox,
-            "resposta_correta": resposta_correta,
-            "Tempo_resposta": tempo_resposta,
-            "Tempo_total": tempo_total,
+            "resposta_correta": resposta_correta,      
             "Tempo_incical_janela": Tempo_incical_janela,
             "Tempo_final_janela": Tempo_final_janela,
         };
     }
 
-    saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, resposta_correta, tempo_resposta, tempo_total, Tempo_incical_janela, Tempo_final_janela) {
+    saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, resposta_correta, Tempo_incical_janela, Tempo_final_janela) {
         var checkboxes = document.querySelectorAll(this.checkboxSelector);
         var checkedCheckboxes = [];
         checkboxes.forEach(function (checkbox) {
@@ -33,7 +31,7 @@ class Respostas {
             }
         });        
         // Corrigido para usar this.createCarObject
-        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, checkedCheckboxes, resposta_correta, tempo_resposta, tempo_total, Tempo_incical_janela, Tempo_final_janela));
+        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, checkedCheckboxes, resposta_correta, Tempo_incical_janela, Tempo_final_janela));
 
     }
 
