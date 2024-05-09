@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="styles2.css">
+ 
 </head>
 
 <body>
@@ -18,9 +19,7 @@
             <h1>Bem-vindo ao teste </h1>
             <form>
                 <div class="form">
-                    <h2>Formulário de Informações do Usuário</h2>
-                    <!-- <input type="text" id="id_user" class="input-largo" placeholder="id"><br>
-                    <input type="email" id="email" class="input-largo" placeholder="Email"><br> -->
+                    <h2>Formulário de Informações do Usuário</h2>                    
                     <select id="idade" class="select-largo">
                         <option value="">Selecione a faixa etária</option>
                         <option value="0-18">0 - 18 anos</option>
@@ -56,6 +55,7 @@
         function capturarDados() {
             // var id = 0;
             // localStorage.setItem("id", id);
+            // localStorage.clear();
 
             var id = parseInt(localStorage.getItem("id")) || 0;
             // Incrementa o ID
@@ -64,8 +64,6 @@
             localStorage.setItem("id", id);
             console.log(id);
 
-            // var nome = document.getElementById("nome").value;
-            // var email = document.getElementById("email").value;
             var idade = document.getElementById("idade").value;
             var grauEscolaridade = document.getElementById("grauEscolaridade").value;
             var curso = document.getElementById("curso").value;

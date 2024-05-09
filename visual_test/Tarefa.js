@@ -14,11 +14,13 @@ class Tarefa {
         this.campoResposta = document.querySelector('fieldset');
 
         this.checkboxSelector = 'input[type="checkbox"][name="resposta"]';
+        this.temp_visualizacao = 0;
 
-        // this.perg='';
+        this.perg = '';
         this.pergId = '';
         this.tempoLimite = 15000; // Tempo limite padrão em milissegundos
         this.timerId = null; // Variável para armazenar o ID do temporizador
+
 
 
     }
@@ -47,7 +49,7 @@ class Tarefa {
         this.iniciarTemporizador(); // Start a new timer for the next round of questions
 
 
-        // this.perg = perguntaSelecionada
+        this.perg = perguntaSelecionada
         this.pergId = this.id_pergunta(perguntaSelecionada);;
 
 
@@ -59,6 +61,7 @@ class Tarefa {
             this.proximoBotao.style.display = "none";
             this.fimPerguntas.style.display = "block";
             this.campoResposta.style.display = "none";
+            this.temp_visualizacao = 1;
         }
 
     }
@@ -69,6 +72,7 @@ class Tarefa {
         this.proximoBotao.style.display = "block";
         this.fimPerguntas.style.display = "none";
         this.campoResposta.style.display = "flex";
+        this.temp_visualizacao = 0;
         this.exibirProximaPergunta();
 
     }
