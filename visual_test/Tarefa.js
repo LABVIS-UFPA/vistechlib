@@ -155,5 +155,22 @@ class Tarefa {
         clearTimeout(this.timerId);
     }
 
+
+    // Função para formatar o tempo em formato de relógio
+    formatatempo_performace(milliseconds) {
+        // Calcula horas, minutos e segundos
+        let hours = Math.floor(milliseconds / 3600000);
+        let minutes = Math.floor((milliseconds % 3600000) / 60000);
+        let seconds = Math.floor((milliseconds % 60000) / 1000);
+
+        // Formata os valores para terem sempre 2 dígitos
+        hours = String(hours).padStart(2, '0');
+        minutes = String(minutes).padStart(2, '0');
+        seconds = String(seconds).padStart(2, '0');
+
+        // Retorna o tempo formatado
+        return hours + ':' + minutes + ':' + seconds;
+    }
+
 }
 

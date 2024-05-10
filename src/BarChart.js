@@ -405,6 +405,8 @@ BarChart.strategies = {
                     .style("fill", barchart.settings.color);
                     barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
+
+                //axis
                 g.selectAll("g.y.upperaxis").remove();
                 g.selectAll("g.y.loweraxis").remove();
 
@@ -419,6 +421,34 @@ BarChart.strategies = {
                 g.selectAll(".rule.rigth")
                     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
                     .attr("x2", barchart.innerWidth).attr("y2", 0);
+
+
+                //texture 
+                for (let j = 1; j < 5; j++) {
+                    g.append("path")
+                        .attr("stroke", "black")
+                        .attr("class", "Line1")
+                        .attr("d", (d, i) => {
+                            let x = 0;
+                            let x2 = barchart.innerWidth;
+                            let y1 = barchart.boxHeight - (j*100) ;
+                            let y2 = barchart.boxHeight - (j*100);
+                            return `M${x},${y1} L${x2},${y2}`;
+                        });
+                }
+
+                for (j = 1; j < 3; j++) {
+                    g.append("path")
+                        .attr("stroke", "black")
+                        .attr("class", "Line5")
+                        .attr("d", (d, i) => {
+                            let x = 0;
+                            let x2 = barchart.innerWidth;
+                            let y1 = barchart.boxHeightBreak - (j*30) ;
+                            let y2 = barchart.boxHeightBreak - (j*30);
+                            return `M${x},${y1} L${x2},${y2}`;
+                        });
+                }
 
             });
 

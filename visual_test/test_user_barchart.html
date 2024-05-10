@@ -14,11 +14,16 @@
     <script src="../visual_test/Tarefa.js"></script>
     <script src="../visual_test/BaseDeDados.js"></script>
     <script src="../visual_test/Respostas.js"></script>
+    <script src="../visual_test/webcam.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/json2csv/dist/json2csv.umd.min.js"></script>
 
     <script>
-
         document.addEventListener("DOMContentLoaded", () => {
+            //Liga a camera
+            // const videoElement = document.getElementById('video');
+            // const web = new webcam(videoElement);
+            // web.startRecording();
+
             var bodyElement = document.body;
             let layout = document.querySelector("#chart");
             var continuarBotao = document.getElementById("continuarBotao");
@@ -47,7 +52,7 @@
             const tarefa = new Tarefa();
             const resposta = new Respostas();
 
-            var strategies = ["default", "scale-break", "scale break perspective"];
+            var strategies = ["scale-break"];
             var tarefas = ["1", "2", "3", "4"];
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
@@ -57,7 +62,7 @@
                 // Loop pelas estratégias
                 for (let strategy of strategies) {
                     // Loop pelos valores
-                    for (let [varName, values] of [['1', minhaBaseDeDados.base1], ['2', minhaBaseDeDados.base2], ['3', minhaBaseDeDados.base3], ['4', minhaBaseDeDados.base4]]) {
+                    for (let [varName, values] of [['1', minhaBaseDeDados.base1],['2', minhaBaseDeDados.base2],['3', minhaBaseDeDados.base3],['4', minhaBaseDeDados.base4]]) {  //
                         // Loop pelas tarefas
                         for (let tarefa of tarefas) {
                             // Adiciona a combinação com o nome da variável, a estratégia e a tarefa
@@ -65,7 +70,6 @@
                         }
                     }
                 }
-
                 return combinations;
             }
 
@@ -91,6 +95,13 @@
                     if (index < combinations.length) {
                         combination = combinations[index++];
 
+                                            
+                        combination.values = minhaBaseDeDados.embaralhar(minhaBaseDeDados['base' + combination.varName]); 
+                      
+
+                        
+
+
                         //valores dos breaks
                         let break_dados = minhaBaseDeDados.breakdados(combination.varName);
                         createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
@@ -106,6 +117,7 @@
                     } else {
                         // Todas as combinações foram exibidas, agora exporte para CSV
                         resposta.exportToCSV();
+                        web.stopRecording();
                     }
                 }
                 // Inicia a exibição das combinações
@@ -120,27 +132,33 @@
                     var valorlikert = localStorage.getItem("respostaLikert");
 
                     var res = minhaBaseDeDados.respostacorreta(combination.varName);
-                    var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1];
+                    var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1]; // tarefa 1 esta na posição [0]
+                    console.log(res)
+                    console.log(resposta_correta)
 
                     temp_visualizaçãof = performance.now();
-                    let temp_D = (temp_visualizaçãof - temp_visualizaçãoi) / 1000;
-                    let temp_janela_incicial = (temp_visualizaçãoi) / 1000
+                    let temp_D = temp_visualizaçãof - temp_visualizaçãoi;
+                    // Formata o tempo decorrido
+                    let temp_D_formatado = tarefa.formatatempo_performace(temp_D);
+
+                    let temp_janela_incicial = (temp_visualizaçãoi) 
                     let temp_janela_final = temp_janela_incicial + temp_D
-                    console.log('Inicio', temp_janela_incicial, 'Fim', temp_janela_final)
-                    let tempoincicial = temp_janela_incicial.toLocaleString('pt-BR', { minimumFractionDigits: 3 })
-                    let tempofinal = temp_janela_final.toLocaleString('pt-BR', { minimumFractionDigits: 3 })
+                    console.log('Inicio', tarefa.formatatempo_performace(temp_janela_incicial), 'Fim', tarefa.formatatempo_performace(temp_janela_final))
+                    let tempoincicial = tarefa.formatatempo_performace(temp_janela_incicial)
+                    let tempofinal = tarefa.formatatempo_performace(temp_janela_final)
 
                     //salvar resposta ussuario por pergunta
                     resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, resposta_correta, tempoincicial, tempofinal);
-                    tarefa.enviarpergunta()
+                    tarefa.enviarpergunta();                    
 
                 });
 
-                continuarBotao.addEventListener('click', function () {                                       
+                continuarBotao.addEventListener('click', function () {
                     displayNextCombination();
                 });
 
             }
+
             // Chama a função para exibir as combinações
             displayCombinations();
 
@@ -163,8 +181,8 @@
                     input.classList.add("checkbox-container");
                     input.type = "checkbox";
                     input.name = "resposta";
-                    input.value = "bar" + (index + 1);
-                    input.id = "resp" + (index + 1);
+                    input.value = "bar" + index ;
+                    input.id = "resp" + index ;
                     input.style.marginLeft = 0;
                     input.style.marginRight = ((gap) * 4) + 'px';
                     input.style.marginTop = 0;
@@ -216,23 +234,25 @@
         </header>
         <main>
             <div id="chart"></div>
-        </main>>
+        </main>
 
 
         <fieldset style="margin-bottom: 15px;">
             <legend>Resposta</legend>
         </fieldset>
 
-        <div id="perguntaContainer" style="margin-bottom: 15px;"></div>
+        <div id="perguntaContainer" style="margin-left: 20px; margin-bottom: 15px;"></div>
         <div id="fimPerguntas" style="display: none;">
-            <p style="margin-bottom: 15px;">Fim das perguntas, deseja continuar ?</p>
-            <button id="continuarBotao" style="margin-bottom: 15px;">Continuar</button>
+            <p style="margin-left: 20px; margin-bottom: 15px;">Fim das perguntas, deseja continuar ?</p>
+            <button id="continuarBotao" style="margin-left: 20px; margin-bottom: 15px;">Continuar</button>
         </div>
 
-        <div>
+        <div style="margin-left: 20px; margin-bottom: 15px;">
             <button id="proximoBotao">Enviar</button>
         </div>
     </div>
+
+    <video id="video" autoplay muted ></video>
 
 </body>
 

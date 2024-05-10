@@ -168,79 +168,110 @@ class BaseDeDados {
         }
     }
 
+    acharmenor(base) {
+        let menores = [];
+        for (let j = 0; j < 4; j++) {
+            let menorValor = Number.POSITIVE_INFINITY;
+            let posicaoMenorValor = -1;
 
-    // encontrarMenores(base,50)
-    encontrarMenores(array, n) {
-        // Ordenar o array em ordem crescente com base nos valores
-        array.sort((a, b) => a.valor - b.valor);
-
-        // Retornar os primeiros n elementos do array
-        return array.slice(0, n);
+            // Encontrando o menor valor e sua posição
+            for (let i = 0; i < base.length; i++) {
+                if (base[i].valor < menorValor && !menores.some(menor => menor.posicao === i)) {
+                    menorValor = base[i].valor;
+                    posicaoMenorValor = i;
+                }
+            }
+            // Adicionando o menor valor e sua posição ao array 'menores'
+            menores.push({ valor: menorValor, posicao: posicaoMenorValor });
+        }
+        return menores;
     }
 
+    acharmaior(base) {
+    let maiores = [];
 
-    respostacorreta(base){
-        if (base == 1) {
-            let x1 = 'bar18';
-            let x2 = 'bar48';
-            let x3 = 'bar17';
-            let x4 = 'bar18,bar48,bar12,bar49';
-            return [x1, x2, x3, x4];
-        } else if (base == 2) {
-            let x1 = 'bar42';
-            let x2 = 'bar11';
-            let x3 = 'bar10';
-            let x4 = 'bar42,bar11,bar30,bar16';
-            return [x1, x2, x3, x4];
-        } else if (base == 3) {
-            let x1 = 'bar3';
-            let x2 = 'bar10';
-            let x3 = 'bar2';
-            let x4 = 'bar3, bar10,bar7, bar1';
-            return [x1, x2, x3, x4];
-        } else if (base == 4) {
-            let x1 = 'bar12';
-            let x2 = 'bar13';
-            let x3 = 'bar2';
-            let x4 = 'bar12, bar13, bar9 ,bar7';
-            return [x1, x2, x3, x4];
-        } else {
-            console.log('erro ao carregar o corte')
-        }     
-        
-        // if(base ==='1' & tarefa === '1'){
-        // }else if(base ==='1' & tarefa === '2'){
-        //     return ;
-        // }else if(base ==='1' & tarefa === '3'){
-        //     return ;
-        // }else if(base ==='1' & tarefa === '4'){
-        //     return ;
-        // }else if(base ==='2' & tarefa === '1'){
-        //     return ;
-        // }else if(base ==='2' & tarefa === '2'){
-        //     return ;
-        // }else if(base ==='2' & tarefa === '3'){
-        //     return ;
-        // }else if(base ==='2' & tarefa === '4'){
-        //     return ;
-        // }else if(base ==='3' & tarefa === '1'){
-        //     return ;
-        // }else if(base ==='3' & tarefa === '2'){
-        //     return ;
-        // }else if(base ==='3' & tarefa === '3'){
-        //     return ;
-        // }else if(base ==='3' & tarefa === '4'){
-        //     return ;
-        // }else if(base ==='4' & tarefa === '1'){
-        //     return ;
-        // }else if(base ==='4' & tarefa === '2'){
-        //     return ;
-        // }else if(base ==='4' & tarefa === '3'){
-        //     return ;
-        // }else if(base ==='4' & tarefa === '4'){
-        //     return ;
-        // }else{
-        //     return ;
-        // }
+    for (let j = 0; j < 2; j++) {
+        let maiorValor = Number.NEGATIVE_INFINITY;
+        let posicaoMaiorValor = -1;
+
+        // Encontrando o maior valor e sua posição
+        for (let i = 0; i < base.length; i++) {
+            if (base[i].valor > maiorValor && !maiores.some(maior => maior.posicao === i)) {
+                maiorValor = base[i].valor;
+                posicaoMaiorValor = i;
+            }
+        }
+
+        // Adicionando o maior valor e sua posição ao array 'maiores'
+        maiores.push({ valor: maiorValor, posicao: posicaoMaiorValor });
+    }
+
+    return maiores;
+}
+
+respostacorreta(base) {
+    if (base == 1) {
+        let resp_corr_menores = this.acharmenor(this['base' + base]);
+        let resp_corr_maiores = this.acharmaior(this['base' + base]);
+        let x1 = 'bar' + resp_corr_menores[0].posicao;
+        let x2 = 'bar' + resp_corr_menores[1].posicao;
+        let x3 = 'bar' + resp_corr_maiores[1].posicao;
+        let x4 = 'bar' + resp_corr_menores.map(item => item.posicao);
+        return [x1, x2, x3, x4];
+    } else if (base == 2) {
+        let resp_corr_menores = this.acharmenor(this['base' + base]);
+        let resp_corr_maiores = this.acharmaior(this['base' + base]);
+        let x1 = 'bar' + resp_corr_menores[0].posicao;
+        let x2 = 'bar' + resp_corr_menores[1].posicao;
+        let x3 = 'bar' + resp_corr_maiores[1].posicao;
+        let x4 = 'bar' + resp_corr_menores.map(item => item.posicao);
+        return [x1, x2, x3, x4];
+    } else if (base == 3) {
+        let resp_corr_menores = this.acharmenor(this['base' + base]);
+        let resp_corr_maiores = this.acharmaior(this['base' + base]);
+        let x1 = 'bar' + resp_corr_menores[0].posicao;
+        let x2 = 'bar' + resp_corr_menores[1].posicao;
+        let x3 = 'bar' + resp_corr_maiores[1].posicao;
+        let x4 = 'bar' + resp_corr_menores.map(item => item.posicao);
+        return [x1, x2, x3, x4];
+    } else if (base == 4) {
+        let resp_corr_menores = this.acharmenor(this['base' + base]);
+        let resp_corr_maiores = this.acharmaior(this['base' + base]);
+        let x1 = 'bar' + resp_corr_menores[0].posicao;
+        let x2 = 'bar' + resp_corr_menores[1].posicao;
+        let x3 = 'bar' + resp_corr_maiores[1].posicao;
+        let x4 = 'bar' + resp_corr_menores.map(item => item.posicao);
+        return [x1, x2, x3, x4];
+    } else {
+        console.log('erro ao carregar o corte')
     }
 }
+
+shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+embaralhar(base) {
+    // Embaralhando a matriz base4
+    this.shuffle(base);
+    return base
+}
+
+
+
+
+// encontrarMenores(base,50)
+encontrarMenores(array, n) {
+    // Ordenar o array em ordem crescente com base nos valores
+    array.sort((a, b) => a.valor - b.valor);
+
+    // Retornar os primeiros n elementos do array
+    return array.slice(0, n);
+}
+
+}
+
