@@ -6,34 +6,56 @@ class Respostas {
 
     }
 
-    createCarObject(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, checkbox, resposta_correta, Tempo_incical_janela, Tempo_final_janela) {
+    createCarObject(id, idade, grauEscolaridade, curso, visualizacao, conhece,valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_marcada_posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela) {
         return {
             "Id-user": id,
             "Idade": idade,
             "grauEscolaridade": grauEscolaridade,
-            "valorlikert": valorlikert,
+            "Curso": curso,
+            "Disciplina de visualização de dados": visualizacao,
+            "Conhece o gráfico de barras": conhece,
+            "Como está seu dia": valorlikert,
+            "estresse mental": valorlikert2,
+            "cansaço físico": valorlikert3,
             "estrategia": combination1,
             "base": combination2,
             "Pergunta": tarefa,
-            "resposta_marcada": checkbox,
-            "resposta_correta": resposta_correta,      
+            "resposta_marcada_posicao": resposta_marcada_posicao,
+            "resposta_marcada_valor": resposta_marcada_valor,
+            "resposta_correta_posicao": resposta_correta_posicao,
+            "resposta_correta_valor": resposta_correta_valor,
             "Tempo_incical_janela": Tempo_incical_janela,
             "Tempo_final_janela": Tempo_final_janela,
         };
     }
 
-    saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, resposta_correta, Tempo_incical_janela, Tempo_final_janela) {
+    saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela,base) {
         var checkboxes = document.querySelectorAll(this.checkboxSelector);
-        var checkedCheckboxes = [];
+        var resposta_marcada_posicao = [];
         checkboxes.forEach(function (checkbox) {
             if (checkbox.checked) {
-                checkedCheckboxes.push(checkbox.value);
+                resposta_marcada_posicao.push(checkbox.value);
+
             }
         });        
+        let posicao = parseInt(resposta_marcada_posicao)
+        if (posicao >= base.length || posicao < 0) {
+            return "Posição inválida";
+        }
+        let resposta_marcada_valor;
+        console.log(posicao)
+        if (Number.isNaN(posicao)) {
+            resposta_marcada_valor = 0;
+        }else{
+            resposta_marcada_valor = base[posicao].valor;
+        }
+        
+        
         // Corrigido para usar this.createCarObject
-        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, valorlikert, combination1, combination2, tarefa, checkedCheckboxes, resposta_correta, Tempo_incical_janela, Tempo_final_janela));
+        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade,curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_marcada_posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
 
     }
+
 
     exportToCSV() {
         var csvData = json2csv.parse(this.carObjects);

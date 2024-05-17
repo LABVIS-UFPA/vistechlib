@@ -19,10 +19,12 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            //Liga a camera
+            // Liga a camera
             // const videoElement = document.getElementById('video');
             // const web = new webcam(videoElement);
             // web.startRecording();
+
+            console.log(localStorage.getItem("id"))
 
             var bodyElement = document.body;
             let layout = document.querySelector("#chart");
@@ -52,7 +54,7 @@
             const tarefa = new Tarefa();
             const resposta = new Respostas();
 
-            var strategies = ["scale-break"];
+            var strategies = ["default", "log", "scale-break", "scale break perspective"];
             var tarefas = ["1", "2", "3", "4"];
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
@@ -62,7 +64,7 @@
                 // Loop pelas estratégias
                 for (let strategy of strategies) {
                     // Loop pelos valores
-                    for (let [varName, values] of [['1', minhaBaseDeDados.base1],['2', minhaBaseDeDados.base2],['3', minhaBaseDeDados.base3],['4', minhaBaseDeDados.base4]]) {  //
+                    for (let [varName, values] of [['1', minhaBaseDeDados.base1], ['2', minhaBaseDeDados.base2], ['3', minhaBaseDeDados.base3], ['4', minhaBaseDeDados.base4]]) {  //
                         // Loop pelas tarefas
                         for (let tarefa of tarefas) {
                             // Adiciona a combinação com o nome da variável, a estratégia e a tarefa
@@ -89,31 +91,33 @@
                 combinations = shuffle(combinations); // Embaralha as combinações
                 let index = 0;
                 let combination = [];
+                let value_t4_barra = 0;
 
                 // Função recursiva para exibir as combinações uma por uma
                 function displayNextCombination() {
                     if (index < combinations.length) {
                         combination = combinations[index++];
-
-                                            
-                        combination.values = minhaBaseDeDados.embaralhar(minhaBaseDeDados['base' + combination.varName]); 
-                      
-
-                        
-
+                        minhaBaseDeDados.embaralhar(minhaBaseDeDados['base' + combination.varName]);
+                        combination.values = minhaBaseDeDados['base' + combination.varName];
+                        // console.log(combination.values)
 
                         //valores dos breaks
                         let break_dados = minhaBaseDeDados.breakdados(combination.varName);
                         createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
-                        tarefa.reset(combination.tarefa);
+                        //passa  a base para a função que grar o valor para t4
+                        let t4 = minhaBaseDeDados.gerarvalor(combination.varName);
+                        value_t4_barra = t4.valor;
+                        tarefa.reset(combination.tarefa, t4.valor);
                         temp_visualizaçãoi = performance.now();
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
-                        if (tarefa.pergId == 4) {
-                            createresp(combination.value, true);
-                        } else {
-                            createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
-                        }
+                        createresp(combination.value);
+                        // if (tarefa.pergId == 4) {
+                        //     // createresp(combination.value, true);
+                        //     createrespinput()
+                        // } else {
+                        //     createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
+                        // }
                     } else {
                         // Todas as combinações foram exibidas, agora exporte para CSV
                         resposta.exportToCSV();
@@ -126,30 +130,42 @@
                 let tempo_total = 0;
 
                 this.proximoBotao.addEventListener("click", function () {
+                    tarefa.pararTemporizador();// parar temporizador da classe tarefa
+
                     var id = localStorage.getItem("id");
                     var idade = localStorage.getItem("idade");
                     var grauEscolaridade = localStorage.getItem("grauEscolaridade");
+                    var curso = localStorage.getItem("curso");
+                    var visualizacao = localStorage.getItem("visualizacao");
+                    var conhece = localStorage.getItem("conhece");
+
                     var valorlikert = localStorage.getItem("respostaLikert");
+                    var valorlikert2 = localStorage.getItem("respostaLikert2", valorlikert2);
+                    var valorlikert3 = localStorage.getItem("respostaLikert3", valorlikert3);
 
                     var res = minhaBaseDeDados.respostacorreta(combination.varName);
                     var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1]; // tarefa 1 esta na posição [0]
-                    console.log(res)
-                    console.log(resposta_correta)
+                    // console.log(resposta_correta)
+                    resposta_correta_posicao = resposta_correta.posicao;
+                    resposta_correta_valor = resposta_correta.valor;
+                    console.log(resposta_correta_posicao, resposta_correta_valor)
+
+
 
                     temp_visualizaçãof = performance.now();
                     let temp_D = temp_visualizaçãof - temp_visualizaçãoi;
                     // Formata o tempo decorrido
                     let temp_D_formatado = tarefa.formatatempo_performace(temp_D);
 
-                    let temp_janela_incicial = (temp_visualizaçãoi) 
+                    let temp_janela_incicial = (temp_visualizaçãoi)
                     let temp_janela_final = temp_janela_incicial + temp_D
-                    console.log('Inicio', tarefa.formatatempo_performace(temp_janela_incicial), 'Fim', tarefa.formatatempo_performace(temp_janela_final))
+                    // console.log('Inicio', tarefa.formatatempo_performace(temp_janela_incicial), 'Fim', tarefa.formatatempo_performace(temp_janela_final))
                     let tempoincicial = tarefa.formatatempo_performace(temp_janela_incicial)
                     let tempofinal = tarefa.formatatempo_performace(temp_janela_final)
 
                     //salvar resposta ussuario por pergunta
-                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, valorlikert, combination.strategy, combination.varName, tarefa.pergId, resposta_correta, tempoincicial, tempofinal);
-                    tarefa.enviarpergunta();                    
+                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece,valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
+                    tarefa.enviarpergunta();
 
                 });
 
@@ -181,28 +197,28 @@
                     input.classList.add("checkbox-container");
                     input.type = "checkbox";
                     input.name = "resposta";
-                    input.value = "bar" + index ;
-                    input.id = "resp" + index ;
+                    input.value = index;
+                    input.id = "resp" + index;
                     input.style.marginLeft = 0;
                     input.style.marginRight = ((gap) * 4) + 'px';
                     input.style.marginTop = 0;
                     input.style.marginBottom = 0;
                     campoResposta.appendChild(input);
 
-                    if (dados.length > 15) {
-                        //  para o primeiro e o ultimo input
-                        if (index === 0) {
-                            input.style.marginLeft = barchart.x.bandwidth() / 3 + 'px';
-                        } else if (index === dados.length - 1) {
-                            input.style.marginRight = (barchart.x.bandwidth()) / 5 + 'px';
-                        }// if (index > 0) {
-                        //     input.style.marginRight = 109794;
-                    } else {
-                        if (index === 0) {
-                            input.style.marginLeft = barchart.x.bandwidth() / 2 + 'px';
-                        } else if (index === dados.length - 1) {
-                            input.style.marginRight = (barchart.x.bandwidth()) / 2 + 'px';
-                        }
+
+                    // if (dados.length > 15) {
+                    //     //  para o primeiro e o ultimo input
+                    //     if (index === 0) {
+                    //         input.style.marginLeft = barchart.x.bandwidth() / 3 + 'px';
+                    //     } else if (index === dados.length - 1) {
+                    //         input.style.marginRight = (barchart.x.bandwidth()) / 5 + 'px';
+                    //     }// if (index > 0) {
+                    //     //     input.style.marginRight = 109794;
+                    // } else {
+                    if (index === 0) {
+                        input.style.marginLeft = barchart.x.bandwidth() / 2 + 'px';
+                    } else if (index === dados.length - 1) {
+                        input.style.marginRight = (barchart.x.bandwidth()) / 2 + 'px';
                     }
                 });
 
@@ -252,7 +268,7 @@
         </div>
     </div>
 
-    <video id="video" autoplay muted ></video>
+    <video id="video" autoplay muted></video>
 
 </body>
 

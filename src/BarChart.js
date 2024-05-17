@@ -56,9 +56,9 @@ class BarChart extends Visualization {
         this.settings.startZero = true;
         this.settings.drawStrategy = 'default';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
         this.settings.breakPoint = 0.2; //"parseFloat(document.getElementById('breakpointInput').value) ||"
-        this.settings.breakPoint2 = 0.978; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
-        this.settings.breakPoint3 = 0.92; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
-        this.settings.breakPoint4 = 0.97;
+        this.settings.breakPoint2 = 0.96, 5; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
+        this.settings.breakPoint3 = 0.88; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
+        this.settings.breakPoint4 = 0.95, 5;
         this.settings.corte; //"parseFloat(document.getElementById('breakpointInput4').value) ||"
         this.settings.cortefinal;
         this.settings.z = 0.28; //"parseFloat(document.getElementById('inputz').value) ||"
@@ -204,7 +204,7 @@ class BarChart extends Visualization {
         //     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
         //     .attr("x2", barchart.innerWidth).attr("y2", 0);
 
-        
+
         this.drawStrategy.draw(barchart); // chama a estrategia
         // let t1 = performance.now();
         // console.log("TIme: "+(t1-t0));
@@ -297,10 +297,10 @@ class BarChart extends Visualization {
 
 
 }
-
 BarChart.strategies = {
     "default": {
         draw: (barchart) => {
+            
             barchart.foreground.selectAll("g.dataGroup").each(function (key) {
                 let g = d3.select(this);
                 g.selectAll(".data")
@@ -320,12 +320,25 @@ BarChart.strategies = {
                     .attr("y", (d) => barchart.y[key](d[key]))  //fazer Math.min
                     .attr("width", barchart.x.bandwidth())
                     .attr("height", (d) => barchart.boxHeight - barchart.y[key](d[key]));
-                    barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
+                barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
                 g.selectAll("g.y.axis").remove();
+
                 g.append("g")
                     .attr("class", "y axis")
-                    .call(d3.axisLeft(barchart.y[key]).ticks(6));
+                    .call(d3.axisLeft(barchart.y[key]).ticks(8).tickFormat(d => d.toLocaleString('pt-BR'))) //colcoar em formato brasileiro
+                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
+                    .each(function (d) { // Para cada marca de tick
+                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
+                            .append("line") // Adiciona uma linha
+                            .attr("class", "grid-line") // Define a classe para estilização
+                            .attr("stroke", "black")
+                            .attr("x1", 0) // Posição inicial x da linha
+                            .attr("x2", barchart.innerWidth) // Posição final x da linha
+                            .attr("y1", barchart.y[key](d[key])) // Posição inicial y da linha
+                            .attr("y2", barchart.y[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
+                    });
+
                 g.selectAll(".rule.rigth")
                     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
                     .attr("x2", barchart.innerWidth).attr("y2", 0);
@@ -333,6 +346,65 @@ BarChart.strategies = {
 
             });
 
+        },
+        data: (barchart) => {
+
+        }
+
+    },
+    "log": {
+        draw: (barchart) => {
+            barchart.foreground.selectAll("g.dataGroup").each(function (key) {
+                let g = d3.select(this);
+                g.selectAll(".data")
+                    .data(barchart.d)
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("rect")
+                                .attr("class", "data")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
+                    .style("fill", barchart.settings.color)
+                    .attr("x", (d, i) => barchart.x(i))
+                    .attr("y", (d) => barchart.y[key](d[key]))  // Aqui estamos usando a chave para selecionar a propriedade correta no seu dado
+                    .attr("width", barchart.x.bandwidth())
+                    .attr("height", (d) => barchart.boxHeight - barchart.y[key](d[key]));
+
+                // Alterando a escala y para logarítmica
+                barchart.y[key] = d3.scaleLog()
+                    .domain([1, d3.max(barchart.d, d => d[key])]) // Assumindo que o valor mínimo é 1
+                    .range([barchart.boxHeight, 0]);
+
+                // Atualizando as barras com a escala logarítmica
+                g.selectAll(".data")
+                    .attr("y", (d) => barchart.y[key](d[key]))
+                    .attr("height", (d) => barchart.boxHeight - barchart.y[key](d[key]));
+
+
+                g.append("g")
+                    .attr("class", "y axis")
+                    .call(d3.axisLeft(barchart.y[key]).ticks(8))
+                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
+                    .each(function (d) { // Para cada marca de tick
+                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
+                            .append("line") // Adiciona uma linha
+                            .attr("class", "grid-line") // Define a classe para estilização
+                            .attr("stroke", "black")
+                            .attr("x1", 0) // Posição inicial x da linha
+                            .attr("x2", barchart.innerWidth) // Posição final x da linha
+                            .attr("y1", barchart.y[key](d[key])) // Posição inicial y da linha
+                            .attr("y2", barchart.y[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
+                    });
+
+                // Atualizando a regra
+                g.selectAll(".rule.rigth")
+                    .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
+                    .attr("x2", barchart.innerWidth).attr("y2", 0);
+            });
         },
         data: (barchart) => {
 
@@ -391,7 +463,7 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("rect")
-                                .attr("class", "lower")
+                                .attr("class", "upper")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
@@ -403,52 +475,52 @@ BarChart.strategies = {
                     .attr("y", (d) => barchart.ybreak[key](d[key]))
                     .attr("height", (d) => Math.max(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), 0))
                     .style("fill", barchart.settings.color);
-                    barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
+                barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
 
-                //axis
+                //remove
                 g.selectAll("g.y.upperaxis").remove();
                 g.selectAll("g.y.loweraxis").remove();
+                g.selectAll("g.Line1").remove();
+
+                //axis
 
                 g.append("g")
                     .attr("class", "y upperaxis")
-                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(8));
+                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(4).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
+                    .each(function (d) { // Para cada marca de tick
+                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
+                            .append("line") // Adiciona uma linha
+                            .attr("class", "grid-line") // Define a classe para estilização
+                            .attr("stroke", "black")
+                            .attr("x1", 0) // Posição inicial x da linha
+                            .attr("x2", barchart.innerWidth) // Posição final x da linha
+                            .attr("y1", barchart.ybreak[key](d[key])) // Posição inicial y da linha
+                            .attr("y2", barchart.ybreak[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
+                    });
 
                 g.append("g")
                     .attr("class", "y loweraxis")
-                    .call(d3.axisLeft(barchart.y[key]).ticks(8));
+                    .call(d3.axisLeft(barchart.y[key]).ticks(7).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
+                    .each(function (d) { // Para cada marca de tick
+                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
+                            .append("line") // Adiciona uma linha
+                            .attr("class", "grid-line") // Define a classe para estilização
+                            .attr("stroke", "black")
+                            .attr("x1", 0) // Posição inicial x da linha
+                            .attr("x2", barchart.innerWidth) // Posição final x da linha
+                            .attr("y1", barchart.ybreak[key](d[key])) // Posição inicial y da linha
+                            .attr("y2", barchart.ybreak[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
+                    });
+
+
 
                 g.selectAll(".rule.rigth")
                     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
                     .attr("x2", barchart.innerWidth).attr("y2", 0);
 
-
-                //texture 
-                for (let j = 1; j < 5; j++) {
-                    g.append("path")
-                        .attr("stroke", "black")
-                        .attr("class", "Line1")
-                        .attr("d", (d, i) => {
-                            let x = 0;
-                            let x2 = barchart.innerWidth;
-                            let y1 = barchart.boxHeight - (j*100) ;
-                            let y2 = barchart.boxHeight - (j*100);
-                            return `M${x},${y1} L${x2},${y2}`;
-                        });
-                }
-
-                for (j = 1; j < 3; j++) {
-                    g.append("path")
-                        .attr("stroke", "black")
-                        .attr("class", "Line5")
-                        .attr("d", (d, i) => {
-                            let x = 0;
-                            let x2 = barchart.innerWidth;
-                            let y1 = barchart.boxHeightBreak - (j*30) ;
-                            let y2 = barchart.boxHeightBreak - (j*30);
-                            return `M${x},${y1} L${x2},${y2}`;
-                        });
-                }
 
             });
 
@@ -501,8 +573,8 @@ BarChart.strategies = {
                 let corte = 10;
                 let meio = 190;
 
-                barchart.breakPoint = 0.8;
-                barchart.breakPoint2 = 0.85;
+                barchart.breakPoint = 0.6;
+                barchart.breakPoint2 = 0.96;
 
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint;
@@ -594,10 +666,10 @@ BarChart.strategies = {
             let cortefinal = barchart.settings.cortefinal;
             let diferença = cortefinal - corte;
 
-            let corte2 = corte + (diferença*40)/100
-           
-            let corte3 = corte2 + (diferença*20)/100;
-            
+            let corte2 = corte + (diferença * 40) / 100
+
+            let corte3 = corte2 + (diferença * 20) / 100;
+
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
 
@@ -607,7 +679,7 @@ BarChart.strategies = {
                 barchart.breakPoint3 = barchart.settings.breakPoint3;
                 barchart.breakPoint4 = barchart.settings.breakPoint4;
 
-                barchart.breakPoint = 0.5;
+                barchart.breakPoint = 0.3;
                 // barchart.breakPoint2 = 0.92;
                 // barchart.breakPoint3 = 0.91;
                 // barchart.breakPoint4 = 0.91;
@@ -641,15 +713,23 @@ BarChart.strategies = {
                 let g = d3.select(this);
                 g.selectAll("rect.lower")
                     .data(barchart.d)
-                    .enter()
-                    .append("rect")
-                    .attr("class", "lower")
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("rect")
+                                .attr("class", "lower")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
                     .attr("x", (d, i) => barchart.x(i))
                     .attr("y", (d) => Math.max(barchart.y[key](d[key]), barchart.boxHeightBreak))
                     .attr("width", barchart.x.bandwidth())
                     .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
                     .style("fill", barchart.settings.color);
-                    barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
+
+                barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
                 let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
                 let z = 2;
@@ -657,9 +737,16 @@ BarChart.strategies = {
                 let f = 30;
                 g.selectAll("path.meio1")
                     .data(barchart.d)
-                    .enter()
-                    .append("path")
-                    .attr("class", "meio1")
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("path")
+                                .attr("class", "meio1")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
                     .style("fill", barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
@@ -677,9 +764,16 @@ BarChart.strategies = {
                 let maxh3 = barchart.boxHeightBreak2 - barchart.boxHeightBreak3;
                 g.selectAll("path.meio2")
                     .data(barchart.d)
-                    .enter()
-                    .append("path")
-                    .attr("class", "meio2")
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("path")
+                                .attr("class", "meio2")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
                     .style("fill", barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
@@ -692,9 +786,16 @@ BarChart.strategies = {
                 let maxh4 = barchart.boxHeightBreak3 - barchart.boxHeightBreak4;
                 g.selectAll("path.meio3")
                     .data(barchart.d)
-                    .enter()
-                    .append("path")
-                    .attr("class", "meio3")
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("path")
+                                .attr("class", "meio3")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
                     .style("fill", barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
@@ -706,9 +807,16 @@ BarChart.strategies = {
 
                 g.selectAll("path.upper")
                     .data(barchart.d)
-                    .enter()
-                    .append("path")
-                    .attr("class", "upper")
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("path")
+                                .attr("class", "upper")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
                     .style("fill", barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
@@ -719,10 +827,26 @@ BarChart.strategies = {
 
                     });
 
-                // Axis
+                // Remove os elementos existentes
+                g.selectAll("g.y.loweraxis, g.y.meio1, g.y.meio2, g.y.meio3, g.y.upper, g.Axisright.meio1, g.Axisright.meio2, g.Axisright.meio3, g.Axisright.meio4, g.Axisright.meio5, g.Line1, g.Line2, g.Line3, g.Line4, g.Line5").remove();
+
+
+                // Axis          
                 g.append("g")
                     .attr("class", "y loweraxis")
-                    .call(d3.axisLeft(barchart.y[key]).ticks(3));
+                    .call(d3.axisLeft(barchart.y[key]).ticks(7).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
+                    .each(function (d) { // Para cada marca de tick
+                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
+                            .append("line") // Adiciona uma linha
+                            .attr("class", "grid-line") // Define a classe para estilização
+                            .attr("stroke", "black")
+                            .attr("x1", 0) // Posição inicial x da linha
+                            .attr("x2", barchart.innerWidth) // Posição final x da linha
+                            .attr("y1", barchart.ybreak[key](d[key])) // Posição inicial y da linha
+                            .attr("y2", barchart.ybreak[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
+                    });
+
 
                 g.append("path")
                     .attr("stroke", "black")
@@ -759,7 +883,19 @@ BarChart.strategies = {
 
                 g.append("g")
                     .attr("class", "y upper")
-                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(6));
+                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(4).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
+                    .each(function (d) { // Para cada marca de tick
+                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
+                            .append("line") // Adiciona uma linha
+                            .attr("class", "grid-line") // Define a classe para estilização
+                            .attr("stroke", "black")
+                            .attr("x1", 0) // Posição inicial x da linha
+                            .attr("x2", barchart.innerWidth) // Posição final x da linha
+                            .attr("y1", barchart.ybreak4[key](d[key])) // Posição inicial y da linha
+                            .attr("y2", barchart.ybreak4[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
+                    });
+
 
                 //Line rigth
                 g.append("path")
@@ -774,7 +910,7 @@ BarChart.strategies = {
 
                 g.append("path")
                     .attr("stroke", "black")
-                    .attr("class", "Axisrigth.meio1")
+                    .attr("class", "Axisrigth.meio2")
                     .attr("d", (d, i) => {
                         let x = barchart.innerWidth;
                         let width = barchart.x.bandwidth();
@@ -786,7 +922,7 @@ BarChart.strategies = {
 
                 g.append("path")
                     .attr("stroke", "black")
-                    .attr("class", "Axis rigth.meio2")
+                    .attr("class", "Axis rigth.meio3")
                     .attr("d", (d, i) => {
                         let width = barchart.x.bandwidth();
                         let x = barchart.innerWidth - (width * barchart.z);
@@ -797,7 +933,7 @@ BarChart.strategies = {
 
                 g.append("path")
                     .attr("stroke", "black")
-                    .attr("class", "Axis rigth.meio3")
+                    .attr("class", "Axis rigth.meio4")
                     .attr("d", (d, i) => {
                         let width = barchart.x.bandwidth();
                         let x = barchart.innerWidth - (width * barchart.z);
@@ -809,7 +945,7 @@ BarChart.strategies = {
 
                 g.append("path")
                     .attr("stroke", "black")
-                    .attr("class", "Axisrigth.meio1")
+                    .attr("class", "Axisrigth.meio5")
                     .attr("d", (d, i) => {
                         let x = barchart.innerWidth;
                         let y = barchart.boxHeightBreak4;
@@ -818,20 +954,7 @@ BarChart.strategies = {
                     });
 
 
-                // Texture
-                for (let j = 1; j < 2; j++) {
-                    g.append("path")
-                        .attr("stroke", "black")
-                        .attr("class", "Line1")
-                        .attr("d", (d, i) => {
-                            let x = 0;
-                            let x2 = barchart.innerWidth;
-                            let y1 = barchart.boxHeight + j * (barchart.boxHeightBreak - barchart.boxHeight) / 2;
-                            let y2 = barchart.boxHeightBreak - j * (barchart.boxHeightBreak - barchart.boxHeight) / 2;
-                            return `M${x},${y1} L${x2},${y2}`;
-                        });
-                }
-
+                //textura
                 let xbreak = 0;
                 for (let j = 0; j < 4; j++) {
                     g.append("path")
@@ -874,21 +997,7 @@ BarChart.strategies = {
                         });
                     xbreak3 = xbreak3 - ((barchart.x.bandwidth() * barchart.z)) / 3
                 }
-
-                for (j = 1; j < 5; j++) {
-                    g.append("path")
-                        .attr("stroke", "black")
-                        .attr("class", "Line5")
-                        .attr("d", (d, i) => {
-                            let x = 0;
-                            let x2 = barchart.innerWidth;
-                            let y = barchart.boxHeightBreak4 + j * ((0 - barchart.boxHeightBreak4) / 5);
-                            return `M${x},${y} L${x2},${y} Z`;
-                        });
-                }
-
             });
-
         }
     },
 }

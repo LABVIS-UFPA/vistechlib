@@ -4,7 +4,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 500px; /* ou o tamanho desejado */
-    height: 500px; /* ou o tamanho desejado */
+    height: 650px; /* ou o tamanho desejado */
     background-color: #e0dfdf; /* apenas para visualização */
     text-align: center;
   }
@@ -23,7 +23,8 @@
 }
 
 .likert{
-    margin-top: 20px;    
+    margin-top: 20px;
+    margin-bottom: 35px;    
 }
 
 

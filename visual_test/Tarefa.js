@@ -1,10 +1,11 @@
 class Tarefa {
     constructor() {
         this.perguntas = [
-            "Selecione a menor barra?",
+            // "Selecione a menor barra?",
             "Selecione a segunda menor barra?",
             "Selecione a segunda maior barra? ",
-            "Liste as quatro barras com menores valores?"
+            "Selecione a barra que é a mediana?",
+            "Selecione a barra com o valor"
         ];
         // this.perguntasSelecionadas = [];
         this.perguntaContainer = document.getElementById("perguntaContainer");
@@ -18,7 +19,7 @@ class Tarefa {
 
         this.perg = '';
         this.pergId = '';
-        this.tempoLimite = 20000; // Tempo limite padrão em milissegundos
+        this.tempoLimite = 30000; // Tempo limite padrão em milissegundos
         // this.timerId = null; // Variável para armazenar o ID do temporizador
 
 
@@ -69,7 +70,7 @@ class Tarefa {
 
     // }
 
-    exibirProximaPergunta(p) {
+    exibirProximaPergunta(p, valorbarra) {
         if (p == 1) {
             var perguntaSelecionada = this.perguntas[0];
             this.perg = perguntaSelecionada
@@ -98,7 +99,7 @@ class Tarefa {
             var perguntaSelecionada = this.perguntas[3];
             this.perg = perguntaSelecionada
             this.pergId = this.id_pergunta(perguntaSelecionada);
-            this.perguntaContainer.textContent = perguntaSelecionada;
+            this.perguntaContainer.textContent = perguntaSelecionada + " " + valorbarra + " ?"; //valorbarra é valor associado a barra para a pergunta 4
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
             this.pararTemporizador(); // Stop the timer            
             this.iniciarTemporizador(); // Start a new timer for the next round of questions
@@ -108,26 +109,28 @@ class Tarefa {
 
     }
 
-    reset(p) {
+    reset(p, valorbarra) {
         // this.perguntasSelecionadas = [];
         this.perguntaContainer.style.display = "block";
         this.proximoBotao.style.display = "block";
         this.fimPerguntas.style.display = "none";
         this.campoResposta.style.display = "flex";
         // this.temp_visualizacao = 0;
-        this.exibirProximaPergunta(p);
+        this.exibirProximaPergunta(p, valorbarra);
 
     }
 
-    // e passado no  exibir pergunta o que rotorna o id da pergunta
+    // e passado no  exibir pergunta o que retorna o id da pergunta
     id_pergunta(pergunta) {
-        if (pergunta === "Selecione a menor barra?") {
+        // if (pergunta === "Selecione a menor barra?") {
+        //     return 1;
+        if (pergunta === "Selecione a segunda menor barra?") {
             return 1;
-        } else if (pergunta === "Selecione a segunda menor barra?") {
-            return 2;
         } else if (pergunta === "Selecione a segunda maior barra? ") {
-            return 3;
-        } else if (pergunta === "Liste as quatro barras com menores valores?") {
+            return 2;
+        } else if (pergunta === "Selecione a barra que é a mediana?") {
+            return 3
+        } else if (pergunta === "Selecione a barra com o valor") {
             return 4;
         }
     }
@@ -146,7 +149,7 @@ class Tarefa {
     // Método para iniciar o temporizador
     iniciarTemporizador() {
         this.timerId = setTimeout(() => {
-            this.enviarpergunta(); // Aciona o clique no botão próximo quando o temporizador expira
+            this.proximoBotao.click(); // Aciona o clique no botão próximo quando o temporizador expira
         }, this.tempoLimite);
     }
 

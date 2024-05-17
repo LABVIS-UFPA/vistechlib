@@ -29,8 +29,10 @@
                     </select>
                     <input type="text" id="grauEscolaridade" class="input-largo" placeholder="Grau de escolaridade"><br>
                     <input type="text" id="curso" class="input-largo" placeholder="Curso"><br>
+                    <input type="text" id="visualizacao" class="input-largo" placeholder="Já fez disciplina de visualização de dados?"><br>
+                    <input type="text" id="conhece" class="input-largo" placeholder="Conhece o gráfico de barras?"><br>
                     <!-- Questionario dia do cara -->
-                    <label>Por favor, responda a seguinte pergunta:</label>
+                    <label>Por favor, responda as seguintes perguntas:</label>
                     <div class="likert">
                         <label>Como está seu dia ?: <br><br></label>
                         <label for="likert1">Mutio ruim</label>
@@ -41,10 +43,30 @@
                         <input type="radio" name="likert1" class="input-likert" value="5">
                         <label for="likert1">Muito bom</label>
                     </div>
+                    <div class="likert">
+                        <label>Como está seu nivel de estresse mental ?: <br><br></label>
+                        <label for="likert2">Mutio tranquilo</label>
+                        <input type="radio" id="likert2" class="input-likert" name="likert2" value="1">
+                        <input type="radio" name="likert2" class="input-likert" value="2">
+                        <input type="radio" name="likert2" class="input-likert" value="3">
+                        <input type="radio" name="likert2" class="input-likert" value="4">
+                        <input type="radio" name="likert2" class="input-likert" value="5">
+                        <label for="likert2">Muito extressado</label>
+                    </div>
+                    <div class="likert">
+                        <label>Como está seu nivel de cansaço físico ?: <br><br></label>
+                        <label for="likert3">Mutio cansado</label>
+                        <input type="radio" id="likert3" class="input-likert" name="likert3" value="1">
+                        <input type="radio" name="likert3" class="input-likert" value="2">
+                        <input type="radio" name="likert3" class="input-likert" value="3">
+                        <input type="radio" name="likert3" class="input-likert" value="4">
+                        <input type="radio" name="likert3" class="input-likert" value="5">
+                        <label for="likert3">Muito descansado</label>
+                    </div>
                 </div>
             </form>
             <button type="button" onclick="capturarDados(); irParaPagina2();"
-                style="margin-top: 20px;">Concluir</button>
+                style="margin-top: 10px;">Concluir</button>
 
         </div>
     </div>
@@ -66,16 +88,26 @@
             var idade = document.getElementById("idade").value;
             var grauEscolaridade = document.getElementById("grauEscolaridade").value;
             var curso = document.getElementById("curso").value;
+            var vizualizacao = document.getElementById("visualizacao").value;
+            var conhece = document.getElementById("conhece").value;
             // Capturar o valor selecionado
             var valorlikert = document.querySelector('input[name="likert1"]:checked').value;
+            // Capturar o valor selecionado
+            var valorlikert2 = document.querySelector('input[name="likert2"]:checked').value;
+            // Capturar o valor selecionado
+            var valorlikert3 = document.querySelector('input[name="likert3"]:checked').value;
             // Armazenar dados no localStorage
             localStorage.setItem("id", id);
             // localStorage.setItem("email", email);
             localStorage.setItem("idade", idade);
             localStorage.setItem("grauEscolaridade", grauEscolaridade);
             localStorage.setItem("curso", curso);
+            localStorage.setItem("visualizacao", visualizacao);
+            localStorage.setItem("conhece", conhece);
             // Armazenar o valor no localStorage
             localStorage.setItem("respostaLikert", valorlikert);
+            localStorage.setItem("respostaLikert2", valorlikert2);
+            localStorage.setItem("respostaLikert3", valorlikert3);
         }
         function irParaPagina2() {
             // Redirecionar para a página 2
