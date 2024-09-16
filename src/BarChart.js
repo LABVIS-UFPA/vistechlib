@@ -40,8 +40,8 @@ class BarChart extends Visualization {
         this.name = "BarChart";
         this.x = d3.scaleBand().paddingInner(0.1).paddingOuter(0.1);
 
-        this.settings.corte = corte;
-        this.settings.cortefinal = cortefinal;
+        this.settings.corte = 11000;
+        this.settings.cortefinal = 75412.47462722816;
 
     }
 
@@ -300,7 +300,7 @@ class BarChart extends Visualization {
 BarChart.strategies = {
     "default": {
         draw: (barchart) => {
-            
+
             barchart.foreground.selectAll("g.dataGroup").each(function (key) {
                 let g = d3.select(this);
                 g.selectAll(".data")
@@ -997,6 +997,166 @@ BarChart.strategies = {
                         });
                     xbreak3 = xbreak3 - ((barchart.x.bandwidth() * barchart.z)) / 3
                 }
+            });
+        }
+    }, "default_div": {
+        data: (barchart) => {
+
+            barchart.ybreak = {};
+            barchart.ybreak2 = {};
+            barchart.ybreak3 = {};
+            barchart.ybreak4 = {};
+            barchart.z = barchart.settings.z;
+
+            let corte = barchart.settings.corte;
+            let cortefinal = barchart.settings.cortefinal;
+            let diferença = cortefinal - corte;
+
+            let corte2 = corte + (diferença * 40) / 100
+
+            let corte3 = corte2 + (diferença * 20) / 100;
+
+            for (let k of barchart.keys_filter) {
+                let maximo = barchart.domain[k][1];
+
+
+
+
+                barchart.breakPoint = 0.3;
+                barchart.breakPoint2 = 0.96;
+                barchart.breakPoint3 = 0.88;
+                barchart.breakPoint4 = 0.95;
+
+
+
+                barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint;
+                barchart.boxHeightBreak2 = barchart.boxHeightBreak * barchart.breakPoint2;
+                barchart.boxHeightBreak3 = barchart.boxHeightBreak2 * barchart.breakPoint3;
+                barchart.boxHeightBreak4 = barchart.boxHeightBreak3 * barchart.breakPoint4;
+
+
+
+                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
+                barchart.ybreak[k] = d3.scaleLinear().domain([corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
+                barchart.ybreak2[k] = d3.scaleLinear().domain([corte2, corte3]).range([barchart.boxHeightBreak2, barchart.boxHeightBreak3]);
+                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
+                barchart.ybreak4[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
+
+            }
+        },
+        draw: (barchart) => {
+
+            barchart.foreground.selectAll("g.dataGroup").each(function (key) {
+                let maxh = barchart.boxHeight - barchart.boxHeightBreak;
+                //let g = d3.select(this);
+
+                // Selecione a div "upper" no HTML para inserir o gráfico SVG
+                let container1 = document.getElementById("upper");
+
+                // Adicione o SVG dentro da div "upper"
+                let svg = d3.select(container1)
+                    .style("overflow", "hidden")  // Para esconder o excesso, se necessário
+                    .append("svg")
+                    .attr("width", barchart.settings.innerWidth)  // Defina a largura do SVG
+                    .attr("height", maxh);  // Defina a altura do SVG
+
+
+                svg.selectAll("rect.lower")
+                    .data(barchart.d)
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("rect")
+                                .attr("class", "lower")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
+                    .attr("x", (d, i) => barchart.x(i))
+                    .attr("y", (d) => Math.max(barchart.y[key](d[key]), barchart.boxHeightBreak))
+                    .attr("width", barchart.x.bandwidth())
+                    .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
+                    .style("fill", barchart.settings.color);
+
+
+                let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
+                let z = 2;
+                let di = 5;
+                let f = 30;
+                g.selectAll("rect.meio1")
+                    .data(barchart.d)
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("rect")
+                                .attr("class", "meio1")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
+                    .style("fill", barchart.settings.color)
+                    .attr("x", (d, i) => barchart.x(i))
+                    .attr("y", (d) => Math.max(barchart.ybreak[key](d[key]), barchart.boxHeightBreak2))
+                    .attr("width", (d) => barchart.x.bandwidth())
+                    .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), maxh2), 0));
+
+                let maxh3 = barchart.boxHeightBreak2 - barchart.boxHeightBreak3;
+                g.selectAll("rect.meio2")
+                    .data(barchart.d)
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("rect")
+                                .attr("class", "meio2")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
+                    .style("fill", barchart.settings.color)
+                    .attr("x", (d, i) => barchart.x(i))
+                    .attr("y", (d) => Math.max(barchart.ybreak2[key](d[key]), barchart.boxHeightBreak3))
+                    .attr("width", (d) => barchart.x.bandwidth())
+                    .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak2 - barchart.ybreak2[key](d[key]), maxh3), 0));
+
+                let maxh4 = barchart.boxHeightBreak3 - barchart.boxHeightBreak4;
+                g.selectAll("rect.meio3")
+                    .data(barchart.d)
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("rect")
+                                .attr("class", "meio3")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
+                    .style("fill", barchart.settings.color)
+                    .attr("x", (d, i) => barchart.x(i))
+                    .attr("y", (d) => Math.max(barchart.ybreak3[key](d[key]), barchart.boxHeightBreak4))
+                    .attr("width", (d) => barchart.x.bandwidth())
+                    .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak3 - barchart.ybreak3[key](d[key]), maxh4), 0));
+
+                g.selectAll("rect.upper")
+                    .data(barchart.d)
+                    .join(
+                        enter => {
+                            let enter_result = enter.append("rect")
+                                .attr("class", "upper")
+                                .style("stroke", "none")
+                                .attr("data-index", (d, i) => i);
+                            barchart._bindDataMouseEvents(enter_result);
+                            return enter_result;
+                        }
+                    )
+                    .style("fill", barchart.settings.color)
+                    .attr("x", (d, i) => barchart.x(i))
+                    .attr("y", (d) => barchart.ybreak4[key](d[key]))
+                    .attr("width", barchart.x.bandwidth())
+                    .attr("height", (d) => Math.max(barchart.boxHeightBreak4 - barchart.ybreak4[key](d[key]), 0));
             });
         }
     },

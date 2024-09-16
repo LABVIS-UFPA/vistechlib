@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="d3.v7.min.js"></script>
+    <script src="moment.min.js"></script>
+    <script src="require.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="../src/Visualization.js"></script>
+    <script src="../src/BarChart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let layout = document.querySelector("#chart");
+
+            let config = {
+                drawStrategy: "default_div"
+            };
+
+            let barchart = new BarChart(layout, config);
+
+            this.base4 = [
+                { valor: 2086.788469112473 },
+                { valor: 77412.47462722816 },
+                { valor: 798.87765686746255 },
+                { valor: 85685.42065542887 },
+                { valor: 875.6592439886408 },
+                { valor: 680.341495589178564 },
+                { valor: 555.6272574356251 },
+                { valor: 9878.030571097508 },
+                { valor: 420.07647618035685 },
+                { valor: 10858.416405323893 },
+                { valor: 634.4914334661673 },
+                { valor: 302.267786914083707 },
+                { valor: 396.77761749210134 },
+                { valor: 7398.659925373594 },
+                { valor: 5661.633142901761 }
+            ];
+            barchart.data(base4);
+            barchart.redraw();
+
+        });
+
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body>
+    <header class="bg-slate-200 p-2 ">
+        <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
+    </header>
+
+    <main>
+        <h1 class="p-4">Gráfico de barras otimizado</h1>
+        <p class="p-4">Mitigando problemas de Outliers.</p>
+
+
+
+        <div id="chart" style="height: 600px;">
+            <div id="upper" class="child" style="height: 600px;"></div>
+            <div id="meio3" class="child"></div>
+            <div id="meio2" class="child"></div>
+            <div id="meio1" class="child"></div>
+            <div id="lower" class="child"></div>
+        </div>
+
+
+
+
+
+    </main>
+</body>
+
+</html>
