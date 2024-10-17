@@ -1079,9 +1079,6 @@ BarChart.strategies = {
                     .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
                     .style("fill", barchart.settings.color)
                     
-                
-                 
-
 
                 let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
                 let z = 2;
@@ -1104,12 +1101,6 @@ BarChart.strategies = {
                     .attr("y", (d) => Math.max(barchart.ybreak[key](d[key]), barchart.boxHeightBreak2))
                     .attr("width", (d) => barchart.x.bandwidth())
                     .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), maxh2), 0));
-
-                
-
-
-
-
 
                 let maxh3 = barchart.boxHeightBreak2 - barchart.boxHeightBreak3;
                 g.selectAll("rect.meio2")
@@ -1149,9 +1140,6 @@ BarChart.strategies = {
                     .attr("width", (d) => barchart.x.bandwidth())
                     .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak3 - barchart.ybreak3[key](d[key]), maxh4), 0));
           
-
-
-
                 g.selectAll("rect.upper")
                     .data(barchart.d)
                     .join(
@@ -1170,51 +1158,51 @@ BarChart.strategies = {
                     .attr("width", barchart.x.bandwidth())
                     .attr("height", (d) => Math.max(barchart.boxHeightBreak4 - barchart.ybreak4[key](d[key]), 0));
 
-                    const parts = {
-                        0: d3.selectAll("rect.upper"), 
-                        1: d3.selectAll("rect.meio3"), 
-                        2: d3.selectAll("rect.meio2"), 
-                        3: d3.selectAll("rect.meio1"), 
-                        4: d3.selectAll("rect.lower"), 
-                    };
+                const parts = {
+                    0: d3.selectAll("rect.upper"), 
+                    1: d3.selectAll("rect.meio3"), 
+                    2: d3.selectAll("rect.meio2"), 
+                    3: d3.selectAll("rect.meio1"), 
+                    4: d3.selectAll("rect.lower"), 
+                };
 
-                    const baseSVG = document.querySelector("#chart > svg")
-                    baseSVG.parentNode.removeChild(baseSVG)
+                const baseSVG = document.querySelector("#chart > svg")
+                baseSVG.parentNode.removeChild(baseSVG)
 
-                    for (part in parts){
-                        const classe = parts[part].node().classList.value
-                        const raiz = document.querySelector(`#${classe} svg`)
-                        parts[part].nodes().forEach(element => {
-                           const divFilho = element;
-                           divFilho.setAttribute('y', "0")
-                           if(Math.ceil(divFilho.attributes.height.value)) { raiz.parentElement.style.height = Math.ceil(divFilho.attributes.height.value) + "px" }
-                           
-                           raiz.appendChild(divFilho);
-                       });
-                    }                               
-                    
-                    const m3 = document.querySelector("#meio3");
-                    m3.style.transform = `translate3d(0px, ${m3.clientHeight/2}px, 0px) rotate3d(1, 0, 0, 90deg) translate3d(0px, -${m3.clientHeight/2}px, 0px)`
-
-                    const m2 = document.querySelector("#meio2");
-                    m2.style.transform = `translate3d(0px, 0px, -${m3.clientHeight}px)`
-                    
-                    const m1 = document.querySelector("#meio1");
-                    m1.style.transform = `translate3d(0px, -${m1.clientHeight/2}px, 0px) rotate3d(1, 0, 0, -90deg) translate3d(0px, ${m1.clientHeight/2}px, 0px)`
-
-                    const upper = document.querySelector("#upper");
-                    upper.style.transform = `rotateX(180deg) translate3d(0px, -${m3.clientHeight}px, 0px)`
-
-                    const lower = document.querySelector("#lower");
-                    lower.style.transform = `rotateX(180deg) translate3d(0px, ${m1.clientHeight}px, 0px)`
-
-                    const slider = document.querySelector('#slider');
-                    const myDiv = document.getElementById('chart');
-
-                    slider.addEventListener('input', () => {
-                        const rotateXValue = slider.value;
-                        myDiv.style.transform = `perspective(231px) rotateY(${rotateXValue}deg) rotateX(0deg) translateY(100px)`;
+                for (part in parts){
+                    const classe = parts[part].node().classList.value
+                    const raiz = document.querySelector(`#${classe} svg`)
+                    parts[part].nodes().forEach(element => {
+                        const divFilho = element;
+                        divFilho.setAttribute('y', "0")
+                        if(Math.ceil(divFilho.attributes.height.value)) { raiz.parentElement.style.height = Math.ceil(divFilho.attributes.height.value) + "px" }
+                        
+                        raiz.appendChild(divFilho);
                     });
+                }                               
+                
+                const m3 = document.querySelector("#meio3");
+                m3.style.transform = `translate3d(0px, ${m3.clientHeight/2}px, 0px) rotate3d(1, 0, 0, 90deg) translate3d(0px, -${m3.clientHeight/2}px, 0px)`
+
+                const m2 = document.querySelector("#meio2");
+                m2.style.transform = `translate3d(0px, 0px, -${m3.clientHeight}px)`
+                
+                const m1 = document.querySelector("#meio1");
+                m1.style.transform = `translate3d(0px, -${m1.clientHeight/2}px, 0px) rotate3d(1, 0, 0, -90deg) translate3d(0px, ${m1.clientHeight/2}px, 0px)`
+
+                const upper = document.querySelector("#upper");
+                upper.style.transform = `rotateX(180deg) translate3d(0px, -${m3.clientHeight}px, 0px)`
+
+                const lower = document.querySelector("#lower");
+                lower.style.transform = `rotateX(180deg) translate3d(0px, ${m1.clientHeight}px, 0px)`
+
+                const slider = document.querySelector('#slider');
+                const myDiv = document.getElementById('chart');
+
+                slider.addEventListener('input', () => {
+                    const rotateXValue = slider.value;
+                    myDiv.style.transform = `perspective(231px) rotateY(${rotateXValue}deg) rotateX(0deg) translateY(100px)`;
+                });
 
             });
 

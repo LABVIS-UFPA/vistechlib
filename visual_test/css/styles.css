@@ -5,35 +5,32 @@
     top: -1000px;
     -webkit-transform-style: preserve-3d;
     -webkit-transform:perspective(231px) rotateY(0deg) rotateX(0deg) translateY(100px);
-    transition: transform 0.2s ease-in-out; /* Anima a rotação */
+    transition: transform 0.2s ease-in-out;
 }
 
 #upper {
     -webkit-transform: rotateX(180deg) translate3d(-0, 0px, 0px);
-    background-color: red;
+ 
     opacity: .85;
 }
 
 #meio3 {
     -webkit-transform: translate3d(0px, 0px, 0px) rotate3d(0, 0, 0, 0deg) translate3d(0px, 0px, 0px)  ;
-    background-color: aqua;
+   
     opacity: .85;
 }
 
 #meio2 {
     -webkit-transform:  translate3d(0px, -0px, -0px);
-    background-color: yellow;
 }
 
 #meio1 {
     -webkit-transform:  translate3d(0px, -0, 0px) rotate3d(1, 0, 0, -0deg) translate3d(0px, 0, 0px) ;
-    background-color: aqua;
     opacity: .85;
 }
 
 #lower {
     -webkit-transform: rotateX(180deg) translate3d(0, 0, 0px);
-    background-color: red;
     opacity: .85;
 }
 
