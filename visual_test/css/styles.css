@@ -1,14 +1,14 @@
 #chart {
     overflow: visible !important;
-    position: absolute;
-    width: 100%;
-    top: -1000px;
+    position: relative;
+    width: 80%;
+    margin: 0 auto;
     -webkit-transform-style: preserve-3d;
     -webkit-transform:perspective(231px) rotateY(0deg) rotateX(0deg) translateY(100px);
     transition: transform 0.2s ease-in-out;
 }
 
-#upper {
+/* #upper {
     -webkit-transform: rotateX(180deg) translate3d(-0, 0px, 0px);
  
     opacity: .85;
@@ -21,7 +21,7 @@
 }
 
 #meio2 {
-    -webkit-transform:  translate3d(0px, -0px, -0px);
+    -webkit-transform:  translate3d(0px, -0px, -0px) rotateY(180deg);
 }
 
 #meio1 {
@@ -32,7 +32,7 @@
 #lower {
     -webkit-transform: rotateX(180deg) translate3d(0, 0, 0px);
     opacity: .85;
-}
+} */
 
 svg{
     border: 1px solid #000;
