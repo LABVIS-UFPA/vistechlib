@@ -730,9 +730,6 @@ BarChart.strategies = {
                 barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
                 let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
-                let z = 2;
-                let di = 5;
-                let f = 30;
                 g.selectAll("path.meio1")
                     .data(barchart.d)
                     .join(
@@ -1213,43 +1210,24 @@ BarChart.strategies = {
             let cortefinal = barchart.settings.cortefinal;
             let diferença = cortefinal - corte;
 
-            let corte2 = corte + (diferença * 40) / 100
-
-            let corte3 = corte2 + (diferença * 20) / 100;
+            let corte2 = corte + (diferença * 37) / 100;
+            let corte3 = corte2 + (diferença *37) / 100;
 
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
 
+                barchart.breakPoint = 5;
 
-                barchart.breakPoint = barchart.settings.breakPoint;
-                barchart.breakPoint2 = barchart.settings.breakPoint2;
-                barchart.breakPoint3 = barchart.settings.breakPoint3;
-                barchart.breakPoint4 = barchart.settings.breakPoint4;
-
-                barchart.breakPoint = 0.3;
-                // barchart.breakPoint2 = 0.92;
-                // barchart.breakPoint3 = 0.91;
-                // barchart.breakPoint4 = 0.91;
-
-                // let corte1 = 10;
-                // let corte2 = 100;
-                // let corte3 = 130;
-                // let corte4 = 230;
-
-
-                barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint;
-                barchart.boxHeightBreak2 = barchart.boxHeightBreak * barchart.breakPoint2;
-                barchart.boxHeightBreak3 = barchart.boxHeightBreak2 * barchart.breakPoint3;
-                barchart.boxHeightBreak4 = barchart.boxHeightBreak3 * barchart.breakPoint4;
-
-
+                barchart.boxHeightBreak = barchart.boxHeight / barchart.breakPoint * 4;
+                barchart.boxHeightBreak2 = barchart.boxHeight / barchart.breakPoint * 3 ;
+                barchart.boxHeightBreak3 = barchart.boxHeight / barchart.breakPoint * 2 ;
+                barchart.boxHeightBreak4 = barchart.boxHeight / barchart.breakPoint ;
 
                 barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
                 barchart.ybreak[k] = d3.scaleLinear().domain([corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
                 barchart.ybreak2[k] = d3.scaleLinear().domain([corte2, corte3]).range([barchart.boxHeightBreak2, barchart.boxHeightBreak3]);
                 barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
                 barchart.ybreak4[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
-
             }
         },
         draw: (barchart) => {
@@ -1299,10 +1277,6 @@ BarChart.strategies = {
                         return `M${x},${y} L${x + width},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
                     })
               
-
-
-
-
                 let maxh3 = barchart.boxHeightBreak2 - barchart.boxHeightBreak3;
                 g.selectAll("path.meio2")
                     .data(barchart.d)
@@ -1380,7 +1354,7 @@ BarChart.strategies = {
                 // Axis          
                 g.append("g")
                     .attr("class", "y loweraxis")
-                    .call(d3.axisLeft(barchart.y[key]).ticks(7).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .call(d3.axisLeft(barchart.y[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
                     .selectAll("text") // Seleciona todos os elementos de texto do eixo y
                     .each(function (d) { // Para cada marca de tick
                         d3.select(this.parentNode) // Seleciona o pai (o elemento g)
@@ -1393,43 +1367,57 @@ BarChart.strategies = {
                             .attr("y2", barchart.ybreak[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
                     });
 
-
-                g.append("path")
-                    .attr("stroke", "black")
+                g.append("g")
                     .attr("class", "y meio1axis")
-                    .attr("d", (d, i) => {
-                        let x = 0;
-                        let y = barchart.boxHeightBreak;
-                        let heigth = barchart.boxHeightBreak2;
-                        let width = barchart.x.bandwidth();
-                        return `M${x},${y} L${x + (width * barchart.z)},${heigth} Z`;
+                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
+                    .each(function (d) { // Para cada marca de tick
+                        d3.select(this).attr('style', "display:none;")
+                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
+                            .append("line") // Adiciona uma linha
+                            .attr("class", "grid-line") // Define a classe para estilização
+                            .attr("stroke", "black")
+                            .attr("x1", 0) // Posição inicial x da linha
+                            .attr("x2", barchart.innerWidth) // Posição final x da linha
+                            .attr("y1", barchart.ybreak[key](d[key])) // Posição inicial y da linha
+                            .attr("y2", barchart.ybreak[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
                     });
 
-                g.append("path")
-                    .attr("stroke", "black")
+                
+                g.append("g")
                     .attr("class", "y meio2axis")
-                    .attr("d", (d, i) => {
-                        let x = 0;
-                        let y = barchart.boxHeightBreak2;
-                        let heigth = barchart.boxHeightBreak3;
-                        let width = barchart.x.bandwidth();
-                        return `M${x + (width * barchart.z)},${y} L${x + (width * barchart.z)},${heigth} Z`;
+                    .call(d3.axisLeft(barchart.ybreak2[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
+                    .each(function (d) { // Para cada marca de tick
+                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
+                            .append("line") // Adiciona uma linha
+                            .attr("class", "grid-line") // Define a classe para estilização
+                            .attr("stroke", "black")
+                            .attr("x1", 0) // Posição inicial x da linha
+                            .attr("x2", barchart.innerWidth) // Posição final x da linha
+                            .attr("y1", barchart.ybreak2[key](d[key])) // Posição inicial y da linha
+                            .attr("y2", barchart.ybreak2[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
                     });
 
-                g.append("path")
-                    .attr("stroke", "black")
+                g.append("g")
                     .attr("class", "y meio3axis")
-                    .attr("d", (d, i) => {
-                        let x = 0;
-                        let y = barchart.boxHeightBreak3;
-                        let heigth = barchart.boxHeightBreak4;
-                        let width = barchart.x.bandwidth();
-                        return `M${x + (width * barchart.z)},${y} L${x},${heigth} Z`;
+                    .call(d3.axisLeft(barchart.ybreak3[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
+                    .each(function (d) { // Para cada marca de tick
+                        d3.select(this).attr('style', "display:none;")
+                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
+                            .append("line") // Adiciona uma linha
+                            .attr("class", "grid-line") // Define a classe para estilização
+                            .attr("stroke", "black")
+                            .attr("x1", 0) // Posição inicial x da linha
+                            .attr("x2", barchart.innerWidth) // Posição final x da linha
+                            .attr("y1", barchart.ybreak3[key](d[key])) // Posição inicial y da linha
+                            .attr("y2", barchart.ybreak3[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
                     });
 
                 g.append("g")
                     .attr("class", "y upperaxis")
-                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(4).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
                     .selectAll("text") // Seleciona todos os elementos de texto do eixo y
                     .each(function (d) { // Para cada marca de tick
                         d3.select(this.parentNode) // Seleciona o pai (o elemento g)
@@ -1442,120 +1430,23 @@ BarChart.strategies = {
                             .attr("y2", barchart.ybreak4[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
                     });
 
-
-                //Line rigth
-                g.append("path")
-                    .attr("stroke", "black")
-                    .attr("class", "Axisrigth.meio1")
-                    .attr("d", (d, i) => {
-                        let x = barchart.innerWidth;
-                        let y = barchart.boxHeight;
-                        let heigth = barchart.boxHeightBreak;
-                        return `M${x},${y} L${x},${heigth} Z`;
-                    });
-
-                g.append("path")
-                    .attr("stroke", "black")
-                    .attr("class", "Axisrigth.meio2")
-                    .attr("d", (d, i) => {
-                        let x = barchart.innerWidth;
-                        let width = barchart.x.bandwidth();
-                        let x2 = barchart.innerWidth - ((width * barchart.z));
-                        let y = barchart.boxHeightBreak;
-                        let heigth = barchart.boxHeightBreak2;
-                        return `M${x},${y} L${x2},${heigth} Z`;
-                    });
-
-                g.append("path")
-                    .attr("stroke", "black")
-                    .attr("class", "Axis rigth.meio3")
-                    .attr("d", (d, i) => {
-                        let width = barchart.x.bandwidth();
-                        let x = barchart.innerWidth - (width * barchart.z);
-                        let y = barchart.boxHeightBreak2;
-                        let heigth = barchart.boxHeightBreak3;
-                        return `M${x},${y} L${x},${heigth} Z`;
-                    });
-
-                g.append("path")
-                    .attr("stroke", "black")
-                    .attr("class", "Axis rigth.meio4")
-                    .attr("d", (d, i) => {
-                        let width = barchart.x.bandwidth();
-                        let x = barchart.innerWidth - (width * barchart.z);
-                        let x2 = barchart.innerWidth;
-                        let y = barchart.boxHeightBreak3;
-                        let heigth = barchart.boxHeightBreak4;
-                        return `M${x},${y} L${x2},${heigth} Z`;
-                    });
-
-                g.append("path")
-                    .attr("stroke", "black")
-                    .attr("class", "Axisrigth.meio5")
-                    .attr("d", (d, i) => {
-                        let x = barchart.innerWidth;
-                        let y = barchart.boxHeightBreak4;
-                        let heigth = 0;
-                        return `M${x},${y} L${x},${heigth} Z`;
-                    });
-
-
-                //textura
-                let xbreak = 0;
-                for (let j = 0; j < 4; j++) {
-                    g.append("path")
-                        .attr("stroke", "black")
-                        .attr("stroke-width", (1 - (j * 30.3) / 100))
-                        .attr("class", "Line2")
-                        .attr("d", (d, i) => {
-                            x2 = barchart.innerWidth - (xbreak)
-                            y = barchart.boxHeightBreak + j * ((barchart.boxHeightBreak2 - barchart.boxHeightBreak) / 3);
-                            return `M${xbreak},${y} L${x2},${y}`;
-                        });
-                    xbreak += (barchart.x.bandwidth() * barchart.z) / 3;
-                }
-
-
-                for (j = 1; j < 6; j++) {
-                    g.append("path")
-                        .attr("stroke", "black")
-                        .attr("stroke-width", (0.10))
-                        .attr("class", "Line3")
-                        .attr("d", (d, i) => {
-                            let x = (barchart.x.bandwidth() * barchart.z);
-                            let x2 = barchart.innerWidth - ((barchart.x.bandwidth() * barchart.z));
-                            let y = barchart.boxHeightBreak2 + j * ((barchart.boxHeightBreak3 - barchart.boxHeightBreak2) / 5);
-                            return `M${x},${y} L${x2},${y} Z`;
-                        })
-
-                }
-
-                let xbreak3 = (barchart.x.bandwidth() * barchart.z);
-                for (j = 0; j < 4; j++) {
-                    g.append("path")
-                        .attr("stroke", "black")
-                        .attr("stroke-width", (0.10 + (j * 27) / 100))
-                        .attr("class", "Line4")
-                        .attr("d", (d, i) => {
-                            let x2 = (barchart.innerWidth) - (xbreak3)
-                            let y = barchart.boxHeightBreak3 + j * ((barchart.boxHeightBreak4 - barchart.boxHeightBreak3) / 3);
-                            return `M${xbreak3},${y} L${x2},${y} Z`;
-                        });
-                    xbreak3 = xbreak3 - ((barchart.x.bandwidth() * barchart.z)) / 3
-                }
-
                 const parts = {
-                    0: d3.selectAll("path.upper"), 
-                    1: d3.selectAll("path.meio3"), 
-                    2: d3.selectAll("path.meio2"), 
-                    3: d3.selectAll("path.meio1"), 
-                    4: d3.selectAll("rect.lower"), 
+                    0: d3.selectAll("rect.lower"),
+                    1: d3.selectAll("path.meio2"), 
+                    9: d3.selectAll("path.meio3"), 
+                    6: d3.selectAll("path.upper"),
+                    20: d3.selectAll("path.meio1"), 
+                     
                 };
 
                 for (part in parts){
                     const classe = parts[part].node().classList.value
-                    const linha = document.querySelector(`.${classe}axis`)
+
                     const raiz = document.querySelector(`#${classe} svg`)
+                    const linhas = document.querySelectorAll(`.${classe}axis .tick`)
+                    let linhaYmax = linhas[0].transform.animVal[0].matrix.f
+
+
                     raiz.parentElement.attributes.height = 0
                     raiz.parentElement.style.height = 0
                     parts[part].nodes().forEach(element => {
@@ -1563,24 +1454,31 @@ BarChart.strategies = {
                         divFilho.setAttribute('y', "0")
                         if(Number(divFilho.attributes.height.value) >= Number(raiz.parentElement.attributes.height)) {raiz.parentElement.attributes.height = divFilho.attributes.height.value}
                         raiz.appendChild(divFilho);
-                    });
-                    raiz.appendChild(linha)
+                    });                  
+                    
+                    linhas.forEach(linha => {       
+                        let y = (linha.transform.animVal[0].matrix.f-linhaYmax -part )*-1
+                        linha.setAttribute("transform", `translate(0, ${y})`)
+                        linha.parentElement.setAttribute("transform", "translate(50, 0)")
+                        linha.childNodes[1].style.transform = 'rotateX(180deg)'
+                        linha.parentElement.firstChild.attributes.d.value = "M-7,115H0V0H-6";                      
+                    })                  
+                    
+                    raiz.appendChild(document.querySelector(`.${classe}axis`))
                     raiz.parentElement.style.height = raiz.parentElement.attributes.height + "px"
-                }          
+                    
+                    
+                }
 
-                
-
-              
                 const baseSVG = document.querySelector("#chart > svg")
                 baseSVG.parentNode.removeChild(baseSVG)
-                
                 
                 const m3 = document.querySelector("#meio3");
                 m3.style.transform = `translate3d(0px, ${m3.clientHeight/2}px, 0px) rotate3d(1, 0, 0, 90deg) translate3d(0px, -${m3.clientHeight/2}px, 0px)`
 
                 const m2 = document.querySelector("#meio2");
-                m2.style.transform = `translate3d(0px, 0px, -${m3.clientHeight}px)`
-                
+                m2.style.transform = `rotateX(180deg) translate3d(0px, 0px, ${m3.clientHeight}px)`
+
                 const m1 = document.querySelector("#meio1");
                 m1.style.transform = `translate3d(0px, -${m1.clientHeight/2}px, 0px) rotate3d(1, 0, 0, -90deg) translate3d(0px, ${m1.clientHeight/2}px, 0px)`
 
@@ -1593,9 +1491,10 @@ BarChart.strategies = {
                 const slider = document.querySelector('#slider');
                 const myDiv = document.getElementById('chart');
 
-                slider.addEventListener('input', () => {
+                slider.addEventListener('input', () => {            
                     const rotateXValue = slider.value;
-                    myDiv.style.transform = `perspective(231px) rotateY(${rotateXValue}deg) rotateX(0deg) translateY(100px)`;
+                    myDiv.style.transform = `perspective(231px) rotateY(${rotateXValue}deg)`;
+
                 });
             });
         }
