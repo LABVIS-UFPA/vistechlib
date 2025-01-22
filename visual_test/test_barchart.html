@@ -17,7 +17,7 @@
             let slider2 = document.getElementById('slider2');
             let slider3 = document.getElementById('slider3');
             var button = document.getElementById('read-more');
-            var closeButton = document.getElementById('fechar'); 
+            var closeButton = document.getElementById('fechar');
             var configuracaoDiv = document.getElementById('configuracao');
 
             let barchart = null; // Inicialmente, o gráfico é nulo
@@ -39,22 +39,32 @@
                 }
 
                 // Crie um novo BarChart com a nova estratégia
-                let config = { drawStrategy: 'default' };
-                barchart = new BarChart(layout, config);
+                let config = { drawStrategy: 'scale break perspective' };
+                let break_inicial = 480
+                let breakfinal = 2000
+                barchart = new BarChart(layout, config, break_inicial, breakfinal);
                 // Dados de exemplo
-                var valores = [
-                    { valor: 5 },
-                    { valor: 8 },
-                    { valor: 9 },
-                    { valor: 240 },
-                    { valor: 250 },
-                    { valor: 350 },
-                    { valor: 400 }
-                    // ajustar para valores dentro do break
+                base3 = [
+                    { valor: 105 },
+                    { valor: 5556 },
+                    { valor: 24 },
+                    { valor: 467 },
+                    { valor: 135 },
+                    { valor: 53272 },
+                    { valor: 72 },
+                    { valor: 178 },
+                    { valor: 204 },
+                    { valor: 40 },
+                    { valor: 209 },
+                    { valor: 160 },
+                    { valor: 379 },
+                    { valor: 362 },
+                    { valor: 169 }
                 ];
-                barchart.data(valores);
+                barchart.data(base3);
                 barchart.redraw();
             }
+
             // Adiciona um evento de escuta para detectar quando o valor da lista suspensa for alterado
             strategySelect.addEventListener("change", () => {
                 salvarUltimaEstrategia(strategySelect.value);
@@ -90,13 +100,13 @@
             //slider com breakpoint 3
             slider2.addEventListener('input', function () {
                 breakpointInput3.value = slider2.value;
-                salvarUltimaEstrategia(strategySelect.value);                
+                salvarUltimaEstrategia(strategySelect.value);
                 createOrUpdateBarChart(strategySelect.value);
             });
 
             //slider com breakpoint 1
             slider3.addEventListener('input', function () {
-                breakpointInput.value = slider3.value;  
+                breakpointInput.value = slider3.value;
                 salvarUltimaEstrategia(strategySelect.value);
                 createOrUpdateBarChart(strategySelect.value);
             });
@@ -105,7 +115,7 @@
             // Crie o gráfico inicialmente com a ultima estrategia utilizada
             var ultimaEstrategiaSalva = carregarUltimaEstrategia();
             strategySelect.value = ultimaEstrategiaSalva;
-            createOrUpdateBarChart(ultimaEstrategiaSalva);            
+            createOrUpdateBarChart(ultimaEstrategiaSalva);
 
             // Evento botão configuração
             button.addEventListener('click', function () {
@@ -113,7 +123,7 @@
                 configuracaoDiv.classList.toggle('hidden');
             });
 
-           // Eevnto botão fechar
+            // Eevnto botão fechar
             closeButton.addEventListener('click', function () {
                 // Esconde a div de configuração quando o botão "Fechar" é clicado
                 configuracaoDiv.classList.add('hidden');
@@ -193,7 +203,8 @@
 
 
                 <button id="fechar"
-                    class="bg-gray-300 hover:bg-gray-400 text-gray-600 py-0.3 px-2 rounded inline-flex items-center mt-2" style="margin-top: 20px;">
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-600 py-0.3 px-2 rounded inline-flex items-center mt-2"
+                    style="margin-top: 20px;">
                     <span>Fechar</span>
                 </button>
 

@@ -13,29 +13,32 @@
             let layout = document.querySelector("#chart");
 
             let config = {
-                drawStrategy: "perspective escalonada"
+                drawStrategy: "scale break perspective"
             };
 
-            let barchart = new BarChart(layout, config);
+            let break_inicial = 480
+            let breakfinal = 2000
 
-            this.base4 = [
-                { valor: 2086.788469112473 },
-                { valor: 77412.47462722816 },
-                { valor: 798.87765686746255 },
-                { valor: 85685.42065542887 },
-                { valor: 875.6592439886408 },
-                { valor: 680.341495589178564 },
-                { valor: 555.6272574356251 },
-                { valor: 9878.030571097508 },
-                { valor: 420.07647618035685 },
-                { valor: 10858.416405323893 },
-                { valor: 634.4914334661673 },
-                { valor: 302.267786914083707 },
-                { valor: 396.77761749210134 },
-                { valor: 7398.659925373594 },
-                { valor: 5661.633142901761 }
+            let barchart = new BarChart(layout, config, break_inicial, breakfinal);
+
+            base3 = [
+                { valor: 105 },
+                { valor: 5556 },
+                { valor: 24 },
+                { valor: 467 },
+                { valor: 135 },
+                { valor: 53272 },
+                { valor: 72 },
+                { valor: 178 },
+                { valor: 204 },
+                { valor: 40 },
+                { valor: 209 },
+                { valor: 160 },
+                { valor: 379 },
+                { valor: 362 },
+                { valor: 169 }
             ];
-            barchart.data(base4);
+            barchart.data(base3);
             barchart.redraw();
 
         });

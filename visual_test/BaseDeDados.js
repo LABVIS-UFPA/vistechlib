@@ -38,6 +38,7 @@ class BaseDeDados {
             { valor: 440 }
         ];
 
+        // 2 outliers
         this.base3 = [
             { valor: 105 },
             { valor: 5556 },
@@ -56,7 +57,7 @@ class BaseDeDados {
             { valor: 169 }
         ];
 
-
+        // group outliers
         this.base4 = [
             { valor: 2086 },
             { valor: 77412 },
@@ -91,7 +92,7 @@ class BaseDeDados {
             return [x, y];
         } else if (base == 3) {
             let x = 480;
-            let y = 3000;
+            let y = 2000;
             return [x, y];
         } else if (base == 4) {
             let x = 11000;
