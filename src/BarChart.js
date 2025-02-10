@@ -1159,6 +1159,295 @@
                 });
             }
         },
+        "3d break": {
+            data: (barchart) => {
+                barchart.ordenado = [...barchart.d].sort((a, b) => a.valor - b.valor).map(item => item.valor);
+
+                barchart.d = [...barchart.d].map(item => item.valor);
+
+
+    
+                function identificarMaiorDiferenca(arr) {
+                    let maiorGap = 0;
+                    let posicaoGap = -1;
+                
+                    for (let i = 0; i < arr.length - 1; i++) {
+                        let diff = arr[i + 1] - arr[i];
+                
+                        if (diff > maiorGap) {
+                            maiorGap = diff;
+                            posicaoGap = i;
+                        }
+                    }
+                    return {
+                        corte: arr[posicaoGap],
+                        cortefinal: arr[posicaoGap + 1],
+                        maximo: arr[arr.length-1]
+                    };
+                }
+                let {corte, cortefinal, maximo} = identificarMaiorDiferenca(barchart.ordenado)  
+
+                barchart.corte = corte
+                cortefinal = maximo - corte;
+                let diferença = cortefinal - corte
+
+                let tamanhoMeioRelativo = .5
+                let tamanhoMeio = corte*(tamanhoMeioRelativo/2)
+
+
+                let corte2 = corte + (diferença/2) - tamanhoMeio
+                let corte3 = corte + (diferença/2) + tamanhoMeio
+
+                barchart.sections = [
+                    { name: "lower", range: [0, corte] },
+                    { name: "meio1", range: [corte, corte2] },
+                    { name: "meio2", range: [corte2, corte3] },
+                    { name: "meio3", range: [corte3, cortefinal] },
+                    { name: "upper", range: [cortefinal, maximo] }
+                ];
+            },
+            draw: (barchart) => {
+                    barchart.parentElement.classList.add("dbreak")
+                    barchart.parentElement.innerHTML = `
+                    <div id="upper" class="child">
+                        <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
+                    </div>
+                    <div id="meio3" class="child">
+                        <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
+                    </div>
+                    <div id="meio2" class="child">
+                        <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
+                    </div>
+                    <div id="meio1" class="child">
+                        <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
+                    </div>
+                    <div id="lower" class="child">
+                        <svg xmlns="https://www.w3.org/2000/svg"  height="100%"></svg>
+                    </div>
+                `;
+
+                    // Função para dividir o valor de uma barra nas seções
+                    const divideValueBySections = (value, sections) => {
+                        let remaining = value;
+                        return sections.map(section => {
+                            const rangeSize = section.range[1] - section.range[0];
+                            const inSection = Math.max(0, Math.min(rangeSize, remaining));
+                            remaining -= inSection;
+                            return { name: section.name, value: inSection };
+                        });
+                    };
+
+                    // Configurações do "lower" e incremento fixo
+                    const lowerMax = barchart.corte; // Maior valor do "lower"
+                    const yIncrement = lowerMax/10; // Incremento fixo no eixo Y
+                    
+
+                    // Altura relativa com base no maior valor do dataset
+                    const maxDataValue = d3.max(barchart.d);
+                    const scaleFactor = 250; // Pixels por unidade (ajuste conforme necessário)
+                    const dynamicHeight = scaleFactor * (maxDataValue / lowerMax); // Altura proporcional
+
+                    // Configurações do gráfico
+                    const width = 800;
+                    const height = Math.max(300, dynamicHeight); // Altura dinâmica
+                    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+
+                    // Escalas
+                    const xScale = d3.scaleBand()
+                        .domain(barchart.d.map((_, i) => i))
+                        .range([margin.left, width - margin.right])
+                        .padding(0.1);
+
+                
+
+                    const sortedTicks = []
+                    const ticks = d3.scaleLinear()
+                        .domain([0, maxDataValue]) // Escala do menor até o maior valor
+                        .range([height - margin.bottom, margin.top])
+                        .ticks(maxDataValue / yIncrement);
+                    ticks.forEach((d) => {
+                        sortedTicks.push(d)
+                    });
+
+                    barchart.sections.forEach((section, index) => {
+                        for (const d of sortedTicks) {
+                            if (d >= section.range[1]) {
+                                if(section.name == "meio3"){
+                                    section.range[1] = sortedTicks[sortedTicks.indexOf(d) - 1] - 1
+                                    barchart.sections[index+1].range[0] = sortedTicks[sortedTicks.indexOf(d) - 1]
+                                    break
+                                }
+                                if(section.name == "lower"){
+                                    section.range[1] = d;
+                                    barchart.sections[index+1].range[0] = d
+                                    break;
+                                }
+                            }
+
+                            if (section.name == "upper" && d == sortedTicks[sortedTicks.length-1]){
+                                section.range[1] = d + sortedTicks[1]
+                            }
+                        }
+                    });
+                    
+                    const yScale = d3.scaleLinear()
+                        .domain([0, sortedTicks[sortedTicks.length-1] + sortedTicks[1]]) // Escala do menor até o maior valor
+                        .range([height - margin.bottom, margin.top]);
+
+
+                    // Criação do SVG
+                    const svg = d3.select("#chart").append("svg")
+                        .attr("width", width)
+                        .attr("height", height);
+
+                    // Adicionando barras divididas
+                    barchart.d.forEach((value, i) => {
+                        const dividedValues = divideValueBySections(value, barchart.sections);
+                        let yOffset = yScale(0); // Começa no eixo 0
+
+                        dividedValues.forEach(section => {
+                            if (section.value > 0) {
+                                const barHeight = yScale(0) - yScale(section.value);
+                                svg.append("rect")
+                                    .attr("x", xScale(i))
+                                    .attr("y", yOffset - barHeight)
+                                    .style("fill", barchart.settings.color)
+                                    .attr("width", xScale.bandwidth())
+                                    .attr("height", barHeight)
+                                    .attr("class", `${section.name}`);
+
+                                yOffset -= barHeight; // Atualiza o deslocamento para a próxima parte da barra
+                            }
+                        });
+                    });
+
+                    // Adicionando eixo Y
+                    svg.append("g")
+                        .attr("transform", `translate(${margin.left},0)`)
+                        .call(d3.axisLeft(yScale).ticks(maxDataValue / yIncrement))
+                        .selectAll(".tick") // Seleciona cada tick do eixo Y
+                        .each(function (d) {
+                            // Determinar a seção do tick
+                            const section = barchart.sections.find(sec => d >= sec.range[0] && d <= sec.range[1]);
+                            const sectionClass = section ? `${section.name}axis` : "unknownaxis"; // Define a classe com base na seção
+                            // Adiciona uma linha horizontal para cada tick
+                            d3.select(this) // Seleciona o elemento de tick atual
+                                .attr("class", sectionClass); // Atribui a classe baseada na seção
+                            d3.select(this) // Seleciona o elemento de tick atual
+                                .append("line") // Cria a linha horizontal
+                                .attr("x1", 0) // Começa na borda do eixo Y
+                                .attr("x2", width - margin.left - margin.right) // Vai até a largura do gráfico
+                                .attr("y1", 0) // Mantém o mesmo nível do tick
+                                .attr("y2", 0) // Linha horizontal
+                                .attr("stroke", "black")
+                                .attr("stroke-width", 0.5)  
+                        }); 
+
+
+
+                    const parts = {
+                        4: d3.selectAll("rect.upper"),
+                        3: d3.selectAll("rect.meio3"),
+                        2: d3.selectAll("rect.meio2"), 
+                        1: d3.selectAll("rect.meio1"),
+                        0: d3.selectAll("rect.lower"), 
+                    };
+
+                    for (part in parts){
+                        const classe = parts[part].node().classList.value
+                        const raiz = document.querySelector(`#${classe} svg`)
+
+
+                        raiz.parentElement.attributes.height = 0
+                        raiz.parentElement.style.height = 0
+                        raiz.style.width = `${width}px`
+
+                        parts[part].nodes().forEach(element => {
+                            const divFilho = element;
+                            divFilho.setAttribute('y', "0")
+                            divFilho.style.transform = `translateX(50px)`
+                            if(Number(divFilho.attributes.height.value) >= Number(raiz.parentElement.attributes.height)) {raiz.parentElement.attributes.height = divFilho.attributes.height.value}
+                            raiz.appendChild(divFilho);
+                        });        
+
+                        raiz.parentElement.style.height = raiz.parentElement.attributes.height + "px" 
+
+                        const domain = document.createElement("g");
+                        domain.setAttribute("transform", "translate(40,0)");
+                        domain.setAttribute("fill", "none");
+                        domain.setAttribute("font-size", "10");
+                        domain.setAttribute("font-family", "sans-serif");
+                        domain.setAttribute("text-anchor", "end");
+
+                        // Criação do elemento <path>
+                        const pathElement = document.createElement("path");
+                        pathElement.setAttribute("class", "domain");
+                        pathElement.setAttribute("stroke", "currentColor");
+                        pathElement.setAttribute("d", `M-6,${Math.round(raiz.parentElement.attributes.height)}H0V20H-6`);
+
+                        // Adiciona o <path> ao <g>
+                        // domain.appendChild(pathElement);
+                        raiz.appendChild(domain)
+    
+                        const linhas = document.querySelectorAll(`.${classe}axis`)
+                        let linhaYmax = linhas[0].transform.animVal[0].matrix.f
+                        linhas.forEach(linha => {
+                            
+                            let y = (linha.transform.animVal[0].matrix.f-linhaYmax)*-1
+                            linha.setAttribute("transform", `translate(100, ${y})`)
+                            if (classe == "meio1" || classe == "meio2" || classe == "meio3") { linha.childNodes[1].style.display = "None" }
+                            else { linha.childNodes[1].style.transform = 'translate(-50px, 0) rotateX(180deg)' }
+                            // if(classe == "upper"){
+                            //     linha.setAttribute("transform", `translate(100, ${(linha.transform.animVal[0].matrix.f)})`)
+                            // }
+                            raiz.appendChild(linha)                    
+                        })               
+                    }
+
+                    const baseSVG = document.querySelector("#chart > svg")
+                    baseSVG.parentNode.removeChild(baseSVG)
+                    
+                    const m3 = document.querySelector("#meio3");
+                    m3.style.transform = `translate3d(0px, ${m3.clientHeight/2}px, 0px) rotate3d(1, 0, 0, 90deg) translate3d(0px, -${m3.clientHeight/2}px, 0px)`
+
+                    const m2 = document.querySelector("#meio2");
+                    m2.style.transform = `rotateX(180deg) translate3d(0px, 0px, ${m3.clientHeight}px)`
+
+                    const m1 = document.querySelector("#meio1");
+                    m1.style.transform = `translate3d(0px, -${m1.clientHeight/2}px, 0px) rotate3d(1, 0, 0, -90deg) translate3d(0px, ${m1.clientHeight/2}px, 0px)`
+
+                    const upper = document.querySelector("#upper");
+                    upper.style.transform = `rotateX(180deg) translate3d(0px, -${m3.clientHeight}px, 0px)`
+
+                    const lower = document.querySelector("#lower");
+                    lower.style.transform = `rotateX(180deg) translate3d(0px, ${m1.clientHeight}px, 0px)`
+
+                    const slider = document.querySelector('#sliderGirarGrafico');
+                    const sliderPerspective = document.querySelector('#sliderPerspective');
+                    const myDiv = document.getElementById('chart');
+                    let rotateXValue = slider.value;
+                    let perspectiveValue = sliderPerspective.value;
+
+                    slider.addEventListener('input', () => {            
+                        rotateXValue = slider.value;
+                        myDiv.style.transform = `perspective(${perspectiveValue}px) rotateY(${rotateXValue}deg)`;
+                    });
+
+                    sliderPerspective.addEventListener('input', () => {            
+                        perspectiveValue = sliderPerspective.value;
+                        myDiv.style.transform = `perspective(${perspectiveValue}px) rotateY(${rotateXValue}deg)`;
+                    });
+
+                    myDiv.style.top = `-${m1.clientHeight - 300}px`
+                    
+                    const parent = document.getElementById("chart");
+                    const child = parent.lastChild;
+                    parent.removeChild(child);
+
+            
+            }
+
+        }
     }
     
     module.exports = BarChart;
