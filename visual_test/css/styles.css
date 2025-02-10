@@ -1,14 +1,27 @@
 #chart {
     overflow: visible !important;
     margin: auto;
-    width: 80%;
-    max-width: 800px;
     -webkit-transform-style: preserve-3d;
-    transform:perspective(231px) rotateY(0deg) rotateX(0deg);
     transition: transform 0.2s ease-in-out;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) perspective(245px) rotateY(0deg) rotateX(0deg);
+}
+
+#chart div{
+    display: flex;
+    justify-content: center;
+}
+
+#slider{
+    z-index: 9999;
+    position: absolute;
+    top: 270px;
 }
 
 svg{
+    padding-right: 40px;
     border-right: 2px solid #000;
     overflow: visible !important;
+    margin: 0 auto;
 }

@@ -14,22 +14,33 @@
             let layout = document.querySelector("#chart");
 
             let config = {
-                drawStrategy: "default_teste"
+                drawStrategy: "teste"
             };
 
             let barchart = new BarChart(layout, config);
 
             this.base4 = [
-                { valor: 0 },
-                { valor: 2086.788469112473 },
-                { valor: 77412.47462722816 },
-                { valor: 798.87765686746255 },
-                { valor: 85685.42065542887 },
-                { valor: 875.6592439886408 },
-                { valor: 85680.341495589178564 },
-                { valor: 7555.6272574356251 },
-                { valor: 7000.633142901761 },
+               { valor: 2086.788469112473 },
+               { valor: 7741.47462722816 },
+               { valor: 800.87765686746255 },
+               { valor: 8368.42065542887 },
+               { valor: 875.6592439886408 },
+               { valor: 8568.341495589178564 },
+               { valor: 8568.341495589178564 },
+               { valor: 755.6272574356251 },
+               { valor: 700.633142901761 },
             ];
+
+            // this.base4 = [
+            //    { valor: 1 },
+            //    { valor: 2 },
+            //    { valor: 3 },
+            //    { valor: 4 },
+            //    { valor: 5 },
+            //    { valor: 157 },
+            //    { valor: 154 },
+            //    { valor: 155 },
+            // ];
             barchart.data(base4);
             barchart.redraw();
 
@@ -37,7 +48,7 @@
         
 
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
 
 </head>
 
@@ -52,25 +63,26 @@
 
 
         
-        <div id="chart" style=" height: 600px;">
+        <div id="chart">
             <div id="upper" class="child">
-                <svg xmlns="https://www.w3.org/2000/svg" width="100%" height="100%"></svg>
+                <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
             <div id="meio3" class="child">
-                <svg xmlns="https://www.w3.org/2000/svg" width="100%" height="100%"></svg>
+                <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
             <div id="meio2" class="child">
-                <svg xmlns="https://www.w3.org/2000/svg" width="100%" height="100%"></svg>
+                <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
             <div id="meio1" class="child">
-                <svg xmlns="https://www.w3.org/2000/svg" width="100%" height="100%"></svg>
+                <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
             <div id="lower" class="child">
-                <svg xmlns="https://www.w3.org/2000/svg" width="100%" height="100%"></svg>
+                <svg xmlns="https://www.w3.org/2000/svg"  height="100%"></svg>
             </div>
-            
         </div>
-        <input style="position: fixed;" type="range" id="slider" min="0" max="360" value="0" />
+
+
+        <input type="range" id="slider" min="0" max="360" value="0" />
         
     </main>
 </body>

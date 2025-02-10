@@ -42,6 +42,7 @@ class BarChart extends Visualization {
 
         this.settings.corte = 11000;
         this.settings.cortefinal = 75412.47462722816;
+        
 
     }
 
@@ -151,7 +152,6 @@ class BarChart extends Visualization {
         }
 
         this.drawStrategy.data(this);
-
         return this;
     }
 
@@ -668,7 +668,7 @@ BarChart.strategies = {
 
             let corte2 = corte + (diferença * 40) / 100
 
-            let corte3 = corte2 + (diferença * 20) / 100;
+            let corte3 = corte2 + (diferença * 30) / 100;
 
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
@@ -995,479 +995,232 @@ BarChart.strategies = {
             });
         }
     }, 
-    "default_div": {
+    "teste": {
         data: (barchart) => {
+            barchart.ordenado = [...barchart.d].sort((a, b) => a.valor - b.valor).map(item => item.valor);
 
-            barchart.ybreak = {};
-            barchart.ybreak2 = {};
-            barchart.ybreak3 = {};
-            barchart.ybreak4 = {};
-            barchart.z = barchart.settings.z;
+            barchart.d = [...barchart.d].map(item => item.valor);
 
-            let corte = barchart.settings.corte;
-            let cortefinal = barchart.settings.cortefinal;
-            let diferença = cortefinal - corte;
 
-            let corte2 = corte + (diferença * 40) / 100
-
-            let corte3 = corte2 + (diferença * 20) / 100;
-
-            for (let k of barchart.keys_filter) {
-                let maximo = barchart.domain[k][1];
-
-                barchart.breakPoint = .9;
-                barchart.breakPoint2 = .55;
-                barchart.breakPoint3 = .9;
-                barchart.breakPoint4 = .1;
-
-                barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint;
-                barchart.boxHeightBreak2 = barchart.boxHeightBreak * barchart.breakPoint2;
-                barchart.boxHeightBreak3 = barchart.boxHeightBreak2 * barchart.breakPoint3;
-                barchart.boxHeightBreak4 = barchart.boxHeightBreak3 * barchart.breakPoint4;
-
-                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
-                barchart.ybreak2[k] = d3.scaleLinear().domain([corte2, corte3]).range([barchart.boxHeightBreak2, barchart.boxHeightBreak3]);
-                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
-                barchart.ybreak4[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
-
+  
+            function identificarMaiorDiferenca(arr) {
+                let maiorGap = 0;
+                let posicaoGap = -1;
+            
+                for (let i = 0; i < arr.length - 1; i++) {
+                    let diff = arr[i + 1] - arr[i];
+            
+                    if (diff > maiorGap) {
+                        maiorGap = diff;
+                        posicaoGap = i;
+                    }
+                }
+                return {
+                    corte: arr[posicaoGap],
+                    cortefinal: arr[posicaoGap + 1],
+                    maximo: arr[arr.length-1]
+                };
             }
+            let {corte, cortefinal, maximo} = identificarMaiorDiferenca(barchart.ordenado)  
+
+            barchart.corte = corte
+            cortefinal = maximo - corte;
+            let diferença = cortefinal - corte
+
+            let tamanhoMeioRelativo = .5
+            let tamanhoMeio = corte*(tamanhoMeioRelativo/2)
+
+
+            let corte2 = corte + (diferença/2) - tamanhoMeio
+            let corte3 = corte + (diferença/2) + tamanhoMeio
+
+            barchart.sections = [
+                { name: "lower", range: [0, corte] },
+                { name: "meio1", range: [corte, corte2] },
+                { name: "meio2", range: [corte2, corte3] },
+                { name: "meio3", range: [corte3, cortefinal] },
+                { name: "upper", range: [cortefinal, maximo] }
+            ];
         },
         draw: (barchart) => {
-
-            barchart.foreground.selectAll("g.dataGroup").each(function (key) {
-                let maxh = barchart.boxHeight - barchart.boxHeightBreak;
-                let g = d3.select(this);
-
-                // // Selecione a div "upper" no HTML para inserir o gráfico SVG
-                // let container1 = document.getElementById("upper");
-
-                // // Adicione o SVG dentro da div "upper"
-                // let svg = d3.select(container1)
-                //     .style("overflow", "hidden")  // Para esconder o excesso, se necessário
-                //     .append("svg")
-                //     .attr("width", barchart.settings.innerWidth)  // Defina a largura do SVG
-                //     .attr("height", maxh);  // Defina a altura do SVG
-
-
-                g.selectAll("rect.lower")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "lower")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => Math.max(barchart.y[key](d[key]), barchart.boxHeightBreak))
-                    .attr("width", barchart.x.bandwidth())
-                    .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
-                    .style("fill", barchart.settings.color)
-                    
-
-                let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
-                let z = 2;
-                let di = 5;
-                let f = 30;
-                g.selectAll("rect.meio1")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "meio1")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => Math.max(barchart.ybreak[key](d[key]), barchart.boxHeightBreak2))
-                    .attr("width", (d) => barchart.x.bandwidth())
-                    .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), maxh2), 0));
-
-                let maxh3 = barchart.boxHeightBreak2 - barchart.boxHeightBreak3;
-                g.selectAll("rect.meio2")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "meio2")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => Math.max(barchart.ybreak2[key](d[key]), barchart.boxHeightBreak3))
-                    .attr("width", (d) => barchart.x.bandwidth())
-                    .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak2 - barchart.ybreak2[key](d[key]), maxh3), 0));
-
-                let maxh4 = barchart.boxHeightBreak3 - barchart.boxHeightBreak4;
-                g.selectAll("rect.meio3")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "meio3")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => Math.max(barchart.ybreak3[key](d[key]), barchart.boxHeightBreak4))
-                    .attr("width", (d) => barchart.x.bandwidth())
-                    .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak3 - barchart.ybreak3[key](d[key]), maxh4), 0));
-          
-                g.selectAll("rect.upper")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "upper")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => barchart.ybreak4[key](d[key]))
-                    .attr("width", barchart.x.bandwidth())
-                    .attr("height", (d) => Math.max(barchart.boxHeightBreak4 - barchart.ybreak4[key](d[key]), 0));
-
-                const parts = {
-                    0: d3.selectAll("rect.upper"), 
-                    1: d3.selectAll("rect.meio3"), 
-                    2: d3.selectAll("rect.meio2"), 
-                    3: d3.selectAll("rect.meio1"), 
-                    4: d3.selectAll("rect.lower"), 
+                // Função para dividir o valor de uma barra nas seções
+                const divideValueBySections = (value, sections) => {
+                    let remaining = value;
+                    return sections.map(section => {
+                        const rangeSize = section.range[1] - section.range[0];
+                        const inSection = Math.max(0, Math.min(rangeSize, remaining));
+                        remaining -= inSection;
+                        return { name: section.name, value: inSection };
+                    });
                 };
 
-                const baseSVG = document.querySelector("#chart > svg")
-                baseSVG.parentNode.removeChild(baseSVG)
-
-                for (part in parts){
-                    const classe = parts[part].node().classList.value
-                    const raiz = document.querySelector(`#${classe} svg`)
-                    parts[part].nodes().forEach(element => {
-                        const divFilho = element;
-                        divFilho.setAttribute('y', "0")
-                        if(Math.ceil(divFilho.attributes.height.value)) { raiz.parentElement.style.height = Math.ceil(divFilho.attributes.height.value) + "px" }
-                        
-                        raiz.appendChild(divFilho);
-                    });
-                }                               
+                // Configurações do "lower" e incremento fixo
+                const lowerMax = barchart.corte; // Maior valor do "lower"
+                const yIncrement = lowerMax/10; // Incremento fixo no eixo Y
                 
-                const m3 = document.querySelector("#meio3");
-                m3.style.transform = `translate3d(0px, ${m3.clientHeight/2}px, 0px) rotate3d(1, 0, 0, 90deg) translate3d(0px, -${m3.clientHeight/2}px, 0px)`
 
-                const m2 = document.querySelector("#meio2");
-                m2.style.transform = `translate3d(0px, 0px, -${m3.clientHeight}px)`
-                
-                const m1 = document.querySelector("#meio1");
-                m1.style.transform = `translate3d(0px, -${m1.clientHeight/2}px, 0px) rotate3d(1, 0, 0, -90deg) translate3d(0px, ${m1.clientHeight/2}px, 0px)`
+                // Altura relativa com base no maior valor do dataset
+                const maxDataValue = d3.max(barchart.d);
+                const scaleFactor = 250; // Pixels por unidade (ajuste conforme necessário)
+                const dynamicHeight = scaleFactor * (maxDataValue / lowerMax); // Altura proporcional
 
-                const upper = document.querySelector("#upper");
-                upper.style.transform = `rotateX(180deg) translate3d(0px, -${m3.clientHeight}px, 0px)`
+                // Configurações do gráfico
+                const width = 800;
+                const height = Math.max(300, dynamicHeight); // Altura dinâmica
+                const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
-                const lower = document.querySelector("#lower");
-                lower.style.transform = `rotateX(180deg) translate3d(0px, ${m1.clientHeight}px, 0px)`
+                // Escalas
+                const xScale = d3.scaleBand()
+                    .domain(barchart.d.map((_, i) => i))
+                    .range([margin.left, width - margin.right])
+                    .padding(0.1);
 
-                const slider = document.querySelector('#slider');
-                const myDiv = document.getElementById('chart');
+              
 
-                slider.addEventListener('input', () => {
-                    const rotateXValue = slider.value;
-                    myDiv.style.transform = `perspective(231px) rotateY(${rotateXValue}deg) rotateX(0deg) translateY(100px)`;
+                const sortedTicks = []
+                const ticks = d3.scaleLinear()
+                    .domain([0, maxDataValue]) // Escala do menor até o maior valor
+                    .range([height - margin.bottom, margin.top])
+                    .ticks(maxDataValue / yIncrement);
+                ticks.forEach((d) => {
+                    sortedTicks.push(d)
                 });
 
-            });
-
-
-        }
-    },
-    "default_teste": {
-        data: (barchart) => {
-            barchart.ybreak = {};
-            barchart.ybreak2 = {};
-            barchart.ybreak3 = {};
-            barchart.ybreak4 = {};
-            barchart.z = barchart.settings.z;
-
-            let corte = barchart.settings.corte;
-            let cortefinal = barchart.settings.cortefinal;
-            let diferença = cortefinal - corte;
-
-            let corte2 = corte + (diferença * 37) / 100;
-            let corte3 = corte2 + (diferença *37) / 100;
-
-            for (let k of barchart.keys_filter) {
-                let maximo = barchart.domain[k][1];
-
-                barchart.breakPoint = 5;
-
-                barchart.boxHeightBreak = barchart.boxHeight / barchart.breakPoint * 4;
-                barchart.boxHeightBreak2 = barchart.boxHeight / barchart.breakPoint * 3 ;
-                barchart.boxHeightBreak3 = barchart.boxHeight / barchart.breakPoint * 2 ;
-                barchart.boxHeightBreak4 = barchart.boxHeight / barchart.breakPoint ;
-
-                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
-                barchart.ybreak2[k] = d3.scaleLinear().domain([corte2, corte3]).range([barchart.boxHeightBreak2, barchart.boxHeightBreak3]);
-                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
-                barchart.ybreak4[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
-            }
-        },
-        draw: (barchart) => {
-            barchart.foreground.selectAll("g.dataGroup").each(function (key) {
-                let maxh = barchart.boxHeight - barchart.boxHeightBreak;
-                let g = d3.select(this);
-                g.selectAll("rect.lower")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "lower")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
+                barchart.sections.forEach((section, index) => {
+                    for (const d of sortedTicks) {
+                        if (d >= section.range[1]) {
+                            if(section.name == "meio3"){
+                                section.range[1] = sortedTicks[sortedTicks.indexOf(d) - 1] - 1
+                                barchart.sections[index+1].range[0] = sortedTicks[sortedTicks.indexOf(d) - 1]
+                                break
+                            }
+                            if(section.name == "lower"){
+                                section.range[1] = d;
+                                barchart.sections[index+1].range[0] = d
+                                break;
+                            }
                         }
-                    )
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => Math.max(barchart.y[key](d[key]), barchart.boxHeightBreak))
-                    .attr("width", barchart.x.bandwidth())
-                    .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
-                    .style("fill", barchart.settings.color);
 
-                barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
-
-                let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
-                g.selectAll("path.meio1")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("path")
-                                .attr("class", "meio1")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
+                        if (section.name == "upper" && d == sortedTicks[sortedTicks.length-1]){
+                            section.range[1] = d + sortedTicks[1]
                         }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("height", (d) => Math.max(Math.min((barchart.boxHeightBreak) - barchart.ybreak[key](d[key]), maxh2), 0))
-                    .attr("d", (d, i) => {
-                        let x = barchart.x(i);
-                        let width = barchart.x.bandwidth();
-                        let y = 0;
-                        let height = Math.max(Math.min((barchart.boxHeightBreak) - barchart.ybreak[key](d[key]), maxh2), 0);                   
-                        return `M${x},${y} L${x + width},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
-                    })
-              
-                let maxh3 = barchart.boxHeightBreak2 - barchart.boxHeightBreak3;
-                g.selectAll("path.meio2")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("path")
-                                .attr("class", "meio2")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("height", (d) => Math.max(Math.min((barchart.boxHeightBreak2) - barchart.ybreak2[key](d[key]), maxh3), 0))
-                    .attr("d", (d, i) => {
-                        let x = barchart.x(i);
-                        let width = barchart.x.bandwidth();
-                        let y = 0;
-                        let height = Math.max(Math.min((barchart.boxHeightBreak2) - barchart.ybreak2[key](d[key]), maxh3), 0);     
-                        return `M${x},${y} L${x + width},${y} L${x + width},${y + height} L${x},${y + height} Z`;
-                    })
-                    
+                    }
+                });
                 
-                let maxh4 = barchart.boxHeightBreak3 - barchart.boxHeightBreak4;
-                g.selectAll("path.meio3")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("path")
-                                .attr("class", "meio3")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
+                const yScale = d3.scaleLinear()
+                    .domain([0, sortedTicks[sortedTicks.length-1] + sortedTicks[1]]) // Escala do menor até o maior valor
+                    .range([height - margin.bottom, margin.top]);
+
+
+                // Criação do SVG
+                const svg = d3.select("#chart").append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
+
+                // Adicionando barras divididas
+                barchart.d.forEach((value, i) => {
+                    const dividedValues = divideValueBySections(value, barchart.sections);
+                    let yOffset = yScale(0); // Começa no eixo 0
+
+                    dividedValues.forEach(section => {
+                        if (section.value > 0) {
+                            const barHeight = yScale(0) - yScale(section.value);
+                            svg.append("rect")
+                                .attr("x", xScale(i))
+                                .attr("y", yOffset - barHeight)
+                                .style("fill", barchart.settings.color)
+                                .attr("width", xScale.bandwidth())
+                                .attr("height", barHeight)
+                                .attr("class", `${section.name}`);
+
+                            yOffset -= barHeight; // Atualiza o deslocamento para a próxima parte da barra
                         }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("height", (d) => Math.max(Math.min((barchart.boxHeightBreak3) - barchart.ybreak3[key](d[key]), maxh4), 0))
-                    .attr("d", (d, i) => {
-                        let x = barchart.x(i);
-                        let width = barchart.x.bandwidth();
-                        let y = 0;
-                        let height = Math.max(Math.min((barchart.boxHeightBreak3) - barchart.ybreak3[key](d[key]), maxh4), 0);     
-                        return `M${x},${y} L${x + width},${y} L${x + width},${y + height} L${x},${y + height} Z`;
                     });
-                  
-                g.selectAll("path.upper")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("path")
-                                .attr("class", "upper")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("height", (d) => Math.max(barchart.boxHeightBreak4 - barchart.ybreak4[key](d[key]), 0))
-                    .attr("d", (d, i) => {
-                        let x = barchart.x(i);
-                        let y = 0;
-                        let width = barchart.x.bandwidth();
-                        let height = Math.max(barchart.boxHeightBreak4 - barchart.ybreak4[key](d[key]), 0);
-                        return `M${x},${y} L${x + (width)},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
+                });
 
-                    });
-
-                // Remove os elementos existentes
-                g.selectAll("g.y.loweraxis, g.y.meio1, g.y.meio2, g.y.meio3, g.y.upperaxis, g.Axisright.meio1, g.Axisright.meio2, g.Axisright.meio3, g.Axisright.meio4, g.Axisright.meio5, g.Line1, g.Line2, g.Line3, g.Line4, g.Line5").remove();
-
-
-                // Axis          
-                g.append("g")
-                    .attr("class", "y loweraxis")
-                    .call(d3.axisLeft(barchart.y[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
-                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
-                    .each(function (d) { // Para cada marca de tick
-                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
-                            .append("line") // Adiciona uma linha
-                            .attr("class", "grid-line") // Define a classe para estilização
+                // Adicionando eixo Y
+                svg.append("g")
+                    .attr("transform", `translate(${margin.left},0)`)
+                    .call(d3.axisLeft(yScale).ticks(maxDataValue / yIncrement))
+                    .selectAll(".tick") // Seleciona cada tick do eixo Y
+                    .each(function (d) {
+                        console.log(d)
+                        // Determinar a seção do tick
+                        const section = barchart.sections.find(sec => d >= sec.range[0] && d <= sec.range[1]);
+                        console.log(section)
+                        const sectionClass = section ? `${section.name}axis` : "unknownaxis"; // Define a classe com base na seção
+                        // Adiciona uma linha horizontal para cada tick
+                        d3.select(this) // Seleciona o elemento de tick atual
+                            .attr("class", sectionClass); // Atribui a classe baseada na seção
+                        d3.select(this) // Seleciona o elemento de tick atual
+                            .append("line") // Cria a linha horizontal
+                            .attr("x1", 0) // Começa na borda do eixo Y
+                            .attr("x2", width - margin.left - margin.right) // Vai até a largura do gráfico
+                            .attr("y1", 0) // Mantém o mesmo nível do tick
+                            .attr("y2", 0) // Linha horizontal
                             .attr("stroke", "black")
-                            .attr("x1", 0) // Posição inicial x da linha
-                            .attr("x2", barchart.innerWidth) // Posição final x da linha
-                            .attr("y1", barchart.ybreak[key](d[key])) // Posição inicial y da linha
-                            .attr("y2", barchart.ybreak[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
-                    });
+                            .attr("stroke-width", 0.5)  
+                    }); 
 
-                g.append("g")
-                    .attr("class", "y meio1axis")
-                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
-                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
-                    .each(function (d) { // Para cada marca de tick
-                        d3.select(this).attr('style', "display:none;")
-                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
-                            .append("line") // Adiciona uma linha
-                            .attr("class", "grid-line") // Define a classe para estilização
-                            .attr("stroke", "black")
-                            .attr("x1", 0) // Posição inicial x da linha
-                            .attr("x2", barchart.innerWidth) // Posição final x da linha
-                            .attr("y1", barchart.ybreak[key](d[key])) // Posição inicial y da linha
-                            .attr("y2", barchart.ybreak[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
-                    });
 
-                
-                g.append("g")
-                    .attr("class", "y meio2axis")
-                    .call(d3.axisLeft(barchart.ybreak2[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
-                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
-                    .each(function (d) { // Para cada marca de tick
-                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
-                            .append("line") // Adiciona uma linha
-                            .attr("class", "grid-line") // Define a classe para estilização
-                            .attr("stroke", "black")
-                            .attr("x1", 0) // Posição inicial x da linha
-                            .attr("x2", barchart.innerWidth) // Posição final x da linha
-                            .attr("y1", barchart.ybreak2[key](d[key])) // Posição inicial y da linha
-                            .attr("y2", barchart.ybreak2[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
-                    });
-
-                g.append("g")
-                    .attr("class", "y meio3axis")
-                    .call(d3.axisLeft(barchart.ybreak3[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
-                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
-                    .each(function (d) { // Para cada marca de tick
-                        d3.select(this).attr('style', "display:none;")
-                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
-                            .append("line") // Adiciona uma linha
-                            .attr("class", "grid-line") // Define a classe para estilização
-                            .attr("stroke", "black")
-                            .attr("x1", 0) // Posição inicial x da linha
-                            .attr("x2", barchart.innerWidth) // Posição final x da linha
-                            .attr("y1", barchart.ybreak3[key](d[key])) // Posição inicial y da linha
-                            .attr("y2", barchart.ybreak3[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
-                    });
-
-                g.append("g")
-                    .attr("class", "y upperaxis")
-                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
-                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
-                    .each(function (d) { // Para cada marca de tick
-                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
-                            .append("line") // Adiciona uma linha
-                            .attr("class", "grid-line") // Define a classe para estilização
-                            .attr("stroke", "black")
-                            .attr("x1", 0) // Posição inicial x da linha
-                            .attr("x2", barchart.innerWidth) // Posição final x da linha
-                            .attr("y1", barchart.ybreak4[key](d[key])) // Posição inicial y da linha
-                            .attr("y2", barchart.ybreak4[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
-                    });
 
                 const parts = {
-                    0: d3.selectAll("rect.lower"),
-                    1: d3.selectAll("path.meio2"), 
-                    9: d3.selectAll("path.meio3"), 
-                    6: d3.selectAll("path.upper"),
-                    20: d3.selectAll("path.meio1"), 
-                     
+                    4: d3.selectAll("rect.upper"),
+                    3: d3.selectAll("rect.meio3"),
+                    2: d3.selectAll("rect.meio2"), 
+                    1: d3.selectAll("rect.meio1"),
+                    0: d3.selectAll("rect.lower"), 
                 };
 
                 for (part in parts){
                     const classe = parts[part].node().classList.value
-
                     const raiz = document.querySelector(`#${classe} svg`)
-                    const linhas = document.querySelectorAll(`.${classe}axis .tick`)
-                    let linhaYmax = linhas[0].transform.animVal[0].matrix.f
 
 
                     raiz.parentElement.attributes.height = 0
                     raiz.parentElement.style.height = 0
+                    raiz.style.width = `${width}px`
+
                     parts[part].nodes().forEach(element => {
                         const divFilho = element;
                         divFilho.setAttribute('y', "0")
+                        divFilho.style.transform = `translateX(50px)`
                         if(Number(divFilho.attributes.height.value) >= Number(raiz.parentElement.attributes.height)) {raiz.parentElement.attributes.height = divFilho.attributes.height.value}
                         raiz.appendChild(divFilho);
-                    });                  
-                    
-                    linhas.forEach(linha => {       
-                        let y = (linha.transform.animVal[0].matrix.f-linhaYmax -part )*-1
-                        linha.setAttribute("transform", `translate(0, ${y})`)
-                        linha.parentElement.setAttribute("transform", "translate(50, 0)")
-                        linha.childNodes[1].style.transform = 'rotateX(180deg)'
-                        linha.parentElement.firstChild.attributes.d.value = "M-7,115H0V0H-6";                      
-                    })                  
-                    
-                    raiz.appendChild(document.querySelector(`.${classe}axis`))
-                    raiz.parentElement.style.height = raiz.parentElement.attributes.height + "px"
-                    
-                    
+                    });        
+
+                    raiz.parentElement.style.height = raiz.parentElement.attributes.height + "px" 
+
+                    const domain = document.createElement("g");
+                    domain.setAttribute("transform", "translate(40,0)");
+                    domain.setAttribute("fill", "none");
+                    domain.setAttribute("font-size", "10");
+                    domain.setAttribute("font-family", "sans-serif");
+                    domain.setAttribute("text-anchor", "end");
+
+                    // Criação do elemento <path>
+                    const pathElement = document.createElement("path");
+                    pathElement.setAttribute("class", "domain");
+                    pathElement.setAttribute("stroke", "currentColor");
+                    pathElement.setAttribute("d", `M-6,${Math.round(raiz.parentElement.attributes.height)}H0V20H-6`);
+
+                    // Adiciona o <path> ao <g>
+                    // domain.appendChild(pathElement);
+                    raiz.appendChild(domain)
+ 
+                    const linhas = document.querySelectorAll(`.${classe}axis`)
+                    let linhaYmax = linhas[0].transform.animVal[0].matrix.f
+                    linhas.forEach(linha => {
+                        
+                        let y = (linha.transform.animVal[0].matrix.f-linhaYmax)*-1
+                        linha.setAttribute("transform", `translate(100, ${y})`)
+                        if (classe == "meio1" || classe == "meio2" || classe == "meio3") { linha.childNodes[1].style.display = "None" }
+                        else { linha.childNodes[1].style.transform = 'translate(-50px, 0) rotateX(180deg)' }
+                        // if(classe == "upper"){
+                        //     linha.setAttribute("transform", `translate(100, ${(linha.transform.animVal[0].matrix.f)})`)
+                        // }
+                        raiz.appendChild(linha)                    
+                    })               
                 }
 
                 const baseSVG = document.querySelector("#chart > svg")
@@ -1493,11 +1246,18 @@ BarChart.strategies = {
 
                 slider.addEventListener('input', () => {            
                     const rotateXValue = slider.value;
-                    myDiv.style.transform = `perspective(231px) rotateY(${rotateXValue}deg)`;
+                    myDiv.style.transform = `translateX(-50%) perspective(268px) rotateY(${rotateXValue}deg)`;
 
                 });
-            });
+                myDiv.style.top = `-${m1.clientHeight - 300}px`
+                
+                const parent = document.getElementById("chart");
+                const child = parent.lastChild;
+                parent.removeChild(child);
+
+           
         }
+
     }
 }
 
