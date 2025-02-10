@@ -42,7 +42,6 @@ class BarChart extends Visualization {
 
         this.settings.corte = 11000;
         this.settings.cortefinal = 75412.47462722816;
-        
 
     }
 
@@ -152,6 +151,7 @@ class BarChart extends Visualization {
         }
 
         this.drawStrategy.data(this);
+
         return this;
     }
 
@@ -668,7 +668,7 @@ BarChart.strategies = {
 
             let corte2 = corte + (diferença * 40) / 100
 
-            let corte3 = corte2 + (diferença * 30) / 100;
+            let corte3 = corte2 + (diferença * 20) / 100;
 
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
@@ -706,7 +706,9 @@ BarChart.strategies = {
             }
         },
         draw: (barchart) => {
+
             barchart.foreground.selectAll("g.dataGroup").each(function (key) {
+                
                 let maxh = barchart.boxHeight - barchart.boxHeightBreak;
                 let g = d3.select(this);
                 g.selectAll("rect.lower")
@@ -730,6 +732,9 @@ BarChart.strategies = {
                 barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
                 let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
+                let z = 2;
+                let di = 5;
+                let f = 30;
                 g.selectAll("path.meio1")
                     .data(barchart.d)
                     .join(
