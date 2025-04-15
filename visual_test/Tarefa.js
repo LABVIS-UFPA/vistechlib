@@ -4,7 +4,7 @@ class Tarefa {
             // "Selecione a menor barra?",
             "Selecione a segunda menor barra?",
             "Selecione a segunda maior barra? ",
-            "Selecione a barra que é a mediana?",
+            "Estimar Proporção entre os dois elementos?",
             "Selecione a barra com o valor"
         ];
         // this.perguntasSelecionadas = [];
@@ -21,54 +21,8 @@ class Tarefa {
         this.pergId = '';
         this.tempoLimite = 30000; // Tempo limite padrão em milissegundos
         // this.timerId = null; // Variável para armazenar o ID do temporizador
-
-
-
     }
 
-    //versao antiga
-
-    // selecionarPerguntaAleatoria() {
-    //     const perguntasDisponiveis = this.perguntas.filter(pergunta => !this.perguntasSelecionadas.includes(pergunta));
-    //     if (perguntasDisponiveis.length === 0) return null; // Retorna null se todas as perguntas já foram selecionadas
-    //     const indice = Math.floor(Math.random() * perguntasDisponiveis.length);
-    //     const perguntaSelecionada = perguntasDisponiveis[indice];
-    //     this.perguntasSelecionadas.push(perguntaSelecionada);
-    //     return perguntaSelecionada;
-    // }
-
-
-    // exibirProximaPergunta() {
-
-    //     // Limpar todos os checkboxes marcados
-    //     this.campoResposta.querySelectorAll(this.checkboxSelector).forEach((checkbox) => {
-    //         checkbox.checked = false;
-    //     });
-
-    //     const perguntaSelecionada = this.selecionarPerguntaAleatoria();
-
-    //     //TEMPORIZADO DE 15S
-    //     this.pararTemporizador(); // Stop the timer
-    //     this.tempoLimite = 15000; // Reset the time limit
-    //     this.iniciarTemporizador(); // Start a new timer for the next round of questions
-
-
-    //     this.perg = perguntaSelecionada
-    //     this.pergId = this.id_pergunta(perguntaSelecionada);;
-
-
-    //     if (perguntaSelecionada !== null) {
-    //         this.perguntaContainer.textContent = perguntaSelecionada;
-    //         this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
-    //     } else {
-    //         this.perguntaContainer.style.display = "none";
-    //         this.proximoBotao.style.display = "none";
-    //         this.fimPerguntas.style.display = "block";
-    //         this.campoResposta.style.display = "none";
-    //         this.temp_visualizacao = 1;
-    //     }
-
-    // }
 
     exibirProximaPergunta(p, valorbarra) {
         if (p == 1) {
@@ -128,7 +82,7 @@ class Tarefa {
             return 1;
         } else if (pergunta === "Selecione a segunda maior barra? ") {
             return 2;
-        } else if (pergunta === "Selecione a barra que é a mediana?") {
+        } else if (pergunta === "Estimar Proporção entre os dois elementos?") {
             return 3
         } else if (pergunta === "Selecione a barra com o valor") {
             return 4;

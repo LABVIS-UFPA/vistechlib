@@ -204,6 +204,15 @@ class BaseDeDados {
         return [x1, x2, x3, x4];
     }
 
+    ratio(base) {
+        let resp_corr_menores = this.acharmenor(this['base' + base]);
+        let resp_corr_maiores = this.acharmaior(this['base' + base]);        
+        let x1 = resp_corr_menores[0];
+        let x2 = resp_corr_menores[1];
+        let x3 = resp_corr_maiores[1];
+        return [x1, x2, x3];
+    }
+
     shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));

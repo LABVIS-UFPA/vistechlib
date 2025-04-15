@@ -55,7 +55,7 @@
             const resposta = new Respostas();
 
             var strategies = ["default", "log", "scale-break", "scale break perspective"];
-            var tarefas = ["1", "2", "3", "4"];
+            var tarefas = ["3"];
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -103,21 +103,32 @@
 
                         //valores dos breaks
                         let break_dados = minhaBaseDeDados.breakdados(combination.varName);
+                        // cria a vizualização com a base
                         createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
+
                         //passa  a base para a função que grar o valor para t4
                         let t4 = minhaBaseDeDados.gerarvalor(combination.varName);
                         value_t4_barra = t4.valor;
                         tarefa.reset(combination.tarefa, t4.valor);
                         temp_visualizaçãoi = performance.now();
+
+
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
-                        createresp(combination.value);
-                        // if (tarefa.pergId == 4) {
-                        //     // createresp(combination.value, true);
-                        //     createrespinput()
-                        // } else {
-                        //     createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
-                        // }
+                        if (tarefa.pergId == 3) {
+                            var res = minhaBaseDeDados.ratio(combination.varName);
+                            var resposta_menor = res[0]; 
+                            var resposta_menor2 = res[1]; 
+                            var resposta_maior = res[2]; 
+                            resposta_menor.posicao;                            
+                            console.log(resposta_menor.posicao,)
+                            const highlightGroup = barchart.getHighlightElementsPSB([resposta_menor2.posicao, resposta_maior.posicao]);
+                            // Adiciona o highlight manualmente no SVG
+                            barchart.foreground.node().appendChild(highlightGroup);
+                            createresptext();
+                        } else {
+                            createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
+                        }
                     } else {
                         // Todas as combinações foram exibidas, agora exporte para CSV
                         resposta.exportToCSV();
@@ -126,22 +137,25 @@
                 }
                 // Inicia a exibição das combinações
                 displayNextCombination();
-
                 let tempo_total = 0;
 
+
+
+                // salvamento da resposta do ussuario(botao:Enviar)
                 this.proximoBotao.addEventListener("click", function () {
                     tarefa.pararTemporizador();// parar temporizador da classe tarefa
 
+                    // info ussuario
                     var id = localStorage.getItem("id");
                     var idade = localStorage.getItem("idade");
                     var grauEscolaridade = localStorage.getItem("grauEscolaridade");
                     var curso = localStorage.getItem("curso");
                     var visualizacao = localStorage.getItem("visualizacao");
                     var conhece = localStorage.getItem("conhece");
-
                     var valorlikert = localStorage.getItem("respostaLikert");
                     var valorlikert2 = localStorage.getItem("respostaLikert2", valorlikert2);
                     var valorlikert3 = localStorage.getItem("respostaLikert3", valorlikert3);
+
 
                     var res = minhaBaseDeDados.respostacorreta(combination.varName);
                     var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1]; // tarefa 1 esta na posição [0]
@@ -149,8 +163,6 @@
                     resposta_correta_posicao = resposta_correta.posicao;
                     resposta_correta_valor = resposta_correta.valor;
                     console.log(resposta_correta_posicao, resposta_correta_valor)
-
-
 
                     temp_visualizaçãof = performance.now();
                     let temp_D = temp_visualizaçãof - temp_visualizaçãoi;
@@ -164,11 +176,12 @@
                     let tempofinal = tarefa.formatatempo_performace(temp_janela_final)
 
                     //salvar resposta ussuario por pergunta
-                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece,valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
+                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
                     tarefa.enviarpergunta();
 
                 });
 
+                // botao de Continuar
                 continuarBotao.addEventListener('click', function () {
                     displayNextCombination();
                 });
@@ -204,17 +217,6 @@
                     input.style.marginTop = 0;
                     input.style.marginBottom = 0;
                     campoResposta.appendChild(input);
-
-
-                    // if (dados.length > 15) {
-                    //     //  para o primeiro e o ultimo input
-                    //     if (index === 0) {
-                    //         input.style.marginLeft = barchart.x.bandwidth() / 3 + 'px';
-                    //     } else if (index === dados.length - 1) {
-                    //         input.style.marginRight = (barchart.x.bandwidth()) / 5 + 'px';
-                    //     }// if (index > 0) {
-                    //     //     input.style.marginRight = 109794;
-                    // } else {
                     if (index === 0) {
                         input.style.marginLeft = barchart.x.bandwidth() / 2 + 'px';
                     } else if (index === dados.length - 1) {
@@ -235,6 +237,27 @@
                         });
                     });
                 }
+            }
+
+            function createresptext(labelText = "Resposta:") {
+                const textInputContainer = document.createElement("div");
+                textInputContainer.style.marginTop = "10px";
+
+                const label = document.createElement("label");
+                label.setAttribute("for", "respostaTexto");
+                label.textContent = labelText;
+                label.style.marginRight = "10px";
+
+                const textInput = document.createElement("input");
+                textInput.type = "text";
+                textInput.id = "respostaTexto";
+                textInput.name = "respostaTexto";
+                textInput.style.width = "80px";
+                textInput.style.padding = "5px";
+
+                textInputContainer.appendChild(label);
+                textInputContainer.appendChild(textInput);
+                campoResposta.appendChild(textInputContainer);
             }
 
         });
