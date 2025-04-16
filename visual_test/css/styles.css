@@ -13,7 +13,8 @@
     transition: transform 0.2s ease-in-out;
     position: absolute;
     width: 100%;
-    transform: perspective(245px) rotateY(0deg) rotateX(0deg);
+    transform: perspective(245px) rotateY(0deg) rotateX(0deg) ;
+    z-index: -1;
 }
 
 #chart div{

@@ -25,11 +25,43 @@ header {
 
 
 div#chart {
-    height: 710px;
     width: 98%;
 }
 
 
 #video {
     display: none;
+}
+
+#chart {
+    display: flex;
+    flex-direction: column;
+}
+
+main{
+    position: relative;
+}
+
+.dbreak{
+    display: flex;
+    flex-direction: column;
+    height: auto !important;
+    z-index: -1;
+    overflow: visible !important;
+    -webkit-transform-style: preserve-3d;
+    transition: transform 0.2s ease-in-out;
+    position: absolute;
+    width: 100%;
+    transform: perspective(245px) rotateY(0deg) rotateX(0deg) translateY(00px);
+}
+
+#chart div{
+    display: flex;
+    justify-content: center;
+} 
+
+
+svg{
+    overflow: visible !important;
+    margin: 0 auto;
 }
