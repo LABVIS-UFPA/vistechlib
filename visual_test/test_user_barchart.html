@@ -52,7 +52,7 @@
             const resposta = new Respostas();
 
             var strategies = ["default", "3d break", "scale-break", "scale break perspective"];
-            var tarefas = ["1", "2", "3", "4"];            
+            var tarefas = [ "3"];            
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -124,11 +124,11 @@
                                 var resposta_maior = res[2];
                                 console.log("valor:",resposta_maior.valor);
                                 let razao = resposta_maior.valor/resposta_menor.valor;
-                                console.log("razão:",razao)
+                                console.log("AAqui:")
                                 // lembra que o indice da barra agora e indice+1
-                                const highlightGroup = barchart.getHighlightElementsPSB([resposta_menor2.posicao+1, resposta_maior.posicao+1]);
+                                barchart.getHighlightElementsPSB([resposta_menor2.posicao+1, resposta_maior.posicao+1], "#e74c3c");
                                 // Adiciona o highlight manualmente no SVG
-                                barchart.foreground.node().appendChild(highlightGroup);
+                                // barchart.foreground.node().appendChild(highlightGroup);                
                             }, 5);
                             createresptext();
                         } else {
@@ -261,12 +261,12 @@
 
             function createresptext(labelText = "Resposta:") {
                 const textInputContainer = document.createElement("div");
-                textInputContainer.style.marginTop = "10px";
+                textInputContainer.style.marginTop = "8px";
 
                 const label = document.createElement("label");
                 label.setAttribute("for", "respostaTexto");
                 label.textContent = labelText;
-                label.style.marginRight = "10px";
+                label.style.marginRight = "10px";                
 
                 const textInput = document.createElement("input");
                 textInput.type = "text";
@@ -274,6 +274,7 @@
                 textInput.name = "respostaTexto";
                 textInput.style.width = "80px";
                 textInput.style.padding = "5px";
+                textInput.style.marginBottom = "5px";
 
                 textInputContainer.appendChild(label);
                 textInputContainer.appendChild(textInput);
