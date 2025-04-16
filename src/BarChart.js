@@ -292,14 +292,15 @@ class BarChart extends Visualization {
 
     getHighlightElementsPSB(indices, color) {
         // Muda a cor dos <rect> com data-index dentro do foreground
-        this.foreground.selectAll('rect')
+        this.canvas.selectAll('rect')
+        console.log(this.canvas)
             .filter(function () {
                 return indices.includes(+d3.select(this).attr("data-index"));
             })
             .style("fill", color);
 
         // Muda a cor dos <path> com data-index dentro do foreground
-        this.foreground.selectAll('path')
+        this.canvas.selectAll('path')
             .filter(function () {
                 return indices.includes(+d3.select(this).attr("data-index"));
             })
@@ -1219,7 +1220,8 @@ BarChart.strategies = {
                             )
                             .attr("width", xScale.bandwidth())
                             .attr("height", barHeight)
-                            .attr("class", section.name);
+                            .attr("class", section.name)
+                            .attr("data-index", i+1);
 
                         yOffset -= barHeight; // Atualiza o deslocamento para a próxima parte da barra
                     }
