@@ -292,21 +292,86 @@ class BarChart extends Visualization {
 
     getHighlightElementsPSB(indices, color) {
         // Muda a cor dos <rect> com data-index dentro do foreground
-        this.canvas.selectAll('rect')
-        console.log(this.canvas)
+        d3.selectAll('rect')
             .filter(function () {
                 return indices.includes(+d3.select(this).attr("data-index"));
             })
             .style("fill", color);
 
         // Muda a cor dos <path> com data-index dentro do foreground
-        this.canvas.selectAll('path')
+        d3.selectAll('path')
             .filter(function () {
                 return indices.includes(+d3.select(this).attr("data-index"));
             })
             .style("fill", color);
     }
 
+
+    calcularCortesEMaximo(dados) {
+        if (!dados || dados.length < 2) return null;
+
+        const valoresOrdenados = [...dados]
+            .sort((a, b) => a.valor - b.valor)
+            .map((item) => item.valor);
+    
+        function identificarMaiorDiferenca(arr) {
+            let maiorGap = 0;
+            let posicaoGap = -1;
+    
+            for (let i = 0; i < arr.length - 1; i++) {
+                const diff = arr[i + 1] - arr[i];
+                if (diff > maiorGap) {
+                    maiorGap = diff;
+                    posicaoGap = i;
+                }
+            }
+    
+            if (posicaoGap === -1 || maiorGap === 0) {
+                posicaoGap = Math.floor(arr.length / 2) - 1;
+                if (posicaoGap < 0) posicaoGap = 0;
+            }
+    
+            return {
+                corte: arr[posicaoGap],
+                corteFinal: arr[posicaoGap + 1],
+                maximo: arr[arr.length - 1]
+            };
+        }
+    
+        const { corte, corteFinal, maximo } = identificarMaiorDiferenca(valoresOrdenados);
+    
+        // Ajusta os cortes (igual ao original)
+        let corteAjust = corte;
+        let corteFinalAjust = corteFinal;
+        let maximoAjust = maximo;
+    
+        if (maximoAjust - corteFinalAjust > corteAjust) {
+            corteFinalAjust = maximoAjust - corteAjust;
+            corteAjust = maximoAjust - corteFinalAjust;
+        } else {
+            maximoAjust = corteFinalAjust + corteAjust;
+        }
+    
+        // Calcula cortes intermediários (igual ao original)
+        const tamanhoMeioRelativo = 0.5;
+        const tamanhoMeio = corteAjust * (tamanhoMeioRelativo / 2);
+        const diferenca = corteFinalAjust - corteAjust;
+    
+        let corte2 = corteAjust + diferenca / 2 - tamanhoMeio;
+        let corte3 = corteAjust + diferenca / 2 + tamanhoMeio;
+    
+        corte2 = Math.max(corteAjust, Math.min(corte2, corteFinalAjust));
+        corte3 = Math.max(corte2, Math.min(corte3, corteFinalAjust));
+    
+        return {
+            corteInferior: corteAjust,
+            corteSuperior: corteFinalAjust,
+            corteIntermediario1: corte2,
+            corteIntermediario2: corte3,
+            valorMaximo: maximoAjust,
+            valoresOrdenados: valoresOrdenados
+        };
+    }
 
     filterByDimension(args) {
         this.settings.filter = args;
@@ -1017,81 +1082,23 @@ BarChart.strategies = {
         }
     }, "3d break": {
         data: (barchart) => {
-
-            barchart.ordenado = [...barchart.d]
-                .sort((a, b) => a.valor - b.valor)
-                .map((item) => item.valor);
+            const resultado = barchart.calcularCortesEMaximo(barchart.d);
             barchart.d = [...barchart.d].map((item) => item.valor);
-
-            if (barchart.ordenado.length < 2) {
+            
+            if (!resultado) {
                 console.error("Dados insuficientes para análise de quebra");
                 return;
             }
-
-            function identificarMaiorDiferenca(arr) {
-                let maiorGap = 0;
-                let posicaoGap = -1;
-
-                for (let i = 0; i < arr.length - 1; i++) {
-                    const diff = arr[i + 1] - arr[i];
-
-                    if (diff > maiorGap) {
-                        maiorGap = diff;
-                        posicaoGap = i;
-                    }
-                }
-
-                if (posicaoGap === -1 || maiorGap === 0) {
-                    posicaoGap = Math.floor(arr.length / 2) - 1;
-                    if (posicaoGap < 0) posicaoGap = 0;
-                }
-
-                return {
-                    corte: arr[posicaoGap],
-                    cortefinal: arr[posicaoGap + 1],
-                    maximo: arr[arr.length - 1],
-                };
-            }
-
-            const {
-                corte: corteInicial,
-                cortefinal: corteFinalInicial,
-                maximo: maximoInicial,
-            } = identificarMaiorDiferenca(barchart.ordenado);
-
-            let corte = corteInicial;
-            let corteFinal = corteFinalInicial;
-            let maximo = maximoInicial;
-
-
-            if (maximo - corteFinal > corte) {
-                corteFinal = maximo - corte;
-                corte = maximo - corteFinal;
-
-            } else {
-                maximo = corteFinal + corte;
-                // corteFinal = maximo - corte;
-            }
-
-            const tamanhoMeioRelativo = 0.5;
-            const tamanhoMeio = corte * (tamanhoMeioRelativo / 2);
-
-            const diferenca = corteFinal - corte;
-            let corte2 = corte + diferenca / 2 - tamanhoMeio;
-            let corte3 = corte + diferenca / 2 + tamanhoMeio;
-
-            corte2 = Math.max(corte, Math.min(corte2, corteFinal));
-            corte3 = Math.max(corte2, Math.min(corte3, corteFinal));
-
-            barchart.corte = corte;
-            barchart.maximo = maximo;
-
+        
+            barchart.corte = resultado.corteInferior;
+            barchart.maximo = resultado.valorMaximo;
+        
             barchart.sections = [
-                { name: "lower", range: [0, corte] },
-                { name: "meio1", range: [corte, corte2] },
-                { name: "meio2", range: [corte2, corte3] },
-                { name: "meio3", range: [corte3, corteFinal] },
-                { name: "upper", range: [corteFinal, maximo] },
+                { name: "lower", range: [0, resultado.corteInferior] },
+                { name: "meio1", range: [resultado.corteInferior, resultado.corteIntermediario1] },
+                { name: "meio2", range: [resultado.corteIntermediario1, resultado.corteIntermediario2] },
+                { name: "meio3", range: [resultado.corteIntermediario2, resultado.corteSuperior] },
+                { name: "upper", range: [resultado.corteSuperior, resultado.valorMaximo] },
             ];
         },
 
