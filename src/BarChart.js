@@ -1,4 +1,3 @@
-
 // if(module) {
 //     var d3 = require("d3");
 //     var Visualization = require("./Visualization.js");
@@ -1054,167 +1053,397 @@ BarChart.strategies = {
                 }
             });
         }
-    }, "default_div": {
-        data: (barchart) => {
+    }, "3d break": {
+    data: (barchart) => {
 
-            barchart.ybreak = {};
-            barchart.ybreak2 = {};
-            barchart.ybreak3 = {};
-            barchart.ybreak4 = {};
-            barchart.z = barchart.settings.z;
+      barchart.ordenado = [...barchart.d]
+        .sort((a, b) => a.valor - b.valor)
+        .map((item) => item.valor);
+      barchart.d = [...barchart.d].map((item) => item.valor);
 
-            let corte = barchart.settings.corte;
-            let cortefinal = barchart.settings.cortefinal;
-            let diferença = cortefinal - corte;
+      if (barchart.ordenado.length < 2) {
+        console.error("Dados insuficientes para análise de quebra");
+        return;
+      }
 
-            let corte2 = corte + (diferença * 40) / 100
+      function identificarMaiorDiferenca(arr) {
+        let maiorGap = 0;
+        let posicaoGap = -1;
 
-            let corte3 = corte2 + (diferença * 20) / 100;
+        for (let i = 0; i < arr.length - 1; i++) {
+          const diff = arr[i + 1] - arr[i];
 
-            for (let k of barchart.keys_filter) {
-                let maximo = barchart.domain[k][1];
-
-
-
-
-                barchart.breakPoint = 0.3;
-                barchart.breakPoint2 = 0.96;
-                barchart.breakPoint3 = 0.88;
-                barchart.breakPoint4 = 0.95;
-
-
-
-                barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint;
-                barchart.boxHeightBreak2 = barchart.boxHeightBreak * barchart.breakPoint2;
-                barchart.boxHeightBreak3 = barchart.boxHeightBreak2 * barchart.breakPoint3;
-                barchart.boxHeightBreak4 = barchart.boxHeightBreak3 * barchart.breakPoint4;
-
-
-
-                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
-                barchart.ybreak2[k] = d3.scaleLinear().domain([corte2, corte3]).range([barchart.boxHeightBreak2, barchart.boxHeightBreak3]);
-                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
-                barchart.ybreak4[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
-
-            }
-        },
-        draw: (barchart) => {
-
-            barchart.foreground.selectAll("g.dataGroup").each(function (key) {
-                let maxh = barchart.boxHeight - barchart.boxHeightBreak;
-                //let g = d3.select(this);
-
-                // Selecione a div "upper" no HTML para inserir o gráfico SVG
-                let container1 = document.getElementById("upper");
-
-                // Adicione o SVG dentro da div "upper"
-                let svg = d3.select(container1)
-                    .style("overflow", "hidden")  // Para esconder o excesso, se necessário
-                    .append("svg")
-                    .attr("width", barchart.settings.innerWidth)  // Defina a largura do SVG
-                    .attr("height", maxh);  // Defina a altura do SVG
-
-
-                svg.selectAll("rect.lower")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "lower")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => Math.max(barchart.y[key](d[key]), barchart.boxHeightBreak))
-                    .attr("width", barchart.x.bandwidth())
-                    .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
-                    .style("fill", barchart.settings.color);
-
-
-                let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
-                let z = 2;
-                let di = 5;
-                let f = 30;
-                g.selectAll("rect.meio1")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "meio1")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => Math.max(barchart.ybreak[key](d[key]), barchart.boxHeightBreak2))
-                    .attr("width", (d) => barchart.x.bandwidth())
-                    .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), maxh2), 0));
-
-                let maxh3 = barchart.boxHeightBreak2 - barchart.boxHeightBreak3;
-                g.selectAll("rect.meio2")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "meio2")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => Math.max(barchart.ybreak2[key](d[key]), barchart.boxHeightBreak3))
-                    .attr("width", (d) => barchart.x.bandwidth())
-                    .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak2 - barchart.ybreak2[key](d[key]), maxh3), 0));
-
-                let maxh4 = barchart.boxHeightBreak3 - barchart.boxHeightBreak4;
-                g.selectAll("rect.meio3")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "meio3")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => Math.max(barchart.ybreak3[key](d[key]), barchart.boxHeightBreak4))
-                    .attr("width", (d) => barchart.x.bandwidth())
-                    .attr("height", (d) => Math.max(Math.min(barchart.boxHeightBreak3 - barchart.ybreak3[key](d[key]), maxh4), 0));
-
-                g.selectAll("rect.upper")
-                    .data(barchart.d)
-                    .join(
-                        enter => {
-                            let enter_result = enter.append("rect")
-                                .attr("class", "upper")
-                                .style("stroke", "none")
-                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
-                            barchart._bindDataMouseEvents(enter_result);
-                            return enter_result;
-                        }
-                    )
-                    .style("fill", barchart.settings.color)
-                    .attr("x", (d, i) => barchart.x(i))
-                    .attr("y", (d) => barchart.ybreak4[key](d[key]))
-                    .attr("width", barchart.x.bandwidth())
-                    .attr("height", (d) => Math.max(barchart.boxHeightBreak4 - barchart.ybreak4[key](d[key]), 0));
-            });
+          if (diff > maiorGap) {
+            maiorGap = diff;
+            posicaoGap = i;
+          }
         }
+
+        if (posicaoGap === -1 || maiorGap === 0) {
+          posicaoGap = Math.floor(arr.length / 2) - 1;
+          if (posicaoGap < 0) posicaoGap = 0;
+        }
+
+        return {
+          corte: arr[posicaoGap],
+          cortefinal: arr[posicaoGap + 1],
+          maximo: arr[arr.length - 1],
+        };
+      }
+
+      const {
+        corte: corteInicial,
+        cortefinal: corteFinalInicial,
+        maximo : maximoInicial,
+      } = identificarMaiorDiferenca(barchart.ordenado);
+
+      let corte = corteInicial;
+      let corteFinal = corteFinalInicial;
+      let maximo = maximoInicial;
+
+
+      if (maximo - corteFinal > corte) {
+        corteFinal = maximo - corte;
+        corte = maximo - corteFinal;
+        
+      } else {
+        maximo = corteFinal+corte;
+        // corteFinal = maximo - corte;
+      }
+
+      const tamanhoMeioRelativo = 0.5;
+      const tamanhoMeio = corte * (tamanhoMeioRelativo / 2);
+
+      const diferenca = corteFinal - corte;
+      let corte2 = corte + diferenca / 2 - tamanhoMeio;
+      let corte3 = corte + diferenca / 2 + tamanhoMeio;
+
+      corte2 = Math.max(corte, Math.min(corte2, corteFinal));
+      corte3 = Math.max(corte2, Math.min(corte3, corteFinal));
+
+      barchart.corte = corte;
+      barchart.maximo = maximo;
+
+      barchart.sections = [
+        { name: "lower", range: [0, corte] },
+        { name: "meio1", range: [corte, corte2] },
+        { name: "meio2", range: [corte2, corte3] },
+        { name: "meio3", range: [corte3, corteFinal] },
+        { name: "upper", range: [corteFinal, maximo] },
+      ];
     },
-}
+
+    draw: (barchart) => {
+      barchart.parentElement.classList.add("dbreak");
+
+      barchart.parentElement.innerHTML = `
+            <div id="upper" class="child">
+                <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
+            </div>
+            <div id="meio3" class="child">
+                <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
+            </div>
+            <div id="meio2" class="child">
+                <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
+            </div>
+            <div id="meio1" class="child">
+                <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
+            </div>
+            <div id="lower" class="child">
+                <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
+            </div>
+        `;
+
+      const divideValueBySections = (value, sections) => {
+        let remaining = value;
+        return sections.map((section) => {
+          const rangeSize = section.range[1] - section.range[0];
+          const inSection = Math.max(0, Math.min(rangeSize, remaining));
+          remaining -= inSection;
+          return { name: section.name, value: inSection };
+        });
+      };
+
+      const lowerMax = barchart.corte;
+      const yIncrement = lowerMax / 10;
+      const maxDataValue = barchart.maximo;
+
+      const scaleFactor = 230;
+      const dynamicHeight = scaleFactor * maxDataValue / lowerMax;
+
+      const width = document.querySelector("#chart").clientWidth - 50;
+      const height = dynamicHeight
+      const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+
+      const xScale = d3
+        .scaleBand()
+        .domain(barchart.d.map((_, i) => i))
+        .range([margin.left, width - margin.right])
+        .padding(0.1);
+
+      const sortedTicks = [];
+      const ticks = d3
+        .scaleLinear()
+        .domain([0, maxDataValue])
+        .range(height)
+        .ticks(maxDataValue / yIncrement);
+
+      ticks.forEach((d) => {
+        sortedTicks.push(d);
+      });
+
+      barchart.sections.forEach((section, index) => {
+        for (const d of sortedTicks) {
+          if (d >= section.range[1]) {
+            if (section.name == "meio3") {
+              section.range[1] = sortedTicks[sortedTicks.indexOf(d) - 1] - 1;
+              if (index + 1 < barchart.sections.length) {
+                barchart.sections[index + 1].range[0] =
+                  sortedTicks[sortedTicks.indexOf(d) - 1];
+              }
+              break;
+            }
+            if (section.name == "lower") {
+              section.range[1] = d;
+              if (index + 1 < barchart.sections.length) {
+                barchart.sections[index + 1].range[0] = d;
+              }
+              break;
+            }
+          }
+
+          if (
+            section.name == "upper" &&
+            d == sortedTicks[sortedTicks.length - 1]
+          ) {
+            section.range[1] =
+              d + (sortedTicks.length > 1 ? sortedTicks[1] : 0);
+          }
+        }
+      });
+
+      const yScale = d3
+        .scaleLinear()
+        .domain([
+          0,
+          sortedTicks.length
+            ? sortedTicks[sortedTicks.length - 1] +
+              (sortedTicks.length > 1 ? sortedTicks[1] : 0)
+            : 10,
+        ])
+        .range([height - margin.bottom, margin.top]);
+
+      const svg = d3
+        .select("#chart")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      barchart.d.forEach((value, i) => {
+        const dividedValues = divideValueBySections(value, barchart.sections);
+        let yOffset = yScale(0);
+
+        dividedValues.forEach((section) => {
+          if (section.value > 0) {
+            const barHeight = yScale(0) - yScale(section.value);
+            svg
+              .append("rect")
+              .attr("x", xScale(i))
+              .attr("y", yOffset - barHeight)
+              .style(
+                "fill",
+                barchart.settings && barchart.settings.color
+                  ? barchart.settings.color
+                  : "#69b3a2"
+              )
+              .attr("width", xScale.bandwidth())
+              .attr("height", barHeight)
+              .attr("class", section.name);
+
+            yOffset -= barHeight; // Atualiza o deslocamento para a próxima parte da barra
+          }
+        });
+      });
+
+      // Adiciona o eixo Y com classes para cada seção
+      svg
+        .append("g")
+        .attr("transform", `translate(${margin.left},0)`)
+        .call(d3.axisLeft(yScale).ticks(maxDataValue / yIncrement))
+        .selectAll(".tick")
+        .each(function (d) {
+          // Determina a seção a que o tick pertence
+          const section = barchart.sections.find(
+            (sec) => d >= sec.range[0] && d <= sec.range[1]
+          );
+          const sectionClass = section ? `${section.name}axis` : "unknownaxis";
+
+          // Atribui a classe e adiciona linha horizontal
+          d3.select(this)
+            .attr("class", sectionClass)
+            .append("line")
+            .attr("x1", 0)
+            .attr("x2", width - margin.left - margin.right)
+            .attr("y1", 0)
+            .attr("y2", 0)
+            .attr("stroke", "black")
+            .attr("stroke-width", 0.5);
+        });
+
+      // Agrupa as partes do gráfico
+      const parts = {
+        4: d3.selectAll("rect.upper"),
+        3: d3.selectAll("rect.meio3"),
+        2: d3.selectAll("rect.meio2"),
+        1: d3.selectAll("rect.meio1"),
+        0: d3.selectAll("rect.lower"),
+      };
+
+      // Processa cada parte do gráfico
+      for (const part in parts) {
+        if (!parts[part].nodes().length) continue;
+
+        const classe = parts[part].node().classList.value;
+        const raiz = document.querySelector(`#${classe} svg`);
+
+        if (!raiz) continue;
+
+        // Inicializa dimensões
+        raiz.parentElement.attributes.height = 0;
+        raiz.parentElement.style.height = "0";
+        raiz.style.width = `${width}px`;
+
+        // Move os elementos para o SVG correspondente
+        parts[part].nodes().forEach((element) => {
+          const divFilho = element;
+          divFilho.setAttribute("y", "0");
+          divFilho.style.transform = `translateX(50px)`;
+
+          if (
+            Number(divFilho.attributes.height.value) >=
+            Number(raiz.parentElement.attributes.height)
+          ) {
+            raiz.parentElement.attributes.height =
+              divFilho.attributes.height.value;
+          }
+
+          raiz.appendChild(divFilho);
+        });
+
+        // Atualiza a altura com base nos elementos
+
+        raiz.parentElement.style.height = `${raiz.parentElement.attributes.height}px`;
+        
+
+        // Cria o domínio do gráfico
+        const domain = document.createElement("g");
+        domain.setAttribute("transform", "translate(40,0)");
+        domain.setAttribute("fill", "none");
+        domain.setAttribute("font-size", "10");
+        domain.setAttribute("font-family", "sans-serif");
+        domain.setAttribute("text-anchor", "end");
+
+        // Cria o elemento de caminho
+        const pathElement = document.createElement("path");
+        pathElement.setAttribute("class", "domain");
+        pathElement.setAttribute("stroke", "currentColor");
+        pathElement.setAttribute(
+          "d",
+          `M-6,${Math.round(raiz.parentElement.attributes.height)}H0V20H-6`
+        );
+
+        domain.appendChild(pathElement);
+        raiz.appendChild(domain);
+
+        // Processa as linhas do eixo Y
+        const linhas = document.querySelectorAll(`.${classe}axis`);
+        if (linhas.length > 0) {
+          let linhaYmax = linhas[0].transform.animVal[0].matrix.f;
+
+          linhas.forEach((linha) => {
+            let y = (linha.transform.animVal[0].matrix.f - linhaYmax) * -1;
+            linha.setAttribute("transform", `translate(100, ${y})`);
+
+            if (classe == "meio1" || classe == "meio2" || classe == "meio3") {
+              linha.childNodes[1].style.display = "None";
+            } else {
+              linha.childNodes[1].style.transform =
+                "translate(-50px, 0) rotateX(180deg)";
+            }
+
+            raiz.appendChild(linha);
+            if (raiz.parentElement.id == "upper" || raiz.parentElement.id == "lower") {
+                raiz.parentElement.style.height = `${y}px`;
+            }
+          });
+        }
+      }
+
+      // Remove o SVG base
+      const baseSVG = document.querySelector("#chart > svg");
+      if (baseSVG) {
+        baseSVG.parentNode.removeChild(baseSVG);
+      }
+
+      // Aplica as transformações 3D
+
+
+      const m1 = document.querySelector("#meio1");
+      if (m1) {
+        m1.style.transform = `rotate3d(1, 0, 0, -90deg) translate3d(0px, ${m1.clientHeight / 2}px, -${m1.clientHeight / 2}px)`;
+      }
+
+      const m3 = document.querySelector("#meio3");
+      if (m3) {
+        m3.style.transform = `rotate3d(1, 0, 0, 90deg) translate3d(0px, -${m3.clientHeight / 2}px, -${m3.clientHeight / 2}px)`;
+      }
+
+      const m2 = document.querySelector("#meio2");
+      if (m2 && m3) {
+        m2.style.transform = `rotateX(180deg) translate3d(0px, 0px, ${m3.clientHeight}px)`;
+      }
+
+      const upper = document.querySelector("#upper");
+      if (upper && m3) {
+        upper.style.transform = `rotateX(180deg) translate3d(0px, -${m3.clientHeight}px, 0px)`;
+      }
+
+      const lower = document.querySelector("#lower");
+      if (lower && m1) {
+        lower.style.transform = `rotateX(180deg) translate3d(0px, ${m1.clientHeight}px, 0px)`;
+      }
+      
+
+      // Configura os controles de perspectiva/rotação
+      const slider = document.querySelector("#sliderGirarGrafico");
+      const sliderPerspective = document.querySelector("#sliderPerspective");
+      const myDiv = document.getElementById("chart");
+
+      if (slider && sliderPerspective && myDiv) {
+        let rotateXValue = slider.value;
+        let perspectiveValue = sliderPerspective.value;
+
+        // Configura os event listeners para os sliders
+        slider.addEventListener("input", () => {
+          rotateXValue = slider.value;
+          myDiv.style.transform = `perspective(${perspectiveValue}px) rotateY(${rotateXValue}deg)`;
+        });
+
+        sliderPerspective.addEventListener("input", () => {
+          perspectiveValue = sliderPerspective.value;
+          myDiv.style.transform = `perspective(${perspectiveValue}px) rotateY(${rotateXValue}deg)`;
+        });  
+      }
+      
+      myDiv.style.top = `-${myDiv.clientHeight/2 - upper.clientHeight - upper.clientHeight/3}px`;
+
+      // Remove nós filhos desnecessários
+      const parent = document.getElementById("chart");
+      if (parent && parent.lastChild) {
+        parent.removeChild(parent.lastChild);
+      }
+    },
+  },
+};
 
 module.exports = BarChart;

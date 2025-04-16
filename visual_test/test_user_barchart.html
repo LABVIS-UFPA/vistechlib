@@ -20,9 +20,9 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             // Liga a camera
-            // const videoElement = document.getElementById('video');
-            // const web = new webcam(videoElement);
-            // web.startRecording();
+            const videoElement = document.getElementById('video');
+            const web = new webcam(videoElement);
+            web.startRecording();
 
             var bodyElement = document.body;
             let layout = document.querySelector("#chart");
@@ -44,7 +44,6 @@
                 barchart.data(data);
                 // Redesenha o gráfico
                 barchart.redraw();
-
             }
 
             const minhaBaseDeDados = new BaseDeDados();
@@ -52,8 +51,8 @@
             const tarefa = new Tarefa();
             const resposta = new Respostas();
 
-            var strategies = ["default", "log", "scale-break", "scale break perspective"];
-            var tarefas = ["3"];
+            var strategies = ["default", "3d break", "scale-break", "scale break perspective"];
+            var tarefas = ["1", "2", "3", "4"];            
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -101,7 +100,8 @@
 
                         //valores dos breaks
                         let break_dados = minhaBaseDeDados.breakdados(combination.varName);
-                        // cria a vizualização com a base
+                        document.querySelector("#chart").classList.remove("dbreak")
+                        document.querySelector("#chart").style.top = "0px";
                         createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
 
                         //passa  a base para a função que grar o valor para t4
@@ -189,24 +189,39 @@
                 // botao de Continuar
                 continuarBotao.addEventListener('click', function () {
                     displayNextCombination();
+                    alinharFildsetAoGrafico();
                 });
-
             }
 
             // Chama a função para exibir as combinações
             displayCombinations();
+            alinharFildsetAoGrafico();
 
             //alinhar fieldset ao grafico
-            var ban = d3.select("svg .background .vis_background").node().getBoundingClientRect();
-            campoResposta.style.width = ban.width + "px";
-            campoResposta.style.marginLeft = ban.left - 10 + "px";
-            campoResposta.style.marginRight = 0 + "px";
-            campoResposta.style.padding = 0 + 'px';
+            function alinharFildsetAoGrafico(){
+                console.log(d3.select("svg .background .vis_background").node())
+                if (!d3.select("svg .background .vis_background").node()) {
+                    var ban = d3.selectAll("svg .loweraxis line").nodes().pop().getBoundingClientRect()
+                    campoResposta.style.marginTop = ban.y + 160 + "px";
+                    document.querySelector("#fimPerguntas").style.marginTop = ban.y + 160 + "px";
+                }else{
+                    var ban = d3.select("svg .background .vis_background").node().getBoundingClientRect();
+                    campoResposta.style.marginTop = "0px";
+                    document.querySelector("#fimPerguntas").style.marginTop = "0px";
+                }
 
+                campoResposta.style.width = ban.width + "px";
+                campoResposta.style.marginLeft = ban.left - 10 + "px";
+                campoResposta.style.marginRight = 0 + "px";
+                campoResposta.style.padding = 0 + 'px';
+            }
+            
+            
 
             function createresp(dados, allowMultipleSelection) {
                 campoResposta.classList.add("checkbox-form");
                 var gap = barchart.settings.gap;
+
 
 
                 dados.forEach((valor, index) => {
@@ -277,7 +292,7 @@
             <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
         </header>
         <main>
-            <div id="chart"></div>
+            <div id="chart" style="height: 700px;"></div>
         </main>
 
 

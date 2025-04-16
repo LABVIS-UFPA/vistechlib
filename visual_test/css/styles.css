@@ -2,3 +2,28 @@
     display: block;
     flex-direction: column;
 }
+
+.dbreak{
+    height: auto !important;
+    display: block;
+    flex-direction: column;
+    overflow: visible !important;
+    margin: auto;
+    -webkit-transform-style: preserve-3d;
+    transition: transform 0.2s ease-in-out;
+    position: absolute;
+    width: 100%;
+    transform: perspective(245px) rotateY(0deg) rotateX(0deg) ;
+    z-index: -1;
+}
+
+#chart div{
+    display: flex;
+    justify-content: center;
+} 
+
+
+svg{
+    overflow: visible !important;
+    margin: 0 auto;
+}
