@@ -326,26 +326,20 @@ class BarChart extends Visualization {
             }
         });
 
-        // Agora destaca os paths com data-index presente em indices
         this.foreground.selectAll('path').each(function () {
-            let path_select = d3.select(this);
-            let pathIndex = +path_select.attr("data-index");
-
+            const pathSelect = d3.select(this);
+            const pathIndex = +pathSelect.attr("data-index");
+        
             if (indices.includes(pathIndex)) {
-                let t = parseTranslate(this.parentElement);
-
-                let pathClone = path_select.clone(true); // clona mantendo atributos
-                pathClone
+                // Aqui não aplicamos mais transformação, apenas clonamos a barra na mesma posição
+                const path = d3.select(document.createElementNS("http://www.w3.org/2000/svg", "path"))
                     .attr("class", "pathHighlight")
-                    .style("fill", histogram.settings.highlightColor)
-                    .style("stroke", "none")
-                    .attr("stroke-width", "2px");
-
-                // Ajusta a transformação para manter a posição original
-                let transformStr = `translate(${t.x}, ${t.y})`;
-                pathClone.attr("transform", transformStr);
-
-                group.appendChild(pathClone.node());
+                    .style("fill", histogram.settings.highlightColor) // Remove preenchimento para manter só o contorno
+                    .style("stroke", "none" ) // Cor do contorno
+                    .attr("stroke-width", "2px") // Tamanho da borda
+                    .attr("d", pathSelect.attr("d")); // Mantém o caminho original
+        
+                group.appendChild(path.node());
             }
         });
 
@@ -372,7 +366,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "data")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -425,7 +419,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "data")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -508,7 +502,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "lower")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -527,7 +521,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "upper")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -779,7 +773,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "lower")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -803,7 +797,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("path")
                                 .attr("class", "meio1")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -830,7 +824,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("path")
                                 .attr("class", "meio2")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -852,7 +846,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("path")
                                 .attr("class", "meio3")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -873,7 +867,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("path")
                                 .attr("class", "upper")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -1129,7 +1123,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "lower")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -1152,7 +1146,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "meio1")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -1171,7 +1165,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "meio2")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -1190,7 +1184,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "meio3")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
@@ -1208,7 +1202,7 @@ BarChart.strategies = {
                             let enter_result = enter.append("rect")
                                 .attr("class", "upper")
                                 .style("stroke", "none")
-                                .attr("data-index", (d, i) => i);
+                                .attr("data-index", (d, i) => i + 1);  // Ajustando para começar do índice 1;
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }

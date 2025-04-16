@@ -77,6 +77,7 @@ class BaseDeDados {
         ];
 
         this.valor_barra;
+        this.razaomaior_menor;
 
     }
 
@@ -190,28 +191,32 @@ class BaseDeDados {
         }
     }
 
+    ratio(base) {
+        let resp_corr_menores = this.acharmenor(this['base' + base]);
+        let resp_corr_maiores = this.acharmaior(this['base' + base]);
+        let x1 = resp_corr_menores[0];
+        let x2 = resp_corr_menores[1];
+        let x3 = resp_corr_maiores[1];
+        this.razaomaior_menor = x3.valor/x2.valor;
+        return [x1, x2, x3];
+    }
+
 
 
     respostacorreta(base) {
         let resp_corr_menores = this.acharmenor(this['base' + base]);
         let resp_corr_maiores = this.acharmaior(this['base' + base]);
-        let resp_corr_mediana = this.encontrarMedianaEPosicao(this['base' + base]);
-        console.log(this['base' + base])
+        // let resp_corr_mediana = this.encontrarMedianaEPosicao(this['base' + base]);
         let x1 = resp_corr_menores[1];
         let x2 = resp_corr_maiores[1];
-        let x3 = resp_corr_mediana;
+        // let x3 = resp_corr_mediana;
         let x4 = this.valor_barra;
+        let x3 = { valor: this.razaomaior_menor, posicao: 0 };
+        console.log("valor x3:",x3);
         return [x1, x2, x3, x4];
     }
 
-    ratio(base) {
-        let resp_corr_menores = this.acharmenor(this['base' + base]);
-        let resp_corr_maiores = this.acharmaior(this['base' + base]);        
-        let x1 = resp_corr_menores[0];
-        let x2 = resp_corr_menores[1];
-        let x3 = resp_corr_maiores[1];
-        return [x1, x2, x3];
-    }
+    
 
     shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {

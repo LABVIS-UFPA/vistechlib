@@ -24,8 +24,6 @@
             // const web = new webcam(videoElement);
             // web.startRecording();
 
-            console.log(localStorage.getItem("id"))
-
             var bodyElement = document.body;
             let layout = document.querySelector("#chart");
             var continuarBotao = document.getElementById("continuarBotao");
@@ -115,19 +113,26 @@
 
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
+
+                        // atraamento especifico para a tarefa de razao
                         if (tarefa.pergId == 3) {
-                            var res = minhaBaseDeDados.ratio(combination.varName);
-                            var resposta_menor = res[0]; 
-                            var resposta_menor2 = res[1]; 
-                            var resposta_maior = res[2]; 
-                            resposta_menor.posicao;                            
-                            console.log(resposta_menor.posicao,)
-                            const highlightGroup = barchart.getHighlightElementsPSB([resposta_menor2.posicao, resposta_maior.posicao]);
-                            // Adiciona o highlight manualmente no SVG
-                            barchart.foreground.node().appendChild(highlightGroup);
+                            // carregar somente depois de ter enderizado o grafico
+                            setTimeout(() => {
+                                var res = minhaBaseDeDados.ratio(combination.varName);
+                                var resposta_menor = res[0];
+                                var resposta_menor2 = res[1];
+                                var resposta_maior = res[2];
+                                console.log("valor:",resposta_maior.valor);
+                                let razao = resposta_maior.valor/resposta_menor.valor;
+                                console.log("razão:",razao)
+                                // lembra que o indice da barra agora e indice+1
+                                const highlightGroup = barchart.getHighlightElementsPSB([resposta_menor2.posicao+1, resposta_maior.posicao+1]);
+                                // Adiciona o highlight manualmente no SVG
+                                barchart.foreground.node().appendChild(highlightGroup);
+                            }, 5);
                             createresptext();
                         } else {
-                            createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
+                            createresp(combination.value); 
                         }
                     } else {
                         // Todas as combinações foram exibidas, agora exporte para CSV
