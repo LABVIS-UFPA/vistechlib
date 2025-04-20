@@ -51,7 +51,7 @@
             const tarefa = new Tarefa();
             const resposta = new Respostas();
 
-            var strategies = ["3d break"];
+            var strategies = ["scale-break", "scale break perspective"];
             var tarefas = [ "3"];            
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
@@ -61,7 +61,7 @@
                 // Loop pelas estratégias
                 for (let strategy of strategies) {
                     // Loop pelos valores
-                    for (let [varName, values] of [['1', minhaBaseDeDados.base1], ['2', minhaBaseDeDados.base2], ['3', minhaBaseDeDados.base3], ['4', minhaBaseDeDados.base4]]) {  //
+                    for (let [varName, values] of [ ['3', minhaBaseDeDados.base3]]) {  //
                         // Loop pelas tarefas
                         for (let tarefa of tarefas) {
                             // Adiciona a combinação com o nome da variável, a estratégia e a tarefa
