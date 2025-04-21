@@ -54,7 +54,7 @@ class BarChart extends Visualization {
         this.settings.negativeMode = "disabled";
         this.settings.startZero = true;
         this.settings.drawStrategy = 'default';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
-        this.settings.breakPoint = 0.2; //"parseFloat(document.getElementById('breakpointInput').value) ||"
+        this.settings.breakPoint = 0.5; //"parseFloat(document.getElementById('breakpointInput').value) ||"
         this.settings.breakPoint2 = 0.96, 5; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
         this.settings.breakPoint3 = 0.88; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
         this.settings.breakPoint4 = 0.95, 5;
@@ -576,7 +576,7 @@ BarChart.strategies = {
 
                 g.append("g")
                     .attr("class", "y upperaxis")
-                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(4).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(7).tickFormat(d => d.toLocaleString('pt-BR')))
                     .selectAll("text") // Seleciona todos os elementos de texto do eixo y
                     .each(function (d) { // Para cada marca de tick
                         d3.select(this.parentNode) // Seleciona o pai (o elemento g)
@@ -778,7 +778,7 @@ BarChart.strategies = {
                 barchart.breakPoint3 = barchart.settings.breakPoint3;
                 barchart.breakPoint4 = barchart.settings.breakPoint4;
 
-                barchart.breakPoint = 0.5;
+                barchart.breakPoint = barchart.settings.breakPoint;
 
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint;
@@ -979,7 +979,7 @@ BarChart.strategies = {
 
                 g.append("g")
                     .attr("class", "y upper")
-                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(4).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(7).tickFormat(d => d.toLocaleString('pt-BR')))
                     .selectAll("text") // Seleciona todos os elementos de texto do eixo y
                     .each(function (d) { // Para cada marca de tick
                         d3.select(this.parentNode) // Seleciona o pai (o elemento g)
