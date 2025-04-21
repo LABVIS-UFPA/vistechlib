@@ -96,7 +96,7 @@
                         combination = combinations[index++];
                         minhaBaseDeDados.embaralhar(minhaBaseDeDados['base' + combination.varName]);
                         combination.values = minhaBaseDeDados['base' + combination.varName];
-                        // console.log(combination.values)
+                        
 
                         //valores dos breaks
                         let break_dados = minhaBaseDeDados.breakdados(combination.varName);
@@ -114,11 +114,10 @@
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
 
-                        // atraamento especifico para a tarefa de razao
+                        // tratamento especifico para a tarefa de razao
                         if (tarefa.pergId == 3) {
                             // carregar somente depois de ter enderizado o grafico
                             setTimeout(() => {
-                                console.log("to aqui 1")
                                 var res = minhaBaseDeDados.ratio(combination.varName);
                                 var resposta_menor = res[0];
                                 var resposta_menor2 = res[1];
@@ -130,7 +129,6 @@
                             createresptext();
                         } else if (tarefa.pergId == 5) {
                             setTimeout(() => {
-                                console.log("to aqui 2")
                                 var res = minhaBaseDeDados.ratio(combination.varName);
                                 var resposta_menor = res[0];
                                 var resposta_menor2 = res[1];
@@ -190,7 +188,7 @@
                     let tempofinal = tarefa.formatatempo_performace(temp_janela_final)
 
                     //salvar resposta ussuario por pergunta
-                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
+                    resposta.saveCheckedCheckboxesToJson(tarefa.id_pergunta(tarefa.perg), id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
                     tarefa.enviarpergunta();
 
                 });
