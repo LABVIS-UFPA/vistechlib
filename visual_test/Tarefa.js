@@ -4,8 +4,11 @@ class Tarefa {
             // "Selecione a menor barra?",
             "Selecione a segunda menor barra?",
             "Selecione a segunda maior barra? ",
+            // estimar maior<->menor
             "Estimar Proporção entre os dois elementos?",
-            "Selecione a barra com o valor"
+            "Selecione a barra com o valor",
+            // estimar menor<->menor
+            "Estimar Proporção entre os dois elementos ?"
         ];
         // this.perguntasSelecionadas = [];
         this.perguntaContainer = document.getElementById("perguntaContainer");
@@ -57,6 +60,14 @@ class Tarefa {
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
             this.pararTemporizador(); // Stop the timer            
             this.iniciarTemporizador(); // Start a new timer for the next round of questions
+        } else if (p == 5) {
+            var perguntaSelecionada = this.perguntas[4];
+            this.perg = perguntaSelecionada
+            this.pergId = this.id_pergunta(perguntaSelecionada);
+            this.perguntaContainer.textContent = perguntaSelecionada; 
+            this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
+            this.pararTemporizador(); // Stop the timer            
+            this.iniciarTemporizador(); // Start a new timer for the next round of questions
         } else {
             console.log('não existe essa pergunta')
         }
@@ -86,6 +97,8 @@ class Tarefa {
             return 3
         } else if (pergunta === "Selecione a barra com o valor") {
             return 4;
+        } else if (pergunta === "Estimar Proporção entre os dois elementos ?") {
+            return 5;
         }
     }
 

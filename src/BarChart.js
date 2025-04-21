@@ -495,6 +495,13 @@ BarChart.strategies = {
     "scale-break": {
         data: (barchart) => {
 
+            const resultadoCortes = barchart.calcularCortesEMaximo(barchart.d);
+            if (!resultadoCortes) return;
+
+            barchart.settings.corte = resultadoCortes.corteInferior;
+            barchart.settings.cortefinal = resultadoCortes.corteSuperior;
+
+
             barchart.ybreak = {};
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
@@ -502,15 +509,12 @@ BarChart.strategies = {
                 // let segundo_maior = 10000;
                 // let terceiro = (segundo_maior*40)/100+segundo_maior;
 
-                let corte = barchart.settings.corte;
-                let cortefinal = barchart.settings.cortefinal;
-
                 barchart.breakPoint = barchart.settings.breakPoint;
                 barchart.gapSize = 25;
 
 
-                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2, 10]);
+                barchart.y[k] = d3.scaleLinear().domain([0, barchart.settings.corte]).range([barchart.boxHeight, barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2]);
+                barchart.ybreak[k] = d3.scaleLinear().domain([barchart.settings.cortefinal, maximo]).range([barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2, 10]);
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2;
             }
@@ -555,7 +559,10 @@ BarChart.strategies = {
                     .attr("x", (d, i) => barchart.x(i))
                     .attr("width", barchart.x.bandwidth())
                     .attr("y", (d) => barchart.ybreak[key](d[key]))
-                    .attr("height", (d) => Math.max(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), 0))
+                    .attr("height", (d) => {
+                        if (!(d[key] >= barchart.settings.cortefinal)) return 0;
+                        return Math.max(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), 0);
+                    })
                     .style("fill", barchart.settings.color);
                 barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
@@ -742,10 +749,10 @@ BarChart.strategies = {
             const resultadoCortes = barchart.calcularCortesEMaximo(barchart.d);
             if (!resultadoCortes) return;
 
-            let corte = resultadoCortes.corteInferior;
-            let cortefinal = resultadoCortes.corteSuperior;
+            barchart.settings.corte = resultadoCortes.corteInferior;
+            barchart.settings.cortefinal = resultadoCortes.corteSuperior;
 
-            barchart.settings.corteFinal=cortefinal
+
 
             // Pode usar também se quiser os cortes intermediários:
             // let corte2 = resultadoCortes.corteIntermediario1;
@@ -757,9 +764,9 @@ BarChart.strategies = {
             barchart.ybreak4 = {};
             barchart.z = barchart.settings.z;
 
-            let diferença = cortefinal - corte;
+            let diferença = barchart.settings.cortefinal - barchart.settings.corte;
 
-            let corte2 = corte + (diferença * 40) / 100;
+            let corte2 = barchart.settings.corte + (diferença * 40) / 100;
             let corte3 = corte2 + (diferença * 20) / 100;
 
             for (let k of barchart.keys_filter) {
@@ -781,11 +788,11 @@ BarChart.strategies = {
 
 
 
-                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
+                barchart.y[k] = d3.scaleLinear().domain([0, barchart.settings.corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
+                barchart.ybreak[k] = d3.scaleLinear().domain([barchart.settings.corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
                 barchart.ybreak2[k] = d3.scaleLinear().domain([corte2, corte3]).range([barchart.boxHeightBreak2, barchart.boxHeightBreak3]);
-                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
-                barchart.ybreak4[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
+                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, barchart.settings.cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
+                barchart.ybreak4[k] = d3.scaleLinear().domain([barchart.settings.cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
 
             }
         },
@@ -907,8 +914,8 @@ BarChart.strategies = {
                         let y = barchart.ybreak4[key](d[key]);
                         let width = barchart.x.bandwidth();
 
-                        console.log("valor corte:",barchart.settings.corteFinal)
-                        if (!(d[key] >= barchart.settings.corteFinal)) {
+                        // console.log("valor corte:",barchart.settings.corteFinal)
+                        if (!(d[key] >= barchart.settings.cortefinal)) {
                             return null;
                         } else {
                             let height = Math.max(barchart.boxHeightBreak4 - barchart.ybreak4[key](d[key]), 0);
