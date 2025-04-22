@@ -223,8 +223,9 @@ class BaseDeDados {
         let x4 = this.barraDestacada; 
         let x5 = { valor: this.razaomaior_menor, posicao: 0 };
         let x6 = { valor: this.razaomenor_menor, posicao: 0 };
-        // console.log("valor x3:",x3);
-        return [x1, x2, x3, x4, x5, x6];
+        let x7 = { valor: `${resp_corr_menores[0].valor} - ${resp_corr_maiores[0].valor}`, posicao: 0 };
+        console.log("valor x7:",x7);
+        return [x1, x2, x3, x4, x5, x6, x7];
     }
 
     shuffle(array) {

@@ -52,21 +52,13 @@ class Respostas {
         }
         // Corrigido para usar this.createCarObject
         this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_marcada_posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
-        
-        
-        if (Number.isNaN(posicao)) {
-            resposta_marcada_valor = 0;
-        }else{
-            resposta_marcada_valor = base[posicao].valor;
+                
         }
-        
-        
-        // Corrigido para usar this.createCarObject
-        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade,curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_marcada_posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
-    }
 
     saveInputValueToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela,base) {
         let inputValor = document.querySelector("#respostaTexto").value;
+
+        console.log(inputValor)
               
         this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade,curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, "", inputValor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
     }

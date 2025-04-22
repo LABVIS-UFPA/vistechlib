@@ -52,7 +52,7 @@
             const resposta = new Respostas();
 
             var strategies = ["3d break", "scale break perspective", "default"];
-            var tarefas = ["1","2","3","4","5"];
+            var tarefas = ["1","2","3","4","5","6","7"]; //"8"
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -61,7 +61,7 @@
                 // Loop pelas estratégias
                 for (let strategy of strategies) {
                     // Loop pelos valores
-                    for (let [varName, values] of [['3', minhaBaseDeDados.base3]]) {  //
+                    for (let [varName, values] of [['4', minhaBaseDeDados.base4]]) {  //
                         // Loop pelas tarefas
                         for (let tarefa of tarefas) {
                             // Adiciona a combinação com o nome da variável, a estratégia e a tarefa
@@ -168,15 +168,27 @@
                                 var res = minhaBaseDeDados.ratio(combination.varName);
                                 var resposta_menor = res[0];
                                 var resposta_menor2 = res[1];
-                                var resposta_maior = res[2];
-                                let razao = resposta_maior.valor / resposta_menor.valor;
+                                var resposta_maior = res[2];                               
                                 // lembrar que o indice da barra agora e indice+1
                                 barchart.getHighlightElementsPSB([resposta_menor2.posicao + 1, resposta_maior.posicao + 1], "#e74c3c");
                             }, 5);
                             createresptext();
-                        } else if (tarefa.pergId == 4) {
+                        // tratamento especifico para a tarefa de razao menor<->menor
+                        } else if (tarefa.pergId == 6) {
+                            setTimeout(() => {
+                                var res = minhaBaseDeDados.ratio(combination.varName);
+                                var resposta_menor = res[0];
+                                var resposta_menor2 = res[1];
+                                var resposta_maior = res[2];
+                                // lembrar que o indice da barra agora e indice+1
+                                barchart.getHighlightElementsPSB([resposta_menor2.posicao + 1, resposta_menor.posicao + 1], "#e74c3c");
+                            }, 5);
+                            createresptext();
+                        }else if (tarefa.pergId == 4) {
                             createresptext("Valor da barra:");
-                        } else {
+                        } else if (tarefa.pergId == 7) {
+                            createresptext();
+                        }else {
                             createresp(combination.value);
                         }
                     } else {
@@ -225,7 +237,7 @@
 
                     let base = minhaBaseDeDados['base' + combination.varName];
                     //salvar resposta ussuario por pergunta
-                    if (tarefa.pergId == 4 || tarefa.pergId == 5) {
+                    if (tarefa.pergId == 4 || tarefa.pergId == 5 || tarefa.pergId == 6 || tarefa.pergId == 7) {
                         
                         resposta.saveInputValueToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao = 0, resposta_correta_valor, tempoincicial, tempofinal, base);
                     } else {

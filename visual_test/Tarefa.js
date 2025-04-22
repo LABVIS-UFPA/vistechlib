@@ -1,11 +1,15 @@
 class Tarefa {
     constructor() {
-        this.perguntas = [            
+        this.perguntas = [
             "Selecione a segunda menor barra?",
             "Selecione a segunda maior barra? ",
             "Selecione a barra com o valor",
             "Qual o valor da barra destacada?",
+            // estimar maior<->menor
+            "Estimar Proporção entre os dois elementos?",
+            // estimar menor<->menor
             "Estimar Proporção entre os dois elementos ?",
+            "Determine a escala?",
             "Qual e o grafico com maior crescimento?"
         ];
         // this.perguntasSelecionadas = [];
@@ -55,7 +59,7 @@ class Tarefa {
             var perguntaSelecionada = this.perguntas[3];
             this.perg = perguntaSelecionada
             this.pergId = this.id_pergunta(perguntaSelecionada);
-            this.perguntaContainer.textContent = perguntaSelecionada; 
+            this.perguntaContainer.textContent = perguntaSelecionada;
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
             this.pararTemporizador(); // Stop the timer            
             this.iniciarTemporizador(); // Start a new timer for the next round of questions
@@ -63,15 +67,33 @@ class Tarefa {
             var perguntaSelecionada = this.perguntas[4];
             this.perg = perguntaSelecionada
             this.pergId = this.id_pergunta(perguntaSelecionada);
-            this.perguntaContainer.textContent = perguntaSelecionada; 
+            this.perguntaContainer.textContent = perguntaSelecionada;
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
             this.pararTemporizador(); // Stop the timer            
             this.iniciarTemporizador(); // Start a new timer for the next round of questions
         } else if (p == 6) {
             var perguntaSelecionada = this.perguntas[5];
             this.perg = perguntaSelecionada
-            this.pergId = this.id_pergunta(perguntaSelecionada);            
-            this.perguntaContainer.textContent = perguntaSelecionada; 
+            this.pergId = this.id_pergunta(perguntaSelecionada);
+            this.perguntaContainer.textContent = perguntaSelecionada;
+            console.log("pergunta:", perguntaSelecionada)
+            this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
+            this.pararTemporizador(); // Stop the timer            
+            this.iniciarTemporizador(); // Start a new timer for the next round of questions
+        } else if (p == 7) {
+            var perguntaSelecionada = this.perguntas[6];
+            this.perg = perguntaSelecionada
+            this.pergId = this.id_pergunta(perguntaSelecionada);
+            this.perguntaContainer.textContent = perguntaSelecionada;
+            console.log("pergunta:", perguntaSelecionada)
+            this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
+            this.pararTemporizador(); // Stop the timer            
+            this.iniciarTemporizador(); // Start a new timer for the next round of questions
+        } else if (p == 8) {
+            var perguntaSelecionada = this.perguntas[7];
+            this.perg = perguntaSelecionada
+            this.pergId = this.id_pergunta(perguntaSelecionada);
+            this.perguntaContainer.textContent = perguntaSelecionada;
             console.log("pergunta:", perguntaSelecionada)
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
             this.pararTemporizador(); // Stop the timer            
@@ -105,10 +127,14 @@ class Tarefa {
             return 3;
         } else if (pergunta === "Qual o valor da barra destacada?") {
             return 4;
-        } else if (pergunta === "Estimar Proporção entre os dois elementos ?") {
+        } else if (pergunta === "Estimar Proporção entre os dois elementos?") {
             return 5;
-        } else if (pergunta === "Qual e o grafico com maior crescimento?") {
+        } else if (pergunta === "Estimar Proporção entre os dois elementos ?") {
             return 6;
+        } else if (pergunta === "Determine a escala?") {
+            return 7;
+        }else if (pergunta === "Qual e o grafico com maior crescimento?") {
+            return 8;
         }
     }
     
