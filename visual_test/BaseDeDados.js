@@ -219,9 +219,9 @@ class BaseDeDados {
         let x1 = resp_corr_menores[1];
         let x2 = resp_corr_maiores[1];
         // let x3 = resp_corr_mediana;
-        let x4 = this.valor_barra;
-        let x3 = { valor: this.razaomaior_menor, posicao: 0 };
-        let x5 = this.barraDestacada; 
+        let x3 = this.valor_barra;
+        let x4 = this.barraDestacada; 
+        let x5 = { valor: this.razaomaior_menor, posicao: 0 };
         let x6 = { valor: this.razaomenor_menor, posicao: 0 };
         // console.log("valor x3:",x3);
         return [x1, x2, x3, x4, x5, x6];

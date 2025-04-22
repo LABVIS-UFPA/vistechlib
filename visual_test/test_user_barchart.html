@@ -143,8 +143,8 @@
                         let t4 = minhaBaseDeDados.gerarvalor(combination.varName);
                         value_t4_barra = t4.valor;
                         
-                        // Para a tarefa 5, destaca uma barra aleatória
-                        if (combination.tarefa === "5") {
+                        // Para a tarefa 4, destaca uma barra aleatória
+                        if (combination.tarefa === "4") {
                             let barraDestacada = minhaBaseDeDados.destacarBarraAleatoria(combination.varName);
                             console.log("Barra destacada:", barraDestacada);
                             // Destaca a barra no gráfico
@@ -162,7 +162,7 @@
                         campoResposta.innerHTML = '';
 
                         // tratamento especifico para a tarefa de razao
-                        if (tarefa.pergId == 3) {
+                        if (tarefa.pergId == 5) {
                             // carregar somente depois de ter enderizado o grafico
                             setTimeout(() => {
                                 var res = minhaBaseDeDados.ratio(combination.varName);
@@ -174,19 +174,7 @@
                                 barchart.getHighlightElementsPSB([resposta_menor2.posicao + 1, resposta_maior.posicao + 1], "#e74c3c");
                             }, 5);
                             createresptext();
-                        } else if (tarefa.pergId == 5) {
-                            setTimeout(() => {
-                                var res = minhaBaseDeDados.ratio(combination.varName);
-                                var resposta_menor = res[0];
-                                var resposta_menor2 = res[1];
-                                var resposta_maior = res[2];
-                                let razao = resposta_maior.valor / resposta_menor.valor;
-                                // lembrar que o indice da barra agora e indice+1
-                                barchart.getHighlightElementsPSB([resposta_menor2.posicao + 1, resposta_menor.posicao + 1], "#e74c3c");
-                            }, 5);
-                            createresptext();
-                        } else if (tarefa.pergId == 5) {
-                            // Para a tarefa de determinar o valor da barra, usamos um campo de texto
+                        } else if (tarefa.pergId == 4) {
                             createresptext("Valor da barra:");
                         } else {
                             createresp(combination.value);
@@ -217,11 +205,12 @@
                     var valorlikert3 = localStorage.getItem("respostaLikert3", valorlikert3);
 
                     var res = minhaBaseDeDados.respostacorreta(combination.varName);
+                    console.log(tarefa.id_pergunta(tarefa.perg))
+                    console.log(res)
                     var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1]; // tarefa 1 esta na posição [0]
                     // console.log(resposta_correta)
-                    resposta_correta_posicao = resposta_correta.posicao;
+                    
                     resposta_correta_valor = resposta_correta.valor;
-                    console.log(resposta_correta_posicao, resposta_correta_valor)
 
                     temp_visualizaçãof = performance.now();
                     let temp_D = temp_visualizaçãof - temp_visualizaçãoi;
@@ -234,12 +223,14 @@
                     let tempoincicial = tarefa.formatatempo_performace(temp_janela_incicial)
                     let tempofinal = tarefa.formatatempo_performace(temp_janela_final)
 
-                    console.log(tarefa.pergId)
+                    let base = minhaBaseDeDados['base' + combination.varName];
                     //salvar resposta ussuario por pergunta
-                    if (tarefa.pergId == 3 || tarefa.pergId == 5) {
-                        resposta.saveInputValueToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
+                    if (tarefa.pergId == 4 || tarefa.pergId == 5) {
+                        
+                        resposta.saveInputValueToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao = 0, resposta_correta_valor, tempoincicial, tempofinal, base);
                     } else {
-                        resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
+                        resposta_correta_posicao = resposta_correta.posicao;
+                        resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, base);
                     }
                     tarefa.enviarpergunta();
                 });
@@ -257,7 +248,6 @@
 
             //alinhar fieldset ao grafico
             function alinharFildsetAoGrafico() {
-                console.log(d3.select("svg .background .vis_background").node())
                 if (!d3.select("svg .background .vis_background").node()) {
                     var ban = d3.selectAll("svg .loweraxis line").nodes().pop().getBoundingClientRect()
                     campoResposta.style.marginTop = ban.y + 160 + "px";
@@ -273,7 +263,6 @@
                 }
 
                 campoResposta.style.width = ban.width + "px";
-                console.log({layout})
                 campoResposta.style.marginLeft = ban.left - 10 + "px";
                 campoResposta.style.marginRight = 0 + "px";
                 campoResposta.style.padding = 0 + 'px';

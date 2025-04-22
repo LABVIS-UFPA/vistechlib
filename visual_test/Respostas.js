@@ -30,43 +30,30 @@ class Respostas {
         };
     }
 
-    saveCheckedCheckboxesToJson(id_pergunta, id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela, base) {
+    saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela, base) {
         var checkboxes = document.querySelectorAll(this.checkboxSelector);
         var checkboxestext = document.querySelector(this.checkboxSelectortext);
 
-        // Verifica se a pergunta é do tipo 3 ou 5 (perguntas que exigem entrada de texto manual)
-        if (id_pergunta == 3 || id_pergunta == 5) {
-            // Define a posição marcada como 0, já que neste caso a posição não é usada
-            let resposta_marcada_posicao = 0;
-            // Inicializa o valor da resposta como uma string com espaço (caso o campo esteja vazio ou não exista)
-            let resposta_marcada_valor = checkboxestext.value;
-            console.log("Valor digitado:", resposta_marcada_valor);
-            this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_marcada_posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
+        var resposta_marcada_posicao = [];
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                resposta_marcada_posicao.push(checkbox.value);
 
-        } else {
-            var resposta_marcada_posicao = [];
-            checkboxes.forEach(function (checkbox) {
-                if (checkbox.checked) {
-                    resposta_marcada_posicao.push(checkbox.value);
+            }
+        });
+        let posicao = parseInt(resposta_marcada_posicao)
 
-                }
-            });
-            let posicao = parseInt(resposta_marcada_posicao)
-            if (posicao >= base.length || posicao < 0) {
-                return "Posição inválida";
-            }
-            let resposta_marcada_valor;
-            console.log(posicao)
-            if (Number.isNaN(posicao)) {
-                resposta_marcada_valor = 0;
-            } else {
-                resposta_marcada_valor = base[posicao].valor;
-            }
-            // Corrigido para usar this.createCarObject
-            this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_marcada_posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
-        }
         let resposta_marcada_valor;
-        console.log(posicao)
+
+        if (Number.isNaN(posicao)) {
+            resposta_marcada_valor = 0;
+        } else {
+            resposta_marcada_valor = base[posicao].valor;
+        }
+        // Corrigido para usar this.createCarObject
+        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_marcada_posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
+        
+        
         if (Number.isNaN(posicao)) {
             resposta_marcada_valor = 0;
         }else{
