@@ -51,8 +51,8 @@
             const tarefa = new Tarefa();
             const resposta = new Respostas();
 
-            var strategies = ["3d break"];
-            var tarefas = [ "3"];            
+            var strategies = ["3d break", "default", "scale break perspective"];
+            var tarefas = ["3", "5"]; // Added task 5 to the list of tasks         
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -71,7 +71,6 @@
                 }
                 return combinations;
             }
-
 
             // Função para embaralhar um array
             function shuffle(array) {
@@ -104,12 +103,24 @@
                         document.querySelector("#chart").style.top = "0px";
                         createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
 
-                        //passa  a base para a função que grar o valor para t4
+                        //passa a base para a função que gera o valor para t4
                         let t4 = minhaBaseDeDados.gerarvalor(combination.varName);
                         value_t4_barra = t4.valor;
-                        tarefa.reset(combination.tarefa, t4.valor);
+                        
+                        // Para a tarefa 5, destaca uma barra aleatória
+                        if (combination.tarefa === "5") {
+                            let barraDestacada = minhaBaseDeDados.destacarBarraAleatoria(combination.varName);
+                            console.log("Barra destacada:", barraDestacada);
+                            // Destaca a barra no gráfico
+                            setTimeout(() => {
+                                barchart.getHighlightElementsPSB([barraDestacada.posicao+1], "#e74c3c");
+                            }, 5);
+                            tarefa.reset(parseInt(combination.tarefa), null);
+                        } else {
+                            tarefa.reset(parseInt(combination.tarefa), t4.valor);
+                        }
+                        
                         temp_visualizaçãoi = performance.now();
-
 
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
@@ -126,11 +137,13 @@
                                 let razao = resposta_maior.valor/resposta_menor.valor;
                                 console.log("AAqui:")
                                 // lembra que o indice da barra agora e indice+1
-                                barchart.getHighlightElementsPSB([resposta_menor2.posicao+1, resposta_maior.posicao+1], "#e74c3c");
+                                barchart.getHighlightElementsPSB([resposta_menor2.posicao+1, resposta_maior.posicao+1], "#e74c3c");                         
                                 // Adiciona o highlight manualmente no SVG
-                                // barchart.foreground.node().appendChild(highlightGroup);                
                             }, 5);
                             createresptext();
+                        } else if (tarefa.pergId == 5) {
+                            // Para a tarefa de determinar o valor da barra, usamos um campo de texto
+                            createresptext("Valor da barra:");
                         } else {
                             createresp(combination.value); 
                         }
@@ -143,8 +156,6 @@
                 // Inicia a exibição das combinações
                 displayNextCombination();
                 let tempo_total = 0;
-
-
 
                 // salvamento da resposta do ussuario(botao:Enviar)
                 this.proximoBotao.addEventListener("click", function () {
@@ -160,7 +171,6 @@
                     var valorlikert = localStorage.getItem("respostaLikert");
                     var valorlikert2 = localStorage.getItem("respostaLikert2", valorlikert2);
                     var valorlikert3 = localStorage.getItem("respostaLikert3", valorlikert3);
-
 
                     var res = minhaBaseDeDados.respostacorreta(combination.varName);
                     var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1]; // tarefa 1 esta na posição [0]
@@ -180,10 +190,14 @@
                     let tempoincicial = tarefa.formatatempo_performace(temp_janela_incicial)
                     let tempofinal = tarefa.formatatempo_performace(temp_janela_final)
 
+                    console.log(tarefa.pergId)
                     //salvar resposta ussuario por pergunta
-                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
+                    if (tarefa.pergId == 3 || tarefa.pergId == 5) {
+                        resposta.saveInputValueToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
+                    } else {
+                        resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
+                    }
                     tarefa.enviarpergunta();
-
                 });
 
                 // botao de Continuar
@@ -204,19 +218,31 @@
                     var ban = d3.selectAll("svg .loweraxis line").nodes().pop().getBoundingClientRect()
                     campoResposta.style.marginTop = ban.y + 160 + "px";
                     document.querySelector("#fimPerguntas").style.marginTop = ban.y + 160 + "px";
+                    document.querySelector("#tilt-grafico").style.display = "block";
+                    document.querySelector("[for='tilt-grafico']").style.display = "block";
                 }else{
                     var ban = d3.select("svg .background .vis_background").node().getBoundingClientRect();
                     campoResposta.style.marginTop = "0px";
                     document.querySelector("#fimPerguntas").style.marginTop = "0px";
+                    document.querySelector("#tilt-grafico").style.display = "none";
+                    document.querySelector("[for='tilt-grafico']").style.display = "none";
                 }
 
                 campoResposta.style.width = ban.width + "px";
+                console.log({layout})
                 campoResposta.style.marginLeft = ban.left - 10 + "px";
                 campoResposta.style.marginRight = 0 + "px";
                 campoResposta.style.padding = 0 + 'px';
             }
             
-            
+            document.querySelector("#tilt-grafico").addEventListener("click", function () {
+                var checkbox = document.querySelector("#tilt-grafico");
+                if (checkbox.checked) {
+                    document.querySelector("#chart").style.transform = `perspective(245px) translateZ(-245px) rotateY(20deg)`;
+                } else {
+                    document.querySelector("#chart").style.transform = `perspective(245px) rotateY(0deg)`;
+                }
+            });
 
             function createresp(dados, allowMultipleSelection) {
                 campoResposta.classList.add("checkbox-form");
@@ -300,6 +326,11 @@
         <fieldset style="margin-bottom: 15px;">
             <legend>Resposta</legend>
         </fieldset>
+        
+        <div style="display: flex; border: 1px solid #aaa; margin-bottom: 10px;">
+            <input type="checkbox" name="" id="tilt-grafico" style="display: none;">
+            <label for="tilt-grafico">Rotacionar gráfico</label>
+        </div>
 
         <div id="perguntaContainer" style="margin-left: 20px; margin-bottom: 15px;"></div>
         <div id="fimPerguntas" style="display: none;">

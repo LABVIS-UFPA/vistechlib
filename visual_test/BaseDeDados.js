@@ -78,7 +78,7 @@ class BaseDeDados {
 
         this.valor_barra;
         this.razaomaior_menor;
-
+        this.barraDestacada = null; // Para armazenar a barra destacada para a tarefa 5
     }
 
 
@@ -191,6 +191,14 @@ class BaseDeDados {
         }
     }
 
+    // Método para destacar uma barra aleatória e guardar seu valor para a tarefa 5
+    destacarBarraAleatoria(base) {
+        let indiceAleatorio = Math.floor(Math.random() * this['base' + base].length);
+        let valorBarra = this['base' + base][indiceAleatorio].valor;
+        this.barraDestacada = { valor: valorBarra, posicao: indiceAleatorio };
+        return this.barraDestacada;
+    }
+
     ratio(base) {
         let resp_corr_menores = this.acharmenor(this['base' + base]);
         let resp_corr_maiores = this.acharmaior(this['base' + base]);
@@ -201,8 +209,6 @@ class BaseDeDados {
         return [x1, x2, x3];
     }
 
-
-
     respostacorreta(base) {
         let resp_corr_menores = this.acharmenor(this['base' + base]);
         let resp_corr_maiores = this.acharmaior(this['base' + base]);
@@ -212,11 +218,10 @@ class BaseDeDados {
         // let x3 = resp_corr_mediana;
         let x4 = this.valor_barra;
         let x3 = { valor: this.razaomaior_menor, posicao: 0 };
+        let x5 = this.barraDestacada; 
         console.log("valor x3:",x3);
-        return [x1, x2, x3, x4];
+        return [x1, x2, x3, x4, x5];
     }
-
-    
 
     shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -232,7 +237,6 @@ class BaseDeDados {
         return this[base];
     }
 
-
     // encontrarMenores(base,50)
     encontrarMenores(array, n) {
         // Ordenar o array em ordem crescente com base nos valores
@@ -241,6 +245,4 @@ class BaseDeDados {
         // Retornar os primeiros n elementos do array
         return array.slice(0, n);
     }
-
 }
-

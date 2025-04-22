@@ -5,7 +5,8 @@ class Tarefa {
             "Selecione a segunda menor barra?",
             "Selecione a segunda maior barra? ",
             "Estimar Proporção entre os dois elementos?",
-            "Selecione a barra com o valor"
+            "Selecione a barra com o valor",
+            "Qual o valor da barra destacada?"
         ];
         // this.perguntasSelecionadas = [];
         this.perguntaContainer = document.getElementById("perguntaContainer");
@@ -21,6 +22,7 @@ class Tarefa {
         this.pergId = '';
         this.tempoLimite = 30000; // Tempo limite padrão em milissegundos
         // this.timerId = null; // Variável para armazenar o ID do temporizador
+        this.barraDestacada = null; // Para armazenar a posição da barra destacada
     }
 
 
@@ -57,6 +59,14 @@ class Tarefa {
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
             this.pararTemporizador(); // Stop the timer            
             this.iniciarTemporizador(); // Start a new timer for the next round of questions
+        } else if (p == 5) {
+            var perguntaSelecionada = this.perguntas[4];
+            this.perg = perguntaSelecionada;
+            this.pergId = this.id_pergunta(perguntaSelecionada);
+            this.perguntaContainer.textContent = perguntaSelecionada;
+            this.campoResposta.style.display = "flex";
+            this.pararTemporizador();
+            this.iniciarTemporizador();
         } else {
             console.log('não existe essa pergunta')
         }
@@ -86,6 +96,8 @@ class Tarefa {
             return 3
         } else if (pergunta === "Selecione a barra com o valor") {
             return 4;
+        } else if (pergunta === "Qual o valor da barra destacada?") {
+            return 5;
         }
     }
 
@@ -96,10 +108,7 @@ class Tarefa {
         this.campoResposta.style.display = "none";
     }
 
-
-
     //Tempo maximo de 15s para responde cada tarefa
-
     // Método para iniciar o temporizador
     iniciarTemporizador() {
         this.timerId = setTimeout(() => {
@@ -111,7 +120,6 @@ class Tarefa {
     pararTemporizador() {
         clearTimeout(this.timerId);
     }
-
 
     // Função para formatar o tempo em formato de relógio
     formatatempo_performace(milliseconds) {
@@ -128,6 +136,4 @@ class Tarefa {
         // Retorna o tempo formatado
         return hours + ':' + minutes + ':' + seconds;
     }
-
 }
-
