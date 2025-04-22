@@ -55,9 +55,9 @@ class BarChart extends Visualization {
         this.settings.startZero = true;
         this.settings.drawStrategy = 'default';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
         this.settings.breakPoint = 0.5; //"parseFloat(document.getElementById('breakpointInput').value) ||"
-        this.settings.breakPoint2 = 0.96, 5; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
+        this.settings.breakPoint2 = 0.97, 5; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
         this.settings.breakPoint3 = 0.88; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
-        this.settings.breakPoint4 = 0.95, 5;
+        this.settings.breakPoint4 = 0.96, 5;
         this.settings.corte; //"parseFloat(document.getElementById('breakpointInput4').value) ||"
         this.settings.cortefinal;
         this.settings.z = 0.28; //"parseFloat(document.getElementById('inputz').value) ||"

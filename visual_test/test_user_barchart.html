@@ -51,8 +51,8 @@
             const tarefa = new Tarefa();
             const resposta = new Respostas();
 
-            var strategies = ["scale-break", "scale break perspective", "default"];
-            var tarefas = ["6"];
+            var strategies = ["3d break", "scale break perspective", "default"];
+            var tarefas = ["1","2","3","4","5"];
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -97,41 +97,41 @@
                         minhaBaseDeDados.embaralhar(minhaBaseDeDados['base' + combination.varName]);
                         combination.values = minhaBaseDeDados['base' + combination.varName];
 
-                        if (combination.tarefa == 6) {
-                            const main = document.querySelector("main");
-                            main.innerHTML = "";
+                        // if (combination.tarefa == 6) {
+                        //     const main = document.querySelector("main");
+                        //     main.innerHTML = "";
 
-                            const container = document.createElement("div");
-                            container.style.display = "flex";
-                            container.style.flexDirection = "row";
-                            container.style.height = "700px";
-                            container.style.width = "100%";
+                        //     const container = document.createElement("div");
+                        //     container.style.display = "flex";
+                        //     container.style.flexDirection = "row";
+                        //     container.style.height = "700px";
+                        //     container.style.width = "100%";
 
-                            const layouts = [];
+                        //     const layouts = [];
 
-                            for (let i = 0; i < 3; i++) {
-                                const div = document.createElement("div");
-                                div.style.width = "33.33%";
-                                div.style.height = "100%";
-                                div.style.border = "1px solid black"; // para visualização
-                                div.id = `barchart${i + 1}`;
-                                container.appendChild(div);
-                                layouts.push(div);
-                            }
+                        //     for (let i = 0; i < 3; i++) {
+                        //         const div = document.createElement("div");
+                        //         div.style.width = "33.33%";
+                        //         div.style.height = "100%";
+                        //         div.style.border = "1px solid black"; // para visualização
+                        //         div.id = `barchart${i + 1}`;
+                        //         container.appendChild(div);
+                        //         layouts.push(div);
+                        //     }
 
-                            main.appendChild(container);
+                        //     main.appendChild(container);
 
-                            // Cria um gráfico com uma strategy diferente em cada div
-                            layouts.forEach((layoutDiv, index) => {
-                                const strategy = strategies[index];
-                                const config = { drawStrategy: strategy };
-                                barchart = new BarChart(layoutDiv, config);
-                                barchart.data(combination.value);
-                                barchart.redraw();
-                            });
-                            createresp([{ valor: 2086 },{ valor: 77412 },{ valor: 798 },])
+                        //     // Cria um gráfico com uma strategy diferente em cada div
+                        //     layouts.forEach((layoutDiv, index) => {
+                        //         const strategy = strategies[index];
+                        //         const config = { drawStrategy: strategy };
+                        //         barchart = new BarChart(layoutDiv, config);
+                        //         barchart.data(combination.value);
+                        //         barchart.redraw();
+                        //     });
+                        //     createresp([{ valor: 2086 },{ valor: 77412 },{ valor: 798 },])
                             
-                        }
+                        // }
 
 
                         //valores dos breaks
