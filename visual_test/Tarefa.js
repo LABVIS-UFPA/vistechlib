@@ -1,12 +1,12 @@
 class Tarefa {
     constructor() {
-        this.perguntas = [
-            // "Selecione a menor barra?",
+        this.perguntas = [            
             "Selecione a segunda menor barra?",
             "Selecione a segunda maior barra? ",
-            "Estimar Proporção entre os dois elementos?",
             "Selecione a barra com o valor",
-            "Qual o valor da barra destacada?"
+            "Qual o valor da barra destacada?",
+            "Estimar Proporção entre os dois elementos ?",
+            "Qual e o grafico com maior crescimento?"
         ];
         // this.perguntasSelecionadas = [];
         this.perguntaContainer = document.getElementById("perguntaContainer");
@@ -61,12 +61,21 @@ class Tarefa {
             this.iniciarTemporizador(); // Start a new timer for the next round of questions
         } else if (p == 5) {
             var perguntaSelecionada = this.perguntas[4];
-            this.perg = perguntaSelecionada;
+            this.perg = perguntaSelecionada
             this.pergId = this.id_pergunta(perguntaSelecionada);
-            this.perguntaContainer.textContent = perguntaSelecionada;
-            this.campoResposta.style.display = "flex";
-            this.pararTemporizador();
-            this.iniciarTemporizador();
+            this.perguntaContainer.textContent = perguntaSelecionada; 
+            this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
+            this.pararTemporizador(); // Stop the timer            
+            this.iniciarTemporizador(); // Start a new timer for the next round of questions
+        } else if (p == 6) {
+            var perguntaSelecionada = this.perguntas[5];
+            this.perg = perguntaSelecionada
+            this.pergId = this.id_pergunta(perguntaSelecionada);            
+            this.perguntaContainer.textContent = perguntaSelecionada; 
+            console.log("pergunta:", perguntaSelecionada)
+            this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
+            this.pararTemporizador(); // Stop the timer            
+            this.iniciarTemporizador(); // Start a new timer for the next round of questions
         } else {
             console.log('não existe essa pergunta')
         }
@@ -92,15 +101,17 @@ class Tarefa {
             return 1;
         } else if (pergunta === "Selecione a segunda maior barra? ") {
             return 2;
-        } else if (pergunta === "Estimar Proporção entre os dois elementos?") {
-            return 3
         } else if (pergunta === "Selecione a barra com o valor") {
-            return 4;
+            return 3;
         } else if (pergunta === "Qual o valor da barra destacada?") {
+            return 4;
+        } else if (pergunta === "Estimar Proporção entre os dois elementos ?") {
             return 5;
+        } else if (pergunta === "Qual e o grafico com maior crescimento?") {
+            return 6;
         }
     }
-
+    
     enviarpergunta() {
         this.perguntaContainer.style.display = "none";
         this.proximoBotao.style.display = "none";

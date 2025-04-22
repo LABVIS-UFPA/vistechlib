@@ -54,10 +54,10 @@ class BarChart extends Visualization {
         this.settings.negativeMode = "disabled";
         this.settings.startZero = true;
         this.settings.drawStrategy = 'default';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
-        this.settings.breakPoint = 0.2; //"parseFloat(document.getElementById('breakpointInput').value) ||"
-        this.settings.breakPoint2 = 0.96, 5; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
+        this.settings.breakPoint = 0.5; //"parseFloat(document.getElementById('breakpointInput').value) ||"
+        this.settings.breakPoint2 = 0.97, 5; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
         this.settings.breakPoint3 = 0.88; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
-        this.settings.breakPoint4 = 0.95, 5;
+        this.settings.breakPoint4 = 0.96, 5;
         this.settings.corte; //"parseFloat(document.getElementById('breakpointInput4').value) ||"
         this.settings.cortefinal;
         this.settings.z = 0.28; //"parseFloat(document.getElementById('inputz').value) ||"
@@ -313,11 +313,11 @@ class BarChart extends Visualization {
         const valoresOrdenados = [...dados]
             .sort((a, b) => a.valor - b.valor)
             .map((item) => item.valor);
-    
+
         function identificarMaiorDiferenca(arr) {
             let maiorGap = 0;
             let posicaoGap = -1;
-    
+
             for (let i = 0; i < arr.length - 1; i++) {
                 const diff = arr[i + 1] - arr[i];
                 if (diff > maiorGap) {
@@ -325,44 +325,44 @@ class BarChart extends Visualization {
                     posicaoGap = i;
                 }
             }
-    
+
             if (posicaoGap === -1 || maiorGap === 0) {
                 posicaoGap = Math.floor(arr.length / 2) - 1;
                 if (posicaoGap < 0) posicaoGap = 0;
             }
-    
+
             return {
                 corte: arr[posicaoGap],
                 corteFinal: arr[posicaoGap + 1],
                 maximo: arr[arr.length - 1]
             };
         }
-    
+
         const { corte, corteFinal, maximo } = identificarMaiorDiferenca(valoresOrdenados);
-    
+
         // Ajusta os cortes (igual ao original)
         let corteAjust = corte;
         let corteFinalAjust = corteFinal;
         let maximoAjust = maximo;
-    
+
         if (maximoAjust - corteFinalAjust > corteAjust) {
             corteFinalAjust = maximoAjust - corteAjust;
             corteAjust = maximoAjust - corteFinalAjust;
         } else {
             maximoAjust = corteFinalAjust + corteAjust;
         }
-    
+
         // Calcula cortes intermediários (igual ao original)
         const tamanhoMeioRelativo = 0.5;
         const tamanhoMeio = corteAjust * (tamanhoMeioRelativo / 2);
         const diferenca = corteFinalAjust - corteAjust;
-    
+
         let corte2 = corteAjust + diferenca / 2 - tamanhoMeio;
         let corte3 = corteAjust + diferenca / 2 + tamanhoMeio;
-    
+
         corte2 = Math.max(corteAjust, Math.min(corte2, corteFinalAjust));
         corte3 = Math.max(corte2, Math.min(corte3, corteFinalAjust));
-    
+
         return {
             corteInferior: corteAjust,
             corteSuperior: corteFinalAjust,
@@ -495,6 +495,13 @@ BarChart.strategies = {
     "scale-break": {
         data: (barchart) => {
 
+            const resultadoCortes = barchart.calcularCortesEMaximo(barchart.d);
+            if (!resultadoCortes) return;
+
+            barchart.settings.corte = resultadoCortes.corteInferior;
+            barchart.settings.cortefinal = resultadoCortes.corteSuperior;
+
+
             barchart.ybreak = {};
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
@@ -502,15 +509,12 @@ BarChart.strategies = {
                 // let segundo_maior = 10000;
                 // let terceiro = (segundo_maior*40)/100+segundo_maior;
 
-                let corte = barchart.settings.corte;
-                let cortefinal = barchart.settings.cortefinal;
-
                 barchart.breakPoint = barchart.settings.breakPoint;
                 barchart.gapSize = 25;
 
 
-                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2, 10]);
+                barchart.y[k] = d3.scaleLinear().domain([0, barchart.settings.corte]).range([barchart.boxHeight, barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2]);
+                barchart.ybreak[k] = d3.scaleLinear().domain([barchart.settings.cortefinal, maximo]).range([barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2, 10]);
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2;
             }
@@ -555,7 +559,10 @@ BarChart.strategies = {
                     .attr("x", (d, i) => barchart.x(i))
                     .attr("width", barchart.x.bandwidth())
                     .attr("y", (d) => barchart.ybreak[key](d[key]))
-                    .attr("height", (d) => Math.max(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), 0))
+                    .attr("height", (d) => {
+                        if (!(d[key] >= barchart.settings.cortefinal)) return 0;
+                        return Math.max(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), 0);
+                    })
                     .style("fill", barchart.settings.color);
                 barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
@@ -569,7 +576,7 @@ BarChart.strategies = {
 
                 g.append("g")
                     .attr("class", "y upperaxis")
-                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(4).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(7).tickFormat(d => d.toLocaleString('pt-BR')))
                     .selectAll("text") // Seleciona todos os elementos de texto do eixo y
                     .each(function (d) { // Para cada marca de tick
                         d3.select(this.parentNode) // Seleciona o pai (o elemento g)
@@ -738,17 +745,28 @@ BarChart.strategies = {
     "scale break perspective": {
         data: (barchart) => {
 
+            // Calcula os cortes dinamicamente com base nos dados
+            const resultadoCortes = barchart.calcularCortesEMaximo(barchart.d);
+            if (!resultadoCortes) return;
+
+            barchart.settings.corte = resultadoCortes.corteInferior;
+            barchart.settings.cortefinal = resultadoCortes.corteSuperior;
+
+
+
+            // Pode usar também se quiser os cortes intermediários:
+            // let corte2 = resultadoCortes.corteIntermediario1;
+            // let corte3 = resultadoCortes.corteIntermediario2;
+
             barchart.ybreak = {};
             barchart.ybreak2 = {};
             barchart.ybreak3 = {};
             barchart.ybreak4 = {};
             barchart.z = barchart.settings.z;
 
-            let corte = barchart.settings.corte;
-            let cortefinal = barchart.settings.cortefinal;
-            let diferença = cortefinal - corte;
+            let diferença = barchart.settings.cortefinal - barchart.settings.corte;
 
-            let corte2 = corte + (diferença * 40) / 100
+            let corte2 = barchart.settings.corte + (diferença * 40) / 100;
             let corte3 = corte2 + (diferença * 20) / 100;
 
             for (let k of barchart.keys_filter) {
@@ -760,15 +778,7 @@ BarChart.strategies = {
                 barchart.breakPoint3 = barchart.settings.breakPoint3;
                 barchart.breakPoint4 = barchart.settings.breakPoint4;
 
-                barchart.breakPoint = 0.3;
-                // barchart.breakPoint2 = 0.92;
-                // barchart.breakPoint3 = 0.91;
-                // barchart.breakPoint4 = 0.91;
-
-                // let corte1 = 10;
-                // let corte2 = 100;
-                // let corte3 = 130;
-                // let corte4 = 230;
+                barchart.breakPoint = barchart.settings.breakPoint;
 
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint;
@@ -778,11 +788,11 @@ BarChart.strategies = {
 
 
 
-                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
+                barchart.y[k] = d3.scaleLinear().domain([0, barchart.settings.corte]).range([barchart.boxHeight, barchart.boxHeightBreak]);
+                barchart.ybreak[k] = d3.scaleLinear().domain([barchart.settings.corte, corte2]).range([barchart.boxHeightBreak, barchart.boxHeightBreak2]);
                 barchart.ybreak2[k] = d3.scaleLinear().domain([corte2, corte3]).range([barchart.boxHeightBreak2, barchart.boxHeightBreak3]);
-                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
-                barchart.ybreak4[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
+                barchart.ybreak3[k] = d3.scaleLinear().domain([corte3, barchart.settings.cortefinal]).range([barchart.boxHeightBreak3, barchart.boxHeightBreak4]);
+                barchart.ybreak4[k] = d3.scaleLinear().domain([barchart.settings.cortefinal, maximo]).range([barchart.boxHeightBreak4, 10]);
 
             }
         },
@@ -903,9 +913,14 @@ BarChart.strategies = {
                         let x = barchart.x(i);
                         let y = barchart.ybreak4[key](d[key]);
                         let width = barchart.x.bandwidth();
-                        let height = Math.max(barchart.boxHeightBreak4 - barchart.ybreak4[key](d[key]), 0);
-                        return `M${x},${y} L${x + (width)},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
 
+                        // console.log("valor corte:",barchart.settings.corteFinal)
+                        if (!(d[key] >= barchart.settings.cortefinal)) {
+                            return null;
+                        } else {
+                            let height = Math.max(barchart.boxHeightBreak4 - barchart.ybreak4[key](d[key]), 0);
+                            return `M${x},${y} L${x + (width)},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
+                        }
                     });
 
                 // Remove os elementos existentes
@@ -964,7 +979,7 @@ BarChart.strategies = {
 
                 g.append("g")
                     .attr("class", "y upper")
-                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(4).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .call(d3.axisLeft(barchart.ybreak4[key]).ticks(7).tickFormat(d => d.toLocaleString('pt-BR')))
                     .selectAll("text") // Seleciona todos os elementos de texto do eixo y
                     .each(function (d) { // Para cada marca de tick
                         d3.select(this.parentNode) // Seleciona o pai (o elemento g)
@@ -1084,15 +1099,15 @@ BarChart.strategies = {
         data: (barchart) => {
             const resultado = barchart.calcularCortesEMaximo(barchart.d);
             barchart.d = [...barchart.d].map((item) => item.valor);
-            
+
             if (!resultado) {
                 console.error("Dados insuficientes para análise de quebra");
                 return;
             }
-        
+
             barchart.corte = resultado.corteInferior;
             barchart.maximo = resultado.valorMaximo;
-        
+
             barchart.sections = [
                 { name: "lower", range: [0, resultado.corteInferior] },
                 { name: "meio1", range: [resultado.corteInferior, resultado.corteIntermediario1] },
@@ -1228,7 +1243,7 @@ BarChart.strategies = {
                             .attr("width", xScale.bandwidth())
                             .attr("height", barHeight)
                             .attr("class", section.name)
-                            .attr("data-index", i+1);
+                            .attr("data-index", i + 1);
 
                         yOffset -= barHeight; // Atualiza o deslocamento para a próxima parte da barra
                     }

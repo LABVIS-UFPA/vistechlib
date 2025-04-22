@@ -51,8 +51,8 @@
             const tarefa = new Tarefa();
             const resposta = new Respostas();
 
-            var strategies = ["3d break", "default", "scale break perspective"];
-            var tarefas = ["3", "5"]; // Added task 5 to the list of tasks         
+            var strategies = ["3d break", "scale break perspective", "default"];
+            var tarefas = ["1","2","3","4","5"];
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -61,7 +61,7 @@
                 // Loop pelas estratégias
                 for (let strategy of strategies) {
                     // Loop pelos valores
-                    for (let [varName, values] of [['1', minhaBaseDeDados.base1], ['2', minhaBaseDeDados.base2], ['3', minhaBaseDeDados.base3], ['4', minhaBaseDeDados.base4]]) {  //
+                    for (let [varName, values] of [['3', minhaBaseDeDados.base3]]) {  //
                         // Loop pelas tarefas
                         for (let tarefa of tarefas) {
                             // Adiciona a combinação com o nome da variável, a estratégia e a tarefa
@@ -95,7 +95,43 @@
                         combination = combinations[index++];
                         minhaBaseDeDados.embaralhar(minhaBaseDeDados['base' + combination.varName]);
                         combination.values = minhaBaseDeDados['base' + combination.varName];
-                        // console.log(combination.values)
+
+                        // if (combination.tarefa == 6) {
+                        //     const main = document.querySelector("main");
+                        //     main.innerHTML = "";
+
+                        //     const container = document.createElement("div");
+                        //     container.style.display = "flex";
+                        //     container.style.flexDirection = "row";
+                        //     container.style.height = "700px";
+                        //     container.style.width = "100%";
+
+                        //     const layouts = [];
+
+                        //     for (let i = 0; i < 3; i++) {
+                        //         const div = document.createElement("div");
+                        //         div.style.width = "33.33%";
+                        //         div.style.height = "100%";
+                        //         div.style.border = "1px solid black"; // para visualização
+                        //         div.id = `barchart${i + 1}`;
+                        //         container.appendChild(div);
+                        //         layouts.push(div);
+                        //     }
+
+                        //     main.appendChild(container);
+
+                        //     // Cria um gráfico com uma strategy diferente em cada div
+                        //     layouts.forEach((layoutDiv, index) => {
+                        //         const strategy = strategies[index];
+                        //         const config = { drawStrategy: strategy };
+                        //         barchart = new BarChart(layoutDiv, config);
+                        //         barchart.data(combination.value);
+                        //         barchart.redraw();
+                        //     });
+                        //     createresp([{ valor: 2086 },{ valor: 77412 },{ valor: 798 },])
+                            
+                        // }
+
 
                         //valores dos breaks
                         let break_dados = minhaBaseDeDados.breakdados(combination.varName);
@@ -125,7 +161,7 @@
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
 
-                        // atraamento especifico para a tarefa de razao
+                        // tratamento especifico para a tarefa de razao
                         if (tarefa.pergId == 3) {
                             // carregar somente depois de ter enderizado o grafico
                             setTimeout(() => {
@@ -133,19 +169,27 @@
                                 var resposta_menor = res[0];
                                 var resposta_menor2 = res[1];
                                 var resposta_maior = res[2];
-                                console.log("valor:",resposta_maior.valor);
-                                let razao = resposta_maior.valor/resposta_menor.valor;
-                                console.log("AAqui:")
-                                // lembra que o indice da barra agora e indice+1
-                                barchart.getHighlightElementsPSB([resposta_menor2.posicao+1, resposta_maior.posicao+1], "#e74c3c");                         
-                                // Adiciona o highlight manualmente no SVG
+                                let razao = resposta_maior.valor / resposta_menor.valor;
+                                // lembrar que o indice da barra agora e indice+1
+                                barchart.getHighlightElementsPSB([resposta_menor2.posicao + 1, resposta_maior.posicao + 1], "#e74c3c");
+                            }, 5);
+                            createresptext();
+                        } else if (tarefa.pergId == 5) {
+                            setTimeout(() => {
+                                var res = minhaBaseDeDados.ratio(combination.varName);
+                                var resposta_menor = res[0];
+                                var resposta_menor2 = res[1];
+                                var resposta_maior = res[2];
+                                let razao = resposta_maior.valor / resposta_menor.valor;
+                                // lembrar que o indice da barra agora e indice+1
+                                barchart.getHighlightElementsPSB([resposta_menor2.posicao + 1, resposta_menor.posicao + 1], "#e74c3c");
                             }, 5);
                             createresptext();
                         } else if (tarefa.pergId == 5) {
                             // Para a tarefa de determinar o valor da barra, usamos um campo de texto
                             createresptext("Valor da barra:");
                         } else {
-                            createresp(combination.value); 
+                            createresp(combination.value);
                         }
                     } else {
                         // Todas as combinações foram exibidas, agora exporte para CSV
@@ -212,7 +256,7 @@
             alinharFildsetAoGrafico();
 
             //alinhar fieldset ao grafico
-            function alinharFildsetAoGrafico(){
+            function alinharFildsetAoGrafico() {
                 console.log(d3.select("svg .background .vis_background").node())
                 if (!d3.select("svg .background .vis_background").node()) {
                     var ban = d3.selectAll("svg .loweraxis line").nodes().pop().getBoundingClientRect()
@@ -247,8 +291,6 @@
             function createresp(dados, allowMultipleSelection) {
                 campoResposta.classList.add("checkbox-form");
                 var gap = barchart.settings.gap;
-
-
 
                 dados.forEach((valor, index) => {
 
@@ -292,7 +334,7 @@
                 const label = document.createElement("label");
                 label.setAttribute("for", "respostaTexto");
                 label.textContent = labelText;
-                label.style.marginRight = "10px";                
+                label.style.marginRight = "10px";
 
                 const textInput = document.createElement("input");
                 textInput.type = "text";
