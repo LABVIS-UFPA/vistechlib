@@ -30,15 +30,13 @@ class Respostas {
         };
     }
 
-    saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela, base) {
+    saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela, base, estrategias) {
         var checkboxes = document.querySelectorAll(this.checkboxSelector);
-        var checkboxestext = document.querySelector(this.checkboxSelectortext);
 
         var resposta_marcada_posicao = [];
         checkboxes.forEach(function (checkbox) {
             if (checkbox.checked) {
                 resposta_marcada_posicao.push(checkbox.value);
-
             }
         });
         let posicao = parseInt(resposta_marcada_posicao)
@@ -47,18 +45,18 @@ class Respostas {
 
         if (Number.isNaN(posicao)) {
             resposta_marcada_valor = 0;
-        } else {
+        } else if (tarefa !== 8) {
             resposta_marcada_valor = base[posicao].valor;
+        } else {
+            resposta_marcada_valor = estrategias[posicao];
         }
         // Corrigido para usar this.createCarObject
-        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_marcada_posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
+        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
                 
         }
 
     saveInputValueToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela,base) {
         let inputValor = document.querySelector("#respostaTexto").value;
-
-        console.log(inputValor)
               
         this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade,curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, "", inputValor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
     }

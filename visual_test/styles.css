@@ -49,10 +49,11 @@ main{
     z-index: -1;
     overflow: visible !important;
     -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
     transition: transform 0.2s ease-in-out;
     position: absolute;
     width: 100%;
-    transform: perspective(245px) rotateY(0deg) rotateX(0deg) translateY(00px);
+    transform: perspective(245px) rotateY(0deg) rotateX(0deg) translateY(00px) translateX(10px);
 }
 
 #chart div{

@@ -1109,11 +1109,11 @@ BarChart.strategies = {
             barchart.maximo = resultado.valorMaximo;
 
             barchart.sections = [
-                { name: "lower", range: [0, resultado.corteInferior] },
-                { name: "meio1", range: [resultado.corteInferior, resultado.corteIntermediario1] },
-                { name: "meio2", range: [resultado.corteIntermediario1, resultado.corteIntermediario2] },
-                { name: "meio3", range: [resultado.corteIntermediario2, resultado.corteSuperior] },
-                { name: "upper", range: [resultado.corteSuperior, resultado.valorMaximo] },
+                { name: "lower3d", range: [0, resultado.corteInferior] },
+                { name: "meio13d", range: [resultado.corteInferior, resultado.corteIntermediario1] },
+                { name: "meio23d", range: [resultado.corteIntermediario1, resultado.corteIntermediario2] },
+                { name: "meio33d", range: [resultado.corteIntermediario2, resultado.corteSuperior] },
+                { name: "upper3d", range: [resultado.corteSuperior, resultado.valorMaximo] },
             ];
         },
 
@@ -1121,19 +1121,19 @@ BarChart.strategies = {
             barchart.parentElement.classList.add("dbreak");
 
             barchart.parentElement.innerHTML = `
-            <div id="upper" class="child">
+            <div id="upper3d" class="child">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
-            <div id="meio3" class="child">
+            <div id="meio33d" class="child">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
-            <div id="meio2" class="child">
+            <div id="meio23d" class="child">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
-            <div id="meio1" class="child">
+            <div id="meio13d" class="child">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
-            <div id="lower" class="child">
+            <div id="lower3d" class="child">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
         `;
@@ -1155,9 +1155,9 @@ BarChart.strategies = {
             const scaleFactor = 230;
             const dynamicHeight = scaleFactor * maxDataValue / lowerMax;
 
-            const width = document.querySelector("#chart").clientWidth - 50;
+            const width = barchart.parentElement.clientWidth - 50;
             const height = dynamicHeight
-            const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+            const margin = { top: 20, right: 30, bottom: 30, left: 0 };
 
             const xScale = d3
                 .scaleBand()
@@ -1179,7 +1179,7 @@ BarChart.strategies = {
             barchart.sections.forEach((section, index) => {
                 for (const d of sortedTicks) {
                     if (d >= section.range[1]) {
-                        if (section.name == "meio3") {
+                        if (section.name == "meio33d") {
                             section.range[1] = sortedTicks[sortedTicks.indexOf(d) - 1] - 1;
                             if (index + 1 < barchart.sections.length) {
                                 barchart.sections[index + 1].range[0] =
@@ -1187,7 +1187,7 @@ BarChart.strategies = {
                             }
                             break;
                         }
-                        if (section.name == "lower") {
+                        if (section.name == "lower3d") {
                             section.range[1] = d;
                             if (index + 1 < barchart.sections.length) {
                                 barchart.sections[index + 1].range[0] = d;
@@ -1197,7 +1197,7 @@ BarChart.strategies = {
                     }
 
                     if (
-                        section.name == "upper" &&
+                        section.name == "upper3d" &&
                         d == sortedTicks[sortedTicks.length - 1]
                     ) {
                         section.range[1] =
@@ -1217,9 +1217,7 @@ BarChart.strategies = {
                 ])
                 .range([height - margin.bottom, margin.top]);
 
-            const svg = d3
-                .select("#chart")
-                .append("svg")
+            const svg = d3.select(barchart.parentElement).append("svg")
                 .attr("width", width)
                 .attr("height", height);
 
@@ -1272,16 +1270,16 @@ BarChart.strategies = {
                         .attr("y1", 0)
                         .attr("y2", 0)
                         .attr("stroke", "black")
-                        .attr("stroke-width", 0.5);
+                        .attr("stroke-width", 1);
                 });
 
             // Agrupa as partes do gráfico
             const parts = {
-                4: d3.selectAll("rect.upper"),
-                3: d3.selectAll("rect.meio3"),
-                2: d3.selectAll("rect.meio2"),
-                1: d3.selectAll("rect.meio1"),
-                0: d3.selectAll("rect.lower"),
+                4: d3.selectAll("rect.upper3d"),
+                3: d3.selectAll("rect.meio33d"),
+                2: d3.selectAll("rect.meio23d"),
+                1: d3.selectAll("rect.meio13d"),
+                0: d3.selectAll("rect.lower3d"),
             };
 
             // Processa cada parte do gráfico
@@ -1322,16 +1320,9 @@ BarChart.strategies = {
 
                 // Cria o domínio do gráfico
                 const domain = document.createElement("g");
-                domain.setAttribute("transform", "translate(40,0)");
-                domain.setAttribute("fill", "none");
-                domain.setAttribute("font-size", "10");
-                domain.setAttribute("font-family", "sans-serif");
-                domain.setAttribute("text-anchor", "end");
-
                 // Cria o elemento de caminho
                 const pathElement = document.createElement("path");
-                pathElement.setAttribute("class", "domain");
-                pathElement.setAttribute("stroke", "currentColor");
+
                 pathElement.setAttribute(
                     "d",
                     `M-6,${Math.round(raiz.parentElement.attributes.height)}H0V20H-6`
@@ -1346,18 +1337,22 @@ BarChart.strategies = {
                     let linhaYmax = linhas[0].transform.animVal[0].matrix.f;
 
                     linhas.forEach((linha) => {
-                        let y = (linha.transform.animVal[0].matrix.f - linhaYmax) * -1;
-                        linha.setAttribute("transform", `translate(100, ${y})`);
+                        let y = (linha.transform.animVal[0].matrix.f - linhaYmax);
+                        if (y < 0){ y = y *-1;};
+                        linha.setAttribute("transform", `translate(50, ${y})`);
+                        linha.removeAttribute("opacity")
 
-                        if (classe == "meio1" || classe == "meio2" || classe == "meio3") {
+                        if (classe == "meio13d" || classe == "meio23d" || classe == "meio33d") {
                             linha.childNodes[1].style.display = "None";
                         } else {
+                            linha.childNodes[0].style.display = "None";
                             linha.childNodes[1].style.transform =
                                 "translate(-50px, 0) rotateX(180deg)";
+                            linha.childNodes[1].style.fontSize = "10px";
                         }
 
                         raiz.appendChild(linha);
-                        if (raiz.parentElement.id == "upper" || raiz.parentElement.id == "lower") {
+                        if (raiz.parentElement.id == "upper3d" || raiz.parentElement.id == "lower3d") {
                             raiz.parentElement.style.height = `${y}px`;
                         }
                     });
@@ -1365,7 +1360,7 @@ BarChart.strategies = {
             }
 
             // Remove o SVG base
-            const baseSVG = document.querySelector("#chart > svg");
+            const baseSVG = barchart.parentElement.querySelector(":scope > svg");
             if (baseSVG) {
                 baseSVG.parentNode.removeChild(baseSVG);
             }
@@ -1373,27 +1368,27 @@ BarChart.strategies = {
             // Aplica as transformações 3D
 
 
-            const m1 = document.querySelector("#meio1");
+            const m1 = document.querySelector("#meio13d");
             if (m1) {
                 m1.style.transform = `rotate3d(1, 0, 0, -90deg) translate3d(0px, ${m1.clientHeight / 2}px, -${m1.clientHeight / 2}px)`;
             }
 
-            const m3 = document.querySelector("#meio3");
+            const m3 = document.querySelector("#meio33d");
             if (m3) {
                 m3.style.transform = `rotate3d(1, 0, 0, 90deg) translate3d(0px, -${m3.clientHeight / 2}px, -${m3.clientHeight / 2}px)`;
             }
 
-            const m2 = document.querySelector("#meio2");
+            const m2 = document.querySelector("#meio23d");
             if (m2 && m3) {
                 m2.style.transform = `rotateX(180deg) translate3d(0px, 0px, ${m3.clientHeight}px)`;
             }
 
-            const upper = document.querySelector("#upper");
+            const upper = document.querySelector("#upper3d");
             if (upper && m3) {
                 upper.style.transform = `rotateX(180deg) translate3d(0px, -${m3.clientHeight}px, 0px)`;
             }
 
-            const lower = document.querySelector("#lower");
+            const lower = document.querySelector("#lower3d");
             if (lower && m1) {
                 lower.style.transform = `rotateX(180deg) translate3d(0px, ${m1.clientHeight}px, 0px)`;
             }
@@ -1402,7 +1397,7 @@ BarChart.strategies = {
             // Configura os controles de perspectiva/rotação
             const slider = document.querySelector("#sliderGirarGrafico");
             const sliderPerspective = document.querySelector("#sliderPerspective");
-            const myDiv = document.getElementById("chart");
+            const myDiv = barchart.parentElement;
 
             if (slider && sliderPerspective && myDiv) {
                 let rotateXValue = slider.value;
@@ -1422,11 +1417,6 @@ BarChart.strategies = {
 
             myDiv.style.top = `-${myDiv.clientHeight / 2 - upper.clientHeight - upper.clientHeight / 3}px`;
 
-            // Remove nós filhos desnecessários
-            const parent = document.getElementById("chart");
-            if (parent && parent.lastChild) {
-                parent.removeChild(parent.lastChild);
-            }
         },
     },
 };

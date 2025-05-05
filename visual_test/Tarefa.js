@@ -76,7 +76,6 @@ class Tarefa {
             this.perg = perguntaSelecionada
             this.pergId = this.id_pergunta(perguntaSelecionada);
             this.perguntaContainer.textContent = perguntaSelecionada;
-            console.log("pergunta:", perguntaSelecionada)
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
             this.pararTemporizador(); // Stop the timer            
             this.iniciarTemporizador(); // Start a new timer for the next round of questions
@@ -85,7 +84,6 @@ class Tarefa {
             this.perg = perguntaSelecionada
             this.pergId = this.id_pergunta(perguntaSelecionada);
             this.perguntaContainer.textContent = perguntaSelecionada;
-            console.log("pergunta:", perguntaSelecionada)
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
             this.pararTemporizador(); // Stop the timer            
             this.iniciarTemporizador(); // Start a new timer for the next round of questions
@@ -94,7 +92,6 @@ class Tarefa {
             this.perg = perguntaSelecionada
             this.pergId = this.id_pergunta(perguntaSelecionada);
             this.perguntaContainer.textContent = perguntaSelecionada;
-            console.log("pergunta:", perguntaSelecionada)
             this.campoResposta.style.display = "flex"; // Supondo que você deseja exibir um campo de resposta para perguntas normais
             this.pararTemporizador(); // Stop the timer            
             this.iniciarTemporizador(); // Start a new timer for the next round of questions
