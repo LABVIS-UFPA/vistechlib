@@ -240,7 +240,7 @@ class BaseDeDados {
     let resp_corr_maiores = this.acharmaior(baseAtual);
     let x1 = resp_corr_menores[0];
     let x2 = resp_corr_menores[1];
-    let x3 = resp_corr_maiores[1];
+    let x3 = resp_corr_maiores[0];
     this.razaomaior_menor = x3.valor / x2.valor;
     this.razaomenor_menor = x2.valor / x1.valor;
     return [x1, x2, x3];
