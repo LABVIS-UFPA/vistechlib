@@ -51,10 +51,16 @@ class BaseDeDados {
       throw new Error("totalValues deve ser um número positivo");
     }
 
-    const config = {
-      basePower: 3,
-      outlierCount: 2,
-      outlierPower: 2,
+    // Gerar aleatoriamente os valores de basePower e outlierPower
+    const basePower = this.getRandomInRange(1, 4, true);
+    const outlierPower = this.getRandomInRange(1, 2, true);
+
+    const config = {     
+      // basePower:3,
+      // outlierPower:2, 
+      basePower,
+      outlierPower,
+      outlierCount: 2,      
       precision: 0,
       ...options,
     };
