@@ -55,12 +55,12 @@ class BaseDeDados {
     const basePower = this.getRandomInRange(1, 4, true);
     const outlierPower = this.getRandomInRange(1, 2, true);
 
-    const config = {     
+    const config = {
       // basePower:3,
       // outlierPower:2, 
       basePower,
       outlierPower,
-      outlierCount: 2,      
+      outlierCount: 2,
       precision: 0,
       ...options,
     };
@@ -247,8 +247,8 @@ class BaseDeDados {
     let x1 = resp_corr_menores[0];
     let x2 = resp_corr_menores[1];
     let x3 = resp_corr_maiores[0];
-    this.razaomaior_menor = x3.valor / x2.valor;
-    this.razaomenor_menor = x2.valor / x1.valor;
+    this.razaomaior_menor = parseFloat((x3.valor / x2.valor).toFixed(2));
+    this.razaomenor_menor = parseFloat((x2.valor / x1.valor).toFixed(2));
     return [x1, x2, x3];
   }
 

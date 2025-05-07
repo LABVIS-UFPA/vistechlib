@@ -55,7 +55,7 @@
         }
 
         init() {
-          this.initWebcam();
+          // this.initWebcam();
           this.setupEventListeners();
           this.combinations = this.shuffleArray(this.generateCombinations());
           this.displayNextCombination();
@@ -687,7 +687,7 @@
 
         finishTest() {
           this.resposta.exportToCSV();
-          this.webcam.stopRecording();
+          // this.webcam.stopRecording();
         }
       }
 

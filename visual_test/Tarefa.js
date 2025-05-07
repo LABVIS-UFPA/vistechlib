@@ -8,7 +8,7 @@ class Tarefa {
             // estimar maior<->menor
             "Estimar Proporção entre os dois elementos?",
             // estimar menor<->menor
-            "Estimar Proporção entre os dois elementos?",
+            "Estimar Proporção entre os dois elementos ?",
             "Determine a escala?",
             "Qual e o grafico com maior crescimento?"
         ];
