@@ -81,10 +81,10 @@
         generateCombinations() {
           const combinations = [];
 
+          // Primeiro, adicionar todas as combinações das tarefas 1-7
           for (const strategy of CONFIG.strategies) {
             for (const baseType of ["1"]) {
-              for (const tarefa of CONFIG.tarefas) {
-                // Não usamos a base diretamente, apenas guardamos o tipo
+              for (const tarefa of CONFIG.tarefas.filter((t) => t !== "8")) {
                 combinations.push({
                   baseType,
                   strategy,
@@ -93,6 +93,14 @@
               }
             }
           }
+
+          // Adicionar a tarefa 8 apenas uma vez, com uma estratégia específica
+          combinations.push({
+            baseType: "1",
+            strategy: CONFIG.strategies[0], // Usando a primeira estratégia disponível
+            tarefa: "8",
+          });
+
           return combinations;
         }
 
@@ -113,6 +121,10 @@
 
           this.resetLayout();
           this.currentCombination = this.combinations[this.combinationIndex++];
+          console.log(
+            `Exibindo combinação ${this.combinationIndex}:`,
+            this.currentCombination
+          );
           this.prepareCurrentCombination();
           this.renderVisualization();
           this.tempo_visualizacao_inicial = performance.now();
@@ -177,7 +189,7 @@
           this.baseDeDados.baseTemporaria = baseEmbaralhada;
 
           // Reset da tarefa
-          if (tarefa === "4") {
+          if (tarefa === "4" || tarefa === "8") {
             this.tarefa.reset(parseInt(tarefa), null);
           }
         }
@@ -326,7 +338,6 @@
           this.tarefa8Crescimentos = crescimentos;
 
           this.createResponseForm([{ valor: 0 }, { valor: 1 }, { valor: 2 }]);
-
           this.tarefa.exibirProximaPergunta(8, null);
           this.elements.campoResposta.style.width = "100%";
           this.elements.campoResposta.style.justifyContent = "space-around";
@@ -485,7 +496,6 @@
             input.style.marginRight = gap;
 
             if (index === 0) {
-              console.log(this.barchart)
               input.style.marginLeft = "50px";
             } else if (index === dados.length - 1) {
               input.style.marginRight = "50px";
@@ -624,7 +634,6 @@
               base
             );
           } else {
-            // Para tarefa 8, a resposta correta é o índice da visualização com maior crescimento
             const resposta_correta_posicao =
               tarefaId === 8
                 ? resposta_correta.posicao
