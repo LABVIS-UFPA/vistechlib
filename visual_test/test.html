@@ -1,748 +1,750 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Teste de Visualização - LabVis</title>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="styles.css" />
-
-    <!-- Scripts externos -->
-    <script src="d3.v7.min.js"></script>
-    <script src="moment.min.js"></script>
-    <script src="require.js"></script>
-    <script src="../visual_test/datagen.js"></script>
-    <script src="../visual_test/BaseDeDados.js"></script>
-    <script src="../visual_test/Tarefa.js"></script>
-    <script src="../visual_test/Respostas.js"></script>
-    <script src="../visual_test/webcam.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/json2csv/dist/json2csv.umd.min.js"></script>
-    <script src="../src/Visualization.js"></script>
-    <script src="../src/BarChart.js"></script>
-
-    <script>
-      const CONFIG = {
-        strategies: ["3d break", "scale break perspective", "default"],
-        tarefas: ["1", "2", "3", "4", "5", "6", "7", "8"],
-      };
-
-      class TestManager {
-        constructor() {
-          this.baseDeDados = new BaseDeDados();
-          this.tarefa = new Tarefa();
-          this.resposta = new Respostas();
-          this.webcam = null;
-          this.barchart = null;
-          this.combinationIndex = 0;
-          this.combinations = [];
-          this.currentCombination = null;
-          this.value_t4_barra = 0;
-          this.value_t3_valor;
-          this.tempo_visualizacao_inicial = 0;
-
-          // Elementos do DOM
-          this.elements = {
-            layout: document.querySelector("#chart"),
-            campoResposta: document.querySelector("fieldset"),
-            continuarBotao: document.getElementById("continuarBotao"),
-            proximoBotao: document.getElementById("proximoBotao"),
-            perguntaContainer: document.getElementById("perguntaContainer"),
-            fimPerguntas: document.getElementById("fimPerguntas"),
-            video: document.getElementById("video"),
-            tiltCheckbox: document.getElementById("tilt-grafico"),
-          };
-        }
-
-        init() {
-          // this.initWebcam();
-          this.setupEventListeners();
-          this.combinations = this.shuffleArray(this.generateCombinations());
-          this.displayNextCombination();
-        }
-
-        initWebcam() {
-          this.webcam = new webcam(this.elements.video);
-          this.webcam.startRecording();
-        }
-
-        setupEventListeners() {
-          this.elements.proximoBotao.addEventListener("click", () =>
-            this.handleProximoButtonClick()
-          );
-          this.elements.continuarBotao.addEventListener("click", () =>
-            this.displayNextCombination()
-          );
-          this.elements.tiltCheckbox.addEventListener("click", () =>
-            this.toggleChartTilt()
-          );
-        }
-
-        generateCombinations() {
-          const combinations = [];
-
-          // Primeiro, adicionar todas as combinações das tarefas 1-7
-          for (const strategy of CONFIG.strategies) {
-            for (const baseType of ["1"]) {
-              for (const tarefa of CONFIG.tarefas.filter((t) => t !== "8")) {
-                combinations.push({
-                  baseType,
-                  strategy,
-                  tarefa,
-                });
-              }
-            }
-          }
-
-          // Adicionar a tarefa 8 apenas uma vez, com uma estratégia específica
-          combinations.push({
-            baseType: "1",
-            strategy: CONFIG.strategies[0], // Usando a primeira estratégia disponível
-            tarefa: "8",
-          });
-
-          return combinations;
-        }
-
-        shuffleArray(array) {
-          const newArray = [...array];
-          for (let i = newArray.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-          }
-          return newArray;
-        }
-
-        displayNextCombination() {
-          if (this.combinationIndex >= this.combinations.length) {
-            this.finishTest();
-            return;
-          }
-
-          this.resetLayout();
-          this.currentCombination = this.combinations[this.combinationIndex++];
-          console.log(
-            `Exibindo combinação ${this.combinationIndex}:`,
-            this.currentCombination
-          );
-          this.prepareCurrentCombination();
-          this.renderVisualization();
-          this.tempo_visualizacao_inicial = performance.now();
-        }
-
-        resetLayout() {
-          this.elements.layout.classList.remove("dbreak");
-          this.elements.layout.style =
-            "height: 700px; display: block; overflow: hidden;";
-          this.elements.campoResposta.innerHTML = "";
-        }
-
-        prepareCurrentCombination() {
-          const { baseType, tarefa } = this.currentCombination;
-
-          // Gerar bases
-          const novaBases = {
-            // Base 1
-            1: this.baseDeDados.generateBaseWithoutDataGen(15, {
-              // basePower: 3,
-              outlierCount: 1,
-              // outlierPower: 2,
-              precision: 2,
-            }),
-            // // Base 2
-            // 2: this.baseDeDados.generateBaseWithoutDataGen(15, {
-            //   basePower: 3,
-            //   outlierCount: 2,
-            //   outlierPower: 2,
-            //   precision: 2,
-            // }),
-            // // Base 3
-            // 3: this.baseDeDados.generateBaseWithoutDataGen(15, {
-            //   basePower: 3,
-            //   outlierCount: 2,
-            //   outlierPower: 2,
-            //   precision: 2,
-            // }),
-            // // Base 4
-            // 4: this.baseDeDados.generateBaseWithoutDataGen(15, {
-            //   basePower: 3,
-            //   outlierCount: 2,
-            //   outlierPower: 2,
-            //   precision: 2,
-            // }),
-          };
-
-          // Criar uma base temporária para esta tarefa
-          const baseAtual = novaBases[baseType];
-
-          // Embaralhar os dados
-          const baseEmbaralhada = this.shuffleArray([...baseAtual]);
-
-          // Atribuir a base embaralhada à combinação atual
-          this.currentCombination.values = baseEmbaralhada;
-
-          // Calcular breaks baseados no tipo de base
-          const breakDados = this.baseDeDados.breakdados(baseType);
-          this.currentCombination.breaks = breakDados;
-
-          // Armazenar temporariamente a base atual para cálculos de razão e destaque
-          this.baseDeDados.baseTemporaria = baseEmbaralhada;
-
-          // Reset da tarefa
-          if (tarefa === "4" || tarefa === "8") {
-            this.tarefa.reset(parseInt(tarefa), null);
-          }
-        }
-
-        renderVisualization() {
-          const { tarefa, strategy, values } = this.currentCombination;
-          const breaks = this.currentCombination.breaks;
-
-          // Remover elementos anteriores
-          const tarefa8div = document.getElementById("tarefa8div");
-          if (tarefa8div) tarefa8div.remove();
-
-          if (parseInt(tarefa) === 8) {
-            this.renderTarefa8();
-          } else {
-            this.elements.layout.style.display = "block";
-            this.createAndDisplayChart(strategy, values, breaks[0], breaks[1]);
-            this.handleSpecificTarefas();
-          }
-
-          if (parseInt(tarefa) !== 8) {
-            this.alinharFildsetAoGrafico();
-          }
-        }
-
-        renderTarefa8() {
-          this.elements.layout.style.display = "none";
-          this.elements.layout.innerHTML = "";
-
-          const main = document.querySelector("main");
-          const container = document.createElement("div");
-          container.style.display = "flex";
-          container.style.flexDirection = "row";
-          container.style.height = "700px";
-          container.style.width = "100%";
-          container.id = "tarefa8div";
-
-          const layouts = [];
-
-          // Criar 3 divisões para as diferentes visualizações
-          for (let i = 0; i < 3; i++) {
-            const div = document.createElement("div");
-            div.style.width = "33.33%";
-            div.style.height = "100%";
-            div.id = `chart${i}`;
-
-            if (i === 0) {
-              div.setAttribute("class", "dbreak");
-            }
-
-            container.appendChild(div);
-            layouts.push(div);
-          }
-
-          main.appendChild(container);
-
-          document.querySelector("#chart1").style.marginLeft =
-            document.querySelector("#chart0").offsetWidth + "px";
-
-          // Gerar 3 bases diferentes para cada visualização
-          const bases = [
-            // Base 1
-            this.shuffleArray(
-              this.baseDeDados.generateBaseWithoutDataGen(15, {
-                basePower: 3,
-                outlierCount: 1,
-                outlierPower: 2,
-                precision: 2,
-              })
-            ),
-            // Base 2
-            this.shuffleArray(
-              this.baseDeDados.generateBaseWithoutDataGen(15, {
-                basePower: 3,
-                outlierCount: 1,
-                outlierPower: 2,
-                precision: 2,
-              })
-            ),
-            // Base 3
-            this.shuffleArray(
-              this.baseDeDados.generateBaseWithoutDataGen(15, {
-                basePower: 3,
-                outlierCount: 1,
-                outlierPower: 2,
-                precision: 2,
-              })
-            ),
-          ];
-
-          // Calcular a razão (crescimento) para cada base
-          const crescimentos = bases.map((base) => {
-            // Encontrar o menor e o maior valor em cada base
-            let menorValor = Number.POSITIVE_INFINITY;
-            let maiorValor = Number.NEGATIVE_INFINITY;
-
-            base.forEach((item) => {
-              if (item.valor < menorValor) menorValor = item.valor;
-              if (item.valor > maiorValor) maiorValor = item.valor;
-            });
-
-            // Calcular a razão
-            return {
-              razao: maiorValor / menorValor,
-              menor: menorValor,
-              maior: maiorValor,
-            };
-          });
-
-          // Determinar qual visualização tem o maior crescimento
-          let maiorCrescimentoIndex = 0;
-          let maiorRazao = crescimentos[0].razao;
-
-          for (let i = 1; i < crescimentos.length; i++) {
-            if (crescimentos[i].razao > maiorRazao) {
-              maiorRazao = crescimentos[i].razao;
-              maiorCrescimentoIndex = i;
-            }
-          }
-
-          this.respostaCorrctaTarefa8 = {
-            valor: CONFIG.strategies[maiorCrescimentoIndex],
-            posicao: maiorCrescimentoIndex,
-            razao: maiorRazao,
-            estrategia: CONFIG.strategies[maiorCrescimentoIndex],
-          };
-
-          // Criar gráficos com diferentes estratégias e bases de dados
-          layouts.forEach((layoutDiv, index) => {
-            const strategy = CONFIG.strategies[index];
-            const config = { drawStrategy: strategy };
-
-            // Usar uma base de dados diferente para cada gráfico
-            const baseData = bases[index];
-
-            const barchart = new BarChart(layoutDiv, config);
-            barchart.data(baseData);
-            barchart.redraw();
-
-            // Armazenar a base usada para cada gráfico caso precise recuperar depois
-            layoutDiv.dataset.baseIndex = index;
-          });
-
-          // Armazenar as bases temporariamente para referência
-          this.tarefa8Bases = bases;
-          this.tarefa8Crescimentos = crescimentos;
-
-          this.createResponseForm([{ valor: 0 }, { valor: 1 }, { valor: 2 }]);
-          this.tarefa.exibirProximaPergunta(8, null);
-          this.elements.campoResposta.style.width = "100%";
-          this.elements.campoResposta.style.justifyContent = "space-around";
-          this.elements.campoResposta.style.marginTop = "0px";
-          this.elements.fimPerguntas.style.marginTop = "0px";
-        }
-
-        handleSpecificTarefas() {
-          const tarefaId = parseInt(this.currentCombination.tarefa);
-          const baseAtual = this.currentCombination.values;
-
-          this.tarefa.reset(tarefaId, baseAtual);
-
-          // Garantir que a baseTemporaria está configurada para a base atual
-          this.baseDeDados.baseTemporaria = baseAtual;
-
-          // Gerar a pergunta específica para a tarefa atual
-          if (tarefaId === 1 || tarefaId === 2) {
-            this.createResponseForm(this.currentCombination.values);
-            this.tarefa.exibirProximaPergunta(tarefaId);
-          } else if (tarefaId === 3) {
-            this.value_t3_valor = this.baseDeDados.gerarvalor(baseAtual);
-            this.tarefa.exibirProximaPergunta(3, this.value_t3_valor.valor);
-
-            this.createResponseForm(this.currentCombination.values);
-          } else if (tarefaId === 4) {
-            this.value_t4_barra = this.baseDeDados.destacarBarraAleatoria();
-
-            setTimeout(() => {
-              this.barchart.getHighlightElementsPSB(
-                [this.value_t4_barra.posicao + 1],
-                "#e74c3c"
-              );
-            }, 5);
-            this.tarefa.exibirProximaPergunta(4, null);
-
-            this.createTextResponseForm("Valor da barra:");
-          } else if (tarefaId === 5 || tarefaId === 6) {
-            // Destacar barras para tarefas de razão
-            setTimeout(() => {
-              const res = this.baseDeDados.ratio();
-              const resposta_menor = res[0];
-              const resposta_menor2 = res[1];
-              const resposta_maior = res[2];
-
-              if (tarefaId === 5) {
-                this.barchart.getHighlightElementsPSB(
-                  [resposta_menor2.posicao + 1, resposta_maior.posicao + 1],
-                  "#e74c3c"
-                );
-                this.tarefa.exibirProximaPergunta(5, null);
-              } else {
-                this.barchart.getHighlightElementsPSB(
-                  [resposta_menor2.posicao + 1, resposta_menor.posicao + 1],
-                  "#e74c3c"
-                );
-
-                this.tarefa.exibirProximaPergunta(6, null);
-              }
-            }, 5);
-            this.createTextResponseForm();
-          } else if (tarefaId === 7) {
-            this.tarefa.exibirProximaPergunta(7, null);
-            this.createTextResponseForm();
-          }
-        }
-
-        createAndDisplayChart(strategy, data, breakInicial, breakFinal) {
-          if (this.barchart) {
-            this.elements.layout.innerHTML = "";
-          }
-
-          const config = { drawStrategy: strategy };
-          this.barchart = new BarChart(
-            this.elements.layout,
-            config,
-            breakInicial,
-            breakFinal
-          );
-          this.barchart.data(data);
-          this.barchart.redraw();
-        }
-
-        alinharFildsetAoGrafico() {
-          let ban;
-
-          if (
-            d3.selectAll("svg .lower3daxis line").nodes().pop() &&
-            !document.querySelector("#chart0")
-          ) {
-            ban = d3
-              .selectAll("svg .lower3daxis line")
-              .nodes()
-              .pop()
-              .getBoundingClientRect();
-            this.elements.campoResposta.style.marginTop = ban.y + 160 + "px";
-            this.elements.fimPerguntas.style.marginTop = ban.y + 160 + "px";
-            this.elements.tiltCheckbox.style.display = "block";
-            document.querySelector("[for='tilt-grafico']").style.display =
-              "block";
-          } else {
-            ban = d3
-              .select("svg .background .vis_background")
-              .node()
-              .getBoundingClientRect();
-            this.elements.campoResposta.style.marginTop = "0px";
-            this.elements.fimPerguntas.style.marginTop = "0px";
-            this.elements.tiltCheckbox.style.display = "none";
-            document.querySelector("[for='tilt-grafico']").style.display =
-              "none";
-          }
-
-          this.elements.campoResposta.style.width = ban.width + "px";
-          this.elements.campoResposta.style.marginLeft = ban.left - 10 + "px";
-          this.elements.campoResposta.style.marginRight = "0px";
-          this.elements.campoResposta.style.padding = "0px";
-        }
-
-        toggleChartTilt() {
-          if (this.elements.tiltCheckbox.checked) {
-            document.querySelector(
-              "#chart"
-            ).style.transform = `perspective(245px) translateZ(-245px) rotateY(20deg)`;
-          } else {
-            document.querySelector(
-              "#chart"
-            ).style.transform = `perspective(245px) rotateY(0deg)`;
-          }
-        }
-
-        createResponseForm(dados, allowMultipleSelection = false, labelText) {
-          this.elements.campoResposta.classList.add("checkbox-form");
-          const gap = "5px";
-
-          const generalLabel = document.createElement("label");
-          generalLabel.textContent = labelText;
-          generalLabel.style.display = "block";
-          generalLabel.style.marginBottom = gap;
-          this.elements.campoResposta.insertAdjacentElement(
-            "beforebegin",
-            generalLabel
-          );
-
-          dados.forEach((valor, index) => {
-            const container = document.createElement("div");
-            container.style.display = "flex";
-            container.style.alignItems = "center";
-            container.style.marginBottom = gap;
-
-            const input = document.createElement("input");
-            input.classList.add("checkbox-container");
-            input.type = "checkbox";
-            input.name = "resposta";
-            input.value = index;
-            input.id = "resp" + index;
-            input.style.marginRight = gap;
-
-            if (index === 0) {
-              input.style.marginLeft = "50px";
-            } else if (index === dados.length - 1) {
-              input.style.marginRight = "50px";
-            }
-
-            container.appendChild(input);
-            this.elements.campoResposta.appendChild(container);
-          });
-
-          if (!allowMultipleSelection) {
-            const checkboxes = document.querySelectorAll(
-              'input[type="checkbox"][name="resposta"]'
-            );
-            checkboxes.forEach((checkbox) => {
-              checkbox.addEventListener("click", function () {
-                checkboxes.forEach((cb) => {
-                  if (cb !== checkbox) cb.checked = false;
-                });
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste de Visualização - LabVis</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Scripts externos -->
+  <script src="d3.v7.min.js"></script>
+  <script src="moment.min.js"></script>
+  <script src="require.js"></script>
+  <script src="../visual_test/datagen.js"></script>
+  <script src="../visual_test/BaseDeDados.js"></script>
+  <script src="../visual_test/Tarefa.js"></script>
+  <script src="../visual_test/Respostas.js"></script>
+  <script src="../visual_test/webcam.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/json2csv/dist/json2csv.umd.min.js"></script>
+  <script src="../src/Visualization.js"></script>
+  <script src="../src/BarChart.js"></script>
+
+  <script>
+    const CONFIG = {
+      strategies: ["3d break", "scale break perspective", "default"],
+      tarefas: ["8"],
+    };
+
+    class TestManager {
+      constructor() {
+        this.baseDeDados = new BaseDeDados();
+        this.tarefa = new Tarefa();
+        this.resposta = new Respostas();
+        this.webcam = null;
+        this.barchart = null;
+        this.combinationIndex = 0;
+        this.combinations = [];
+        this.currentCombination = null;
+        this.value_t4_barra = 0;
+        this.value_t3_valor;
+        this.tempo_visualizacao_inicial = 0;
+
+        // Elementos do DOM
+        this.elements = {
+          layout: document.querySelector("#chart"),
+          campoResposta: document.querySelector("fieldset"),
+          continuarBotao: document.getElementById("continuarBotao"),
+          proximoBotao: document.getElementById("proximoBotao"),
+          perguntaContainer: document.getElementById("perguntaContainer"),
+          fimPerguntas: document.getElementById("fimPerguntas"),
+          video: document.getElementById("video"),
+          tiltCheckbox: document.getElementById("tilt-grafico"),
+        };
+      }
+
+      init() {
+        // this.initWebcam();
+        this.setupEventListeners();
+        this.combinations = this.shuffleArray(this.generateCombinations());
+        this.displayNextCombination();
+      }
+
+      initWebcam() {
+        this.webcam = new webcam(this.elements.video);
+        this.webcam.startRecording();
+      }
+
+      setupEventListeners() {
+        this.elements.proximoBotao.addEventListener("click", () =>
+          this.handleProximoButtonClick()
+        );
+        this.elements.continuarBotao.addEventListener("click", () =>
+          this.displayNextCombination()
+        );
+        this.elements.tiltCheckbox.addEventListener("click", () =>
+          this.toggleChartTilt()
+        );
+      }
+
+      generateCombinations() {
+        const combinations = [];
+
+        // Primeiro, adicionar todas as combinações das tarefas 1-7
+        for (const strategy of CONFIG.strategies) {
+          for (const baseType of ["1"]) {
+            for (const tarefa of CONFIG.tarefas.filter((t) => t !== "8")) {
+              combinations.push({
+                baseType,
+                strategy,
+                tarefa,
               });
-            });
-          }
-        }
-
-        createTextResponseForm(labelText = "Resposta:") {
-          const textInputContainer = document.createElement("div");
-          textInputContainer.style.marginTop = "8px";
-
-          const label = document.createElement("label");
-          label.setAttribute("for", "respostaTexto");
-          label.textContent = labelText;
-          label.style.marginRight = "10px";
-
-          const textInput = document.createElement("input");
-          textInput.type = "text";
-          textInput.id = "respostaTexto";
-          textInput.name = "respostaTexto";
-          textInput.style.width = "80px";
-          textInput.style.padding = "5px";
-          textInput.style.marginBottom = "5px";
-
-          textInputContainer.appendChild(label);
-          textInputContainer.appendChild(textInput);
-          this.elements.campoResposta.appendChild(textInputContainer);
-        }
-
-        handleProximoButtonClick() {
-          this.tarefa.pararTemporizador();
-
-          const userData = {
-            id: localStorage.getItem("id"),
-            idade: localStorage.getItem("idade"),
-            grauEscolaridade: localStorage.getItem("grauEscolaridade"),
-            curso: localStorage.getItem("curso"),
-            visualizacao: localStorage.getItem("visualizacao"),
-            conhece: localStorage.getItem("conhece"),
-            valorlikert: localStorage.getItem("respostaLikert"),
-            valorlikert2: localStorage.getItem("respostaLikert2"),
-            valorlikert3: localStorage.getItem("respostaLikert3"),
-          };
-
-          const { strategy, baseType, tarefa } = this.currentCombination;
-          const tarefaId = parseInt(tarefa);
-
-          // Obter resposta correta
-          let res;
-          let resposta_correta;
-          let resposta_correta_valor;
-
-          if (tarefaId === 8) {
-            resposta_correta = this.respostaCorrctaTarefa8;
-            resposta_correta_valor = resposta_correta.valor;
-
-            // Criar um array de resultados para manter consistência com outras tarefas
-            res = [
-              { valor: "não usado", posicao: 0 }, // x1
-              { valor: "não usado", posicao: 0 }, // x2
-              { valor: "não usado", posicao: 0 }, // x3
-              { valor: "não usado", posicao: 0 }, // x4
-              { valor: "não usado", posicao: 0 }, // x5
-              { valor: "não usado", posicao: 0 }, // x6
-              { valor: "não usado", posicao: 0 }, // x7
-              resposta_correta, // x8
-            ];
-          } else {
-            res = this.baseDeDados.respostacorreta(baseType);
-            resposta_correta =
-              res[this.tarefa.id_pergunta(this.tarefa.perg) - 1];
-            if (tarefaId === 4) {
-              resposta_correta_valor = this.value_t4_barra.valor;
             }
-            resposta_correta_valor = resposta_correta.valor;
           }
-
-          // Calcular tempo de visualização
-          const tempo_visualizacao_final = performance.now();
-          const tempo_total =
-            tempo_visualizacao_final - this.tempo_visualizacao_inicial;
-
-          const tempo_inicial_formatado = this.tarefa.formatatempo_performace(
-            this.tempo_visualizacao_inicial
-          );
-          const tempo_final_formatado = this.tarefa.formatatempo_performace(
-            this.tempo_visualizacao_inicial + tempo_total
-          );
-
-          // Para tarefa 8, registrar bases específicas
-          const base =
-            tarefaId === 8
-              ? this.tarefa8Bases // As três bases da tarefa 8
-              : this.currentCombination.values; // A base atual para outras tarefas
-
-          // Salvar resposta do usuário
-          if (
-            tarefaId === 4 ||
-            tarefaId === 5 ||
-            tarefaId === 6 ||
-            tarefaId === 7
-          ) {
-            this.resposta.saveInputValueToJson(
-              userData.id,
-              userData.idade,
-              userData.grauEscolaridade,
-              userData.curso,
-              userData.visualizacao,
-              userData.conhece,
-              userData.valorlikert,
-              userData.valorlikert2,
-              userData.valorlikert3,
-              strategy,
-              baseType,
-              tarefaId,
-              0,
-              resposta_correta_valor,
-              tempo_inicial_formatado,
-              tempo_final_formatado,
-              base
-            );
-          } else {
-            const resposta_correta_posicao =
-              tarefaId === 8
-                ? resposta_correta.posicao
-                : resposta_correta.posicao;
-
-            // Para tarefas com checkbox (incluindo tarefa 8)
-            this.resposta.saveCheckedCheckboxesToJson(
-              userData.id,
-              userData.idade,
-              userData.grauEscolaridade,
-              userData.curso,
-              userData.visualizacao,
-              userData.conhece,
-              userData.valorlikert,
-              userData.valorlikert2,
-              userData.valorlikert3,
-              strategy,
-              baseType,
-              tarefaId,
-              resposta_correta_posicao,
-              resposta_correta_valor,
-              tempo_inicial_formatado,
-              tempo_final_formatado,
-              base,
-              CONFIG.strategies
-            );
-
-            // if (tarefaId === 8) {
-            //   console.log("Tarefa 8 - Informações de crescimento:");
-            //   console.log(
-            //     "Visualização 0 (3D Break): Razão =",
-            //     this.tarefa8Crescimentos[0].razao
-            //   );
-            //   console.log(
-            //     "Visualização 1 (Scale Break): Razão =",
-            //     this.tarefa8Crescimentos[1].razao
-            //   );
-            //   console.log(
-            //     "Visualização 2 (Default): Razão =",
-            //     this.tarefa8Crescimentos[2].razao
-            //   );
-            //   console.log(
-            //     "Resposta correta (maior crescimento):",
-            //     resposta_correta.estrategia
-            //   );
-            // }
-          }
-
-          this.tarefa.enviarpergunta();
         }
 
-        finishTest() {
-          this.resposta.exportToCSV();
-          // this.webcam.stopRecording();
+        // Adicionar a tarefa 8 apenas uma vez, com uma estratégia específica
+        combinations.push({
+          baseType: "1",
+          strategy: CONFIG.strategies[0], // Usando a primeira estratégia disponível
+          tarefa: "8",
+        });
+
+        return combinations;
+      }
+
+      shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+      }
+
+      displayNextCombination() {
+        if (this.combinationIndex >= this.combinations.length) {
+          this.finishTest();
+          return;
+        }
+
+        this.resetLayout();
+        this.currentCombination = this.combinations[this.combinationIndex++];
+        console.log(
+          `Exibindo combinação ${this.combinationIndex}:`,
+          this.currentCombination
+        );
+        this.prepareCurrentCombination();
+        this.renderVisualization();
+        this.tempo_visualizacao_inicial = performance.now();
+      }
+
+      resetLayout() {
+        this.elements.layout.classList.remove("dbreak");
+        this.elements.layout.style =
+          "height: 700px; display: block; overflow: hidden;";
+        this.elements.campoResposta.innerHTML = "";
+      }
+
+      prepareCurrentCombination() {
+        const { baseType, tarefa } = this.currentCombination;
+
+        // Gerar bases
+        const novaBases = {
+          // Base 1
+          1: this.baseDeDados.generateBaseWithoutDataGen(15, {
+            // basePower: 3,
+            outlierCount: 1,
+            // outlierPower: 2,
+            precision: 2,
+          }),
+          // // Base 2
+          // 2: this.baseDeDados.generateBaseWithoutDataGen(15, {
+          //   basePower: 3,
+          //   outlierCount: 2,
+          //   outlierPower: 2,
+          //   precision: 2,
+          // }),
+          // // Base 3
+          // 3: this.baseDeDados.generateBaseWithoutDataGen(15, {
+          //   basePower: 3,
+          //   outlierCount: 2,
+          //   outlierPower: 2,
+          //   precision: 2,
+          // }),
+          // // Base 4
+          // 4: this.baseDeDados.generateBaseWithoutDataGen(15, {
+          //   basePower: 3,
+          //   outlierCount: 2,
+          //   outlierPower: 2,
+          //   precision: 2,
+          // }),
+        };
+
+        // Criar uma base temporária para esta tarefa
+        const baseAtual = novaBases[baseType];
+
+        // Embaralhar os dados
+        const baseEmbaralhada = this.shuffleArray([...baseAtual]);
+
+        // Atribuir a base embaralhada à combinação atual
+        this.currentCombination.values = baseEmbaralhada;
+
+        // Calcular breaks baseados no tipo de base
+        const breakDados = this.baseDeDados.breakdados(baseType);
+        this.currentCombination.breaks = breakDados;
+
+        // Armazenar temporariamente a base atual para cálculos de razão e destaque
+        this.baseDeDados.baseTemporaria = baseEmbaralhada;
+
+        // Reset da tarefa
+        if (tarefa === "4" || tarefa === "8") {
+          this.tarefa.reset(parseInt(tarefa), null);
         }
       }
 
-      // Inicializar o teste quando o DOM estiver carregado
-      document.addEventListener("DOMContentLoaded", () => {
-        const testManager = new TestManager();
-        testManager.init();
-      });
-    </script>
-  </head>
+      renderVisualization() {
+        const { tarefa, strategy, values } = this.currentCombination;
+        const breaks = this.currentCombination.breaks;
 
-  <body>
-    <div>
-      <header>
-        <img class="h-24" src="./Imagem/logo_labvis.svg" alt="" />
-      </header>
-      <main>
-        <div id="chart" style="height: 700px"></div>
-      </main>
+        // Remover elementos anteriores
+        const tarefa8div = document.getElementById("tarefa8div");
+        if (tarefa8div) tarefa8div.remove();
 
-      <fieldset style="margin-bottom: 15px">
-        <legend>Resposta</legend>
-      </fieldset>
+        if (parseInt(tarefa) === 8) {
+          this.renderTarefa8();
+        } else {
+          this.elements.layout.style.display = "block";
+          this.createAndDisplayChart(strategy, values, breaks[0], breaks[1]);
+          this.handleSpecificTarefas();
+        }
 
-      <div style="display: flex; border: 1px solid #aaa; margin-bottom: 10px">
-        <input
-          type="checkbox"
-          name=""
-          id="tilt-grafico"
-          style="display: none"
-        />
-        <label for="tilt-grafico">Rotacionar gráfico</label>
-      </div>
+        if (parseInt(tarefa) !== 8) {
+          this.alinharFildsetAoGrafico();
+        }
+      }
 
-      <div
-        id="perguntaContainer"
-        style="margin-left: 20px; margin-bottom: 15px"
-      ></div>
-      <div id="fimPerguntas" style="display: none">
-        <p style="margin-left: 20px; margin-bottom: 15px">
-          Fim das perguntas, deseja continuar?
-        </p>
-        <button
-          id="continuarBotao"
-          style="margin-left: 20px; margin-bottom: 15px"
-        >
-          Continuar
-        </button>
-      </div>
+      renderTarefa8() {
+        this.elements.layout.style.display = "none";
+        this.elements.layout.innerHTML = "";
 
-      <div style="margin-left: 20px; margin-bottom: 15px">
-        <button id="proximoBotao">Enviar</button>
-      </div>
+        const main = document.querySelector("main");
+        const container = document.createElement("div");
+        container.style.display = "flex";
+        container.style.flexDirection = "row";
+        container.style.height = "700px";
+        container.style.width = "100%";
+        container.id = "tarefa8div";
+
+        const layouts = [];
+
+        // Criar 3 divisões para as diferentes visualizações
+        for (let i = 0; i < 3; i++) {
+          const div = document.createElement("div");
+          div.style.width = "33.33%";
+          div.style.height = "100%";
+          div.id = `chart${i}`;
+
+          if (i === 0) {
+            div.setAttribute("class", "dbreak");
+          }
+
+          container.appendChild(div);
+          layouts.push(div);
+        }
+
+        main.appendChild(container);
+
+        document.querySelector("#chart1").style.marginLeft =
+          document.querySelector("#chart0").offsetWidth + "px";
+
+        // Gerar 3 bases diferentes para cada visualização
+        const bases = [
+          // Base 1
+          this.shuffleArray(
+            this.baseDeDados.generateBaseWithoutDataGen(15, {
+              basePower: 3,
+              outlierCount: 1,
+              outlierPower: 2,
+              precision: 2,
+            })
+          ),
+          // Base 2
+          this.shuffleArray(
+            this.baseDeDados.generateBaseWithoutDataGen(15, {
+              basePower: 3,
+              outlierCount: 1,
+              outlierPower: 2,
+              precision: 2,
+            })
+          ),
+          // Base 3
+          this.shuffleArray(
+            this.baseDeDados.generateBaseWithoutDataGen(15, {
+              basePower: 3,
+              outlierCount: 1,
+              outlierPower: 2,
+              precision: 2,
+            })
+          ),
+        ];
+
+        function calcularCorrelacaoLinear(base) {
+          const n = base.length;
+          const xs = Array.from({ length: n }, (_, i) => i);
+          const ys = base.map(d => d.valor);
+
+          const mediaX = xs.reduce((a, b) => a + b, 0) / n;
+          const mediaY = ys.reduce((a, b) => a + b, 0) / n;
+
+          const covXY = xs.reduce((acc, x, i) => acc + (x - mediaX) * (ys[i] - mediaY), 0);
+          const varX = xs.reduce((acc, x) => acc + Math.pow(x - mediaX, 2), 0);
+          const varY = ys.reduce((acc, y) => acc + Math.pow(y - mediaY, 2), 0);
+
+          const correlacao = covXY / Math.sqrt(varX * varY);
+          return correlacao;
+        }
+
+        // Calcular correlação para cada base
+        const correlacoes = bases.map(base => calcularCorrelacaoLinear(base));
+
+        // Encontrar a base com maior correlação positiva
+        let maiorCorrelacaoIndex = -1;
+        let maiorCorrelacao = -Infinity;
+
+        for (let i = 0; i < correlacoes.length; i++) {
+          const corr = correlacoes[i];
+          if (corr > maiorCorrelacao && corr > 0) {
+            maiorCorrelacao = corr;
+            maiorCorrelacaoIndex = i;
+          }
+        }
+
+        // Se nenhuma correlação positiva for encontrada, usar índice 0 como fallback
+        if (maiorCorrelacaoIndex === -1) {
+          maiorCorrelacaoIndex = 0;
+          maiorCorrelacao = correlacoes[0];
+        }
+
+        // Armazenar a resposta correta
+        this.respostaCorrctaTarefa8 = {
+          valor: CONFIG.strategies[maiorCorrelacaoIndex],
+          posicao: maiorCorrelacaoIndex,
+          correlacao: maiorCorrelacao,
+          estrategia: CONFIG.strategies[maiorCorrelacaoIndex],
+        };
+
+
+        console.log("trends:", this.respostaCorrctaTarefa8)
+
+        // Criar gráficos com diferentes estratégias e bases de dados
+        layouts.forEach((layoutDiv, index) => {
+          const strategy = CONFIG.strategies[index];
+          const config = { drawStrategy: strategy };
+
+          // Usar uma base de dados diferente para cada gráfico
+          const baseData = bases[index];
+
+          const barchart = new BarChart(layoutDiv, config);
+          barchart.data(baseData);
+          barchart.redraw();
+
+          // Armazenar a base usada para cada gráfico caso precise recuperar depois
+          layoutDiv.dataset.baseIndex = index;
+        });
+
+        // Armazenar as bases temporariamente para referência
+        this.tarefa8Bases = bases;
+        this.tarefa8Crescimentos = crescimentos;
+
+        this.createResponseForm([{ valor: 0 }, { valor: 1 }, { valor: 2 }]);
+        this.tarefa.exibirProximaPergunta(8, null);
+        this.elements.campoResposta.style.width = "100%";
+        this.elements.campoResposta.style.justifyContent = "space-around";
+        this.elements.campoResposta.style.marginTop = "0px";
+        this.elements.fimPerguntas.style.marginTop = "0px";
+      }
+
+      handleSpecificTarefas() {
+        const tarefaId = parseInt(this.currentCombination.tarefa);
+        const baseAtual = this.currentCombination.values;
+
+        this.tarefa.reset(tarefaId, baseAtual);
+
+        // Garantir que a baseTemporaria está configurada para a base atual
+        this.baseDeDados.baseTemporaria = baseAtual;
+
+        // Gerar a pergunta específica para a tarefa atual
+        if (tarefaId === 1 || tarefaId === 2) {
+          this.createResponseForm(this.currentCombination.values);
+          this.tarefa.exibirProximaPergunta(tarefaId);
+        } else if (tarefaId === 3) {
+          this.value_t3_valor = this.baseDeDados.gerarvalor(baseAtual);
+          this.tarefa.exibirProximaPergunta(3, this.value_t3_valor.valor);
+
+          this.createResponseForm(this.currentCombination.values);
+        } else if (tarefaId === 4) {
+          this.value_t4_barra = this.baseDeDados.destacarBarraAleatoria();
+
+          setTimeout(() => {
+            this.barchart.getHighlightElementsPSB(
+              [this.value_t4_barra.posicao + 1],
+              "#e74c3c"
+            );
+          }, 5);
+          this.tarefa.exibirProximaPergunta(4, null);
+
+          this.createTextResponseForm("Valor da barra:");
+        } else if (tarefaId === 5 || tarefaId === 6) {
+          // Destacar barras para tarefas de razão
+          setTimeout(() => {
+            const res = this.baseDeDados.ratio();
+            const resposta_menor = res[0];
+            const resposta_menor2 = res[1];
+            const resposta_maior = res[2];
+
+            if (tarefaId === 5) {
+              this.barchart.getHighlightElementsPSB(
+                [resposta_menor2.posicao + 1, resposta_maior.posicao + 1],
+                "#e74c3c"
+              );
+              this.tarefa.exibirProximaPergunta(5, null);
+            } else {
+              this.barchart.getHighlightElementsPSB(
+                [resposta_menor2.posicao + 1, resposta_menor.posicao + 1],
+                "#e74c3c"
+              );
+
+              this.tarefa.exibirProximaPergunta(6, null);
+            }
+          }, 5);
+          this.createTextResponseForm();
+        } else if (tarefaId === 7) {
+          this.tarefa.exibirProximaPergunta(7, null);
+          this.createTextResponseForm();
+        }
+      }
+
+      createAndDisplayChart(strategy, data, breakInicial, breakFinal) {
+        if (this.barchart) {
+          this.elements.layout.innerHTML = "";
+        }
+
+        const config = { drawStrategy: strategy };
+        this.barchart = new BarChart(
+          this.elements.layout,
+          config,
+          breakInicial,
+          breakFinal
+        );
+        this.barchart.data(data);
+        this.barchart.redraw();
+      }
+
+      alinharFildsetAoGrafico() {
+        let ban;
+
+        if (
+          d3.selectAll("svg .lower3daxis line").nodes().pop() &&
+          !document.querySelector("#chart0")
+        ) {
+          ban = d3
+            .selectAll("svg .lower3daxis line")
+            .nodes()
+            .pop()
+            .getBoundingClientRect();
+          this.elements.campoResposta.style.marginTop = ban.y + 160 + "px";
+          this.elements.fimPerguntas.style.marginTop = ban.y + 160 + "px";
+          this.elements.tiltCheckbox.style.display = "block";
+          document.querySelector("[for='tilt-grafico']").style.display =
+            "block";
+        } else {
+          ban = d3
+            .select("svg .background .vis_background")
+            .node()
+            .getBoundingClientRect();
+          this.elements.campoResposta.style.marginTop = "0px";
+          this.elements.fimPerguntas.style.marginTop = "0px";
+          this.elements.tiltCheckbox.style.display = "none";
+          document.querySelector("[for='tilt-grafico']").style.display =
+            "none";
+        }
+
+        this.elements.campoResposta.style.width = ban.width + "px";
+        this.elements.campoResposta.style.marginLeft = ban.left - 10 + "px";
+        this.elements.campoResposta.style.marginRight = "0px";
+        this.elements.campoResposta.style.padding = "0px";
+      }
+
+      toggleChartTilt() {
+        if (this.elements.tiltCheckbox.checked) {
+          document.querySelector(
+            "#chart"
+          ).style.transform = `perspective(245px) translateZ(-245px) rotateY(20deg)`;
+        } else {
+          document.querySelector(
+            "#chart"
+          ).style.transform = `perspective(245px) rotateY(0deg)`;
+        }
+      }
+
+      createResponseForm(dados, allowMultipleSelection = false, labelText) {
+        this.elements.campoResposta.classList.add("checkbox-form");
+        const gap = "5px";
+
+        const generalLabel = document.createElement("label");
+        generalLabel.textContent = labelText;
+        generalLabel.style.display = "block";
+        generalLabel.style.marginBottom = gap;
+        this.elements.campoResposta.insertAdjacentElement(
+          "beforebegin",
+          generalLabel
+        );
+
+        dados.forEach((valor, index) => {
+          const container = document.createElement("div");
+          container.style.display = "flex";
+          container.style.alignItems = "center";
+          container.style.marginBottom = gap;
+
+          const input = document.createElement("input");
+          input.classList.add("checkbox-container");
+          input.type = "checkbox";
+          input.name = "resposta";
+          input.value = index;
+          input.id = "resp" + index;
+          input.style.marginRight = gap;
+
+          if (index === 0) {
+            input.style.marginLeft = "50px";
+          } else if (index === dados.length - 1) {
+            input.style.marginRight = "50px";
+          }
+
+          container.appendChild(input);
+          this.elements.campoResposta.appendChild(container);
+        });
+
+        if (!allowMultipleSelection) {
+          const checkboxes = document.querySelectorAll(
+            'input[type="checkbox"][name="resposta"]'
+          );
+          checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener("click", function () {
+              checkboxes.forEach((cb) => {
+                if (cb !== checkbox) cb.checked = false;
+              });
+            });
+          });
+        }
+      }
+
+      createTextResponseForm(labelText = "Resposta:") {
+        const textInputContainer = document.createElement("div");
+        textInputContainer.style.marginTop = "8px";
+
+        const label = document.createElement("label");
+        label.setAttribute("for", "respostaTexto");
+        label.textContent = labelText;
+        label.style.marginRight = "10px";
+
+        const textInput = document.createElement("input");
+        textInput.type = "text";
+        textInput.id = "respostaTexto";
+        textInput.name = "respostaTexto";
+        textInput.style.width = "80px";
+        textInput.style.padding = "5px";
+        textInput.style.marginBottom = "5px";
+
+        textInputContainer.appendChild(label);
+        textInputContainer.appendChild(textInput);
+        this.elements.campoResposta.appendChild(textInputContainer);
+      }
+
+      handleProximoButtonClick() {
+        this.tarefa.pararTemporizador();
+
+        const userData = {
+          id: localStorage.getItem("id"),
+          idade: localStorage.getItem("idade"),
+          grauEscolaridade: localStorage.getItem("grauEscolaridade"),
+          curso: localStorage.getItem("curso"),
+          visualizacao: localStorage.getItem("visualizacao"),
+          conhece: localStorage.getItem("conhece"),
+          valorlikert: localStorage.getItem("respostaLikert"),
+          valorlikert2: localStorage.getItem("respostaLikert2"),
+          valorlikert3: localStorage.getItem("respostaLikert3"),
+        };
+
+        const { strategy, baseType, tarefa } = this.currentCombination;
+        const tarefaId = parseInt(tarefa);
+
+        // Obter resposta correta
+        let res;
+        let resposta_correta;
+        let resposta_correta_valor;
+
+        if (tarefaId === 8) {
+          resposta_correta = this.respostaCorrctaTarefa8;
+          resposta_correta_valor = resposta_correta.valor;
+
+          // Criar um array de resultados para manter consistência com outras tarefas
+          res = [
+            { valor: "não usado", posicao: 0 }, // x1
+            { valor: "não usado", posicao: 0 }, // x2
+            { valor: "não usado", posicao: 0 }, // x3
+            { valor: "não usado", posicao: 0 }, // x4
+            { valor: "não usado", posicao: 0 }, // x5
+            { valor: "não usado", posicao: 0 }, // x6
+            { valor: "não usado", posicao: 0 }, // x7
+            resposta_correta, // x8
+          ];
+        } else {
+          res = this.baseDeDados.respostacorreta(baseType);
+          resposta_correta =
+            res[this.tarefa.id_pergunta(this.tarefa.perg) - 1];
+          if (tarefaId === 4) {
+            resposta_correta_valor = this.value_t4_barra.valor;
+          }
+          resposta_correta_valor = resposta_correta.valor;
+        }
+
+        // Calcular tempo de visualização
+        const tempo_visualizacao_final = performance.now();
+        const tempo_total =
+          tempo_visualizacao_final - this.tempo_visualizacao_inicial;
+
+        const tempo_inicial_formatado = this.tarefa.formatatempo_performace(
+          this.tempo_visualizacao_inicial
+        );
+        const tempo_final_formatado = this.tarefa.formatatempo_performace(
+          this.tempo_visualizacao_inicial + tempo_total
+        );
+
+        // Para tarefa 8, registrar bases específicas
+        const base =
+          tarefaId === 8
+            ? this.tarefa8Bases // As três bases da tarefa 8
+            : this.currentCombination.values; // A base atual para outras tarefas
+
+        // Salvar resposta do usuário
+        if (
+          tarefaId === 4 ||
+          tarefaId === 5 ||
+          tarefaId === 6 ||
+          tarefaId === 7
+        ) {
+          this.resposta.saveInputValueToJson(
+            userData.id,
+            userData.idade,
+            userData.grauEscolaridade,
+            userData.curso,
+            userData.visualizacao,
+            userData.conhece,
+            userData.valorlikert,
+            userData.valorlikert2,
+            userData.valorlikert3,
+            strategy,
+            baseType,
+            tarefaId,
+            0,
+            resposta_correta_valor,
+            tempo_inicial_formatado,
+            tempo_final_formatado,
+            base
+          );
+        } else {
+          const resposta_correta_posicao =
+            tarefaId === 8
+              ? resposta_correta.posicao
+              : resposta_correta.posicao;
+
+          // Para tarefas com checkbox (incluindo tarefa 8)
+          this.resposta.saveCheckedCheckboxesToJson(
+            userData.id,
+            userData.idade,
+            userData.grauEscolaridade,
+            userData.curso,
+            userData.visualizacao,
+            userData.conhece,
+            userData.valorlikert,
+            userData.valorlikert2,
+            userData.valorlikert3,
+            strategy,
+            baseType,
+            tarefaId,
+            resposta_correta_posicao,
+            resposta_correta_valor,
+            tempo_inicial_formatado,
+            tempo_final_formatado,
+            base,
+            CONFIG.strategies
+          );
+
+          // if (tarefaId === 8) {
+          //   console.log("Tarefa 8 - Informações de crescimento:");
+          //   console.log(
+          //     "Visualização 0 (3D Break): Razão =",
+          //     this.tarefa8Crescimentos[0].razao
+          //   );
+          //   console.log(
+          //     "Visualização 1 (Scale Break): Razão =",
+          //     this.tarefa8Crescimentos[1].razao
+          //   );
+          //   console.log(
+          //     "Visualização 2 (Default): Razão =",
+          //     this.tarefa8Crescimentos[2].razao
+          //   );
+          //   console.log(
+          //     "Resposta correta (maior crescimento):",
+          //     resposta_correta.estrategia
+          //   );
+          // }
+        }
+
+        this.tarefa.enviarpergunta();
+      }
+
+      finishTest() {
+        this.resposta.exportToCSV();
+        // this.webcam.stopRecording();
+      }
+    }
+
+    // Inicializar o teste quando o DOM estiver carregado
+    document.addEventListener("DOMContentLoaded", () => {
+      const testManager = new TestManager();
+      testManager.init();
+    });
+  </script>
+</head>
+
+<body>
+  <div>
+    <header>
+      <img class="h-24" src="./Imagem/logo_labvis.svg" alt="" />
+    </header>
+    <main>
+      <div id="chart" style="height: 700px"></div>
+    </main>
+
+    <fieldset style="margin-bottom: 15px">
+      <legend>Resposta</legend>
+    </fieldset>
+
+    <div style="display: flex; border: 1px solid #aaa; margin-bottom: 10px">
+      <input type="checkbox" name="" id="tilt-grafico" style="display: none" />
+      <label for="tilt-grafico">Rotacionar gráfico</label>
     </div>
 
-    <video id="video" autoplay muted></video>
-  </body>
+    <div id="perguntaContainer" style="margin-left: 20px; margin-bottom: 15px"></div>
+    <div id="fimPerguntas" style="display: none">
+      <p style="margin-left: 20px; margin-bottom: 15px">
+        Fim das perguntas, deseja continuar?
+      </p>
+      <button id="continuarBotao" style="margin-left: 20px; margin-bottom: 15px">
+        Continuar
+      </button>
+    </div>
+
+    <div style="margin-left: 20px; margin-bottom: 15px">
+      <button id="proximoBotao">Enviar</button>
+    </div>
+  </div>
+
+  <video id="video" autoplay muted></video>
+</body>
+
 </html>
