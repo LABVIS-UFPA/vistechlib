@@ -23,8 +23,8 @@
 
     <script>
       const CONFIG = {
-        strategies: ["3d break"],
-        tarefas: ["8"],
+        strategies: ["3d break", "scale break perspective", "default"],
+        tarefas: ["1", "2", "3", "4", "5", "6", "7", "8"],
       };
 
       class TestManager {
@@ -250,17 +250,19 @@
               document.querySelector("#chart0").offsetWidth * 2 + "px";
           }
 
+          // Escolher aleatoriamente qual base terá o fator de crescimento
+          const baseComCrescimentoIndex = Math.floor(Math.random() * 3);
+          
           // Gerar 3 bases diferentes para cada visualização
           let bases = [
             // Base 1
-
             this.insertLastValueAtRandomPosition(
               this.baseDeDados.generateBaseWithoutDataGen(15, {
                 // basePower: 3,
                 outlierCount: 1,
                 outlierPower: 2,
                 precision: 2,
-                fatorCrescimento: 0,
+                fatorCrescimento: baseComCrescimentoIndex === 0 ? 0.3 : 0,
               })
             ),
             // Base 2
@@ -270,7 +272,7 @@
                 outlierCount: 1,
                 outlierPower: 2,
                 precision: 2,
-                fatorCrescimento: 0,
+                fatorCrescimento: baseComCrescimentoIndex === 1 ? 0.3 : 0,
               })
             ),
             // Base 3
@@ -280,7 +282,7 @@
                 outlierCount: 1,
                 outlierPower: 2,
                 precision: 2,
-                fatorCrescimento: 0.3,
+                fatorCrescimento: baseComCrescimentoIndex === 2 ? 0.3 : 0,
               })
             ),
           ];
@@ -338,8 +340,8 @@
           // Armazenar a resposta correta
           this.respostaCorrctaTarefa8 = {
             valor: CONFIG.strategies[maiorCorrelacaoIndex],
-            posicao: maiorCorrelacaoIndex,
-            correlacao: maiorCorrelacao,
+            posicao: baseComCrescimentoIndex,
+            correlacao: correlacoes[baseComCrescimentoIndex],
             estrategia: CONFIG.strategies[maiorCorrelacaoIndex],
           };
 
