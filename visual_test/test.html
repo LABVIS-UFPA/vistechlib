@@ -177,7 +177,7 @@
           this.baseDeDados.baseTemporaria = baseEmbaralhada;
 
           // Reset da tarefa
-          if (tarefa === "4") {
+          if (tarefa === "4" || tarefa === "8") {
             this.tarefa.reset(parseInt(tarefa), null);
           }
         }
@@ -224,7 +224,8 @@
             div.style.height = "100%";
             div.id = `chart${i}`;
 
-            if (i === 0) {
+            // Todas as divisões usam a mesma classe para manter consistência visual
+            if (this.currentCombination.strategy === "3d break") {
               div.setAttribute("class", "dbreak");
             }
 
@@ -234,8 +235,13 @@
 
           main.appendChild(container);
 
-          document.querySelector("#chart1").style.marginLeft =
-            document.querySelector("#chart0").offsetWidth + "px";
+          // Ajustar o espaçamento entre os gráficos
+          if (this.currentCombination.strategy === "3d break") {
+            document.querySelector("#chart1").style.marginLeft =
+              document.querySelector("#chart0").offsetWidth + "px";
+            document.querySelector("#chart2").style.marginLeft =
+              document.querySelector("#chart0").offsetWidth * 2 + "px";
+          }
 
           // Gerar 3 bases diferentes para cada visualização
           const bases = [
@@ -299,15 +305,15 @@
           }
 
           this.respostaCorrctaTarefa8 = {
-            valor: CONFIG.strategies[maiorCrescimentoIndex],
+            valor: maiorCrescimentoIndex,
             posicao: maiorCrescimentoIndex,
             razao: maiorRazao,
-            estrategia: CONFIG.strategies[maiorCrescimentoIndex],
+            estrategia: this.currentCombination.strategy,
           };
 
-          // Criar gráficos com diferentes estratégias e bases de dados
+          // Criar gráficos com a mesma estratégia, mas bases de dados diferentes
           layouts.forEach((layoutDiv, index) => {
-            const strategy = CONFIG.strategies[index];
+            const strategy = this.currentCombination.strategy;
             const config = { drawStrategy: strategy };
 
             // Usar uma base de dados diferente para cada gráfico
@@ -413,12 +419,9 @@
         alinharFildsetAoGrafico() {
           let ban;
 
-          if (
-            d3.selectAll("svg .lower3daxis line").nodes().pop() &&
-            !document.querySelector("#chart0")
-          ) {
+            if (d3.selectAll("[class*='lower3d']").nodes().length > 0) {
             ban = d3
-              .selectAll("svg .lower3daxis line")
+              .selectAll("svg [class^='lower3d'] line")
               .nodes()
               .pop()
               .getBoundingClientRect();
@@ -485,7 +488,6 @@
             input.style.marginRight = gap;
 
             if (index === 0) {
-              console.log(this.barchart)
               input.style.marginLeft = "50px";
             } else if (index === dados.length - 1) {
               input.style.marginRight = "50px";
