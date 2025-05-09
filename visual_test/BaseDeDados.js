@@ -96,7 +96,7 @@ class BaseDeDados {
 
     for (let i = 0; i < config.outlierCount; i++) {
       const randomValue = this.getRandomInRange(
-        1 * outlierScale,
+        2 * outlierScale,
         9 * outlierScale
       );
       outlierData.push({
