@@ -54,6 +54,7 @@ class BaseDeDados {
     // Gerar aleatoriamente os valores de basePower e outlierPower
     const basePower = this.getRandomInRange(1, 4, true);
     const outlierPower = this.getRandomInRange(1, 2, true);
+    let crescimento = 1
 
     const config = {
       // basePower:3,
@@ -62,6 +63,7 @@ class BaseDeDados {
       outlierPower,
       outlierCount: 2,
       precision: 0,
+      fatorCrescimento: 0,
       ...options,
     };
 
@@ -74,10 +76,15 @@ class BaseDeDados {
     const normalData = [];
 
     for (let i = 0; i < totalValues - config.outlierCount; i++) {
-      const randomValue = this.getRandomInRange(
+      let randomValue = this.getRandomInRange(
         1 * normalScale,
         9 * normalScale
       );
+
+      randomValue = randomValue * crescimento
+
+      crescimento += config.fatorCrescimento;
+      
       normalData.push({
         valor: parseFloat(randomValue.toFixed(config.precision)),
       });
