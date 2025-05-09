@@ -12,6 +12,7 @@
     <script src="../src/Visualization.js"></script>
     <script src="../src/BarChart.js"></script>
     <script src="../visual_test/Tarefa.js"></script>
+    <script src="../visual_test/datagen.js"></script>
     <script src="../visual_test/BaseDeDados.js"></script>
     <script src="../visual_test/Respostas.js"></script>
     <script src="../visual_test/webcam.js"></script>
@@ -52,7 +53,8 @@
             const resposta = new Respostas();
 
             var strategies = ["3d break", "scale break perspective", "default"];
-            var tarefas = ["1","2","3","4","5","6","7"]; //"8"
+            // var tarefas = ["1","2","3","4","5","6","7"]; //"8"
+            var tarefas = ["7","8"]; 
 
             // Função para gerar todas as combinações possíveis entre os valores e as estratégias
             function generateCombinations() {
@@ -84,6 +86,7 @@
             // Função para exibir as combinações uma por uma
             function displayCombinations() {
                 let combinations = generateCombinations();
+                console.log(combinations)
                 combinations = shuffle(combinations); // Embaralha as combinações
                 let index = 0;
                 let combination = [];
@@ -92,52 +95,15 @@
                 // Função recursiva para exibir as combinações uma por uma
                 function displayNextCombination() {
                     if (index < combinations.length) {
+                        layout.classList.remove("dbreak");
+                        layout.style = "height: 700px; display: block; overflow: hidden;";
+
                         combination = combinations[index++];
                         minhaBaseDeDados.embaralhar(minhaBaseDeDados['base' + combination.varName]);
                         combination.values = minhaBaseDeDados['base' + combination.varName];
 
-                        // if (combination.tarefa == 6) {
-                        //     const main = document.querySelector("main");
-                        //     main.innerHTML = "";
-
-                        //     const container = document.createElement("div");
-                        //     container.style.display = "flex";
-                        //     container.style.flexDirection = "row";
-                        //     container.style.height = "700px";
-                        //     container.style.width = "100%";
-
-                        //     const layouts = [];
-
-                        //     for (let i = 0; i < 3; i++) {
-                        //         const div = document.createElement("div");
-                        //         div.style.width = "33.33%";
-                        //         div.style.height = "100%";
-                        //         div.style.border = "1px solid black"; // para visualização
-                        //         div.id = `barchart${i + 1}`;
-                        //         container.appendChild(div);
-                        //         layouts.push(div);
-                        //     }
-
-                        //     main.appendChild(container);
-
-                        //     // Cria um gráfico com uma strategy diferente em cada div
-                        //     layouts.forEach((layoutDiv, index) => {
-                        //         const strategy = strategies[index];
-                        //         const config = { drawStrategy: strategy };
-                        //         barchart = new BarChart(layoutDiv, config);
-                        //         barchart.data(combination.value);
-                        //         barchart.redraw();
-                        //     });
-                        //     createresp([{ valor: 2086 },{ valor: 77412 },{ valor: 798 },])
-                            
-                        // }
-
-
                         //valores dos breaks
                         let break_dados = minhaBaseDeDados.breakdados(combination.varName);
-                        document.querySelector("#chart").classList.remove("dbreak")
-                        document.querySelector("#chart").style.top = "0px";
-                        createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
 
                         //passa a base para a função que gera o valor para t4
                         let t4 = minhaBaseDeDados.gerarvalor(combination.varName);
@@ -146,7 +112,7 @@
                         // Para a tarefa 4, destaca uma barra aleatória
                         if (combination.tarefa === "4") {
                             let barraDestacada = minhaBaseDeDados.destacarBarraAleatoria(combination.varName);
-                            console.log("Barra destacada:", barraDestacada);
+        
                             // Destaca a barra no gráfico
                             setTimeout(() => {
                                 barchart.getHighlightElementsPSB([barraDestacada.posicao+1], "#e74c3c");
@@ -161,9 +127,62 @@
                         // Limpa o conteúdo do campo
                         campoResposta.innerHTML = '';
 
-                        // tratamento especifico para a tarefa de razao
+                        const main = document.querySelector("main");
+                        const tarefa8div = document.getElementById("tarefa8div");
+                            if (tarefa8div) {
+                                tarefa8div.remove();
+                            }
+                        layout.style.display = "block";
+
+                        if (tarefa.pergId == 8) {   
+                            layout.style.display = "none";
+                            layout.innerHTML = '';
+                            const container = document.createElement("div");
+                            container.style.display = "flex";
+                            container.style.flexDirection = "row";
+                            container.style.height = "700px";
+                            container.style.width = "100%";
+                            container.id = "tarefa8div";
+
+                            const layouts = [];
+
+                            for (let i = 0; i < 3; i++) {
+                                const div = document.createElement("div");
+                                
+                                div.style.width = "33.33%";
+                                div.style.height = "100%";
+                                div.id = `chart${i}`;
+                                
+
+                                if (i === 0) {
+                                    div.setAttribute("class", "dbreak")
+                                }
+
+                                container.appendChild(div);
+                                layouts.push(div);
+                            }
+
+                            main.appendChild(container);
+
+                            document.querySelector("#chart1").style.marginLeft = document.querySelector("#chart0").offsetWidth + "px";
+
+                            // Cria um gráfico com uma strategy diferente em cada div
+                            layouts.forEach((layoutDiv, index) => {
+                                const strategy = strategies[index];
+                                const config = { drawStrategy: strategy };
+                                barchart = new BarChart(layoutDiv, config);
+                                barchart.data(combination.value);
+                                barchart.redraw();
+                            });
+                            createresp([{ valor: 0 },{ valor: 1 },{ valor: 2 },])
+                            campoResposta.style.width = "100%";
+                            campoResposta.style.justifyContent = "space-around";
+                            
+                        }else{
+                            layout.style.display = "block";
+                            createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
+                        }
                         if (tarefa.pergId == 5) {
-                            // carregar somente depois de ter enderizado o grafico
                             setTimeout(() => {
                                 var res = minhaBaseDeDados.ratio(combination.varName);
                                 var resposta_menor = res[0];
@@ -173,6 +192,7 @@
                                 barchart.getHighlightElementsPSB([resposta_menor2.posicao + 1, resposta_maior.posicao + 1], "#e74c3c");
                             }, 5);
                             createresptext();
+                            
                         // tratamento especifico para a tarefa de razao menor<->menor
                         } else if (tarefa.pergId == 6) {
                             setTimeout(() => {
@@ -184,12 +204,18 @@
                                 barchart.getHighlightElementsPSB([resposta_menor2.posicao + 1, resposta_menor.posicao + 1], "#e74c3c");
                             }, 5);
                             createresptext();
+                           
                         }else if (tarefa.pergId == 4) {
                             createresptext("Valor da barra:");
+                            
                         } else if (tarefa.pergId == 7) {
                             createresptext();
-                        }else {
+                            
+                        }else if (tarefa.pergId !== 8) {
                             createresp(combination.value);
+                        }
+                        if (tarefa.pergId !== 8){
+                            alinharFildsetAoGrafico();
                         }
                     } else {
                         // Todas as combinações foram exibidas, agora exporte para CSV
@@ -216,11 +242,16 @@
                     var valorlikert2 = localStorage.getItem("respostaLikert2", valorlikert2);
                     var valorlikert3 = localStorage.getItem("respostaLikert3", valorlikert3);
 
-                    var res = minhaBaseDeDados.respostacorreta(combination.varName);
-                    console.log(tarefa.id_pergunta(tarefa.perg))
-                    console.log(res)
+                    if (tarefa.pergId !== 8){
+                        var res = minhaBaseDeDados.respostacorreta(combination.varName);
+                    }else{
+                        var res = minhaBaseDeDados.respostacorreta(combination.varName, value_t4_barra);
+                    }
+                   
+
+
                     var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1]; // tarefa 1 esta na posição [0]
-                    // console.log(resposta_correta)
+
                     
                     resposta_correta_valor = resposta_correta.valor;
 
@@ -231,7 +262,7 @@
 
                     let temp_janela_incicial = (temp_visualizaçãoi)
                     let temp_janela_final = temp_janela_incicial + temp_D
-                    // console.log('Inicio', tarefa.formatatempo_performace(temp_janela_incicial), 'Fim', tarefa.formatatempo_performace(temp_janela_final))
+            
                     let tempoincicial = tarefa.formatatempo_performace(temp_janela_incicial)
                     let tempofinal = tarefa.formatatempo_performace(temp_janela_final)
 
@@ -250,18 +281,18 @@
                 // botao de Continuar
                 continuarBotao.addEventListener('click', function () {
                     displayNextCombination();
-                    alinharFildsetAoGrafico();
+                    // alinharFildsetAoGrafico();
                 });
             }
 
             // Chama a função para exibir as combinações
             displayCombinations();
-            alinharFildsetAoGrafico();
+            // alinharFildsetAoGrafico();
 
             //alinhar fieldset ao grafico
             function alinharFildsetAoGrafico() {
-                if (!d3.select("svg .background .vis_background").node()) {
-                    var ban = d3.selectAll("svg .loweraxis line").nodes().pop().getBoundingClientRect()
+                if (d3.selectAll("svg .lower3daxis line").nodes().pop() && !document.querySelector("#chart0")) {
+                    var ban = d3.selectAll("svg .lower3daxis line").nodes().pop().getBoundingClientRect()
                     campoResposta.style.marginTop = ban.y + 160 + "px";
                     document.querySelector("#fimPerguntas").style.marginTop = ban.y + 160 + "px";
                     document.querySelector("#tilt-grafico").style.display = "block";

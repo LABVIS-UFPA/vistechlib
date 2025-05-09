@@ -1229,7 +1229,6 @@ BarChart.strategies = {
 
             barchart.d.forEach((value, i) => {
                 const dividedValues = divideValueBySections(value, barchart.sections);
-                console.log(dividedValues)
                 let yOffset = yScale(0);
 
                 dividedValues.forEach((section) => {
@@ -1291,7 +1290,6 @@ BarChart.strategies = {
 
             // Processa cada parte do gráfico
             for (const part in parts) {
-                console.log(parts[part])
                 if (!parts[part].nodes().length) continue;
 
                 const classe = parts[part].node().classList.value;

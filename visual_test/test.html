@@ -274,42 +274,63 @@
             ),
           ];
 
-          // Calcular a razão (crescimento) para cada base
-          const crescimentos = bases.map((base) => {
-            // Encontrar o menor e o maior valor em cada base
-            let menorValor = Number.POSITIVE_INFINITY;
-            let maiorValor = Number.NEGATIVE_INFINITY;
+          function calcularCorrelacaoLinear(base) {
+            const n = base.length;
+            const xs = Array.from({ length: n }, (_, i) => i);
+            const ys = base.map((d) => d.valor);
 
-            base.forEach((item) => {
-              if (item.valor < menorValor) menorValor = item.valor;
-              if (item.valor > maiorValor) maiorValor = item.valor;
-            });
+            const mediaX = xs.reduce((a, b) => a + b, 0) / n;
+            const mediaY = ys.reduce((a, b) => a + b, 0) / n;
 
-            // Calcular a razão
-            return {
-              razao: maiorValor / menorValor,
-              menor: menorValor,
-              maior: maiorValor,
-            };
-          });
+            const covXY = xs.reduce(
+              (acc, x, i) => acc + (x - mediaX) * (ys[i] - mediaY),
+              0
+            );
+            const varX = xs.reduce(
+              (acc, x) => acc + Math.pow(x - mediaX, 2),
+              0
+            );
+            const varY = ys.reduce(
+              (acc, y) => acc + Math.pow(y - mediaY, 2),
+              0
+            );
 
-          // Determinar qual visualização tem o maior crescimento
-          let maiorCrescimentoIndex = 0;
-          let maiorRazao = crescimentos[0].razao;
+            const correlacao = covXY / Math.sqrt(varX * varY);
+            return correlacao;
+          }
 
-          for (let i = 1; i < crescimentos.length; i++) {
-            if (crescimentos[i].razao > maiorRazao) {
-              maiorRazao = crescimentos[i].razao;
-              maiorCrescimentoIndex = i;
+          // Calcular correlação para cada base
+          const correlacoes = bases.map((base) =>
+            calcularCorrelacaoLinear(base)
+          );
+
+          // Encontrar a base com maior correlação positiva
+          let maiorCorrelacaoIndex = -1;
+          let maiorCorrelacao = -Infinity;
+
+          for (let i = 0; i < correlacoes.length; i++) {
+            const corr = correlacoes[i];
+            if (corr > maiorCorrelacao && corr > 0) {
+              maiorCorrelacao = corr;
+              maiorCorrelacaoIndex = i;
             }
           }
 
+          // Se nenhuma correlação positiva for encontrada, usar índice 0 como fallback
+          if (maiorCorrelacaoIndex === -1) {
+            maiorCorrelacaoIndex = 0;
+            maiorCorrelacao = correlacoes[0];
+          }
+
+          // Armazenar a resposta correta
           this.respostaCorrctaTarefa8 = {
-            valor: maiorCrescimentoIndex,
-            posicao: maiorCrescimentoIndex,
-            razao: maiorRazao,
-            estrategia: this.currentCombination.strategy,
+            valor: CONFIG.strategies[maiorCorrelacaoIndex],
+            posicao: maiorCorrelacaoIndex,
+            correlacao: maiorCorrelacao,
+            estrategia: CONFIG.strategies[maiorCorrelacaoIndex],
           };
+
+          console.log("trends:", this.respostaCorrctaTarefa8);
 
           // Criar gráficos com a mesma estratégia, mas bases de dados diferentes
           layouts.forEach((layoutDiv, index) => {
@@ -329,7 +350,6 @@
 
           // Armazenar as bases temporariamente para referência
           this.tarefa8Bases = bases;
-          this.tarefa8Crescimentos = crescimentos;
 
           this.createResponseForm([{ valor: 0 }, { valor: 1 }, { valor: 2 }]);
 
@@ -419,7 +439,7 @@
         alinharFildsetAoGrafico() {
           let ban;
 
-            if (d3.selectAll("[class*='lower3d']").nodes().length > 0) {
+          if (d3.selectAll("[class*='lower3d']").nodes().length > 0) {
             ban = d3
               .selectAll("svg [class^='lower3d'] line")
               .nodes()
