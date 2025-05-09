@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scatterplot com D3.js</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .axis path, .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+  </style>
+</head>
+<body>
+  <svg width="600" height="400"></svg>
+
+  <script>
+    const data = [
+      { x: 0.1 }, { x: 0.3 }, { x: 0.7 }, { x: 0.9 }, { x: 0.5 }
+    ];
+
+    const svg = d3.select("svg"),
+          margin = { top: 20, right: 30, bottom: 30, left: 50 },
+          width = +svg.attr("width") - margin.left - margin.right,
+          height = +svg.attr("height") - margin.top - margin.bottom;
+
+    const g = svg.append("g")
+                 .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Escalas
+    const x = d3.scaleLinear()
+                .domain([0, 1])
+                .range([0, width]);
+
+    const y = d3.scaleLinear()
+                .domain([0, data.length - 1]) // Cada linha = 1 y diferente
+                .range([0, height]);
+
+    // Eixos
+    g.append("g")
+     .attr("transform", `translate(0,${height})`)
+     .call(d3.axisBottom(x));
+
+    g.append("g")
+     .call(d3.axisLeft(y).ticks(data.length).tickFormat(d => `Linha ${d}`));
+
+    // Pontos
+    g.selectAll("circle")
+     .data(data)
+     .enter().append("circle")
+     .attr("cx", d => x(d.x))
+     .attr("cy", (_, i) => y(i))
+     .attr("r", 5)
+     .style("fill", "steelblue");
+  </script>
+</body>
+</html>

@@ -52,13 +52,24 @@ class Respostas {
         }
         // Corrigido para usar this.createCarObject
         this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, posicao, resposta_marcada_valor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
-                
-        }
 
-    saveInputValueToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela,base) {
+    }
+
+    saveInputValueToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela, base) {
         let inputValor = document.querySelector("#respostaTexto").value;
-              
-        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade,curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, "", inputValor, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
+
+        let valorFormatado;
+        // Verifica se o valor contém apenas números, vírgulas e pontos
+        if (/^[\d.,]+$/.test(inputValor)) {
+            // Substitui pontos (separador de milhares) por nada e vírgulas por pontos (separador decimal)
+            valorFormatado = inputValor.replace(/\./g, "").replace(/,/g, ".");
+            valorFormatado = parseFloat(valorFormatado).toFixed(2); // Converte para número e formata
+        } else {
+            // Se não for um número formatado, mantém como string original
+            valorFormatado = inputValor;
+        }
+        console.log("Valor formatado:", valorFormatado);
+        this.carObjects.push(this.createCarObject(id, idade, grauEscolaridade, curso, visualizacao, conhece, valorlikert, valorlikert2, valorlikert3, combination1, combination2, tarefa, "", valorFormatado, resposta_correta_posicao, resposta_correta_valor, Tempo_incical_janela, Tempo_final_janela));
     }
 
 

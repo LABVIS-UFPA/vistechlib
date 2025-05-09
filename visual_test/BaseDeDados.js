@@ -230,7 +230,7 @@ class BaseDeDados {
       return this.gerarvalor(base); // Retorna o valor da chamada recursiva
     } else {
       valor = {
-        valor: resp_corr_valor.toLocaleString("pt-BR"),
+        valor: resp_corr_valor,
         posicao: indiceAleatorio,
       };
       this.valor_barra = valor;
@@ -242,7 +242,9 @@ class BaseDeDados {
   destacarBarraAleatoria(base) {
     let baseAtual = this.baseTemporaria || this["base" + base];
     let indiceAleatorio = Math.floor(Math.random() * baseAtual.length);
-    let valorBarra = baseAtual[indiceAleatorio].valor;
+    // let valorBarra = baseAtual[indiceAleatorio].valor;
+    let valorBarra =  parseFloat(baseAtual[indiceAleatorio].valor.toFixed(2))
+    console.log("valorBarra", valorBarra)
     this.barraDestacada = { valor: valorBarra, posicao: indiceAleatorio };
     return this.barraDestacada;
   }
@@ -254,8 +256,8 @@ class BaseDeDados {
     let x1 = resp_corr_menores[0];
     let x2 = resp_corr_menores[1];
     let x3 = resp_corr_maiores[0];
-    this.razaomaior_menor = parseFloat((x3.valor / x2.valor).toFixed(2));
-    this.razaomenor_menor = parseFloat((x2.valor / x1.valor).toFixed(2));
+    this.razaomaior_menor = parseFloat((x3.valor / x2.valor).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    this.razaomenor_menor = parseFloat((x2.valor / x1.valor).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
     return [x1, x2, x3];
   }
 
@@ -271,6 +273,7 @@ class BaseDeDados {
     let x4 = this.barraDestacada;
     let x5 = { valor: this.razaomaior_menor, posicao: 0 };
     let x6 = { valor: this.razaomenor_menor, posicao: 0 };
+    console.log("resposta correta", x5, x6) 
     let x7 = {
       valor: `${resp_corr_menores[0].valor} - ${resp_corr_maiores[0].valor}`,
       posicao: 0,
