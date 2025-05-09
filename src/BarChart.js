@@ -29,7 +29,7 @@
     }] - basic configuration parameters in the view such as margins, opacity, color
  * */
 class BarChart extends Visualization {
-
+    static idCounter = 0;
 
     constructor(parentElement, settings, corte, cortefinal) {
         super(parentElement, settings);
@@ -41,7 +41,9 @@ class BarChart extends Visualization {
 
         this.settings.corte = corte;
         this.settings.cortefinal = cortefinal;
-
+        
+        // Adicionar ID único para cada instância
+        this.chartId = `chart_${BarChart.idCounter++}`;
     }
 
     _putDefaultSettings() {
@@ -1109,31 +1111,32 @@ BarChart.strategies = {
             barchart.maximo = resultado.valorMaximo;
 
             barchart.sections = [
-                { name: "lower3d", range: [0, resultado.corteInferior] },
-                { name: "meio13d", range: [resultado.corteInferior, resultado.corteIntermediario1] },
-                { name: "meio23d", range: [resultado.corteIntermediario1, resultado.corteIntermediario2] },
-                { name: "meio33d", range: [resultado.corteIntermediario2, resultado.corteSuperior] },
-                { name: "upper3d", range: [resultado.corteSuperior, resultado.valorMaximo] },
+                { name: `lower3d_${barchart.chartId}`, range: [0, resultado.corteInferior] },
+                { name: `meio13d_${barchart.chartId}`, range: [resultado.corteInferior, resultado.corteIntermediario1] },
+                { name: `meio23d_${barchart.chartId}`, range: [resultado.corteIntermediario1, resultado.corteIntermediario2] },
+                { name: `meio33d_${barchart.chartId}`, range: [resultado.corteIntermediario2, resultado.corteSuperior] },
+                { name: `upper3d_${barchart.chartId}`, range: [resultado.corteSuperior, resultado.valorMaximo] },
             ];
         },
 
         draw: (barchart) => {
             barchart.parentElement.classList.add("dbreak");
 
+            // Usar IDs únicos para cada seção do gráfico
             barchart.parentElement.innerHTML = `
-            <div id="upper3d" class="child">
+            <div id="upper3d_${barchart.chartId}" class="child upper3d">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
-            <div id="meio33d" class="child">
+            <div id="meio33d_${barchart.chartId}" class="child meio33d">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
-            <div id="meio23d" class="child">
+            <div id="meio23d_${barchart.chartId}" class="child meio23d">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
-            <div id="meio13d" class="child">
+            <div id="meio13d_${barchart.chartId}" class="child meio13d">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
-            <div id="lower3d" class="child">
+            <div id="lower3d_${barchart.chartId}" class="child lower3d">
                 <svg xmlns="https://www.w3.org/2000/svg" height="100%"></svg>
             </div>
         `;
@@ -1178,8 +1181,11 @@ BarChart.strategies = {
 
             barchart.sections.forEach((section, index) => {
                 for (const d of sortedTicks) {
+                    // Extrair o nome base da seção sem o ID
+                    const sectionBaseName = section.name.split('_')[0];
+                    
                     if (d >= section.range[1]) {
-                        if (section.name == "meio33d") {
+                        if (sectionBaseName === "meio33d") {
                             section.range[1] = sortedTicks[sortedTicks.indexOf(d) - 1] - 1;
                             if (index + 1 < barchart.sections.length) {
                                 barchart.sections[index + 1].range[0] =
@@ -1187,7 +1193,7 @@ BarChart.strategies = {
                             }
                             break;
                         }
-                        if (section.name == "lower3d") {
+                        if (sectionBaseName === "lower3d") {
                             section.range[1] = d;
                             if (index + 1 < barchart.sections.length) {
                                 barchart.sections[index + 1].range[0] = d;
@@ -1197,8 +1203,8 @@ BarChart.strategies = {
                     }
 
                     if (
-                        section.name == "upper3d" &&
-                        d == sortedTicks[sortedTicks.length - 1]
+                        sectionBaseName === "upper3d" &&
+                        d === sortedTicks[sortedTicks.length - 1]
                     ) {
                         section.range[1] =
                             d + (sortedTicks.length > 1 ? sortedTicks[1] : 0);
@@ -1223,6 +1229,7 @@ BarChart.strategies = {
 
             barchart.d.forEach((value, i) => {
                 const dividedValues = divideValueBySections(value, barchart.sections);
+                console.log(dividedValues)
                 let yOffset = yScale(0);
 
                 dividedValues.forEach((section) => {
@@ -1259,7 +1266,7 @@ BarChart.strategies = {
                     const section = barchart.sections.find(
                         (sec) => d >= sec.range[0] && d <= sec.range[1]
                     );
-                    const sectionClass = section ? `${section.name}axis` : "unknownaxis";
+                    const sectionClass = section ? `${section.name}axis` : `unknownaxis_${barchart.chartId}`;
 
                     // Atribui a classe e adiciona linha horizontal
                     d3.select(this)
@@ -1273,29 +1280,31 @@ BarChart.strategies = {
                         .attr("stroke-width", 1);
                 });
 
-            // Agrupa as partes do gráfico
+            // Agrupa as partes do gráfico usando o ID único
             const parts = {
-                4: d3.selectAll("rect.upper3d"),
-                3: d3.selectAll("rect.meio33d"),
-                2: d3.selectAll("rect.meio23d"),
-                1: d3.selectAll("rect.meio13d"),
-                0: d3.selectAll("rect.lower3d"),
+                4: d3.selectAll(`rect.upper3d_${barchart.chartId}`),
+                3: d3.selectAll(`rect.meio33d_${barchart.chartId}`),
+                2: d3.selectAll(`rect.meio23d_${barchart.chartId}`),
+                1: d3.selectAll(`rect.meio13d_${barchart.chartId}`),
+                0: d3.selectAll(`rect.lower3d_${barchart.chartId}`),
             };
 
             // Processa cada parte do gráfico
             for (const part in parts) {
+                console.log(parts[part])
                 if (!parts[part].nodes().length) continue;
 
                 const classe = parts[part].node().classList.value;
+                const baseClass = classe.split("_")[0];  // Obtém a classe base (ex: upper3d)
                 const raiz = document.querySelector(`#${classe} svg`);
-
+                
                 if (!raiz) continue;
 
                 // Inicializa dimensões
                 raiz.parentElement.attributes.height = 0;
                 raiz.parentElement.style.height = "0";
                 raiz.style.width = `${width}px`;
-
+                
                 // Move os elementos para o SVG correspondente
                 parts[part].nodes().forEach((element) => {
                     const divFilho = element;
@@ -1342,7 +1351,8 @@ BarChart.strategies = {
                         linha.setAttribute("transform", `translate(50, ${y})`);
                         linha.removeAttribute("opacity")
 
-                        if (classe == "meio13d" || classe == "meio23d" || classe == "meio33d") {
+                        const baseClass = classe.split("_")[0];
+                        if (baseClass == "meio13d" || baseClass == "meio23d" || baseClass == "meio33d") {
                             linha.childNodes[1].style.display = "None";
                         } else {
                             linha.childNodes[0].style.display = "None";
@@ -1352,8 +1362,12 @@ BarChart.strategies = {
                         }
 
                         raiz.appendChild(linha);
-                        if (raiz.parentElement.id == "upper3d" || raiz.parentElement.id == "lower3d") {
-                            raiz.parentElement.style.height = `${y}px`;
+                        if (raiz.parentElement.id.startsWith("upper3d") || raiz.parentElement.id.startsWith("lower3d")) {
+                            // Só atualiza a altura se for maior que a atual
+                            const currentHeight = parseInt(raiz.parentElement.style.height) || 0;
+                            if (y > currentHeight) {
+                                raiz.parentElement.style.height = `${y}px`;
+                            }
                         }
                     });
                 }
@@ -1368,27 +1382,27 @@ BarChart.strategies = {
             // Aplica as transformações 3D
 
 
-            const m1 = document.querySelector("#meio13d");
+            const m1 = document.querySelector(`#meio13d_${barchart.chartId}`);
             if (m1) {
                 m1.style.transform = `rotate3d(1, 0, 0, -90deg) translate3d(0px, ${m1.clientHeight / 2}px, -${m1.clientHeight / 2}px)`;
             }
 
-            const m3 = document.querySelector("#meio33d");
+            const m3 = document.querySelector(`#meio33d_${barchart.chartId}`);
             if (m3) {
                 m3.style.transform = `rotate3d(1, 0, 0, 90deg) translate3d(0px, -${m3.clientHeight / 2}px, -${m3.clientHeight / 2}px)`;
             }
 
-            const m2 = document.querySelector("#meio23d");
+            const m2 = document.querySelector(`#meio23d_${barchart.chartId}`);
             if (m2 && m3) {
                 m2.style.transform = `rotateX(180deg) translate3d(0px, 0px, ${m3.clientHeight}px)`;
             }
 
-            const upper = document.querySelector("#upper3d");
+            const upper = document.querySelector(`#upper3d_${barchart.chartId}`);
             if (upper && m3) {
                 upper.style.transform = `rotateX(180deg) translate3d(0px, -${m3.clientHeight}px, 0px)`;
             }
 
-            const lower = document.querySelector("#lower3d");
+            const lower = document.querySelector(`#lower3d_${barchart.chartId}`);
             if (lower && m1) {
                 lower.style.transform = `rotateX(180deg) translate3d(0px, ${m1.clientHeight}px, 0px)`;
             }
