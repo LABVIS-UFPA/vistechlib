@@ -1,58 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>Scatterplot com D3.js</title>
+  <title>Plot por Pergunta e Estratégia</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    .axis path, .axis line {
-      fill: none;
-      stroke: #000;
-      shape-rendering: crispEdges;
+    body {
+      font-family: sans-serif;
+    }
+
+    .label {
+      font-size: 12px;
+      alignment-baseline: middle;
+    }
+
+    .dot {
+      fill: lightblue;
+      stroke: black;
+      stroke-width: 1px;
+    }
+
+    .line {
+      stroke: gray;
+      stroke-width: 2px;
+    }
+
+    .question-label {
+      font-weight: bold;
+      font-size: 13px;
     }
   </style>
 </head>
-<body>
-  <svg width="600" height="400"></svg>
 
+<body>
+  <svg width="900" height="800"></svg>
   <script>
-    const data = [
-      { x: 0.1 }, { x: 0.3 }, { x: 0.7 }, { x: 0.9 }, { x: 0.5 }
+    const rawData = [
+      { Pergunta: 1, estrategia: "3d break", media: 0.0000, IC95_inferior: 0.00, IC95_superior: 0.00 },
+      { Pergunta: 1, estrategia: "default", media: 1.0000, IC95_inferior: 1.00, IC95_superior: 1.00 },
+      { Pergunta: 1, estrategia: "scale break perspective", media: 1.0000, IC95_inferior: 1.00, IC95_superior: 1.00 },
+      { Pergunta: 2, estrategia: "3d break", media: 0.0000, IC95_inferior: 0.00, IC95_superior: 0.00 },
+      { Pergunta: 2, estrategia: "default", media: 1.0000, IC95_inferior: 1.00, IC95_superior: 1.00 },
+      { Pergunta: 2, estrategia: "scale break perspective", media: 0.0000, IC95_inferior: 0.00, IC95_superior: 0.00 },
+      { Pergunta: 3, estrategia: "3d break", media: 0.0000, IC95_inferior: 0.00, IC95_superior: 0.00 },
+      { Pergunta: 3, estrategia: "default", media: 1.0000, IC95_inferior: 1.00, IC95_superior: 1.00 },
+      { Pergunta: 3, estrategia: "scale break perspective", media: 0.0000, IC95_inferior: 0.00, IC95_superior: 0.00 },
+      { Pergunta: 4, estrategia: "3d break", media: 0.0633, IC95_inferior: 0.06, IC95_superior: 0.07 },
+      { Pergunta: 4, estrategia: "default", media: 0.4133, IC95_inferior: 0.41, IC95_superior: 0.42 },
+      { Pergunta: 4, estrategia: "scale break perspective", media: 0.0900, IC95_inferior: 0.09, IC95_superior: 0.09 },
+      { Pergunta: 5, estrategia: "3d break", media: 2.1233, IC95_inferior: 2.11, IC95_superior: 2.14 },
+      { Pergunta: 5, estrategia: "default", media: 0.4200, IC95_inferior: 0.42, IC95_superior: 0.42 },
+      { Pergunta: 5, estrategia: "scale break perspective", media: 0.0967, IC95_inferior: 0.08, IC95_superior: 0.11 },
+      { Pergunta: 6, estrategia: "3d break", media: 0.1698, IC95_inferior: 0.07, IC95_superior: 0.23 },
+      { Pergunta: 6, estrategia: "default", media: 0.4073, IC95_inferior: 0.12, IC95_superior: 0.60 },
+      { Pergunta: 6, estrategia: "scale break perspective", media: 0.2300, IC95_inferior: 0.06, IC95_superior: 0.53 },
+      { Pergunta: 7, estrategia: "3d break", media: 0.7720, IC95_inferior: 0.00, IC95_superior: 2.32 },
+      { Pergunta: 7, estrategia: "default", media: 0.0614, IC95_inferior: 0.00, IC95_superior: 0.18 },
+      { Pergunta: 7, estrategia: "scale break perspective", media: 0.0167, IC95_inferior: 0.00, IC95_superior: 0.05 },
+      { Pergunta: 8, estrategia: "3d break", media: 0.0000, IC95_inferior: 0.00, IC95_superior: 0.00 },
+      { Pergunta: 8, estrategia: "default", media: 0.0000, IC95_inferior: 0.00, IC95_superior: 0.00 },
+      { Pergunta: 8, estrategia: "scale break perspective", media: 0.0000, IC95_inferior: 0.00, IC95_superior: 0.00 }
     ];
 
-    const svg = d3.select("svg"),
-          margin = { top: 20, right: 30, bottom: 30, left: 50 },
-          width = +svg.attr("width") - margin.left - margin.right,
-          height = +svg.attr("height") - margin.top - margin.bottom;
+    let controlewidth = 400
 
-    const g = svg.append("g")
-                 .attr("transform", `translate(${margin.left},${margin.top})`);
+    const margin = { top: 30, right: 40, bottom: 20, left: controlewidth };  // Aumentando o espaço à esquerda
+    const width = 1200 - margin.left - margin.right;  // Aumentando a largura do gráfico
+    const rowHeight = 30;  // Aumentando o espaçamento entre as linhas
+    const height = rowHeight * rawData.length + 100;  // Ajuste de altura proporcional
 
-    // Escalas
+    const svg = d3.select("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height);
+
+    const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Linha horizontal no topo do gráfico (acima da primeira pergunta)
+    g.append("line")
+      .attr("x1", -controlewidth)
+      .attr("x2", width - width)
+      .attr("y1", -5)
+      .attr("y2", -5)
+      .attr("stroke", "black")
+      .attr("stroke-width", 3);
+
+    // Texto "Task"
+    g.append("text")
+      .attr("x", -controlewidth)
+      .attr("y", -15)
+      .attr("text-anchor", "start")
+      .attr("font-weight", "bold")
+      .text("Task");
+
+    // Texto "Estimate (95% CI)"
+    g.append("text")
+      .attr("x", -controlewidth * 0.85) // ajuste esse valor conforme necessário para alinhar com as estratégias
+      .attr("y", -15)
+      .attr("text-anchor", "start")
+      .attr("font-weight", "bold")
+      .text("Strategy");
+
+    // Texto "Estimate (95% CI)"
+    g.append("text")
+      .attr("x", -controlewidth * 0.35) // ajuste esse valor conforme necessário para alinhar com as estratégias
+      .attr("y", -15)
+      .attr("text-anchor", "start")
+      .attr("font-weight", "bold")
+      .text("Estimate (95% CI)");
+
+
     const x = d3.scaleLinear()
-                .domain([0, 1])
-                .range([0, width]);
+      .domain([
+        d3.min(rawData, d => d.IC95_inferior) - 0.1,
+        d3.max(rawData, d => d.IC95_superior) + 0.1
+      ])
+      .range([0, width]);
 
-    const y = d3.scaleLinear()
-                .domain([0, data.length - 1]) // Cada linha = 1 y diferente
-                .range([0, height]);
+    const y = d3.scaleBand()
+      .domain(rawData.map((d, i) => i))
+      .range([0, rowHeight * rawData.length])
+      .padding(0.2);
 
-    // Eixos
+    // Eixo X
     g.append("g")
-     .attr("transform", `translate(0,${height})`)
-     .call(d3.axisBottom(x));
+      .attr("transform", `translate(0,${rowHeight * rawData.length})`)
+      .call(d3.axisBottom(x));
 
-    g.append("g")
-     .call(d3.axisLeft(y).ticks(data.length).tickFormat(d => `Linha ${d}`));
+    // // Linha tracejada vertical no valor 1 do eixo X
+    // g.append("line")
+    //   .attr("x1", x(1))
+    //   .attr("x2", x(1))
+    //   .attr("y1", 0)
+    //   .attr("y2", rowHeight * rawData.length)
+    //   .attr("stroke", "black")
+    //   .attr("opacity", 0.3)
+    //   .attr("stroke-width", 1)
+    //   .attr("stroke-dasharray", "4 2");  // formato do tracejado
 
-    // Pontos
-    g.selectAll("circle")
-     .data(data)
-     .enter().append("circle")
-     .attr("cx", d => x(d.x))
-     .attr("cy", (_, i) => y(i))
-     .attr("r", 5)
-     .style("fill", "steelblue");
+
+    // Linhas de intervalo de confiança
+    g.selectAll(".line")
+      .data(rawData)
+      .enter()
+      .append("line")
+      .attr("class", "line")
+      .attr("x1", d => x(d.IC95_inferior))
+      .attr("x2", d => x(d.IC95_superior))
+      .attr("y1", (d, i) => y(i) + y.bandwidth() / 2)
+      .attr("y2", (d, i) => y(i) + y.bandwidth() / 2);
+
+    // Pontos médios (média)
+    g.selectAll(".dot")
+      .data(rawData)
+      .enter()
+      .append("circle")
+      .attr("class", "dot")
+      .attr("cx", d => x(d.media))
+      .attr("cy", (d, i) => y(i) + y.bandwidth() / 2)
+      .attr("r", 5);
+
+    // Texto com a estratégia 
+    g.selectAll(".estrategia-label")
+      .data(rawData)
+      .enter()
+      .append("text")
+      .attr("class", "estrategia-label")
+      .attr("x", -controlewidth * 0.85)  // ajusta horizontalmente conforme necessário
+      .attr("y", (d, i) => y(i) + y.bandwidth() / 2)
+      .text(d => `${d.estrategia}`);
+
+    // Texto com a estimativa e intervalo de confiança
+    g.selectAll(".valor-label")
+      .data(rawData)
+      .enter()
+      .append("text")
+      .attr("class", "valor-label")
+      .attr("x", -controlewidth * 0.35)  // ajusta horizontalmente para alinhar à direita da estratégia
+      .attr("y", (d, i) => y(i) + y.bandwidth() / 2)
+      .text(d => `${d.media.toFixed(3)} (${d.IC95_inferior.toFixed(2)} to ${d.IC95_superior.toFixed(2)})`);
+
+    // Agrupar perguntas
+    const perguntasUnicas = [...new Set(rawData.map(d => d.Pergunta))];
+    perguntasUnicas.forEach((pergunta, idx) => {
+      const indices = rawData
+        .map((d, i) => ({ i, pergunta: d.Pergunta }))
+        .filter(d => d.pergunta === pergunta)
+        .map(d => d.i);
+
+      const yMean = d3.mean(indices, i => y(i) + y.bandwidth() / 2);
+
+      g.append("text")
+        .attr("class", "question-label")
+        .attr("x", -(controlewidth * 0.967))
+        .attr("y", yMean)
+        .attr("text-anchor", "start")
+        .text(`${pergunta}`);
+
+      // Adiciona linha somente se não for a última pergunta
+      if (idx < perguntasUnicas.length - 1) {
+        const lastIndex = indices[indices.length - 1];
+        g.append("line")
+          .attr("x1", -controlewidth)
+          .attr("y1", y(lastIndex) + y.bandwidth())
+          .attr("y2", y(lastIndex) + y.bandwidth())
+          .attr("stroke", "gray")
+          .attr("stroke-width", 1);
+      }
+    });
+
   </script>
 </body>
+
 </html>
