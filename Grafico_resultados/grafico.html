@@ -211,15 +211,15 @@
           .attr("text-anchor", "start")
           .text(pergunta);
 
-        if (idx < perguntasUnicas.length - 1) {
-          const lastIndex = indices[indices.length - 1];
-          g.append("line")
-            .attr("x1", -controlewidth)
-            .attr("y1", y(lastIndex) + y.bandwidth())
-            .attr("y2", y(lastIndex) + y.bandwidth())
-            .attr("stroke", "gray")
-            .attr("stroke-width", 1);
-        }
+        // if (idx < perguntasUnicas.length - 1) {
+        //   const lastIndex = indices[indices.length - 1];
+        //   g.append("line")
+        //     .attr("x1", -controlewidth)
+        //     .attr("y1", y(lastIndex) + y.bandwidth())
+        //     .attr("y2", y(lastIndex) + y.bandwidth())
+        //     .attr("stroke", "gray")
+        //     .attr("stroke-width", 1);
+        // }
       });
     }
 
@@ -307,22 +307,22 @@
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 3)
         .text(d => `${d.media.toFixed(1)} (${d.IC95_inferior.toFixed(1)} to ${d.IC95_superior.toFixed(1)})`);
 
-      const perguntasUnicas = [...new Set(rawData.map(d => d.Pergunta))];
-      perguntasUnicas.forEach((pergunta, idx) => {
-        const indices = rawData.map((d, i) => ({ i, pergunta: d.Pergunta }))
-          .filter(d => d.pergunta === pergunta)
-          .map(d => d.i);
+      // const perguntasUnicas = [...new Set(rawData.map(d => d.Pergunta))];
+      // perguntasUnicas.forEach((pergunta, idx) => {
+      //   const indices = rawData.map((d, i) => ({ i, pergunta: d.Pergunta }))
+      //     .filter(d => d.pergunta === pergunta)
+      //     .map(d => d.i);
 
-        if (idx < perguntasUnicas.length - 1) {
-          const lastIndex = indices[indices.length - 1];
-          g.append("line")
-            .attr("x1", -controlewidth)
-            .attr("y1", y(lastIndex) + y.bandwidth())
-            .attr("y2", y(lastIndex) + y.bandwidth())
-            .attr("stroke", "gray")
-            .attr("stroke-width", 1);
-        }
-      });
+      //   if (idx < perguntasUnicas.length - 1) {
+      //     const lastIndex = indices[indices.length - 1];
+      //     g.append("line")
+      //       .attr("x1", -controlewidth)
+      //       .attr("y1", y(lastIndex) + y.bandwidth())
+      //       .attr("y2", y(lastIndex) + y.bandwidth())
+      //       .attr("stroke", "gray")
+      //       .attr("stroke-width", 1);
+      //   }
+      // });
     }
 
 
