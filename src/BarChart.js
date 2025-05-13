@@ -516,7 +516,7 @@ BarChart.strategies = {
 
 
                 barchart.y[k] = d3.scaleLinear().domain([0, barchart.settings.corte]).range([barchart.boxHeight, barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2]);
-                barchart.ybreak[k] = d3.scaleLinear().domain([barchart.settings.cortefinal, maximo]).range([barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2, 10]);
+                barchart.ybreak[k] = d3.scaleLinear().domain([barchart.settings.cortefinal*0.99, maximo]).range([barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2, 10]);
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2;
             }
@@ -593,7 +593,7 @@ BarChart.strategies = {
 
                 g.append("g")
                     .attr("class", "y loweraxis")
-                    .call(d3.axisLeft(barchart.y[key]).ticks(7).tickFormat(d => d.toLocaleString('pt-BR')))
+                    .call(d3.axisLeft(barchart.y[key]).ticks(5).tickFormat(d => d.toLocaleString('pt-BR')))
                     .selectAll("text") // Seleciona todos os elementos de texto do eixo y
                     .each(function (d) { // Para cada marca de tick
                         d3.select(this.parentNode) // Seleciona o pai (o elemento g)

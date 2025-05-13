@@ -38,11 +38,11 @@ div#chart {
     flex-direction: column;
 }
 
-main{
+main {
     position: relative;
 }
 
-.dbreak{
+.dbreak {
     display: flex;
     flex-direction: column;
     height: auto !important;
@@ -56,13 +56,30 @@ main{
     transform: perspective(245px) rotateY(0deg) rotateX(0deg) translateY(00px) translateX(10px);
 }
 
-#chart div{
+#chart div {
     display: flex;
     justify-content: center;
-} 
+}
 
 
-svg{
+svg {
     overflow: visible !important;
     margin: 0 auto;
+}
+
+#contador {
+    position: fixed;
+    background-color: #eee;
+    margin-top: -50px;
+    margin-left: 1780px;
+    padding: 5px 15px;
+    border-radius: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease;
+  }
+
+.vermelho {
+    color: red;
 }

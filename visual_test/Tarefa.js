@@ -24,7 +24,7 @@ class Tarefa {
 
         this.perg = '';
         this.pergId = '';
-        this.tempoLimite = 85000; // Tempo limite padrão em milissegundos
+        this.tempoLimite = 64000; // Tempo limite padrão em milissegundos
         // this.timerId = null; // Variável para armazenar o ID do temporizador
         this.barraDestacada = null; // Para armazenar a posição da barra destacada
     }
