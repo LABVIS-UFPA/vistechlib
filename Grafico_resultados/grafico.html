@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>Gráficos Combinados</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+
   <style>
     body {
       font-family: sans-serif;
@@ -36,8 +37,10 @@
 </head>
 
 <body>
-  <button onclick="downloadSVG('grafico-combinado')">Download SVG</button>
+  
   <svg id="grafico-combinado"></svg>
+
+  <button onclick="downloadSVG('grafico-combinado')">Download SVG</button>
 
   <script>
     const datasets = [
@@ -61,15 +64,15 @@
       "PSB_2.5D": "#6cc5b0ff"     // Turquesa
     };
 
-    const svgWidth = 1286;
-    const svgHeight = 800;
+    const svgWidth = 1150;
+    const svgHeight = 725;
     const svg = d3.select("#grafico-combinado")
       .attr("width", svgWidth)
       .attr("height", svgHeight);
 
     const offsets = {
       "#grafico-precisao": 0,
-      "#grafico-duracao": 820
+      "#grafico-duracao": 770
     };
 
     datasets.forEach(({ selector, data }) => {
@@ -85,8 +88,9 @@
     function renderGrafico1(svg, rawData, offsetX) {
       const controlewidth = 280;
       const margin = { top: 30, right: 40, bottom: 20, left: controlewidth };
-      const width = 730 - margin.left - margin.right;
-      const rowHeight = 30;
+      const width = 670 - margin.left - margin.right;
+      console.log(width)
+      const rowHeight = 27;
       const height = rowHeight * rawData.length + 100;
 
       const posstrategy = -controlewidth * 0.83;
@@ -118,8 +122,8 @@
 
       g.append("text")
         .attr("x", x(xCenter))
-        .attr("y", 760)
-        .text("Erro")
+        .attr("y", 690)
+        .text("Error")
         .attr("font-weight", "bold")
         .attr("text-anchor", "middle");
 
@@ -130,7 +134,7 @@
 
       g.append("g")
         .attr("transform", `translate(0,${rowHeight * rawData.length})`)
-        .call(d3.axisBottom(x));
+        .call(d3.axisBottom(x).ticks(5)).selectAll("text").style("font-size", "11pt");
 
 
       // Adiciona as linhas de intervalo de confiança
@@ -156,7 +160,7 @@
         .attr("cy", (d, i) => y(i) + y.bandwidth() / 2)
         .attr("r", 5)
         .style("fill", d => estrategiaColors[d.estrategia])
-        .style("stroke", "black")
+        .style("stroke", "none")
         .style("stroke-width", "1px");
 
 
@@ -165,7 +169,8 @@
         .enter()
         .append("text")
         .attr("x", posstrategy)
-        .attr("y", (d, i) => y(i) + y.bandwidth() / 2)
+        .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 3)
+        .style("fill", d => estrategiaColors[d.estrategia] || "lightblue")
         .text(d => d.estrategia);
 
       g.selectAll(".valor-label")
@@ -173,7 +178,9 @@
         .enter()
         .append("text")
         .attr("x", posestimate)
-        .attr("y", (d, i) => y(i) + y.bandwidth() / 2)
+        .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 3)
+        .style("fill", d => estrategiaColors[d.estrategia] || "lightblue")
+
         .text(d => `${d.media.toFixed(2)} (${d.IC95_inferior.toFixed(2)} to ${d.IC95_superior.toFixed(2)})`);
 
       const perguntasUnicas = [...new Set(rawData.map(d => d.Pergunta))];
@@ -200,7 +207,7 @@
 
         g.append("text")
           .attr("x", -(controlewidth * 0.967))
-          .attr("y", yMean)
+          .attr("y", yMean + 3)
           .attr("text-anchor", "start")
           .text(pergunta);
 
@@ -220,8 +227,9 @@
       const controlewidth = 135;
       // left controla o gap
       const margin = { top: 30, right: 40, bottom: 20, left: 20 };
-      const width = 500 - margin.left - margin.right;
-      const rowHeight = 30;
+      const width = 410 - margin.left - margin.right;
+      console.log(width)
+      const rowHeight = 27;
 
       const g = svg.append("g").attr("transform", `translate(${offsetX + margin.left},${margin.top})`);
 
@@ -250,7 +258,7 @@
 
       g.append("text")
         .attr("x", x(xCenter))
-        .attr("y", 760)
+        .attr("y", 690)
         .text("Time (s)")
         .attr("font-weight", "bold")
         .attr("text-anchor", "middle");
@@ -262,7 +270,7 @@
 
       g.append("g")
         .attr("transform", `translate(0,${rowHeight * rawData.length})`)
-        .call(d3.axisBottom(x));
+        .call(d3.axisBottom(x).ticks(5)).selectAll("text").style("font-size", "11pt");
 
       // Adiciona as linhas de intervalo de confiança
       g.selectAll(".line")
@@ -287,7 +295,7 @@
         .attr("cy", (d, i) => y(i) + y.bandwidth() / 2)
         .attr("r", 5)
         .style("fill", d => estrategiaColors[d.estrategia] || "lightblue")
-        .style("stroke", "black")
+        .style("stroke", "none")
         .style("stroke-width", "1px");
 
       g.selectAll(".valor-label")
@@ -295,7 +303,8 @@
         .enter()
         .append("text")
         .attr("x", -controlewidth)
-        .attr("y", (d, i) => y(i) + y.bandwidth() / 2)
+        .style("fill", d => estrategiaColors[d.estrategia] || "lightblue")
+        .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 3)
         .text(d => `${d.media.toFixed(1)} (${d.IC95_inferior.toFixed(1)} to ${d.IC95_superior.toFixed(1)})`);
 
       const perguntasUnicas = [...new Set(rawData.map(d => d.Pergunta))];
@@ -337,6 +346,8 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
+
+
   </script>
 </body>
 
