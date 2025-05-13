@@ -9,7 +9,7 @@ class Tarefa {
             "Estimar Proporção entre os dois elementos?",
             // estimar menor<->menor
             "Estimar Proporção entre os dois elementos ?",
-            "Determine a escala?",
+            "Determine o intervalo?",
             "Qual e o grafico com maior crescimento?"
         ];
         // this.perguntasSelecionadas = [];
@@ -24,7 +24,7 @@ class Tarefa {
 
         this.perg = '';
         this.pergId = '';
-        this.tempoLimite = 30000; // Tempo limite padrão em milissegundos
+        this.tempoLimite = 85000; // Tempo limite padrão em milissegundos
         // this.timerId = null; // Variável para armazenar o ID do temporizador
         this.barraDestacada = null; // Para armazenar a posição da barra destacada
     }
@@ -128,7 +128,7 @@ class Tarefa {
             return 5;
         } else if (pergunta === "Estimar Proporção entre os dois elementos ?") {
             return 6;
-        } else if (pergunta === "Determine a escala?") {
+        } else if (pergunta === "Determine o intervalo?") {
             return 7;
         }else if (pergunta === "Qual e o grafico com maior crescimento?") {
             return 8;

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Gráficos Lado a Lado</title>
+  <title>Gráficos Combinados</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
@@ -31,57 +31,69 @@
       font-size: 13px;
     }
 
-    .container {
-      display: flex;
-      gap: 30px;
-      padding: 20px;
-    }
+    /* SVG{background-color: aqua;} */
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <svg id="grafico-precisao"></svg>
-    <svg id="grafico-duracao"></svg>
-  </div>
+  <button onclick="downloadSVG('grafico-combinado')">Download SVG</button>
+  <svg id="grafico-combinado"></svg>
 
   <script>
     const datasets = [
       {
         selector: "#grafico-precisao",
-        data: [{Pergunta:1,estrategia:"3d break",media:0.6667,IC95_inferior:0.2077,IC95_superior:0.9385},{Pergunta:1,estrategia:"default",media:1.0,IC95_inferior:0.4385,IC95_superior:1.0},{Pergunta:1,estrategia:"scale break perspective",media:1.0,IC95_inferior:0.4385,IC95_superior:1.0},{Pergunta:2,estrategia:"3d break",media:0.6667,IC95_inferior:0.2077,IC95_superior:0.9385},{Pergunta:2,estrategia:"default",media:1.0,IC95_inferior:0.4385,IC95_superior:1.0},{Pergunta:2,estrategia:"scale break perspective",media:0.6667,IC95_inferior:0.2077,IC95_superior:0.9385},{Pergunta:3,estrategia:"3d break",media:1.0,IC95_inferior:0.4385,IC95_superior:1.0},{Pergunta:3,estrategia:"default",media:1.0,IC95_inferior:0.4385,IC95_superior:1.0},{Pergunta:3,estrategia:"scale break perspective",media:1.0,IC95_inferior:0.4385,IC95_superior:1.0},{Pergunta:4,estrategia:"3d break",media:0.06,IC95_inferior:0.06,IC95_superior:0.06},{Pergunta:4,estrategia:"default",media:0.4133,IC95_inferior:0.41,IC95_superior:0.42},{Pergunta:4,estrategia:"scale break perspective",media:0.0967,IC95_inferior:0.09,IC95_superior:0.1},{Pergunta:5,estrategia:"3d break",media:2.1264,IC95_inferior:2.11,IC95_superior:2.15},{Pergunta:5,estrategia:"default",media:0.42,IC95_inferior:0.42,IC95_superior:0.42},{Pergunta:5,estrategia:"scale break perspective",media:0.0565,IC95_inferior:0.03,IC95_superior:0.08},{Pergunta:6,estrategia:"3d break",media:0.0667,IC95_inferior:0.05,IC95_superior:0.08},{Pergunta:6,estrategia:"default",media:0.2228,IC95_inferior:0.12,IC95_superior:0.37},{Pergunta:6,estrategia:"scale break perspective",media:0.4022,IC95_inferior:0.06,IC95_superior:0.93},{Pergunta:7,estrategia:"3d break",media:0.7622,IC95_inferior:0.0,IC95_superior:2.32},{Pergunta:7,estrategia:"default",media:0.0595,IC95_inferior:0.0,IC95_superior:0.18},{Pergunta:7,estrategia:"scale break perspective",media:0.0167,IC95_inferior:0.0,IC95_superior:0.05},{Pergunta:8,estrategia:"3d break",media:1.0,IC95_inferior:0.4385,IC95_superior:1.0},{Pergunta:8,estrategia:"default",media:0.6667,IC95_inferior:0.2077,IC95_superior:0.9385},{Pergunta:8,estrategia:"scale break perspective",media:0.6667,IC95_inferior:0.2077,IC95_superior:0.9385}]
-
+        data: [{ Pergunta: 1, estrategia: "PSB_3D", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }, { Pergunta: 1, estrategia: "Def", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 1, estrategia: "PSB_2.5D", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 2, estrategia: "PSB_3D", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }, { Pergunta: 2, estrategia: "Def", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 2, estrategia: "PSB_2.5D", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }, { Pergunta: 3, estrategia: "PSB_3D", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 3, estrategia: "Def", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 3, estrategia: "PSB_2.5D", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 4, estrategia: "PSB_3D", media: 0.06, IC95_inferior: 0.06, IC95_superior: 0.06 }, { Pergunta: 4, estrategia: "Def", media: 0.41, IC95_inferior: 0.41, IC95_superior: 0.42 }, { Pergunta: 4, estrategia: "PSB_2.5D", media: 0.09, IC95_inferior: 0.09, IC95_superior: 0.09 }, { Pergunta: 5, estrategia: "PSB_3D", media: 2.14, IC95_inferior: 2.12, IC95_superior: 2.15 }, { Pergunta: 5, estrategia: "Def", media: 0.42, IC95_inferior: 0.42, IC95_superior: 0.42 }, { Pergunta: 5, estrategia: "PSB_2.5D", media: 0.08, IC95_inferior: 0.05, IC95_superior: 0.1 }, { Pergunta: 6, estrategia: "PSB_3D", media: 0.15, IC95_inferior: 0.04, IC95_superior: 0.34 }, { Pergunta: 6, estrategia: "Def", media: 0.23, IC95_inferior: 0.05, IC95_superior: 0.51 }, { Pergunta: 6, estrategia: "PSB_2.5D", media: 0.34, IC95_inferior: 0.06, IC95_superior: 0.56 }, { Pergunta: 7, estrategia: "PSB_3D", media: 0.77, IC95_inferior: 0.0, IC95_superior: 2.32 }, { Pergunta: 7, estrategia: "Def", media: 0.06, IC95_inferior: 0.0, IC95_superior: 0.18 }, { Pergunta: 7, estrategia: "PSB_2.5D", media: 0.02, IC95_inferior: 0.0, IC95_superior: 0.05 }, { Pergunta: 8, estrategia: "PSB_3D", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 8, estrategia: "Def", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }, { Pergunta: 8, estrategia: "PSB_2.5D", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }]
+        // insira aqui os dados de precisão
       },
       {
         selector: "#grafico-duracao",
-        data: [{ Pergunta: 1, estrategia: "3d break", media: 11.0, IC95_inferior: 11.0, IC95_superior: 11.0 }, { Pergunta: 1, estrategia: "default", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 1, estrategia: "scale break perspective", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 2, estrategia: "3d break", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 2, estrategia: "default", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 2, estrategia: "scale break perspective", media: 6.0, IC95_inferior: 6.0, IC95_superior: 6.0 }, { Pergunta: 3, estrategia: "3d break", media: 24.0, IC95_inferior: 24.0, IC95_superior: 24.0 }, { Pergunta: 3, estrategia: "default", media: 20.0, IC95_inferior: 20.0, IC95_superior: 20.0 }, { Pergunta: 3, estrategia: "scale break perspective", media: 7.0, IC95_inferior: 7.0, IC95_superior: 7.0 }, { Pergunta: 4, estrategia: "3d break", media: 7.0, IC95_inferior: 7.0, IC95_superior: 7.0 }, { Pergunta: 4, estrategia: "default", media: 8.0, IC95_inferior: 8.0, IC95_superior: 8.0 }, { Pergunta: 4, estrategia: "scale break perspective", media: 8.0, IC95_inferior: 8.0, IC95_superior: 8.0 }, { Pergunta: 5, estrategia: "3d break", media: 16.0, IC95_inferior: 16.0, IC95_superior: 16.0 }, { Pergunta: 5, estrategia: "default", media: 12.0, IC95_inferior: 12.0, IC95_superior: 12.0 }, { Pergunta: 5, estrategia: "scale break perspective", media: 24.0, IC95_inferior: 24.0, IC95_superior: 24.0 }, { Pergunta: 6, estrategia: "3d break", media: 10.0, IC95_inferior: 10.0, IC95_superior: 10.0 }, { Pergunta: 6, estrategia: "default", media: 11.0, IC95_inferior: 11.0, IC95_superior: 11.0 }, { Pergunta: 6, estrategia: "scale break perspective", media: 7.0, IC95_inferior: 7.0, IC95_superior: 7.0 }, { Pergunta: 7, estrategia: "3d break", media: 26.0, IC95_inferior: 26.0, IC95_superior: 26.0 }, { Pergunta: 7, estrategia: "default", media: 19.0, IC95_inferior: 19.0, IC95_superior: 19.0 }, { Pergunta: 7, estrategia: "scale break perspective", media: 30.0, IC95_inferior: 30.0, IC95_superior: 30.0 }, { Pergunta: 8, estrategia: "3d break", media: 16.0, IC95_inferior: 16.0, IC95_superior: 16.0 }, { Pergunta: 8, estrategia: "default", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 8, estrategia: "scale break perspective", media: 10.0, IC95_inferior: 10.0, IC95_superior: 10.0 }]
+        data: [{ Pergunta: 1, estrategia: "PSB_3D", media: 11.0, IC95_inferior: 11.0, IC95_superior: 11.0 }, { Pergunta: 1, estrategia: "Def", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 1, estrategia: "PSB_2.5D", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 2, estrategia: "PSB_3D", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 2, estrategia: "Def", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 2, estrategia: "PSB_2.5D", media: 6.0, IC95_inferior: 6.0, IC95_superior: 6.0 }, { Pergunta: 3, estrategia: "PSB_3D", media: 24.0, IC95_inferior: 24.0, IC95_superior: 24.0 }, { Pergunta: 3, estrategia: "Def", media: 20.0, IC95_inferior: 20.0, IC95_superior: 20.0 }, { Pergunta: 3, estrategia: "PSB_2.5D", media: 7.0, IC95_inferior: 7.0, IC95_superior: 7.0 }, { Pergunta: 4, estrategia: "PSB_3D", media: 7.0, IC95_inferior: 7.0, IC95_superior: 7.0 }, { Pergunta: 4, estrategia: "Def", media: 8.0, IC95_inferior: 8.0, IC95_superior: 8.0 }, { Pergunta: 4, estrategia: "PSB_2.5D", media: 8.0, IC95_inferior: 8.0, IC95_superior: 8.0 }, { Pergunta: 5, estrategia: "PSB_3D", media: 16.0, IC95_inferior: 16.0, IC95_superior: 16.0 }, { Pergunta: 5, estrategia: "Def", media: 12.0, IC95_inferior: 12.0, IC95_superior: 12.0 }, { Pergunta: 5, estrategia: "PSB_2.5D", media: 24.0, IC95_inferior: 24.0, IC95_superior: 24.0 }, { Pergunta: 6, estrategia: "PSB_3D", media: 10.0, IC95_inferior: 10.0, IC95_superior: 10.0 }, { Pergunta: 6, estrategia: "Def", media: 11.0, IC95_inferior: 11.0, IC95_superior: 11.0 }, { Pergunta: 6, estrategia: "PSB_2.5D", media: 7.0, IC95_inferior: 7.0, IC95_superior: 7.0 }, { Pergunta: 7, estrategia: "PSB_3D", media: 26.0, IC95_inferior: 26.0, IC95_superior: 26.0 }, { Pergunta: 7, estrategia: "Def", media: 19.0, IC95_inferior: 19.0, IC95_superior: 19.0 }, { Pergunta: 7, estrategia: "PSB_2.5D", media: 30.0, IC95_inferior: 30.0, IC95_superior: 30.0 }, { Pergunta: 8, estrategia: "PSB_3D", media: 16.0, IC95_inferior: 16.0, IC95_superior: 16.0 }, { Pergunta: 8, estrategia: "Def", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 8, estrategia: "PSB_2.5D", media: 10.0, IC95_inferior: 10.0, IC95_superior: 10.0 }]
+
+        // insira aqui os dados de duração
       }
     ];
 
-    // datasets.forEach(({ selector, data }) => {
-    //   renderGrafico2(selector, data);
-    // });
+    // Definir um mapeamento de cores para cada estratégia
+    const estrategiaColors = {
+      "PSB_3D": "#436ad0ff",      // Rosa
+      "Def": "#9c6b4eff",         // Azul
+      "PSB_2.5D": "#6cc5b0ff"     // Turquesa
+    };
+
+    const svgWidth = 1286;
+    const svgHeight = 800;
+    const svg = d3.select("#grafico-combinado")
+      .attr("width", svgWidth)
+      .attr("height", svgHeight);
+
+    const offsets = {
+      "#grafico-precisao": 0,
+      "#grafico-duracao": 820
+    };
 
     datasets.forEach(({ selector, data }) => {
+      const offsetX = offsets[selector];
       if (selector === "#grafico-precisao") {
-        renderGrafico1(selector, data);  // Para grafico-precisao chama renderGrafico1
+        renderGrafico1(svg, data, offsetX);
       } else if (selector === "#grafico-duracao") {
-        renderGrafico2(selector, data);  // Para grafico-duracao chama renderGrafico2
+        renderGrafico2(svg, data, offsetX);
       }
     });
 
-    function renderGrafico1(selector, rawData) {
-      const controlewidth = 400;
+
+    function renderGrafico1(svg, rawData, offsetX) {
+      const controlewidth = 280;
       const margin = { top: 30, right: 40, bottom: 20, left: controlewidth };
-      const width = 1000 - margin.left - margin.right;
+      const width = 730 - margin.left - margin.right;
       const rowHeight = 30;
       const height = rowHeight * rawData.length + 100;
 
-      const svg = d3.select(selector)
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height);
+      const posstrategy = -controlewidth * 0.83;
+      const posestimate = -controlewidth * 0.48;
 
-      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+      const g = svg.append("g").attr("transform", `translate(${offsetX + margin.left},${margin.top})`);
+
 
       g.append("line")
         .attr("x1", -controlewidth)
@@ -92,8 +104,8 @@
         .attr("stroke-width", 3);
 
       g.append("text").attr("x", -controlewidth).attr("y", -15).text("Task").attr("font-weight", "bold");
-      g.append("text").attr("x", -controlewidth * 0.85).attr("y", -15).text("Strategy").attr("font-weight", "bold");
-      g.append("text").attr("x", -controlewidth * 0.35).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold");
+      g.append("text").attr("x", posstrategy).attr("y", -15).text("Strategy").attr("font-weight", "bold");
+      g.append("text").attr("x", posestimate).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold");
 
       const x = d3.scaleLinear()
         .domain([
@@ -102,15 +114,14 @@
         ])
         .range([0, width]);
 
-      // Calculando o meio do eixo x
       const xCenter = (d3.min(rawData, d => d.IC95_inferior) + d3.max(rawData, d => d.IC95_superior)) / 2;
 
       g.append("text")
-        .attr("x", x(xCenter))  // Posição no meio do eixo X
-        .attr("y", 760)  // Posição no eixo y
+        .attr("x", x(xCenter))
+        .attr("y", 760)
         .text("Erro")
         .attr("font-weight", "bold")
-        .attr("text-anchor", "middle");  // Para garantir que o texto seja centralizado
+        .attr("text-anchor", "middle");
 
       const y = d3.scaleBand()
         .domain(rawData.map((_, i) => i))
@@ -121,6 +132,8 @@
         .attr("transform", `translate(0,${rowHeight * rawData.length})`)
         .call(d3.axisBottom(x));
 
+
+      // Adiciona as linhas de intervalo de confiança
       g.selectAll(".line")
         .data(rawData)
         .enter()
@@ -129,8 +142,11 @@
         .attr("x1", d => x(d.IC95_inferior))
         .attr("x2", d => x(d.IC95_superior))
         .attr("y1", (d, i) => y(i) + y.bandwidth() / 2)
-        .attr("y2", (d, i) => y(i) + y.bandwidth() / 2);
+        .attr("y2", (d, i) => y(i) + y.bandwidth() / 2)
+        .style("stroke", d => estrategiaColors[d.estrategia])
+        .style("stroke-width", "2px");   // Garante a largura
 
+      // Adiciona os pontos médios
       g.selectAll(".dot")
         .data(rawData)
         .enter()
@@ -138,13 +154,17 @@
         .attr("class", "dot")
         .attr("cx", d => x(d.media))
         .attr("cy", (d, i) => y(i) + y.bandwidth() / 2)
-        .attr("r", 5);
+        .attr("r", 5)
+        .style("fill", d => estrategiaColors[d.estrategia])
+        .style("stroke", "black")
+        .style("stroke-width", "1px");
+
 
       g.selectAll(".estrategia-label")
         .data(rawData)
         .enter()
         .append("text")
-        .attr("x", -controlewidth * 0.85)
+        .attr("x", posstrategy)
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2)
         .text(d => d.estrategia);
 
@@ -152,9 +172,9 @@
         .data(rawData)
         .enter()
         .append("text")
-        .attr("x", -controlewidth * 0.35)
+        .attr("x", posestimate)
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2)
-        .text(d => `${d.media.toFixed(3)} (${d.IC95_inferior.toFixed(2)} to ${d.IC95_superior.toFixed(2)})`);
+        .text(d => `${d.media.toFixed(2)} (${d.IC95_inferior.toFixed(2)} to ${d.IC95_superior.toFixed(2)})`);
 
       const perguntasUnicas = [...new Set(rawData.map(d => d.Pergunta))];
       perguntasUnicas.forEach((pergunta, idx) => {
@@ -162,14 +182,27 @@
           .filter(d => d.pergunta === pergunta)
           .map(d => d.i);
 
+        const perguntaData = rawData.filter(d => d.Pergunta === pergunta);
+
+        // Adiciona retângulos de fundo cinza alternados
+        g.selectAll(`.background-rect-${pergunta}`)
+          .data(perguntaData)
+          .enter()
+          .insert("rect", ":first-child") // Insere antes do primeiro elemento filho
+          .attr("x", -controlewidth)
+          .attr("y", (d, i) => y(indices[i]) - 6)
+          .attr("width", svgWidth)
+          .attr("height", rowHeight)
+          .attr("fill", idx % 2 === 0 ? "#c0c0c0" : "white")
+          .attr("opacity", 0.3);
+
         const yMean = d3.mean(indices, i => y(i) + y.bandwidth() / 2);
 
         g.append("text")
-          .attr("class", "question-label")
           .attr("x", -(controlewidth * 0.967))
           .attr("y", yMean)
           .attr("text-anchor", "start")
-          .text(`${pergunta}`);
+          .text(pergunta);
 
         if (idx < perguntasUnicas.length - 1) {
           const lastIndex = indices[indices.length - 1];
@@ -183,18 +216,14 @@
       });
     }
 
-    function renderGrafico2(selector, rawData) {
-      const controlewidth = 169;
-      const margin = { top: 30, right: 40, bottom: 20, left: controlewidth };
-      const width = 1000 - margin.left - margin.right;
+    function renderGrafico2(svg, rawData, offsetX) {
+      const controlewidth = 135;
+      // left controla o gap
+      const margin = { top: 30, right: 40, bottom: 20, left: 20 };
+      const width = 500 - margin.left - margin.right;
       const rowHeight = 30;
-      const height = rowHeight * rawData.length + 100;
 
-      const svg = d3.select(selector)
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height);
-
-      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+      const g = svg.append("g").attr("transform", `translate(${offsetX + margin.left},${margin.top})`);
 
       g.append("line")
         .attr("x1", -controlewidth)
@@ -204,8 +233,11 @@
         .attr("stroke", "black")
         .attr("stroke-width", 3);
 
-      g.append("text").attr("x", -controlewidth).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold");
-
+      g.append("text")
+        .attr("x", -controlewidth)
+        .attr("y", -15)
+        .text("Estimate (95% CI)")
+        .attr("font-weight", "bold");
 
       const x = d3.scaleLinear()
         .domain([
@@ -214,15 +246,15 @@
         ])
         .range([0, width]);
 
-      // Calculando o meio do eixo x
       const xCenter = (d3.min(rawData, d => d.IC95_inferior) + d3.max(rawData, d => d.IC95_superior)) / 2;
 
       g.append("text")
-        .attr("x", x(xCenter))  // Posição no meio do eixo X
-        .attr("y", 760)  // Posição no eixo y
-        .text("Time")
+        .attr("x", x(xCenter))
+        .attr("y", 760)
+        .text("Time (s)")
         .attr("font-weight", "bold")
-        .attr("text-anchor", "middle");  // Para garantir que o texto seja centralizado
+        .attr("text-anchor", "middle");
+
       const y = d3.scaleBand()
         .domain(rawData.map((_, i) => i))
         .range([0, rowHeight * rawData.length])
@@ -232,6 +264,7 @@
         .attr("transform", `translate(0,${rowHeight * rawData.length})`)
         .call(d3.axisBottom(x));
 
+      // Adiciona as linhas de intervalo de confiança
       g.selectAll(".line")
         .data(rawData)
         .enter()
@@ -240,8 +273,11 @@
         .attr("x1", d => x(d.IC95_inferior))
         .attr("x2", d => x(d.IC95_superior))
         .attr("y1", (d, i) => y(i) + y.bandwidth() / 2)
-        .attr("y2", (d, i) => y(i) + y.bandwidth() / 2);
+        .attr("y2", (d, i) => y(i) + y.bandwidth() / 2)
+        .style("stroke", d => estrategiaColors[d.estrategia] || "gray")
+        .style("stroke-width", "2px");   // Garante a largura
 
+      // Adiciona os pontos médios
       g.selectAll(".dot")
         .data(rawData)
         .enter()
@@ -249,7 +285,10 @@
         .attr("class", "dot")
         .attr("cx", d => x(d.media))
         .attr("cy", (d, i) => y(i) + y.bandwidth() / 2)
-        .attr("r", 5);
+        .attr("r", 5)
+        .style("fill", d => estrategiaColors[d.estrategia] || "lightblue")
+        .style("stroke", "black")
+        .style("stroke-width", "1px");
 
       g.selectAll(".valor-label")
         .data(rawData)
@@ -257,15 +296,13 @@
         .append("text")
         .attr("x", -controlewidth)
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2)
-        .text(d => `${d.media.toFixed(3)} (${d.IC95_inferior.toFixed(2)} to ${d.IC95_superior.toFixed(2)})`);
+        .text(d => `${d.media.toFixed(1)} (${d.IC95_inferior.toFixed(1)} to ${d.IC95_superior.toFixed(1)})`);
 
       const perguntasUnicas = [...new Set(rawData.map(d => d.Pergunta))];
       perguntasUnicas.forEach((pergunta, idx) => {
         const indices = rawData.map((d, i) => ({ i, pergunta: d.Pergunta }))
           .filter(d => d.pergunta === pergunta)
           .map(d => d.i);
-
-        const yMean = d3.mean(indices, i => y(i) + y.bandwidth() / 2);
 
         if (idx < perguntasUnicas.length - 1) {
           const lastIndex = indices[indices.length - 1];
@@ -277,6 +314,28 @@
             .attr("stroke-width", 1);
         }
       });
+    }
+
+
+    function downloadSVG(svgId) {
+      const svgElement = document.getElementById(svgId);
+      if (!svgElement) {
+        console.error("SVG não encontrado");
+        return;
+      }
+
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgElement);
+      const blob = new Blob([svgString], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "download.svg";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
   </script>
 </body>
