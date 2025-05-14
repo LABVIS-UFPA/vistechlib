@@ -24,7 +24,7 @@
 
   <script>
     const CONFIG = {
-      strategies: ["3d break", "scale-break", "scale break perspective", "default"],
+      strategies: ["3d break", "scale break perspective", "default"],
       tarefas: ["1", "3", "4", "5", "6", "7", "8"],
     };
 
@@ -75,7 +75,7 @@
           this.segundos++;
           this.elemento.textContent = this.segundos;
 
-          if (this.segundos >= 75) {
+          if (this.segundos >= limiteSegundos-10) {
             this.elemento.classList.add('vermelho');
           }
 
@@ -540,6 +540,10 @@
       }
 
       createResponseForm(dados, allowMultipleSelection = false, labelText) {
+        // faltav limpar, senao ficava como estilo space-around da tarefa 8
+        this.elements.campoResposta.style.justifyContent = "";
+
+
         this.elements.campoResposta.classList.add("checkbox-form");
         const gap = "5px";
 
