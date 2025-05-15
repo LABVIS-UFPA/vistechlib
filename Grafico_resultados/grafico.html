@@ -32,7 +32,7 @@
       font-size: 13px;
     }
 
-    /* SVG{background-color: aqua;} */
+    /* SVG{background-color: aqua;}  */
   </style>
 </head>
 
@@ -46,14 +46,15 @@
     const datasets = [
       {
         selector: "#grafico-precisao",
-        data: [{ Pergunta: 1, estrategia: "PSB_3D", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }, { Pergunta: 1, estrategia: "Def", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 1, estrategia: "PSB_2.5D", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 2, estrategia: "PSB_3D", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }, { Pergunta: 2, estrategia: "Def", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 2, estrategia: "PSB_2.5D", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }, { Pergunta: 3, estrategia: "PSB_3D", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 3, estrategia: "Def", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 3, estrategia: "PSB_2.5D", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 4, estrategia: "PSB_3D", media: 0.06, IC95_inferior: 0.06, IC95_superior: 0.06 }, { Pergunta: 4, estrategia: "Def", media: 0.41, IC95_inferior: 0.41, IC95_superior: 0.42 }, { Pergunta: 4, estrategia: "PSB_2.5D", media: 0.09, IC95_inferior: 0.09, IC95_superior: 0.09 }, { Pergunta: 5, estrategia: "PSB_3D", media: 2.14, IC95_inferior: 2.12, IC95_superior: 2.15 }, { Pergunta: 5, estrategia: "Def", media: 0.42, IC95_inferior: 0.42, IC95_superior: 0.42 }, { Pergunta: 5, estrategia: "PSB_2.5D", media: 0.08, IC95_inferior: 0.05, IC95_superior: 0.1 }, { Pergunta: 6, estrategia: "PSB_3D", media: 0.15, IC95_inferior: 0.04, IC95_superior: 0.34 }, { Pergunta: 6, estrategia: "Def", media: 0.23, IC95_inferior: 0.05, IC95_superior: 0.51 }, { Pergunta: 6, estrategia: "PSB_2.5D", media: 0.34, IC95_inferior: 0.06, IC95_superior: 0.56 }, { Pergunta: 7, estrategia: "PSB_3D", media: 0.77, IC95_inferior: 0.0, IC95_superior: 2.32 }, { Pergunta: 7, estrategia: "Def", media: 0.06, IC95_inferior: 0.0, IC95_superior: 0.18 }, { Pergunta: 7, estrategia: "PSB_2.5D", media: 0.02, IC95_inferior: 0.0, IC95_superior: 0.05 }, { Pergunta: 8, estrategia: "PSB_3D", media: 1.0, IC95_inferior: 0.44, IC95_superior: 1.0 }, { Pergunta: 8, estrategia: "Def", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }, { Pergunta: 8, estrategia: "PSB_2.5D", media: 0.67, IC95_inferior: 0.21, IC95_superior: 0.94 }]
-        // insira aqui os dados de precisão
+        data: [{Pergunta:1,estrategia:"PSB_3D",media:0.27,IC95_inferior:0.07,IC95_superior:0.47},{Pergunta:1,estrategia:"Def",media:0.6,IC95_inferior:0.4,IC95_superior:0.8},{Pergunta:1,estrategia:"PSB_2.5D",media:0.13,IC95_inferior:0.0,IC95_superior:0.33},{Pergunta:2,estrategia:"PSB_3D",media:0.4,IC95_inferior:0.2,IC95_superior:0.6},{Pergunta:2,estrategia:"Def",media:0.73,IC95_inferior:0.53,IC95_superior:0.93},{Pergunta:2,estrategia:"PSB_2.5D",media:0.13,IC95_inferior:0.0,IC95_superior:0.33},{Pergunta:3,estrategia:"PSB_3D",media:0.01,IC95_inferior:0.01,IC95_superior:0.02},{Pergunta:3,estrategia:"Def",media:0.42,IC95_inferior:0.12,IC95_superior:0.77},{Pergunta:3,estrategia:"PSB_2.5D",media:0.01,IC95_inferior:0.01,IC95_superior:0.02},{Pergunta:4,estrategia:"PSB_3D",media:2.51,IC95_inferior:1.11,IC95_superior:4.03},{Pergunta:4,estrategia:"Def",media:2.77,IC95_inferior:1.27,IC95_superior:4.49},{Pergunta:4,estrategia:"PSB_2.5D",media:2.78,IC95_inferior:1.3,IC95_superior:4.43},{Pergunta:5,estrategia:"PSB_3D",media:1.49,IC95_inferior:0.39,IC95_superior:2.86},{Pergunta:5,estrategia:"Def",media:2.51,IC95_inferior:0.95,IC95_superior:4.21},{Pergunta:5,estrategia:"PSB_2.5D",media:1.14,IC95_inferior:0.46,IC95_superior:1.92},{Pergunta:6,estrategia:"PSB_3D",media:1.12,IC95_inferior:0.04,IC95_superior:2.97},{Pergunta:6,estrategia:"Def",media:1.02,IC95_inferior:0.39,IC95_superior:1.75},{Pergunta:6,estrategia:"PSB_2.5D",media:0.04,IC95_inferior:0.02,IC95_superior:0.07},{Pergunta:7,estrategia:"PSB_3D",media:0.2,IC95_inferior:0.0,IC95_superior:0.4},{Pergunta:7,estrategia:"Def",media:0.4,IC95_inferior:0.2,IC95_superior:0.67},{Pergunta:7,estrategia:"PSB_2.5D",media:0.4,IC95_inferior:0.2,IC95_superior:0.6}]
+
+
+      // insira aqui os dados de precisão
       },
       {
         selector: "#grafico-duracao",
-        data: [{ Pergunta: 1, estrategia: "PSB_3D", media: 11.0, IC95_inferior: 11.0, IC95_superior: 11.0 }, { Pergunta: 1, estrategia: "Def", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 1, estrategia: "PSB_2.5D", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 2, estrategia: "PSB_3D", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 2, estrategia: "Def", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 2, estrategia: "PSB_2.5D", media: 6.0, IC95_inferior: 6.0, IC95_superior: 6.0 }, { Pergunta: 3, estrategia: "PSB_3D", media: 24.0, IC95_inferior: 24.0, IC95_superior: 24.0 }, { Pergunta: 3, estrategia: "Def", media: 20.0, IC95_inferior: 20.0, IC95_superior: 20.0 }, { Pergunta: 3, estrategia: "PSB_2.5D", media: 7.0, IC95_inferior: 7.0, IC95_superior: 7.0 }, { Pergunta: 4, estrategia: "PSB_3D", media: 7.0, IC95_inferior: 7.0, IC95_superior: 7.0 }, { Pergunta: 4, estrategia: "Def", media: 8.0, IC95_inferior: 8.0, IC95_superior: 8.0 }, { Pergunta: 4, estrategia: "PSB_2.5D", media: 8.0, IC95_inferior: 8.0, IC95_superior: 8.0 }, { Pergunta: 5, estrategia: "PSB_3D", media: 16.0, IC95_inferior: 16.0, IC95_superior: 16.0 }, { Pergunta: 5, estrategia: "Def", media: 12.0, IC95_inferior: 12.0, IC95_superior: 12.0 }, { Pergunta: 5, estrategia: "PSB_2.5D", media: 24.0, IC95_inferior: 24.0, IC95_superior: 24.0 }, { Pergunta: 6, estrategia: "PSB_3D", media: 10.0, IC95_inferior: 10.0, IC95_superior: 10.0 }, { Pergunta: 6, estrategia: "Def", media: 11.0, IC95_inferior: 11.0, IC95_superior: 11.0 }, { Pergunta: 6, estrategia: "PSB_2.5D", media: 7.0, IC95_inferior: 7.0, IC95_superior: 7.0 }, { Pergunta: 7, estrategia: "PSB_3D", media: 26.0, IC95_inferior: 26.0, IC95_superior: 26.0 }, { Pergunta: 7, estrategia: "Def", media: 19.0, IC95_inferior: 19.0, IC95_superior: 19.0 }, { Pergunta: 7, estrategia: "PSB_2.5D", media: 30.0, IC95_inferior: 30.0, IC95_superior: 30.0 }, { Pergunta: 8, estrategia: "PSB_3D", media: 16.0, IC95_inferior: 16.0, IC95_superior: 16.0 }, { Pergunta: 8, estrategia: "Def", media: 9.0, IC95_inferior: 9.0, IC95_superior: 9.0 }, { Pergunta: 8, estrategia: "PSB_2.5D", media: 10.0, IC95_inferior: 10.0, IC95_superior: 10.0 }]
-
-        // insira aqui os dados de duração
+        data: [{Pergunta:1,estrategia:"PSB_3D",media:22.13,IC95_inferior:17.6,IC95_superior:27.87},{Pergunta:1,estrategia:"Def",media:16.33,IC95_inferior:12.13,IC95_superior:21.33},{Pergunta:1,estrategia:"PSB_2.5D",media:18.47,IC95_inferior:13.06,IC95_superior:24.53},{Pergunta:2,estrategia:"PSB_3D",media:33.2,IC95_inferior:26.0,IC95_superior:41.4},{Pergunta:2,estrategia:"Def",media:33.53,IC95_inferior:24.8,IC95_superior:43.33},{Pergunta:2,estrategia:"PSB_2.5D",media:28.6,IC95_inferior:20.86,IC95_superior:37.27},{Pergunta:3,estrategia:"PSB_3D",media:26.07,IC95_inferior:20.73,IC95_superior:32.13},{Pergunta:3,estrategia:"Def",media:23.47,IC95_inferior:18.6,IC95_superior:29.33},{Pergunta:3,estrategia:"PSB_2.5D",media:21.8,IC95_inferior:17.27,IC95_superior:26.87},{Pergunta:4,estrategia:"PSB_3D",media:47.33,IC95_inferior:39.0,IC95_superior:56.4},{Pergunta:4,estrategia:"Def",media:49.67,IC95_inferior:39.6,IC95_superior:59.93},{Pergunta:4,estrategia:"PSB_2.5D",media:58.47,IC95_inferior:49.8,IC95_superior:67.07},{Pergunta:5,estrategia:"PSB_3D",media:44.33,IC95_inferior:32.6,IC95_superior:56.13},{Pergunta:5,estrategia:"Def",media:29.2,IC95_inferior:21.47,IC95_superior:38.0},{Pergunta:5,estrategia:"PSB_2.5D",media:38.87,IC95_inferior:27.67,IC95_superior:50.6},{Pergunta:6,estrategia:"PSB_3D",media:43.6,IC95_inferior:35.33,IC95_superior:52.33},{Pergunta:6,estrategia:"Def",media:35.2,IC95_inferior:26.93,IC95_superior:44.13},{Pergunta:6,estrategia:"PSB_2.5D",media:39.93,IC95_inferior:32.0,IC95_superior:49.0},{Pergunta:7,estrategia:"PSB_3D",media:36.47,IC95_inferior:26.53,IC95_superior:47.4},{Pergunta:7,estrategia:"Def",media:23.73,IC95_inferior:17.0,IC95_superior:31.87},{Pergunta:7,estrategia:"PSB_2.5D",media:20.6,IC95_inferior:15.47,IC95_superior:26.53}]
+        
       }
     ];
 
@@ -65,7 +66,7 @@
     };
 
     const svgWidth = 1150;
-    const svgHeight = 725;
+    const svgHeight = 655;
     const svg = d3.select("#grafico-combinado")
       .attr("width", svgWidth)
       .attr("height", svgHeight);
@@ -122,7 +123,7 @@
 
       g.append("text")
         .attr("x", x(xCenter))
-        .attr("y", 690)
+        .attr("y", 620)
         .text("Error")
         .attr("font-weight", "bold")
         .attr("text-anchor", "middle");
@@ -258,7 +259,7 @@
 
       g.append("text")
         .attr("x", x(xCenter))
-        .attr("y", 690)
+        .attr("y", 620)
         .text("Time (s)")
         .attr("font-weight", "bold")
         .attr("text-anchor", "middle");
