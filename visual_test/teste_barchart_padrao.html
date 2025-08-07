@@ -13,10 +13,13 @@
             let layout = document.querySelector("#chart");
 
             let config = {
-                drawStrategy: "perspective escalonada"
+                drawStrategy: "scale break perspective"
             };
 
-            let barchart = new BarChart(layout, config);
+            let break_inicial = 11000;
+            let breakfinal = 76000;
+
+            let barchart = new BarChart(layout, config, break_inicial, breakfinal);
 
             this.base4 = [
                 { valor: 2086.788469112473 },
@@ -56,8 +59,86 @@
 
         <div id="chart" style="height: 600px; width: 90%;"></div>
 
+        <button onclick="downloadSVG()" class="m-4 px-4 py-2 bg-blue-500 text-white rounded">Baixar SVG</button>
+        <button onclick="downloadPNG()" class="m-4 px-4 py-2 bg-green-600 text-white rounded">Baixar PNG</button>
 
     </main>
+
+    <script>
+    function downloadSVG() {
+        const chartDiv = document.getElementById("chart");
+        const svg = chartDiv.querySelector("svg");
+
+        if (!svg) {
+            alert("SVG não encontrado.");
+            return;
+        }
+
+        // Clona o SVG e define atributos necessários
+        const clonedSvg = svg.cloneNode(true);
+        clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(clonedSvg);
+        const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "grafico.svg";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    function downloadPNG() {
+        const chartDiv = document.getElementById("chart");
+        const svg = chartDiv.querySelector("svg");
+
+        if (!svg) {
+            alert("SVG não encontrado.");
+            return;
+        }
+
+        const clonedSvg = svg.cloneNode(true);
+        clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(clonedSvg);
+        const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(svgBlob);
+
+        const image = new Image();
+        image.onload = function () {
+            const canvas = document.createElement("canvas");
+            canvas.width = svg.viewBox.baseVal.width || svg.clientWidth;
+            canvas.height = svg.viewBox.baseVal.height || svg.clientHeight;
+
+            const context = canvas.getContext("2d");
+            context.fillStyle = "white"; // fundo branco
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0);
+
+            URL.revokeObjectURL(url);
+            canvas.toBlob(function (blob) {
+                const link = document.createElement("a");
+                link.download = "grafico.png";
+                link.href = URL.createObjectURL(blob);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }, "image/png");
+        };
+
+        image.onerror = function () {
+            alert("Erro ao converter SVG para imagem.");
+        };
+
+        image.src = url;
+    }
+    </script>
+
 </body>
 
 </html>
