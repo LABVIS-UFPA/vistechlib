@@ -8,7 +8,7 @@ The structure has been adapted to allow direct testing in the browser, with a pa
 * Updated `BarChart.js` class: Responsible for generating different bar chart strategies based on the experiment parameters.
 * Participant registration page (`cadastro_user.html`): Registration interface with automatic redirection to the testing environment (`test_user_barchart.html`).
 * Additional demonstration page (`teste_barchart_padrao.html`): Displays a bar chart using the *Perspective Scale Break* technique. Includes buttons to download the chart in SVG** or PNG format, facilitating its use in reports, articles, and other visual materials.
-* Web-compatible architecture** — Can be run locally or hosted on servers without additional installation requirements.
+* Web-compatible architecture: Can be run locally or hosted on servers without additional installation requirements.
 
 # How to Use
 
