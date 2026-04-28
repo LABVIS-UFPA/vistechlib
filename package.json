@@ -32,9 +32,11 @@
     "d3-path": "2.0.0",
     "docdash": "^1.2.0",
     "moment": "^2.24.0",
+    "three": "^0.124.0",
     "underscore": "^1.9.1"
   },
   "devDependencies": {
+    "browserify": "^17.0.1",
     "doxdox": "^3.0.0",
     "jsdoc": "^3.6.3"
   }

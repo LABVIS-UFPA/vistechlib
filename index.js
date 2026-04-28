@@ -13,3 +13,4 @@ exports.BarChart = require("./src/BarChart.js");
 exports.PieChart = require("./src/PieChart.js");
 exports.CirclePacking = require("./src/CirclePacking.js");
 exports.selection = require("./src/selections/selections.js")
+exports.PerspectiveScaleBreakBarChart = require("./src/PerspectiveScaleBreakBarChart.js");
