@@ -46,10 +46,11 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.barGap = 0.5;
     this.settings.cameraViewSize = 8.5;
     this.settings.cameraNear = 0.1;
-    this.settings.cameraFar = 100;
+    this.settings.cameraFar = 1000;
     this.settings.cameraX = 0;
-    this.settings.cameraY = 0;
-    this.settings.cameraZ = 20;
+    this.settings.cameraY = 3;
+    this.settings.cameraZ = 18;
+    this.settings.cameraFov = 35;
     this.settings.breakStart = 3.2;
     this.settings.breakEnd = 5.2;
     this.settings.foldVisualHeight = 1.4;
@@ -138,6 +139,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.webglContainer.appendChild(this.renderer.domElement);
 
     this.chartGroup = new THREE.Group();
+    this.chartGroup.rotation.set(0, 0, 0);
     this.scene.add(this.chartGroup);
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
@@ -170,11 +172,9 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     );
 
     if (createNew || !this.camera) {
-      this.camera = new THREE.OrthographicCamera(
-        -viewSize * aspect,
-        viewSize * aspect,
-        viewSize,
-        -2.5,
+      this.camera = new THREE.PerspectiveCamera(
+        this.settings.cameraFov,
+        aspect,
         this.settings.cameraNear,
         this.settings.cameraFar,
       );
