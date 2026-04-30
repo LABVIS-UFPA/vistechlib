@@ -33,35 +33,59 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   }
 
   _putDefaultSettings() {
+    // Dimensões e aparência
     this.settings.width = 900;
     this.settings.height = 500;
     this.settings.color = 0x457b9d;
     this.settings.backgroundColor = 0xf8f9fa;
+
+    // Dados
     this.settings.labelKey = "label";
     this.settings.valueKey = "value";
-    this.settings.maxBarHeight = 6;
-    this.settings.centerY = 3;
-    this.settings.barWidth = 1.2;
-    this.settings.barDepth = 0.8;
-    this.settings.barGap = 0.5;
-    this.settings.cameraViewSize = 8.5;
-    this.settings.cameraNear = 0.1;
-    this.settings.cameraFar = 1000;
-    this.settings.cameraX = 0;
-    this.settings.cameraY = 3;
-    this.settings.cameraZ = 18;
-    this.settings.cameraFov = 35;
-    this.settings.breakStart = 3.2;
-    this.settings.breakEnd = 5.2;
-    this.settings.foldVisualHeight = 1.4;
-    this.settings.depth = 8;
-    this.settings.minDepth = 0;
-    this.settings.maxDepth = 8;
-    this.settings.outlierRatioThreshold = 3;
-    this.settings.smallBarsTargetHeight = 5.5;
-    this.settings.enableRotation = true;
-    this.settings.rotationSpeed = 0.01;
-    this.settings.baseOffsetY = 1.5;
+
+    // Escala e altura
+    this.settings.maxBarHeight = 6; // Altura máxima visual das barras (escala do gráfico)
+    this.settings.centerY = 3; // Centro vertical da cena (pra onde a câmera olha) geralmente = metade do maxBarHeight
+    this.settings.barWidth = 1.2; // Largura (eixo X)
+    this.settings.barDepth = 0.8; // Profundidade (eixo Z)
+    this.settings.barGap = 0.5; // Espaçamento entre barras
+
+    // Camera
+    this.settings.cameraViewSize = 8.5; // (usado na ortográfica) controla o "zoom" da cena
+    // limites de renderização
+    this.settings.cameraNear = 0.1; // distância mínima
+    this.settings.cameraFar = 1000; // distância máxima
+    // posição da câmera no espaço
+    this.settings.cameraX = 0; // lado
+    this.settings.cameraY = 3; // altura
+    this.settings.cameraZ = 18; // distância (quanto maior, mais longe)
+    // campo de visão (PerspectiveCamera)
+    this.settings.cameraFov = 35; // menor → mais “zoom” (menos distorção) / maior → mais abertura (mais distorção)
+    
+    // Scale Break
+    // define onde ocorre a quebra
+    this.settings.breakStart = 3.2; // até 3.2 → barra normal
+    this.settings.breakEnd = 5.2; // entre 3.2 e 5.2 → região da dobra
+     // altura visual da "dobra"
+    this.settings.foldVisualHeight = 1.4; // controla o "tamanho do vinco"
+
+    // Profundidade (Efeito 3D do outlier)
+    this.settings.depth = 8; // quanto o outlier vai para o fundo
+    this.settings.minDepth = 0; // limite de 0
+    this.settings.maxDepth = 8; // a 8
+
+    // Detecção de outlier
+    this.settings.outlierRatioThreshold = 3; // define quando algo é outlier: maior valor / segundo maior ≥ 3 → vira outlier
+    
+    // Ajuste das barras menores
+    this.settings.smallBarsTargetHeight = 5.5; // quando há outlier, as barras pequenas são "esticadas" visualmente
+    
+    // Interação
+    this.settings.enableRotation = true; // permite girar o gráfico
+    this.settings.rotationSpeed = 0.01; // sensibilidade do mouse
+
+    // Offset vertical
+    this.settings.baseOffsetY = 1.5; // levanta todas as barras do "chão"
   }
 
   data(d) {
