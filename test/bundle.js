@@ -68979,8 +68979,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
      * será calculada com base no FOV, na razão de aspecto da tela
      * e nas dimensões aproximadas do gráfico.
      *
-     * Isso evita uma escolha empírica da posição da câmera e torna
-     * a visualização mais defensável academicamente.
+     * Isso evita uma escolha empírica da posição da câmera 
      */
     this.settings.cameraNear = 0.1;
     this.settings.cameraFar = 1000;
@@ -69264,7 +69263,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
      * as barras não-outliers podem ser expandidas visualmente quando há
      * um outlier dominante.
      *
-     * Academicamente, isso deve ser descrito como um trade-off:
+     * Isso deve ser descrito como um trade-off:
      * melhora-se a legibilidade dos valores menores, mas a altura deixa
      * de ser estritamente proporcional ao valor real.
      */
