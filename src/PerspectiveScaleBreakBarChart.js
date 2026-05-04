@@ -504,27 +504,45 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   _renderBars(depth) {
     this._clearBars();
 
+    // Calcula o espaçamento horizontal entre uma barra e outra,
+    // somando largura e espaço entre as barras
     let spacing = this.settings.barWidth + this.settings.barGap;
 
     this.d.forEach((d, i) => {
       let value = +d[this.valueKey];
+
+      // Calcula a posição da barra no eixo X ecentraliza o gráfico no meio da cena
       let x = i * spacing - ((this.d.length - 1) * spacing) / 2;
 
       let bar;
 
+      // Verifica se existe outlier e se a barra atual é justamente a barra outlier
       if (this.hasOutlier && i === this.outlierIndex) {
+        // Calcula a altura visual da barra até o ponto de quebra.
+        // Ou seja, em vez de desenhar o valor real gigante do outlier, ele desenha só até o breakValue.
         let breakHeight = this._getVisualHeight(this.breakValue);
+
+        // Cria a barra outlier com dobra. Recebe
+        // x: posição horizontal da barra;
+        // breakHeight: altura visual até a quebra;
+        // depth: profundidade da dobra no eixo Z
         bar = this._createFoldedBar(x, breakHeight, depth);
       } else {
+        // Converte o valor real do dado em altura visual no gráfico.
         let height = this._getVisualHeight(value);
+
+        // Cria uma barra normal naquela posição x e com aquela altura
         bar = this._createNormalBar(x, height);
       }
 
+      // Guarda informações dentro do objeto 3D da barra,
+      // útil para eventos, como clique, hover ou tooltip.
       bar.userData = { datum: d, index: i };
 
       this.chartGroup.add(bar);
       this.bars.push(bar);
 
+      // Cria o texto do rótulo da barra.
       let label = this._createTextSprite(d[this.labelKey]);
       label.position.set(x, this.settings.baseOffsetY - 0.3, 0);
 
@@ -541,7 +559,9 @@ class PerspectiveScaleBreakBarChart extends Visualization {
    * @returns {THREE.Mesh}
    */
   _createNormalBar(x, height) {
+    // Cria um objeto 3D do tipo Mesh
     let mesh = new THREE.Mesh(
+      // Define a forma da barra: um paralelepípedo (caixa)
       new THREE.BoxGeometry(
         this.settings.barWidth,
         height,
@@ -550,6 +570,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.material,
     );
 
+    // Define a posição da barra no espaço 3D.
+    // X → posição horizontal da barra
+    // Y → altura/2 + offset (pra apoiar no chão)
+    // Z → 0 (fica no plano frontal)
     mesh.position.set(x, height / 2 + this.settings.baseOffsetY, 0);
 
     return mesh;
@@ -571,14 +595,24 @@ class PerspectiveScaleBreakBarChart extends Visualization {
    * @returns {THREE.Group}
    */
   _createFoldedBar(x, breakHeight, depth) {
+    // Cria um grupo 3D    
     let group = new THREE.Group();
+
+    // Posiciona o grupo no gráfico
+    // x: move a barra no eixo horizontal
+    // baseOffsetY: levanta a barra a partir da base do gráfico
+    // Z=0: mantém a barra inicialmente no plano frontal
     group.position.set(x, this.settings.baseOffsetY, 0);
 
+    // Garante que a profundidade nunca seja negativa
+    // Se depth vier menor que zero, vira zero
     const safeDepth = Math.max(0, depth);
+    // Define a altura da parte superior da barra, depois da dobra 
+    // Ponta acima da quebra, definir melhor depois
     const topVisualHeight = 0.8;
 
     /*
-     * Altura visual total do outlier na representação quebrada.
+     * Calcula a altura total da barra quebrada quando ela está sem profundidade.
      * Mesmo sem profundidade, a barra deve continuar visível.
      */
     const totalVisualHeight =
@@ -590,7 +624,12 @@ class PerspectiveScaleBreakBarChart extends Visualization {
      * mas a parte superior continua aparecendo.
      */
     if (safeDepth <= 0) {
+      // Cria uma barra simples para o caso em que depth = 0
       let mesh = new THREE.Mesh(
+        // Cria uma caixa com: 
+        // largura da barra
+        // altura total visual
+        // profundidade normal da barra
         new THREE.BoxGeometry(
           this.settings.barWidth,
           totalVisualHeight,
@@ -599,36 +638,44 @@ class PerspectiveScaleBreakBarChart extends Visualization {
         this.material,
       );
 
+      // Posiciona a barra dentro do grupo
+      // x aqui é 0 porque o grupo já foi colocado na posição x
+      // totalVisualHeight / 2 serve pelo mesmo motivo da barra normal: 
+      // o BoxGeometry nasce centralizado, então é preciso subir metade da altura para a base ficar no chão
       mesh.position.set(0, totalVisualHeight / 2, 0);
       group.add(mesh);
 
       return group;
     }
 
-    let y0 = 0;
-    let y1 = breakHeight;
+    let y0 = 0; // Base da barra
+    let y1 = breakHeight; // Altura até o ponto de quebra (parte inferior da barra)
 
-    let y2 = breakHeight + this.settings.foldVisualHeight * 0.35;
-    let y3 = breakHeight + this.settings.foldVisualHeight * 0.65;
-    let y4 = breakHeight + this.settings.foldVisualHeight;
+    let y2 = breakHeight + this.settings.foldVisualHeight * 0.35; // Primeiro ponto intermediário da dobra
+    let y3 = breakHeight + this.settings.foldVisualHeight * 0.65; // Segundo ponto intermediário da dobra
+    let y4 = breakHeight + this.settings.foldVisualHeight; // Fim da dobra
 
-    let y5 = y4 + topVisualHeight;
+    let y5 = y4 + topVisualHeight; // Topo final da barra
 
+    // Cria uma lista de pontos que define o perfil lateral da barra, usando os eixos y e z
     let points = [
-      { y: y0, z: 0 },
-      { y: y1, z: 0 },
-      { y: y2, z: -safeDepth },
-      { y: y3, z: -safeDepth },
-      { y: y4, z: 0 },
-      { y: y5, z: 0 },
+      { y: y0, z: 0 }, // Base da barra no plano frontal.
+      { y: y1, z: 0 }, // Fim da parte inferior, ainda no plano frontal
+      { y: y2, z: -safeDepth }, // A barra vai para trás no eixo Z. O sinal negativo indica profundidade para dentro da tela
+      { y: y3, z: -safeDepth }, // A barra permanece no fundo por um trecho. Isso cria a sensação de que ela “entrou” no gráfico
+      { y: y4, z: 0 }, // A barra volta para frente
+      { y: y5, z: 0 }, // Topo da barra, novamente no plano frontal
     ];
 
+    // Cria uma geometria 3D a partir desse perfil dobrado
+    // pega esse desenho no plano YZ e “extruda” para formar uma barra com largura no eixo X.
     let geometry = this._createPrismFromYZProfile(
-      points,
-      this.settings.barWidth,
-      this.settings.barDepth,
+      points, // perfil da barra dobrada
+      this.settings.barWidth, // largura da barra
+      this.settings.barDepth, // espessura da barra
     );
 
+    // Cria o objeto 3D final da barra dobrada
     let mesh = new THREE.Mesh(geometry, this.material);
     group.add(mesh);
 
