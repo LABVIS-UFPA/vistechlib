@@ -14,6 +14,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.scene = null;
     this.camera = null;
     this.chartGroup = null;
+    this.yAxisGroup = null;
     this.bars = [];
     this.animationFrame = null;
     this.material = null;
@@ -50,6 +51,13 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.barDepth = 0;
     this.settings.barGap = 0.5;
 
+    // Eixo Y e linhas guias
+    this.settings.showPerspectiveYAxis = true;
+    this.settings.yAxisTicks = 20;
+    this.settings.yAxisColor = 0x333333;
+    this.settings.yGridColor = 0xcfcfcf;
+    this.settings.yAxisOffsetX = 0.9;
+
     /*
      * Configuração da câmera perspectiva.
      *
@@ -57,7 +65,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
      * será calculada com base no FOV, na razão de aspecto da tela
      * e nas dimensões aproximadas do gráfico.
      *
-     * Isso evita uma escolha empírica da posição da câmera 
+     * Isso evita uma escolha empírica da posição da câmera
      */
     this.settings.cameraNear = 0.1;
     this.settings.cameraFar = 1000;
@@ -289,11 +297,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.camera.near = this.settings.cameraNear;
     this.camera.far = this.settings.cameraFar;
 
-    this.camera.position.set(
-      this.settings.cameraX,
-      cameraY,
-      finalCameraZ,
-    );
+    this.camera.position.set(this.settings.cameraX, cameraY, finalCameraZ);
 
     this.camera.lookAt(0, cameraTargetY, 0);
 
@@ -331,7 +335,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     // Distância fixa bem recuada. Na câmera ortográfica o Z não aproxima nem afasta
     // visualmente, apenas garante que os objetos não fiquem atrás da câmera.
-    const finalCameraZ = 100; 
+    const finalCameraZ = 100;
 
     if (createNew || !this.camera || !this.camera.isOrthographicCamera) {
       this.camera = new THREE.OrthographicCamera(
@@ -340,7 +344,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
         frustumHeight / 2,
         frustumHeight / -2,
         0.1,
-        1000
+        1000,
       );
     } else {
       // Atualização dos limites caso haja resize da janela
@@ -350,11 +354,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.camera.bottom = frustumHeight / -2;
     }
 
-    this.camera.position.set(
-      this.settings.cameraX,
-      cameraY,
-      finalCameraZ,
-    );
+    this.camera.position.set(this.settings.cameraX, cameraY, finalCameraZ);
 
     this.camera.lookAt(0, cameraTargetY, 0);
 
@@ -387,18 +387,15 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   _calculatePerspectiveDistance(objectWidth, objectHeight, fovDeg, aspect) {
     const verticalFov = THREE.MathUtils.degToRad(fovDeg);
 
-    const distanceByHeight =
-      objectHeight / (2 * Math.tan(verticalFov / 2));
+    const distanceByHeight = objectHeight / (2 * Math.tan(verticalFov / 2));
 
     /*
      * Como o FOV informado ao Three.js é vertical, calculamos o FOV horizontal
      * equivalente para garantir que a largura do gráfico também caiba na tela.
      */
-    const horizontalFov =
-      2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
+    const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
 
-    const distanceByWidth =
-      objectWidth / (2 * Math.tan(horizontalFov / 2));
+    const distanceByWidth = objectWidth / (2 * Math.tan(horizontalFov / 2));
 
     return Math.max(distanceByHeight, distanceByWidth);
   }
@@ -449,6 +446,11 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   _clearBars() {
     this.bars.forEach((bar) => this.chartGroup.remove(bar));
     this.bars = [];
+
+    if (this.yAxisGroup) {
+      this.chartGroup.remove(this.yAxisGroup);
+      this.yAxisGroup = null;
+    }
   }
 
   _renderBars(depth) {
@@ -459,7 +461,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.d.forEach((d, i) => {
       let value = +d[this.valueKey];
       let x = i * spacing - ((this.d.length - 1) * spacing) / 2;
-      
+
       // Calcula o comprimento físico real unificado
       let scaledLength = this._getScaledBarLength(value, depth);
 
@@ -477,24 +479,33 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.chartGroup.add(label);
       this.bars.push(label);
     });
+
+    // Renderiza o eixo y somente na camera perspectiva
+    if (
+      this.settings.cameraMode === "perspective" &&
+      this.settings.showPerspectiveYAxis
+    ) {
+      this._renderPerspectiveYAxis(depth);
+    }
   }
-
-
 
   _getScaledBarLength(value, depth) {
     if (this.maxValue === 0) return 0;
 
     // Calcula as sobras da chapa de cima
-    const maxTop = this.settings.maxBarHeight - this.settings.breakStart - this.settings.foldVisualHeight;
+    const maxTop =
+      this.settings.maxBarHeight -
+      this.settings.breakStart -
+      this.settings.foldVisualHeight;
     const topLength = Math.max(0, maxTop);
 
     // Calcula o comprimento total da "fita métrica" desdobrada diretamente no escopo (inline)
-    const totalFoldLength = 
-      this.settings.breakStart +        // Chapa da Base
-      depth +                           // Chapa Horizontal de Fundo
-      this.settings.foldVisualHeight +  // Chapa Vertical do Fundo
-      depth +                           // Chapa Horizontal de Retorno
-      topLength;                        // Chapa do Topo
+    const totalFoldLength =
+      this.settings.breakStart + // Chapa da Base
+      depth + // Chapa Horizontal de Fundo
+      this.settings.foldVisualHeight + // Chapa Vertical do Fundo
+      depth + // Chapa Horizontal de Retorno
+      topLength; // Chapa do Topo
 
     // Sem bypass: todas as barras seguem a mesma regra física.
     return (value / this.maxValue) * totalFoldLength;
@@ -510,7 +521,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     const lowerHorizontal = depth;
     const backLength = this.settings.foldVisualHeight;
     const upperHorizontal = depth;
-    const maxTop = this.settings.maxBarHeight - this.settings.breakStart - this.settings.foldVisualHeight;
+    const maxTop =
+      this.settings.maxBarHeight -
+      this.settings.breakStart -
+      this.settings.foldVisualHeight;
     const topLength = Math.max(0, maxTop);
 
     const result = {
@@ -518,7 +532,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       lower: 0,
       back: 0,
       upper: 0,
-      top: 0
+      top: 0,
     };
 
     let remaining = scaledLength;
@@ -719,6 +733,156 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     sprite.scale.set(1.2, 0.6, 1);
 
     return sprite;
+  }
+
+  _renderPerspectiveYAxis(depth) {
+    this.yAxisGroup = new THREE.Group();
+
+    const spacing = this.settings.barWidth + this.settings.barGap;
+
+    const chartLeft =
+      -((this.d.length - 1) * spacing) / 2 - this.settings.barWidth / 2;
+
+    const chartRight =
+      ((this.d.length - 1) * spacing) / 2 + this.settings.barWidth / 2;
+
+    const axisX = chartLeft - this.settings.yAxisOffsetX;
+
+    const maxTop =
+      this.settings.maxBarHeight -
+      this.settings.breakStart -
+      this.settings.foldVisualHeight;
+
+    const totalFoldLength =
+      this.settings.breakStart +
+      depth +
+      this.settings.foldVisualHeight +
+      depth +
+      Math.max(0, maxTop);
+
+    const axisPoints = this._createFoldPathPoints(totalFoldLength, depth);
+
+    const axisLine = this._createLineFromPoints(
+      axisPoints.map(
+        (p) => new THREE.Vector3(axisX, this.settings.baseOffsetY + p.y, p.z),
+      ),
+      this.settings.yAxisColor,
+    );
+
+    this.yAxisGroup.add(axisLine);
+
+    const tickCount = this.settings.yAxisTicks;
+
+    for (let i = 0; i <= tickCount; i++) {
+      const t = i / tickCount;
+      const value = this.maxValue * t;
+      const scaledLength = totalFoldLength * t;
+
+      const point = this._getPointAlongFoldPath(scaledLength, depth);
+
+      const y = this.settings.baseOffsetY + point.y;
+      const z = point.z;
+
+      const gridLine = this._createLineFromPoints(
+        [new THREE.Vector3(axisX, y, z), new THREE.Vector3(chartRight, y, z)],
+        this.settings.yGridColor,
+      );
+
+      this.yAxisGroup.add(gridLine);
+
+      const tickLine = this._createLineFromPoints(
+        [new THREE.Vector3(axisX - 0.12, y, z), new THREE.Vector3(axisX, y, z)],
+        this.settings.yAxisColor,
+      );
+
+      this.yAxisGroup.add(tickLine);
+
+      const label = this._createTextSprite(this._formatYAxisValue(value));
+      label.position.set(axisX - 0.55, y, z);
+      label.scale.set(0.9, 0.45, 1);
+
+      this.yAxisGroup.add(label);
+    }
+
+    this.chartGroup.add(this.yAxisGroup);
+  }
+
+  _createFoldPathPoints(totalLength, depth) {
+    const points = [];
+
+    let remaining = totalLength;
+    let y = 0;
+    let z = 0;
+
+    points.push({ y, z });
+
+    const base = Math.min(remaining, this.settings.breakStart);
+    y += base;
+    remaining -= base;
+    points.push({ y, z });
+
+    if (remaining > 0) {
+      const lower = Math.min(remaining, depth);
+      z -= lower;
+      remaining -= lower;
+      points.push({ y, z });
+    }
+
+    if (remaining > 0) {
+      const back = Math.min(remaining, this.settings.foldVisualHeight);
+      y += back;
+      remaining -= back;
+      points.push({ y, z });
+    }
+
+    if (remaining > 0) {
+      const upper = Math.min(remaining, depth);
+      z += upper;
+      remaining -= upper;
+      points.push({ y, z });
+    }
+
+    if (remaining > 0) {
+      y += remaining;
+      points.push({ y, z });
+    }
+
+    return points;
+  }
+
+  _getPointAlongFoldPath(scaledLength, depth) {
+    const segments = this._calculateSegmentLengths(scaledLength, depth);
+
+    let y = 0;
+    let z = 0;
+
+    y += segments.base;
+    z -= segments.lower;
+    y += segments.back;
+    z += segments.upper;
+    y += segments.top;
+
+    return { y, z };
+  }
+
+  _createLineFromPoints(points, color) {
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+    const material = new THREE.LineBasicMaterial({
+      color,
+      transparent: true,
+      opacity: 0.85,
+    });
+
+    return new THREE.Line(geometry, material);
+  }
+
+  _formatYAxisValue(value) {
+    if (value >= 1000) {
+      return d3.format(".2s")(value);
+    }
+
+    return d3.format(".0f")(value);
   }
 
   _bindRotationEvents() {
