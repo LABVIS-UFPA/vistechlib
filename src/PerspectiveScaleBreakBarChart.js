@@ -64,7 +64,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.cameraX = 0;
     this.settings.cameraY = null;
     this.settings.cameraZ = null;
-    this.settings.cameraFov = 20;
+    this.settings.cameraFov = 45;
     this.settings.cameraMargin = 1.25;
 
     // Scale Break
@@ -75,7 +75,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     // Profundidade do efeito 3D aplicado ao outlier
     this.settings.depth = 8;
     this.settings.minDepth = 0;
-    this.settings.maxDepth = 8;
+    this.settings.maxDepth = 16;
 
     // Detecção de outlier
     this.settings.outlierRatioThreshold = 3;
@@ -376,14 +376,14 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     let spacing = this.settings.barWidth + this.settings.barGap;
 
     this.d.forEach((d, i) => {
-      let totalHeight = this._getVisualHeight(d, depth);
-      let x = i * spacing - ((this.d.length - 1) * spacing) / 2;
       let value = +d[this.valueKey];
+      let x = i * spacing - ((this.d.length - 1) * spacing) / 2;
+      
+      // Calcula o comprimento físico real unificado
+      let scaledLength = this._getScaledBarLength(value, depth);
 
-      let bar =
-        this.hasOutlier && value === this.maxValue
-          ? this._createFoldedBar(x, totalHeight, depth)
-          : this._createNormalBar(x, totalHeight);
+      // Todas as barras são desenhadas pela mesma montagem
+      let bar = this._createFoldedBar(x, scaledLength, depth);
 
       bar.userData = { datum: d, index: i };
 
@@ -398,69 +398,128 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     });
   }
 
-  _createNormalBar(x, height) {
-    let mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(
-        this.settings.barWidth,
-        height,
-        this.settings.barDepth,
-      ),
-      this.material,
-    );
 
-    mesh.position.set(x, height / 2 + this.settings.baseOffsetY, 0);
 
-    return mesh;
+  _getScaledBarLength(value, depth) {
+    if (this.maxValue === 0) return 0;
+
+    // Calcula as sobras da chapa de cima
+    const maxTop = this.settings.maxBarHeight - this.settings.breakStart - this.settings.foldVisualHeight;
+    const topLength = Math.max(0, maxTop);
+
+    // Calcula o comprimento total da "fita métrica" desdobrada diretamente no escopo (inline)
+    const totalFoldLength = 
+      this.settings.breakStart +        // Chapa da Base
+      depth +                           // Chapa Horizontal de Fundo
+      this.settings.foldVisualHeight +  // Chapa Vertical do Fundo
+      depth +                           // Chapa Horizontal de Retorno
+      topLength;                        // Chapa do Topo
+
+    // Sem bypass: todas as barras seguem a mesma regra física.
+    return (value / this.maxValue) * totalFoldLength;
   }
 
-  _createFoldedBar(x, totalHeight, depth) {
+  _calculateSegmentLengths(scaledLength, depth) {
+    /*
+     * Determina o comprimento efetivo de cada chapa para uma barra com
+     * comprimento escalado 'scaledLength'.
+     * Preenche sequencialmente: base -> lower -> back -> upper -> top
+     */
+    const baseLength = this.settings.breakStart;
+    const lowerHorizontal = depth;
+    const backLength = this.settings.foldVisualHeight;
+    const upperHorizontal = depth;
+    const maxTop = this.settings.maxBarHeight - this.settings.breakStart - this.settings.foldVisualHeight;
+    const topLength = Math.max(0, maxTop);
+
+    const result = {
+      base: 0,
+      lower: 0,
+      back: 0,
+      upper: 0,
+      top: 0
+    };
+
+    let remaining = scaledLength;
+
+    // Preencher base
+    if (remaining > 0) {
+      result.base = Math.min(remaining, baseLength);
+      remaining -= result.base;
+    }
+
+    // Preencher lower horizontal (indo para o fundo)
+    if (remaining > 0) {
+      result.lower = Math.min(remaining, lowerHorizontal);
+      remaining -= result.lower;
+    }
+
+    // Preencher back (subindo lá no fundo)
+    if (remaining > 0) {
+      result.back = Math.min(remaining, backLength);
+      remaining -= result.back;
+    }
+
+    // Preencher upper horizontal (voltando para frente)
+    if (remaining > 0) {
+      result.upper = Math.min(remaining, upperHorizontal);
+      remaining -= result.upper;
+    }
+
+    // Preencher top (subindo na frente)
+    if (remaining > 0) {
+      result.top = Math.min(remaining, topLength);
+      remaining -= result.top;
+    }
+
+    return result;
+  }
+
+  _createFoldedBar(x, scaledLength, depth) {
     let group = new THREE.Group();
     group.position.set(x, this.settings.baseOffsetY, 0);
 
-    if (depth <= 0 || totalHeight <= this.settings.breakEnd) {
-      let mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(
-          this.settings.barWidth,
-          totalHeight,
-          this.settings.barDepth,
-        ),
-        this.material,
-      );
+    // Calcula exatamente onde a "gasolina" da barra vai parar
+    const segments = this._calculateSegmentLengths(scaledLength, depth);
 
-      mesh.position.set(0, totalHeight / 2, 0);
+    let points = [];
+    let currentY = 0;
+    let currentZ = 0;
 
-      group.add(mesh);
+    // Ponto zero (base do chão)
+    points.push({ y: currentY, z: currentZ });
 
-      return group;
+    // 1. Chapa da Base (cresce para cima no eixo Y)
+    if (segments.base > 0) {
+      currentY += segments.base;
+      points.push({ y: currentY, z: currentZ });
     }
 
-    /*
-     * A barra outlier é representada como um prisma definido por um perfil YZ.
-     * A dobra desloca parte da barra no eixo Z, criando a percepção de
-     * profundidade associada ao scale break.
-     */
-    let upperHeight = Math.max(
-      0.1,
-      totalHeight - this.settings.breakStart - this.settings.foldVisualHeight,
-    );
+    // 2. Chapa Horizontal Inferior (cresce para o fundo no eixo Z)
+    if (segments.lower > 0) {
+      currentZ -= segments.lower;
+      points.push({ y: currentY, z: currentZ });
+    }
 
-    let y0 = 0;
-    let y1 = this.settings.breakStart;
-    let y4 = this.settings.breakStart + this.settings.foldVisualHeight;
-    // Keep the lower and upper fold plates horizontal and parallel.
-    let y2 = y1;
-    let y3 = y4;
-    let y5 = y4 + upperHeight;
+    // 3. Chapa do Fundo (cresce para cima no eixo Y, lá no fundo)
+    if (segments.back > 0) {
+      currentY += segments.back;
+      points.push({ y: currentY, z: currentZ });
+    }
 
-    let points = [
-      { y: y0, z: 0 },
-      { y: y1, z: 0 },
-      { y: y2, z: -depth },
-      { y: y3, z: -depth },
-      { y: y4, z: 0 },
-      { y: y5, z: 0 },
-    ];
+    // 4. Chapa Horizontal Superior (cresce de volta pra frente no eixo Z)
+    if (segments.upper > 0) {
+      currentZ += segments.upper;
+      points.push({ y: currentY, z: currentZ });
+    }
 
+    // 5. Chapa do Topo (cresce para cima no eixo Y, aqui na frente)
+    if (segments.top > 0) {
+      currentY += segments.top;
+      points.push({ y: currentY, z: currentZ });
+    }
+
+    // A função de prisma já sabe conectar esses pontos sequencialmente
     let geometry = this._createPrismFromYZProfile(
       points,
       this.settings.barWidth,
