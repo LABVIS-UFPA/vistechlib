@@ -58,6 +58,12 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.yGridColor = 0xcfcfcf;
     this.settings.yAxisOffsetX = 0.9;
 
+    // Zoom
+    this.settings.enableZoom = true;
+    this.settings.zoomSpeed = 0.08;
+    this.settings.minCameraDistance = 4;
+    this.settings.maxCameraDistance = 40;
+
     /*
      * Configuração da câmera perspectiva.
      *
@@ -231,6 +237,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     });
 
     if (this.settings.enableRotation) this._bindRotationEvents();
+    if (this.settings.enableZoom) this._bindZoomEvents();
 
     this._animate();
   }
@@ -883,6 +890,36 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     }
 
     return d3.format(".0f")(value);
+  }
+
+  _bindZoomEvents() {
+    const canvas = this.renderer.domElement;
+
+    canvas.addEventListener(
+      "wheel",
+      (e) => {
+        if (!this.camera || !this.camera.isPerspectiveCamera) return;
+
+        e.preventDefault();
+
+        const zoomDirection = e.deltaY > 0 ? 1 : -1;
+
+        const currentDistance = this.camera.position.length();
+
+        const nextDistance = THREE.MathUtils.clamp(
+          currentDistance +
+            zoomDirection * this.settings.zoomSpeed * currentDistance,
+          this.settings.minCameraDistance,
+          this.settings.maxCameraDistance,
+        );
+
+        const scale = nextDistance / currentDistance;
+
+        this.camera.position.multiplyScalar(scale);
+        this.camera.updateProjectionMatrix();
+      },
+      { passive: false },
+    );
   }
 
   _bindRotationEvents() {
