@@ -47,7 +47,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.maxBarHeight = 6;
     this.settings.centerY = 3;
     this.settings.barWidth = 1.2;
-    this.settings.barDepth = 0.8;
+    this.settings.barDepth = 0;
     this.settings.barGap = 0.5;
 
     /*
@@ -205,6 +205,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
      */
     this.material = new THREE.MeshBasicMaterial({
       color: this.settings.color,
+      side: THREE.DoubleSide,
     });
 
     if (this.settings.enableRotation) this._bindRotationEvents();
@@ -239,10 +240,16 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.settings.cameraZ ?? cameraDistance * this.settings.cameraMargin;
 
     /*
-     * Para a visão frontal calibrada, a câmera deve olhar para o centro
-     * vertical do gráfico. Se cameraY não for informado, usa-se centerY.
+     * Desloca apenas o eixo Y para alinhar o centro da câmera ao centro
+     * da chapa da dobra que recua para o fundo.
      */
-    const cameraTargetY = this.settings.centerY;
+    const backPlateCenterY =
+      this.settings.baseOffsetY +
+      this.settings.breakStart +
+      this.settings.foldVisualHeight / 2;
+
+    const yOffset = backPlateCenterY - this.settings.centerY;
+    const cameraTargetY = this.settings.centerY + yOffset;
     const cameraY = this.settings.cameraY ?? cameraTargetY;
 
     if (createNew || !this.camera) {
@@ -439,9 +446,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     let y0 = 0;
     let y1 = this.settings.breakStart;
-    let y2 = this.settings.breakStart + this.settings.foldVisualHeight * 0.35;
-    let y3 = this.settings.breakStart + this.settings.foldVisualHeight * 0.65;
     let y4 = this.settings.breakStart + this.settings.foldVisualHeight;
+    // Keep the lower and upper fold plates horizontal and parallel.
+    let y2 = y1;
+    let y3 = y4;
     let y5 = y4 + upperHeight;
 
     let points = [
@@ -465,6 +473,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   }
 
   _createPrismFromYZProfile(points, width, thickness) {
+    if (thickness <= 0) {
+      return this._createFlatSurfaceFromYZProfile(points, width);
+    }
+
     let vertices = [];
     let indices = [];
 
@@ -494,6 +506,40 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     let last = (points.length - 1) * 4;
     indices.push(last, last + 2, last + 1, last + 1, last + 2, last + 3);
+
+    let geometry = new THREE.BufferGeometry();
+
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3),
+    );
+
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+
+    return geometry;
+  }
+
+  _createFlatSurfaceFromYZProfile(points, width) {
+    let vertices = [];
+    let indices = [];
+
+    let xLeft = -width / 2;
+    let xRight = width / 2;
+
+    points.forEach((p) => {
+      vertices.push(xLeft, p.y, p.z);
+      vertices.push(xRight, p.y, p.z);
+    });
+
+    for (let i = 0; i < points.length - 1; i++) {
+      let a = i * 2;
+      let b = (i + 1) * 2;
+
+      // Two-sided quads so the flat bar remains visible from both sides.
+      indices.push(a, b, a + 1, a + 1, b, b + 1);
+      indices.push(a, a + 1, b, a + 1, b + 1, b);
+    }
 
     let geometry = new THREE.BufferGeometry();
 
