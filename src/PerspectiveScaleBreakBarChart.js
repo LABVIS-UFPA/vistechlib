@@ -306,14 +306,19 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
   _updateCameraOrthographic(createNew) {
     const aspect = this.settings.width / this.settings.height;
-    
-    // Na câmera ortográfica, definimos um volume de visão constante (frustum).
+
+    // Na câmera ortográfica, definimos um volume de visão ajustado ao tamanho
+    // efetivo do gráfico no frame atual para evitar excesso de espaço vazio.
     const { chartWidth, chartHeight } = this._getChartBounds();
-    
-    // Usamos a maior dimensão (largura X, altura Y ou profundidade Z) para garantir que
-    // o gráfico inteiro caiba na tela, independente do ângulo que o usuário girar.
-    const maxDimension = Math.max(chartWidth, chartHeight, this.settings.maxDepth);
-    const frustumSize = maxDimension * this.settings.cameraMargin;
+
+    // O frustum vertical precisa acomodar a altura e, via aspect, também a
+    // largura projetada. Usar maxDepth aqui deixava a projeção pequena demais.
+    const currentDepth = Math.max(this.settings.depth, 0);
+    const projectedWidth = chartWidth + currentDepth;
+    const projectedHeight = chartHeight;
+    const frustumHeight =
+      Math.max(projectedHeight, projectedWidth / Math.max(aspect, 1e-6)) *
+      this.settings.cameraMargin;
 
     const backPlateCenterY =
       this.settings.baseOffsetY +
@@ -330,19 +335,19 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     if (createNew || !this.camera || !this.camera.isOrthographicCamera) {
       this.camera = new THREE.OrthographicCamera(
-        (frustumSize * aspect) / -2,
-        (frustumSize * aspect) / 2,
-        frustumSize / 2,
-        frustumSize / -2,
+        (frustumHeight * aspect) / -2,
+        (frustumHeight * aspect) / 2,
+        frustumHeight / 2,
+        frustumHeight / -2,
         0.1,
         1000
       );
     } else {
       // Atualização dos limites caso haja resize da janela
-      this.camera.left = (frustumSize * aspect) / -2;
-      this.camera.right = (frustumSize * aspect) / 2;
-      this.camera.top = frustumSize / 2;
-      this.camera.bottom = frustumSize / -2;
+      this.camera.left = (frustumHeight * aspect) / -2;
+      this.camera.right = (frustumHeight * aspect) / 2;
+      this.camera.top = frustumHeight / 2;
+      this.camera.bottom = frustumHeight / -2;
     }
 
     this.camera.position.set(
