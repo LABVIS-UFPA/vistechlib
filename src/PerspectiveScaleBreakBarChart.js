@@ -66,6 +66,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.cameraZ = null;
     this.settings.cameraFov = 45;
     this.settings.cameraMargin = 1.25;
+    this.settings.cameraMode = "perspective";
 
     // Scale Break
     this.settings.breakStart = 3.2;
@@ -120,7 +121,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     if (this.renderer && this.camera) {
       this.renderer.setSize(this.settings.width, this.settings.height);
-      this._updateCamera();
+      this._updateConfiguredCamera();
     }
 
     return this;
@@ -143,6 +144,19 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     );
 
     this._renderBars(this.settings.depth);
+
+    return this;
+  }
+
+  setCameraMode(cameraMode) {
+    const nextCameraMode =
+      cameraMode === "orthographic" ? "orthographic" : "perspective";
+
+    this.settings.cameraMode = nextCameraMode;
+
+    if (this.scene) {
+      this._updateConfiguredCamera(true);
+    }
 
     return this;
   }
@@ -180,7 +194,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
      * A câmera é criada antes dos objetos porque sua configuração depende
      * apenas das dimensões estimadas do gráfico e dos parâmetros de projeção.
      */
-    this._updateCamera(true);
+    this._updateConfiguredCamera(true);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(this.settings.width, this.settings.height);
@@ -211,6 +225,15 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     if (this.settings.enableRotation) this._bindRotationEvents();
 
     this._animate();
+  }
+
+  _updateConfiguredCamera(createNew) {
+    if (this.settings.cameraMode === "orthographic") {
+      this._updateCameraOrthographic(createNew);
+      return;
+    }
+
+    this._updateCamera(createNew);
   }
 
   _updateCamera(createNew) {
@@ -281,6 +304,59 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.camera.updateProjectionMatrix();
   }
 
+  _updateCameraOrthographic(createNew) {
+    const aspect = this.settings.width / this.settings.height;
+    
+    // Na câmera ortográfica, definimos um volume de visão constante (frustum).
+    const { chartWidth, chartHeight } = this._getChartBounds();
+    
+    // Usamos a maior dimensão (largura X, altura Y ou profundidade Z) para garantir que
+    // o gráfico inteiro caiba na tela, independente do ângulo que o usuário girar.
+    const maxDimension = Math.max(chartWidth, chartHeight, this.settings.maxDepth);
+    const frustumSize = maxDimension * this.settings.cameraMargin;
+
+    const backPlateCenterY =
+      this.settings.baseOffsetY +
+      this.settings.breakStart +
+      this.settings.foldVisualHeight / 2;
+
+    const yOffset = backPlateCenterY - this.settings.centerY;
+    const cameraTargetY = this.settings.centerY + yOffset;
+    const cameraY = this.settings.cameraY ?? cameraTargetY;
+
+    // Distância fixa bem recuada. Na câmera ortográfica o Z não aproxima nem afasta
+    // visualmente, apenas garante que os objetos não fiquem atrás da câmera.
+    const finalCameraZ = 100; 
+
+    if (createNew || !this.camera || !this.camera.isOrthographicCamera) {
+      this.camera = new THREE.OrthographicCamera(
+        (frustumSize * aspect) / -2,
+        (frustumSize * aspect) / 2,
+        frustumSize / 2,
+        frustumSize / -2,
+        0.1,
+        1000
+      );
+    } else {
+      // Atualização dos limites caso haja resize da janela
+      this.camera.left = (frustumSize * aspect) / -2;
+      this.camera.right = (frustumSize * aspect) / 2;
+      this.camera.top = frustumSize / 2;
+      this.camera.bottom = frustumSize / -2;
+    }
+
+    this.camera.position.set(
+      this.settings.cameraX,
+      cameraY,
+      finalCameraZ,
+    );
+
+    this.camera.lookAt(0, cameraTargetY, 0);
+
+    // Essencial atualizar a matriz projetiva após alterar os limites do frustum
+    this.camera.updateProjectionMatrix();
+  }
+
   _getChartBounds() {
     const spacing = this.settings.barWidth + this.settings.barGap;
 
@@ -331,7 +407,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.chartGroup.rotation.set(0, 0, 0);
     }
 
-    this._updateCamera();
+    this._updateConfiguredCamera();
 
     return this;
   }
