@@ -57,6 +57,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.yAxisColor = 0x333333;
     this.settings.yGridColor = 0xcfcfcf;
     this.settings.yAxisOffsetX = 0.9;
+    this.settings.yAxisStep = 3;
 
     // Zoom
     this.settings.enableZoom = true;
@@ -779,11 +780,9 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.yAxisGroup.add(axisLine);
 
     const tickCount = this.settings.yAxisTicks;
-
-    for (let i = 0; i <= tickCount; i++) {
-      const t = i / tickCount;
-      const value = this.maxValue * t;
-      const scaledLength = totalFoldLength * t;
+    
+    for (let value = 0; value <= this.maxValue; value += this.settings.yAxisStep) {
+      const scaledLength = (value / this.maxValue) * totalFoldLength;
 
       const point = this._getPointAlongFoldPath(scaledLength, depth);
 
@@ -805,6 +804,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.yAxisGroup.add(tickLine);
 
       const label = this._createTextSprite(this._formatYAxisValue(value));
+
       label.position.set(axisX - 0.55, y, z);
       label.scale.set(0.9, 0.45, 1);
 
