@@ -39,6 +39,12 @@ class PerspectiveScaleBreakBarChart extends Visualization {
         this.settings.height = 500;
         this.settings.color = 0x457b9d;
         this.settings.backgroundColor = 0xf8f9fa;
+        this.settings.fitPadding = {
+            top: 0.08,
+            right: 0.04,
+            bottom: 0.10,
+            left: 0.04,
+        };
 
         // Dados
         this.settings.labelKey = "label";
@@ -277,7 +283,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
         );
 
         const finalCameraZ =
-            this.settings.cameraZ ?? cameraDistance * this.settings.cameraMargin;
+            this.settings.cameraZ ?? cameraDistance;
 
         /*
          * Desloca apenas o eixo Y para alinhar o centro da câmera ao centro
@@ -394,17 +400,31 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     }
 
     _calculatePerspectiveDistance(objectWidth, objectHeight, fovDeg, aspect) {
+        const padding = this.settings.fitPadding || {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+        };
+
+        const availableWidthRatio =
+            1 - padding.left - padding.right;
+
+        const availableHeightRatio =
+            1 - padding.top - padding.bottom;
+
         const verticalFov = THREE.MathUtils.degToRad(fovDeg);
 
-        const distanceByHeight = objectHeight / (2 * Math.tan(verticalFov / 2));
+        const distanceByHeight =
+            objectHeight /
+            (2 * Math.tan(verticalFov / 2) * availableHeightRatio);
 
-        /*
-         * Como o FOV informado ao Three.js é vertical, calculamos o FOV horizontal
-         * equivalente para garantir que a largura do gráfico também caiba na tela.
-         */
-        const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
+        const horizontalFov =
+            2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
 
-        const distanceByWidth = objectWidth / (2 * Math.tan(horizontalFov / 2));
+        const distanceByWidth =
+            objectWidth /
+            (2 * Math.tan(horizontalFov / 2) * availableWidthRatio);
 
         return Math.max(distanceByHeight, distanceByWidth);
     }
