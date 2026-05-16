@@ -69904,9 +69904,6 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     const startY = this.chartGroup.rotation.y;
     const startZ = this.chartGroup.rotation.z;
 
-    const startDepth = this.settings.depth;
-    const targetDepth = this.initialDepth;
-
     const duration = this.settings.autoReturnDuration || 600;
     const startTime = performance.now();
 
@@ -69919,29 +69916,12 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       // Rotação
       this.chartGroup.rotation.x = THREE.MathUtils.lerp(startX, 0, easedT);
       this.chartGroup.rotation.y = THREE.MathUtils.lerp(startY, 0, easedT);
-      this.chartGroup.rotation.z = THREE.MathUtils.lerp(startZ, 0, easedT);
-
-      // Profundidade
-      const currentDepth = THREE.MathUtils.lerp(
-        startDepth,
-        targetDepth,
-        easedT,
-      );
-
-      this.updateDepth(currentDepth);
-
-      if (this.depthSlider) {
-        this.depthSlider.value = currentDepth;
-      }
+      this.chartGroup.rotation.z = THREE.MathUtils.lerp(startZ, 0, easedT);      
 
       if (t < 1) {
         this.returnAnimation = requestAnimationFrame(animateReturn);
       } else {
         this.chartGroup.rotation.set(0, 0, 0);
-        this.updateDepth(targetDepth);
-        if (this.depthSlider) {
-          this.depthSlider.value = targetDepth;
-        }
         this.returnAnimation = null;
       }
     };
