@@ -68946,6 +68946,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.returnAnimation = null;
     this.toggleButton = null;
     this.initialDepth = settings?.depth ?? 8;
+    this.baseGeometrySpec = null;
+    this.layout = null;
 
     this.svg.style("display", "none");
 
@@ -68966,10 +68968,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.color = 0x457b9d;
     this.settings.backgroundColor = 0xf8f9fa;
     this.settings.fitPadding = {
-      top: 0.08,
-      right: 0.04,
-      bottom: 0.1,
-      left: 0.04,
+      top: 0,
+      right: 0.03,
+      bottom: 0,
+      left: 0.08,
     };
 
     // Dados
@@ -69036,7 +69038,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.rotationSpeed = 0.01;
 
     // Offset vertical
-    this.settings.baseOffsetY = 1.5;
+    this.settings.baseOffsetY = 0.5;
 
     // Controlar inspeção 3d
     this.settings.enableAutoReturnToggle = true;
@@ -69048,10 +69050,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.valueKey = this.settings.valueKey;
     this.labelKey = this.settings.labelKey;
 
-    this.yScale = d3
-      .scaleLinear()
-      .domain([0, d3.max(this.d, (item) => +item[this.valueKey])])
-      .range([0, this.settings.maxBarHeight]);
+    this._updateResponsiveGeometry();
+    this._updateYScale();
 
     this._calculateOutlierInfo();
     this.redraw();
@@ -69070,9 +69070,16 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.height =
       this.settings.size_type === "fit" ? bounds.height : this.settings.height;
 
+    this._updateResponsiveGeometry();
+    this._updateYScale();
+
     if (this.renderer && this.camera) {
       this.renderer.setSize(this.settings.width, this.settings.height);
       this._updateConfiguredCamera();
+
+      if (this.hasData) {
+        this._renderBars(this.settings.depth);
+      }
     }
 
     return this;
@@ -69093,6 +69100,37 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.settings.minDepth,
       Math.min(this.settings.maxDepth, depth),
     );
+
+    this._renderBars(this.settings.depth);
+
+    return this;
+  }
+
+  updateBreakStartRatio(breakStartRatio) {
+    this.settings.breakStartRatio = Math.max(
+      0.2,
+      Math.min(0.85, breakStartRatio),
+    );
+
+    this.settings.breakStart =
+      this.settings.maxBarHeight * this.settings.breakStartRatio;
+
+    if (this.layout) {
+      this.layout.breakStart =
+        this.layout.maxBarHeight * this.settings.breakStartRatio;
+    }
+
+    this._renderBars(this.settings.depth);
+
+    return this;
+  }
+
+  updateFoldVisualHeight(foldVisualHeight) {
+    this.settings.foldVisualHeight = Math.max(0.1, foldVisualHeight);
+
+    if (this.layout) {
+      this.layout.foldVisualHeight = foldVisualHeight;
+    }
 
     this._renderBars(this.settings.depth);
 
@@ -69137,6 +69175,84 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.minNonOutlier = Math.min(...nonOutliers);
   }
 
+  _ensureBaseGeometrySpec() {
+    if (this.baseGeometrySpec) return;
+
+    const labelOffset = 0.3;
+    const chartHeight =
+      this.settings.baseOffsetY + this.settings.maxBarHeight + labelOffset;
+
+    this.baseGeometrySpec = {
+      chartHeight,
+      maxBarHeightRatio: this.settings.maxBarHeight / chartHeight,
+      foldVisualHeightRatio: this.settings.foldVisualHeight / chartHeight,
+      baseOffsetYRatio: this.settings.baseOffsetY / chartHeight,
+      labelOffsetYRatio: labelOffset / chartHeight,
+      gapToBarRatio:
+        this.settings.barGap / Math.max(this.settings.barWidth, 1e-6),
+      axisOffsetToBarRatio:
+        this.settings.yAxisOffsetX / Math.max(this.settings.barWidth, 1e-6),
+    };
+  }
+
+  _updateResponsiveGeometry() {
+    this._ensureBaseGeometrySpec();
+
+    const padding = this.settings.fitPadding || {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    };
+
+    const availableWidthRatio = Math.max(
+      1e-6,
+      1 - padding.left - padding.right,
+    );
+    const availableHeightRatio = Math.max(
+      1e-6,
+      1 - padding.top - padding.bottom,
+    );
+
+    const viewportAspect =
+      (this.settings.width * availableWidthRatio) /
+      (Math.max(this.settings.height, 1e-6) * availableHeightRatio);
+
+    const count = Math.max(this.d?.length || 1, 1);
+    const baseHeight = this.baseGeometrySpec.chartHeight;
+    const chartWidth = baseHeight * viewportAspect;
+    const gapToBarRatio = this.baseGeometrySpec.gapToBarRatio;
+    const totalUnits = count + Math.max(0, count - 1) * gapToBarRatio;
+
+    const barWidth = chartWidth / Math.max(totalUnits, 1);
+    const barGap = barWidth * gapToBarRatio;
+    const maxBarHeight = baseHeight * this.baseGeometrySpec.maxBarHeightRatio;
+    const foldVisualHeight = this.settings.foldVisualHeight;
+    const baseOffsetY = baseHeight * this.baseGeometrySpec.baseOffsetYRatio;
+
+    this.layout = {
+      chartWidth,
+      chartHeight: baseHeight,
+      barWidth,
+      barGap,
+      maxBarHeight,
+      foldVisualHeight,
+      baseOffsetY,
+      breakStart: maxBarHeight * this.settings.breakStartRatio,
+      yAxisOffsetX: barWidth * this.baseGeometrySpec.axisOffsetToBarRatio,
+      labelOffsetY: baseHeight * this.baseGeometrySpec.labelOffsetYRatio,
+    };
+  }
+
+  _updateYScale() {
+    if (!this.d || !this.layout) return;
+
+    this.yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(this.d, (item) => +item[this.valueKey])])
+      .range([0, this.layout.maxBarHeight]);
+  }
+
   _createScene() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(this.settings.backgroundColor);
@@ -69154,6 +69270,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.webglContainer.appendChild(this.renderer.domElement);
 
     this.chartGroup = new THREE.Group();
+    this.chartGroup.position.set(this.settings.fitPadding.left * 6, 0, 0);
     this.chartGroup.rotation.set(0, 0, 0);
     this.scene.add(this.chartGroup);
 
@@ -69189,6 +69306,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   }
 
   _updateCamera(createNew) {
+    if (!this.layout) this._updateResponsiveGeometry();
+
     const aspect = this.settings.width / this.settings.height;
     const { chartWidth, chartHeight } = this._getChartBounds();
 
@@ -69217,13 +69336,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
      * Desloca apenas o eixo Y para alinhar o centro da câmera ao centro
      * da chapa da dobra que recua para o fundo.
      */
-    const backPlateCenterY =
-      this.settings.baseOffsetY +
-      this.settings.breakStart +
-      this.settings.foldVisualHeight / 2;
-
-    const yOffset = backPlateCenterY - this.settings.centerY;
-    const cameraTargetY = this.settings.centerY + yOffset;
+    const { minY, maxY } = this._getVerticalBounds();
+    const cameraTargetY = (minY + maxY) / 2;
     const cameraY = this.settings.cameraY ?? cameraTargetY;
 
     if (createNew || !this.camera) {
@@ -69252,6 +69366,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   }
 
   _updateCameraOrthographic(createNew) {
+    if (!this.layout) this._updateResponsiveGeometry();
+
     const aspect = this.settings.width / this.settings.height;
 
     // Na câmera ortográfica, definimos um volume de visão ajustado ao tamanho
@@ -69267,13 +69383,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       Math.max(projectedHeight, projectedWidth / Math.max(aspect, 1e-6)) *
       this.settings.cameraMargin;
 
-    const backPlateCenterY =
-      this.settings.baseOffsetY +
-      this.settings.breakStart +
-      this.settings.foldVisualHeight / 2;
-
-    const yOffset = backPlateCenterY - this.settings.centerY;
-    const cameraTargetY = this.settings.centerY + yOffset;
+    const { minY, maxY } = this._getVerticalBounds();
+    const cameraTargetY = (minY + maxY) / 2;
     const cameraY = this.settings.cameraY ?? cameraTargetY;
 
     // Distância fixa bem recuada. Na câmera ortográfica o Z não aproxima nem afasta
@@ -69306,25 +69417,33 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   }
 
   _getChartBounds() {
-    const spacing = this.settings.barWidth + this.settings.barGap;
+    if (!this.layout) this._updateResponsiveGeometry();
+
+    const spacing = this.layout.barWidth + this.layout.barGap;
 
     /*
      * Estimativa da largura total do gráfico no espaço 3D.
      * Serve para calcular a distância mínima da câmera.
      */
-    const chartWidth = this.d ? this.d.length * spacing : spacing;
+    const count = Math.max(this.d?.length || 1, 1);
+    const chartWidth =
+      count > 1
+        ? (count - 1) * spacing + this.layout.barWidth
+        : this.layout.barWidth;
 
-    /*
-     * Estimativa da altura total visível do gráfico.
-     * Inclui altura máxima, deslocamento da base e a região visual da dobra.
-     */
-    const chartHeight =
-      this.settings.baseOffsetY +
-      this.settings.maxBarHeight +
-      this.settings.foldVisualHeight +
-      1;
+    const { minY, maxY } = this._getVerticalBounds();
+    const chartHeight = Math.max(1e-6, maxY - minY);
 
     return { chartWidth, chartHeight };
+  }
+
+  _getVerticalBounds() {
+    if (!this.layout) this._updateResponsiveGeometry();
+
+    const minY = this.layout.baseOffsetY - this.layout.labelOffsetY;
+    const maxY = this.layout.baseOffsetY + this.layout.maxBarHeight;
+
+    return { minY, maxY };
   }
 
   _calculatePerspectiveDistance(objectWidth, objectHeight, fovDeg, aspect) {
@@ -69394,7 +69513,9 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   _renderBars(depth) {
     this._clearBars();
 
-    let spacing = this.settings.barWidth + this.settings.barGap;
+    if (!this.layout) this._updateResponsiveGeometry();
+
+    let spacing = this.layout.barWidth + this.layout.barGap;
 
     this.d.forEach((d, i) => {
       let value = +d[this.valueKey];
@@ -69412,7 +69533,11 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.bars.push(bar);
 
       let label = this._createTextSprite(d[this.labelKey]);
-      label.position.set(x, this.settings.baseOffsetY - 0.3, 0);
+      label.position.set(
+        x,
+        this.layout.baseOffsetY - this.layout.labelOffsetY,
+        0,
+      );
 
       this.chartGroup.add(label);
       this.bars.push(label);
@@ -69430,18 +69555,20 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   _getScaledBarLength(value, depth) {
     if (this.maxValue === 0) return 0;
 
+    if (!this.layout) this._updateResponsiveGeometry();
+
     // Calcula as sobras da chapa de cima
     const maxTop =
-      this.settings.maxBarHeight -
-      this.settings.breakStart -
-      this.settings.foldVisualHeight;
+      this.layout.maxBarHeight -
+      this.layout.breakStart -
+      this.layout.foldVisualHeight;
     const topLength = Math.max(0, maxTop);
 
     // Calcula o comprimento total da "fita métrica" desdobrada diretamente no escopo (inline)
     const totalFoldLength =
-      this.settings.breakStart + // Chapa da Base
+      this.layout.breakStart + // Chapa da Base
       depth + // Chapa Horizontal de Fundo
-      this.settings.foldVisualHeight + // Chapa Vertical do Fundo
+      this.layout.foldVisualHeight + // Chapa Vertical do Fundo
       depth + // Chapa Horizontal de Retorno
       topLength; // Chapa do Topo
 
@@ -69450,19 +69577,21 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   }
 
   _calculateSegmentLengths(scaledLength, depth) {
+    if (!this.layout) this._updateResponsiveGeometry();
+
     /*
      * Determina o comprimento efetivo de cada chapa para uma barra com
      * comprimento escalado 'scaledLength'.
      * Preenche sequencialmente: base -> lower -> back -> upper -> top
      */
-    const baseLength = this.settings.breakStart;
+    const baseLength = this.layout.breakStart;
     const lowerHorizontal = depth;
-    const backLength = this.settings.foldVisualHeight;
+    const backLength = this.layout.foldVisualHeight;
     const upperHorizontal = depth;
     const maxTop =
-      this.settings.maxBarHeight -
-      this.settings.breakStart -
-      this.settings.foldVisualHeight;
+      this.layout.maxBarHeight -
+      this.layout.breakStart -
+      this.layout.foldVisualHeight;
     const topLength = Math.max(0, maxTop);
 
     const result = {
@@ -69509,8 +69638,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   }
 
   _createFoldedBar(x, scaledLength, depth) {
+    if (!this.layout) this._updateResponsiveGeometry();
+
     let group = new THREE.Group();
-    group.position.set(x, this.settings.baseOffsetY, 0);
+    group.position.set(x, this.layout.baseOffsetY, 0);
 
     // Calcula exatamente onde a "gasolina" da barra vai parar
     const segments = this._calculateSegmentLengths(scaledLength, depth);
@@ -69555,7 +69686,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     // A função de prisma já sabe conectar esses pontos sequencialmente
     let geometry = this._createPrismFromYZProfile(
       points,
-      this.settings.barWidth,
+      this.layout.barWidth,
       this.settings.barDepth,
     );
 
@@ -69674,27 +69805,29 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   }
 
   _renderPerspectiveYAxis(depth) {
+    if (!this.layout) this._updateResponsiveGeometry();
+
     this.yAxisGroup = new THREE.Group();
 
-    const spacing = this.settings.barWidth + this.settings.barGap;
+    const spacing = this.layout.barWidth + this.layout.barGap;
 
     const chartLeft =
-      -((this.d.length - 1) * spacing) / 2 - this.settings.barWidth / 2;
+      -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
 
     const chartRight =
-      ((this.d.length - 1) * spacing) / 2 + this.settings.barWidth / 2;
+      ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
 
-    const axisX = chartLeft - this.settings.yAxisOffsetX;
+    const axisX = chartLeft - this.layout.yAxisOffsetX;
 
     const maxTop =
-      this.settings.maxBarHeight -
-      this.settings.breakStart -
-      this.settings.foldVisualHeight;
+      this.layout.maxBarHeight -
+      this.layout.breakStart -
+      this.layout.foldVisualHeight;
 
     const totalFoldLength =
-      this.settings.breakStart +
+      this.layout.breakStart +
       depth +
-      this.settings.foldVisualHeight +
+      this.layout.foldVisualHeight +
       depth +
       Math.max(0, maxTop);
 
@@ -69702,7 +69835,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     const axisLine = this._createLineFromPoints(
       axisPoints.map(
-        (p) => new THREE.Vector3(axisX, this.settings.baseOffsetY + p.y, p.z),
+        (p) => new THREE.Vector3(axisX, this.layout.baseOffsetY + p.y, p.z),
       ),
       this.settings.yAxisColor,
     );
@@ -69725,7 +69858,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
       const point = this._getPointAlongFoldPath(scaledLength, depth);
 
-      const y = this.settings.baseOffsetY + point.y;
+      const y = this.layout.baseOffsetY + point.y;
       const z = point.z;
 
       const gridLine = this._createLineFromPoints(
@@ -69762,7 +69895,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     points.push({ y, z });
 
-    const base = Math.min(remaining, this.settings.breakStart);
+    const base = Math.min(remaining, this.layout.breakStart);
     y += base;
     remaining -= base;
     points.push({ y, z });
@@ -69775,7 +69908,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     }
 
     if (remaining > 0) {
-      const back = Math.min(remaining, this.settings.foldVisualHeight);
+      const back = Math.min(remaining, this.layout.foldVisualHeight);
       y += back;
       remaining -= back;
       points.push({ y, z });
@@ -69916,7 +70049,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       // Rotação
       this.chartGroup.rotation.x = THREE.MathUtils.lerp(startX, 0, easedT);
       this.chartGroup.rotation.y = THREE.MathUtils.lerp(startY, 0, easedT);
-      this.chartGroup.rotation.z = THREE.MathUtils.lerp(startZ, 0, easedT);      
+      this.chartGroup.rotation.z = THREE.MathUtils.lerp(startZ, 0, easedT);
 
       if (t < 1) {
         this.returnAnimation = requestAnimationFrame(animateReturn);

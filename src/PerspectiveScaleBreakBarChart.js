@@ -49,7 +49,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       top: 0,
       right: 0.03,
       bottom: 0,
-      left: 0.08
+      left: 0.08,
     };
 
     // Dados
@@ -184,6 +184,37 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     return this;
   }
 
+  updateBreakStartRatio(breakStartRatio) {
+    this.settings.breakStartRatio = Math.max(
+      0.2,
+      Math.min(0.85, breakStartRatio),
+    );
+
+    this.settings.breakStart =
+      this.settings.maxBarHeight * this.settings.breakStartRatio;
+
+    if (this.layout) {
+      this.layout.breakStart =
+        this.layout.maxBarHeight * this.settings.breakStartRatio;
+    }
+
+    this._renderBars(this.settings.depth);
+
+    return this;
+  }
+
+  updateFoldVisualHeight(foldVisualHeight) {
+    this.settings.foldVisualHeight = Math.max(0.1, foldVisualHeight);
+
+    if (this.layout) {
+      this.layout.foldVisualHeight = foldVisualHeight;
+    }
+
+    this._renderBars(this.settings.depth);
+
+    return this;
+  }
+
   setCameraMode(cameraMode) {
     const nextCameraMode =
       cameraMode === "orthographic" ? "orthographic" : "perspective";
@@ -235,7 +266,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       foldVisualHeightRatio: this.settings.foldVisualHeight / chartHeight,
       baseOffsetYRatio: this.settings.baseOffsetY / chartHeight,
       labelOffsetYRatio: labelOffset / chartHeight,
-      gapToBarRatio: this.settings.barGap / Math.max(this.settings.barWidth, 1e-6),
+      gapToBarRatio:
+        this.settings.barGap / Math.max(this.settings.barWidth, 1e-6),
       axisOffsetToBarRatio:
         this.settings.yAxisOffsetX / Math.max(this.settings.barWidth, 1e-6),
     };
@@ -268,15 +300,12 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     const baseHeight = this.baseGeometrySpec.chartHeight;
     const chartWidth = baseHeight * viewportAspect;
     const gapToBarRatio = this.baseGeometrySpec.gapToBarRatio;
-    const totalUnits =
-      count + Math.max(0, count - 1) * gapToBarRatio;
+    const totalUnits = count + Math.max(0, count - 1) * gapToBarRatio;
 
     const barWidth = chartWidth / Math.max(totalUnits, 1);
     const barGap = barWidth * gapToBarRatio;
-    const maxBarHeight =
-      baseHeight * this.baseGeometrySpec.maxBarHeightRatio;
-    const foldVisualHeight =
-      baseHeight * this.baseGeometrySpec.foldVisualHeightRatio;
+    const maxBarHeight = baseHeight * this.baseGeometrySpec.maxBarHeightRatio;
+    const foldVisualHeight = this.settings.foldVisualHeight;
     const baseOffsetY = baseHeight * this.baseGeometrySpec.baseOffsetYRatio;
 
     this.layout = {
@@ -319,7 +348,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.webglContainer.appendChild(this.renderer.domElement);
 
     this.chartGroup = new THREE.Group();
-    this.chartGroup.position.set(this.settings.fitPadding.left*6, 0, 0);
+    this.chartGroup.position.set(this.settings.fitPadding.left * 6, 0, 0);
     this.chartGroup.rotation.set(0, 0, 0);
     this.scene.add(this.chartGroup);
 
@@ -582,7 +611,11 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.bars.push(bar);
 
       let label = this._createTextSprite(d[this.labelKey]);
-      label.position.set(x, this.layout.baseOffsetY - this.layout.labelOffsetY, 0);
+      label.position.set(
+        x,
+        this.layout.baseOffsetY - this.layout.labelOffsetY,
+        0,
+      );
 
       this.chartGroup.add(label);
       this.bars.push(label);
@@ -1094,7 +1127,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       // Rotação
       this.chartGroup.rotation.x = THREE.MathUtils.lerp(startX, 0, easedT);
       this.chartGroup.rotation.y = THREE.MathUtils.lerp(startY, 0, easedT);
-      this.chartGroup.rotation.z = THREE.MathUtils.lerp(startZ, 0, easedT);      
+      this.chartGroup.rotation.z = THREE.MathUtils.lerp(startZ, 0, easedT);
 
       if (t < 1) {
         this.returnAnimation = requestAnimationFrame(animateReturn);
