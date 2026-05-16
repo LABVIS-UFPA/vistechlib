@@ -68985,11 +68985,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     // Eixo Y e linhas guias
     this.settings.showPerspectiveYAxis = true;
-    this.settings.yAxisTicks = 20;
     this.settings.yAxisColor = 0x333333;
     this.settings.yGridColor = 0xcfcfcf;
     this.settings.yAxisOffsetX = 0.9;
-    this.settings.yAxisStep = 3;
+    this.settings.yAxisMinTickPixels = 35;
 
     // Zoom
     this.settings.enableZoom = true;
@@ -69710,13 +69709,18 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     this.yAxisGroup.add(axisLine);
 
-    const tickCount = this.settings.yAxisTicks;
+    const tickCount = Math.max(
+      2,
+      Math.floor(this.settings.height / this.settings.yAxisMinTickPixels),
+    );
 
-    for (
-      let value = 0;
-      value <= this.maxValue;
-      value += this.settings.yAxisStep
-    ) {
+    const tickValues = d3
+      .scaleLinear()
+      .domain([0, this.maxValue])
+      .nice()
+      .ticks(tickCount);
+
+    tickValues.forEach((value) => {
       const scaledLength = (value / this.maxValue) * totalFoldLength;
 
       const point = this._getPointAlongFoldPath(scaledLength, depth);
@@ -69744,7 +69748,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       label.scale.set(0.9, 0.45, 1);
 
       this.yAxisGroup.add(label);
-    }
+    });
 
     this.chartGroup.add(this.yAxisGroup);
   }
