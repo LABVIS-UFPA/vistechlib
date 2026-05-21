@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR" style="width:100%;height:100%;">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Worm Bar Chart 3D Test - Vistechlib</title>
+    <script src="bundle.js"></script>
+</head>
+
+<body style="width:100%;height:100%;margin:0;font-family:Arial, sans-serif;">
+
+    <div style="padding:12px; display:flex; align-items:center; justify-content:space-between; background-color: #f8f9fa; border-bottom: 1px solid #ddd;">
+
+        <!-- Novo controle principal para a metáfora da minhoca -->
+        <div style="display:flex; align-items:center; gap:10px;">
+            <label for="foldThreshold">Limiar de Dobra (Teto Y):</label>
+            <!-- O range vai de 0.01 (1%) a 1.0 (100%). Começamos em 1.0 para mostrar a transição fluida a partir do estado original -->
+            <input id="foldThreshold" type="range" min="0.01" max="1.0" step="0.01" value="1.0" />
+            <span id="thresholdValue" style="min-width: 45px; font-weight: bold;">100%</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+            <label for="cameraMode">Câmera:</label>
+            <select id="cameraMode">
+                <option value="perspective" selected>Perspectiva</option>
+                <option value="orthographic">Ortográfica</option>
+            </select>
+        </div>
+
+        <div>
+            <button id="btnReset">Resetar Rotação</button>
+            <button id="btnToggleAutoReturn">Auto retorno: OFF</button>
+        </div>
+    </div>
+
+    <div id="canvasTest" style="width:100%;height:calc(100% - 52px);"></div>
+
+    <script>
+        const data = [
+            // Gases inertes
+            { label: 'A', value: 33 },
+            { label: 'B', value: 1150 },
+
+            // Elementos voláteis
+            { label: 'C', value: 240 },
+            { label: 'D', value: 1150 },
+            { label: 'E', value: 1760 },
+            { label: 'F', value: 910 },
+            { label: 'G', value: 47 },
+            { label: 'H', value: 36 },
+            { label: 'I', value: 85 },
+
+            // Elementos com volatilidade intermediária
+            { label: 'J', value: 115 },
+            { label: 'K', value: 10 },
+            { label: 'L', value: 168 },
+            { label: 'M', value: 73 },
+            { label: 'N', value: 240 },
+
+            // Elementos refratários
+            { label: 'O', value: 84 },
+            { label: 'P', value: 72 },
+            { label: 'Q', value: 84 },
+            { label: 'R', value: 50 },
+            { label: 'S', value: 400 }
+        ];
+
+        // Instancia a nova classe que foi renomeada (WormBarChart3D)
+        const chart = new vistechlib.WormBarChart3D(
+            document.getElementById('canvasTest'),
+            {
+                size_type: 'fit',
+                valueKey: 'value',
+                labelKey: 'label',
+                cameraMode: 'perspective',
+                maxYLimitRatio: 1.0, // Inicia como um gráfico de barras normal
+                zStepDepth: 1.5      // Profundidade padrão de cada dobra no eixo Z
+            }
+        );
+
+        chart.data(data);
+
+        // Referências da UI
+        const thresholdSlider = document.getElementById('foldThreshold');
+        const thresholdValueText = document.getElementById('thresholdValue');
+        const cameraModeSelect = document.getElementById('cameraMode');
+        const btnReset = document.getElementById('btnReset');
+        const btnToggleAutoReturn = document.getElementById('btnToggleAutoReturn');
+
+        // Evento que ativa a "constância de objeto" chamando a função que criamos no Passo 3
+        thresholdSlider.addEventListener('input', function (event) {
+            const ratio = Number(event.target.value);
+            thresholdValueText.innerText = Math.round(ratio * 100) + '%';
+            chart.updateFoldThreshold(ratio);
+        });
+
+        // Alternar câmera
+        cameraModeSelect.addEventListener('change', function (event) {
+            chart.setCameraMode(event.target.value);
+        });
+
+        // Resetar view
+        btnReset.addEventListener('click', function () {
+            chart._returnToInitialRotation();
+        });
+
+        // Toggle do Auto-retorno da câmera
+        btnToggleAutoReturn.addEventListener('click', function () {
+            chart.autoReturnEnabled = !chart.autoReturnEnabled;
+            btnToggleAutoReturn.innerText = chart.autoReturnEnabled
+                ? 'Auto retorno: ON'
+                : 'Auto retorno: OFF';
+        });
+
+        // Redimensionamento responsivo
+        window.addEventListener('resize', function () {
+            chart.resize();
+        });
+    </script>
+</body>
+
+</html>
