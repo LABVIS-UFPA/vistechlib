@@ -26,6 +26,12 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.initialDepth = settings?.depth ?? 8;
     this.baseGeometrySpec = null;
     this.layout = null;
+    this.cameraLookTarget = new THREE.Vector3();
+    this.middleZoomAnimation = null;
+    this.middleZoomActive = false;
+    this.defaultCameraState = null;
+    this.raycaster = new THREE.Raycaster();
+    this.pointerNdc = new THREE.Vector2();
 
     this.svg.style("display", "none");
 
@@ -70,11 +76,12 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.yAxisOffsetX = 0.9;
     this.settings.yAxisMinTickPixels = 35;
 
-    // Zoom
+    // Zoom temporário no botão do meio
     this.settings.enableZoom = true;
-    this.settings.zoomSpeed = 0.08;
-    this.settings.minCameraDistance = 4;
-    this.settings.maxCameraDistance = 40;
+    this.settings.middleZoomDuration = 320;
+    this.settings.middleZoomMinTravelZ = 1;
+    this.settings.middleZoomMaxTravelZ = 7;
+    this.settings.middleZoomFocusOffsetZ = 1.2;
 
     /*
      * Configuração da câmera perspectiva.
@@ -230,6 +237,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
   destroy() {
     if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+    if (this.middleZoomAnimation) cancelAnimationFrame(this.middleZoomAnimation);
     if (this.renderer) this.renderer.dispose();
 
     this.webglContainer.innerHTML = "";
@@ -432,9 +440,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.camera.near = this.settings.cameraNear;
     this.camera.far = this.settings.cameraFar;
 
-    this.camera.position.set(this.settings.cameraX, cameraY, finalCameraZ);
-
-    this.camera.lookAt(0, cameraTargetY, 0);
+    this._setCameraView(
+      new THREE.Vector3(this.settings.cameraX, cameraY, finalCameraZ),
+      new THREE.Vector3(0, cameraTargetY, 0),
+    );
 
     /*
      * Sempre que FOV, aspect, near ou far mudam, a matriz de projeção
@@ -486,9 +495,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.camera.bottom = frustumHeight / -2;
     }
 
-    this.camera.position.set(this.settings.cameraX, cameraY, finalCameraZ);
-
-    this.camera.lookAt(0, cameraTargetY, 0);
+    this._setCameraView(
+      new THREE.Vector3(this.settings.cameraX, cameraY, finalCameraZ),
+      new THREE.Vector3(0, cameraTargetY, 0),
+    );
 
     // Essencial atualizar a matriz projetiva após alterar os limites do frustum
     this.camera.updateProjectionMatrix();
@@ -1042,40 +1052,182 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     return d3.format(".0f")(value);
   }
 
+  _setCameraView(position, target) {
+    if (!this.camera) return;
+
+    this.camera.position.copy(position);
+    this.cameraLookTarget.copy(target);
+    this.camera.lookAt(this.cameraLookTarget);
+  }
+
+  _getDefaultPerspectiveCameraState() {
+    const aspect = this.settings.width / this.settings.height;
+    const { chartWidth, chartHeight } = this._getChartBounds();
+    const cameraDistance = this._calculatePerspectiveDistance(
+      chartWidth,
+      chartHeight,
+      this.settings.cameraFov,
+      aspect,
+    );
+
+    const finalCameraZ = this.settings.cameraZ ?? cameraDistance;
+    const { minY, maxY } = this._getVerticalBounds();
+    const cameraTargetY = (minY + maxY) / 2;
+    const cameraY = this.settings.cameraY ?? cameraTargetY;
+
+    return {
+      position: new THREE.Vector3(this.settings.cameraX, cameraY, finalCameraZ),
+      target: new THREE.Vector3(0, cameraTargetY, 0),
+    };
+  }
+
+  _animateCameraTo(position, target, duration, onComplete) {
+    if (!this.camera) return;
+
+    if (this.middleZoomAnimation) {
+      cancelAnimationFrame(this.middleZoomAnimation);
+      this.middleZoomAnimation = null;
+    }
+
+    const startPosition = this.camera.position.clone();
+    const startTarget = this.cameraLookTarget.clone();
+    const targetPosition = position.clone();
+    const targetLookAt = target.clone();
+    const startTime = performance.now();
+
+    const animateStep = (now) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / Math.max(duration, 1), 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+
+      this.camera.position.lerpVectors(startPosition, targetPosition, eased);
+      this.cameraLookTarget.lerpVectors(startTarget, targetLookAt, eased);
+      this.camera.lookAt(this.cameraLookTarget);
+
+      if (t < 1) {
+        this.middleZoomAnimation = requestAnimationFrame(animateStep);
+        return;
+      }
+
+      this.middleZoomAnimation = null;
+
+      if (onComplete) onComplete();
+    };
+
+    this.middleZoomAnimation = requestAnimationFrame(animateStep);
+  }
+
+  _getFocusPointFromPointerEvent(e) {
+    if (!this.renderer || !this.camera || !this.chartGroup) {
+      return null;
+    }
+
+    const rect = this.renderer.domElement.getBoundingClientRect();
+
+    this.pointerNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    this.pointerNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.pointerNdc, this.camera);
+
+    const intersections = this.raycaster
+      .intersectObjects(this.chartGroup.children, true)
+      .filter((hit) => hit.object && hit.object.isMesh);
+
+    if (intersections.length > 0) {
+      return intersections[0].point.clone();
+    }
+
+    const fallbackPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const fallbackPoint = new THREE.Vector3();
+
+    if (this.raycaster.ray.intersectPlane(fallbackPlane, fallbackPoint)) {
+      return fallbackPoint;
+    }
+
+    const { minY, maxY } = this._getVerticalBounds();
+    return new THREE.Vector3(0, (minY + maxY) / 2, 0);
+  }
+
+  _startMiddleButtonZoom(e) {
+    if (!this.camera || !this.camera.isPerspectiveCamera) return;
+
+    const focusPoint = this._getFocusPointFromPointerEvent(e);
+    if (!focusPoint) return;
+
+    this.middleZoomActive = true;
+    this.defaultCameraState = this._getDefaultPerspectiveCameraState();
+
+    const depthNorm = THREE.MathUtils.clamp(
+      Math.abs(focusPoint.z) / Math.max(this.settings.maxDepth, 1e-6),
+      0,
+      1,
+    );
+
+    const travelZ = THREE.MathUtils.lerp(
+      this.settings.middleZoomMinTravelZ,
+      this.settings.middleZoomMaxTravelZ,
+      depthNorm,
+    );
+
+    const desiredZ = Math.max(
+      focusPoint.z + this.settings.middleZoomFocusOffsetZ,
+      this.defaultCameraState.position.z - travelZ,
+    );
+
+    const zoomedPosition = new THREE.Vector3(
+      focusPoint.x,
+      focusPoint.y,
+      desiredZ,
+    );
+
+    this._animateCameraTo(
+      zoomedPosition,
+      focusPoint,
+      this.settings.middleZoomDuration,
+    );
+  }
+
+  _endMiddleButtonZoom() {
+    if (!this.middleZoomActive || !this.defaultCameraState) return;
+
+    this.middleZoomActive = false;
+
+    this._animateCameraTo(
+      this.defaultCameraState.position,
+      this.defaultCameraState.target,
+      this.settings.middleZoomDuration,
+      () => {
+        this.defaultCameraState = null;
+      },
+    );
+  }
+
   _bindZoomEvents() {
     const canvas = this.renderer.domElement;
 
-    canvas.addEventListener(
-      "wheel",
-      (e) => {
-        if (!this.camera || !this.camera.isPerspectiveCamera) return;
+    canvas.addEventListener("pointerdown", (e) => {
+      if (e.button !== 1) return;
 
-        e.preventDefault();
+      e.preventDefault();
+      this._startMiddleButtonZoom(e);
+    });
 
-        const zoomDirection = e.deltaY > 0 ? 1 : -1;
+    window.addEventListener("pointerup", (e) => {
+      if (e.button !== 1) return;
+      this._endMiddleButtonZoom();
+    });
 
-        const currentDistance = this.camera.position.length();
-
-        const nextDistance = THREE.MathUtils.clamp(
-          currentDistance +
-            zoomDirection * this.settings.zoomSpeed * currentDistance,
-          this.settings.minCameraDistance,
-          this.settings.maxCameraDistance,
-        );
-
-        const scale = nextDistance / currentDistance;
-
-        this.camera.position.multiplyScalar(scale);
-        this.camera.updateProjectionMatrix();
-      },
-      { passive: false },
-    );
+    window.addEventListener("pointercancel", () => {
+      this._endMiddleButtonZoom();
+    });
   }
 
   _bindRotationEvents() {
     let canvas = this.renderer.domElement;
 
     canvas.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0 || this.middleZoomActive) return;
+
       this.isDragging = true;
       this.lastPointer = { x: e.clientX, y: e.clientY };
     });
