@@ -15,12 +15,13 @@ class WormBarChart3D extends Visualization {
     this.camera = null;
     this.chartGroup = null;
     this.yAxisGroup = null;
+    this.backgroundMesh = null;
     this.bars = [];
     this.animationFrame = null;
     this.material = null;
     this.isDragging = false;
     this.lastPointer = null;
-    this.autoReturnEnabled = false;
+    this.autoReturnEnabled = true;
     this.returnAnimation = null;
     this.toggleButton = null;
     this.initialDepth = settings?.depth ?? 8;
@@ -318,21 +319,37 @@ class WormBarChart3D extends Visualization {
     this.chartGroup.rotation.set(0, 0, 0);
     this.scene.add(this.chartGroup);
 
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    // this.scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
-    let light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(5, 10, 10);
-    this.scene.add(light);
+    // let light = new THREE.DirectionalLight(0xffffff, 1);
+    // light.position.set(5, 10, 10);
+    // this.scene.add(light);
 
-    /*
-     * MeshBasicMaterial remove variações de iluminação.
-     * Isso pode ser útil academicamente porque evita que sombras e brilho
-     * interfiram na percepção da altura das barras.
-     */
+    // /*
+    //  * MeshBasicMaterial remove variações de iluminação.
+    //  * Isso pode ser útil academicamente porque evita que sombras e brilho
+    //  * interfiram na percepção da altura das barras.
+    //  */
     this.material = new THREE.MeshBasicMaterial({
       color: this.settings.color,
       side: THREE.DoubleSide,
     });
+
+    // 1. Reduzimos a luz ambiente para permitir sombras
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+
+    // // 2. Luz direcional posicionada acima e levemente à direita
+    // let light = new THREE.DirectionalLight(0xffffff, 0.8);
+    // light.position.set(0, 0, -10); 
+    // this.scene.add(light);
+
+    // // 3. Substituímos o Lambert pelo Standard, que reage melhor à luz
+    // this.material = new THREE.MeshStandardMaterial({
+    //   color: this.settings.color,
+    //   roughness: 0.6, // Deixa a superfície mais fosca (bom para gráficos)
+    //   metalness: 0.1,
+    //   side: THREE.DoubleSide,
+    // });
 
     if (this.settings.enableRotation) this._bindRotationEvents();
     if (this.settings.enableZoom) this._bindZoomEvents();
@@ -552,12 +569,21 @@ class WormBarChart3D extends Visualization {
       this.chartGroup.remove(this.yAxisGroup);
       this.yAxisGroup = null;
     }
+
+    // Limpa o background
+    if (this.backgroundMesh) {
+      this.chartGroup.remove(this.backgroundMesh);
+      this.backgroundMesh = null;
+    }
   }
 
   _renderBars(depth) {
     this._clearBars();
 
     if (!this.layout) this._updateResponsiveGeometry();
+
+    // DESENHA O PAINEL DE FUNDO PRIMEIRO
+    this._renderFoldedBackground();
 
     let spacing = this.layout.barWidth + this.layout.barGap;
 
@@ -594,6 +620,47 @@ class WormBarChart3D extends Visualization {
     ) {
       this._renderPerspectiveYAxis(depth);
     }
+  }
+
+  _renderFoldedBackground() {
+    if (!this.layout) this._updateResponsiveGeometry();
+
+    // 1. Calcula a largura total necessária para o painel (do eixo até o fim da última barra)
+    const spacing = this.layout.barWidth + this.layout.barGap;
+    const chartLeft = -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
+    const chartRight = ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
+    
+    // Adicionamos uma margem extra para o painel cobrir bem a área do eixo Y
+    const margin = this.layout.barWidth; 
+    const totalWidth = (chartRight - chartLeft) + margin * 2;
+    const centerX = (chartLeft + chartRight) / 2;
+
+    // 2. Gera os vértices usando o limite máximo (o caminho mais longo possível)
+    const maxScaledLength = this._getScaledBarLength(this.maxValue);
+    const points = this._generateWormPoints(maxScaledLength);
+
+    // 3. Cria a geometria plana
+    const geometry = this._createFlatSurfaceFromYZProfile(points, totalWidth);
+
+    // 4. Cria o material do "papel"
+    const material = new THREE.MeshBasicMaterial({
+      color: this.settings.yGridColor, // Usa a mesma cor das linhas de grade para harmonia
+      transparent: true,
+      opacity: 0.2, // Bem sutil para não ofuscar os dados
+      side: THREE.DoubleSide,
+      depthWrite: false, // Fundamental para não conflitar com a transparência das linhas do eixo
+      polygonOffset: true,
+      polygonOffsetFactor: 1, // Empurra levemente para o fundo no Z-buffer
+      polygonOffsetUnits: 1
+    });
+
+    this.backgroundMesh = new THREE.Mesh(geometry, material);
+    
+    // Posiciona no centro do gráfico (com o deslocamento Y que as barras também usam)
+    // O leve recuo extra no centerX acompanha o eixo Y
+    this.backgroundMesh.position.set(centerX - (margin / 2), this.layout.baseOffsetY, 0);
+
+    this.chartGroup.add(this.backgroundMesh);
   }
 
   _getScaledBarLength(value) {
@@ -655,13 +722,39 @@ class WormBarChart3D extends Visualization {
     let points = this._generateWormPoints(scaledLength);
 
     // O gerador de prisma já sabe desenhar qualquer N de pontos sequenciais
+    // let geometry = this._createPrismFromYZProfile(
+    //   points,
+    //   this.layout.barWidth,
+    //   this.settings.barDepth,
+    // );
+
+    // group.add(new THREE.Mesh(geometry, this.material));
+
+    // return group;
     let geometry = this._createPrismFromYZProfile(
       points,
       this.layout.barWidth,
       this.settings.barDepth,
     );
 
-    group.add(new THREE.Mesh(geometry, this.material));
+    // Adiciona o sólido da barra
+    let mesh = new THREE.Mesh(geometry, this.material);
+    group.add(mesh);
+
+    // Cria uma instância de cor do Three.js e multiplica a luminosidade por 0.5 (escurecendo-a)
+    let edgeColor = new THREE.Color(this.settings.color).multiplyScalar(0.5);
+
+    // Cria as linhas de contorno apenas nos vincos
+    let edgesGeometry = new THREE.EdgesGeometry(geometry, 15); // O 15 é o limite de ângulo
+    let edgesMaterial = new THREE.LineBasicMaterial({ 
+      color: edgeColor, 
+      linewidth: 1, // Nota: a espessura da linha é restrita em alguns navegadores WebGL
+      transparent: true,
+      opacity: 0.7
+    });
+    let wireframe = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+    
+    group.add(wireframe);
 
     return group;
   }
@@ -765,7 +858,7 @@ class WormBarChart3D extends Visualization {
     const material = new THREE.SpriteMaterial({
       map: texture,
       transparent: true,
-      depthTest: false,
+      depthTest: true,
       depthWrite: false,
     });
 
