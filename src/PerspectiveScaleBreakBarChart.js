@@ -15,6 +15,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.camera = null;
     this.chartGroup = null;
     this.yAxisGroup = null;
+    this.backgroundMesh = null;
     this.bars = [];
     this.animationFrame = null;
     this.material = null;
@@ -237,7 +238,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
   destroy() {
     if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
-    if (this.middleZoomAnimation) cancelAnimationFrame(this.middleZoomAnimation);
+    if (this.middleZoomAnimation)
+      cancelAnimationFrame(this.middleZoomAnimation);
     if (this.renderer) this.renderer.dispose();
 
     this.webglContainer.innerHTML = "";
@@ -596,10 +598,17 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.chartGroup.remove(this.yAxisGroup);
       this.yAxisGroup = null;
     }
+
+    if (this.backgroundMesh) {
+      this.chartGroup.remove(this.backgroundMesh);
+      this.backgroundMesh = null;
+    }
   }
 
   _renderBars(depth) {
     this._clearBars();
+
+    this._renderFoldedBackground(depth);
 
     if (!this.layout) this._updateResponsiveGeometry();
 
@@ -972,6 +981,54 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     });
 
     this.chartGroup.add(this.yAxisGroup);
+  }
+
+  _renderFoldedBackground(depth) {
+    if (!this.layout) this._updateResponsiveGeometry();
+
+    const spacing = this.layout.barWidth + this.layout.barGap;
+
+    const chartLeft =
+      -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
+
+    const chartRight =
+      ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
+
+    const margin = this.layout.barWidth;
+
+    const totalWidth = chartRight - chartLeft + margin * 2;
+
+    const centerX = (chartLeft + chartRight) / 2;
+
+    // comprimento máximo possível da fita
+    const maxScaledLength = this._getScaledBarLength(this.maxValue, depth);
+
+    // usa exatamente a mesma geometria da dobra
+    const points = this._createFoldPathPoints(maxScaledLength, depth);
+
+    // cria superfície plana
+    const geometry = this._createFlatSurfaceFromYZProfile(points, totalWidth);
+
+    const material = new THREE.MeshBasicMaterial({
+      color: this.settings.yGridColor,
+      transparent: true,
+      opacity: 0.18,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1,
+    });
+
+    this.backgroundMesh = new THREE.Mesh(geometry, material);
+
+    this.backgroundMesh.position.set(
+      centerX - margin / 2,
+      this.layout.baseOffsetY,
+      0,
+    );
+
+    this.chartGroup.add(this.backgroundMesh);
   }
 
   _createFoldPathPoints(totalLength, depth) {
