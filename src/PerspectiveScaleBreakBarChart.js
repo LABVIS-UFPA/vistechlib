@@ -1205,6 +1205,63 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     return new THREE.Vector3(0, (minY + maxY) / 2, 0);
   }
 
+  _startDoubleClickZoom(e) {
+    const focusPoint = this._getFocusPointFromPointerEvent(e);
+    if (!focusPoint) return;
+
+    if (!this.defaultCameraState) {
+      this.defaultCameraState = this._getDefaultPerspectiveCameraState();
+    }
+
+    this.middleZoomActive = true;
+
+    const zoomDistance = 2.7; // quanto menor, maior o zoom
+
+    const direction = new THREE.Vector3()
+      .subVectors(this.camera.position, focusPoint)
+      .normalize();
+
+    const zoomedPosition = new THREE.Vector3()
+      .copy(focusPoint)
+      .add(direction.multiplyScalar(zoomDistance));
+
+    this._animateCameraTo(
+      zoomedPosition,
+      focusPoint,
+      this.settings.middleZoomDuration,
+    );
+  }
+
+  _resetDoubleClickZoom() {
+    if (!this.middleZoomActive || !this.defaultCameraState) return;
+
+    this.middleZoomActive = false;
+
+    this._animateCameraTo(
+      this.defaultCameraState.position,
+      this.defaultCameraState.target,
+      this.settings.middleZoomDuration,
+      () => {
+        this.defaultCameraState = null;
+      },
+    );
+  }
+
+  _resetDoubleClickZoom() {
+    if (!this.middleZoomActive || !this.defaultCameraState) return;
+
+    this.middleZoomActive = false;
+
+    this._animateCameraTo(
+      this.defaultCameraState.position,
+      this.defaultCameraState.target,
+      this.settings.middleZoomDuration,
+      () => {
+        this.defaultCameraState = null;
+      },
+    );
+  }
+
   _startMiddleButtonZoom(e) {
     if (!this.camera || !this.camera.isPerspectiveCamera) return;
 
@@ -1262,20 +1319,12 @@ class PerspectiveScaleBreakBarChart extends Visualization {
   _bindZoomEvents() {
     const canvas = this.renderer.domElement;
 
-    canvas.addEventListener("pointerdown", (e) => {
-      if (e.button !== 1) return;
+    canvas.addEventListener("dblclick", (e) => {
+      if (!this.camera || !this.camera.isPerspectiveCamera) return;
 
       e.preventDefault();
-      this._startMiddleButtonZoom(e);
-    });
 
-    window.addEventListener("pointerup", (e) => {
-      if (e.button !== 1) return;
-      this._endMiddleButtonZoom();
-    });
-
-    window.addEventListener("pointercancel", () => {
-      this._endMiddleButtonZoom();
+      this._startDoubleClickZoom(e);
     });
   }
 
@@ -1283,7 +1332,12 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     let canvas = this.renderer.domElement;
 
     canvas.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0 || this.middleZoomActive) return;
+      if (e.button !== 0) return;
+
+      if (this.middleZoomActive) {
+        this._resetDoubleClickZoom();
+        return;
+      }
 
       this.isDragging = true;
       this.lastPointer = { x: e.clientX, y: e.clientY };
