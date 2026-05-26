@@ -69,7 +69,7 @@ class WormBarChart3D extends Visualization {
     this.settings.yAxisColor = 0x333333;
     this.settings.yGridColor = 0xcfcfcf;
     this.settings.yAxisOffsetX = 0.9;
-    this.settings.yAxisMinTickPixels = 35;
+    this.settings.yAxisMinTickPixels = 1;
 
     // Zoom
     this.settings.enableZoom = true;
@@ -92,7 +92,10 @@ class WormBarChart3D extends Visualization {
     this.settings.cameraY = null;
     this.settings.cameraZ = null;
     this.settings.cameraFov = 45;
-    this.settings.cameraMargin = 1.25;
+    // 2. Novo parâmetro: Ângulo de elevação (em graus) para ver por cima do gráfico
+    // this.settings.cameraElevationAngle = 3;
+    this.settings.lensShiftOffset = 1;
+    this.settings.cameraMargin = 1.25;//1.25;
     this.settings.cameraMode = "perspective";
 
     // --- Worm/Accordion Fold Settings ---
@@ -399,6 +402,11 @@ class WormBarChart3D extends Visualization {
      */
     const { minY, maxY } = this._getVerticalBounds();
     const cameraTargetY = (minY + maxY) / 2;
+
+
+    // Calculamos o Y usando o ângulo que definimos nas configurações
+    // const elevationRad = THREE.MathUtils.degToRad(this.settings.cameraElevationAngle || 0);
+    // const cameraY = this.settings.cameraY ?? (cameraTargetY + finalCameraZ * Math.tan(elevationRad));
     const cameraY = this.settings.cameraY ?? cameraTargetY;
 
     if (createNew || !this.camera) {
@@ -417,7 +425,27 @@ class WormBarChart3D extends Visualization {
 
     this.camera.position.set(this.settings.cameraX, cameraY, finalCameraZ);
 
-    this.camera.lookAt(0, cameraTargetY, 0);
+    this.camera.lookAt(0, cameraTargetY, 0);//0, cameraTargetY, 0);
+
+    this.camera.position.multiplyScalar(2.1);
+    // this.camera.fov = this.settings.cameraFov * 0.75;
+
+
+    // Nós criamos uma tela virtual mais alta e capturamos apenas a metade de baixo.
+    // Isso move o ponto de fuga central lá para o alto da sua div real.
+    const shiftAmount = this.settings.height * (this.settings.lensShiftOffset || 0);
+    if (shiftAmount > 0) {
+      this.camera.setViewOffset(
+        this.settings.width,
+        this.settings.height + shiftAmount, // Expande a tela virtual
+        0,
+        shiftAmount, // Corta a tela no topo, empurrando o gráfico visível "para baixo"
+        this.settings.width,
+        this.settings.height
+      );
+    } else {
+      this.camera.clearViewOffset();
+    }
 
     /*
      * Sempre que FOV, aspect, near ou far mudam, a matriz de projeção
@@ -430,14 +458,9 @@ class WormBarChart3D extends Visualization {
     if (!this.layout) this._updateResponsiveGeometry();
 
     const aspect = this.settings.width / this.settings.height;
-
-    // Na câmera ortográfica, definimos um volume de visão ajustado ao tamanho
-    // efetivo do gráfico no frame atual para evitar excesso de espaço vazio.
     const { chartWidth, chartHeight } = this._getChartBounds();
 
-    // O frustum vertical precisa acomodar a altura e, via aspect, também a
-    // largura projetada. Usar maxDepth aqui deixava a projeção pequena demais.
-    const currentDepth = Math.max(this.settings.depth, 0);
+    const currentDepth = Math.max(this.settings.depth || 0, 0);
     const projectedWidth = chartWidth + currentDepth;
     const projectedHeight = chartHeight;
     const frustumHeight =
@@ -446,11 +469,15 @@ class WormBarChart3D extends Visualization {
 
     const { minY, maxY } = this._getVerticalBounds();
     const cameraTargetY = (minY + maxY) / 2;
-    const cameraY = this.settings.cameraY ?? cameraTargetY;
-
-    // Distância fixa bem recuada. Na câmera ortográfica o Z não aproxima nem afasta
-    // visualmente, apenas garante que os objetos não fiquem atrás da câmera.
-    const finalCameraZ = 100;
+    
+    // --- ELEVAÇÃO ORTOGRÁFICA ---
+    // Usamos o ângulo (ex: 12 a 20 graus) para subir a câmera e recuá-la.
+    // Na câmera ortográfica, a distância Z não altera o tamanho, apenas a posição física da câmera.
+    const elevationRad = THREE.MathUtils.degToRad(this.settings.cameraElevationAngle || 15);
+    const distance = 100; // Distância fixa segura
+    
+    const cameraY = cameraTargetY + distance * Math.sin(elevationRad);
+    const finalCameraZ = distance * Math.cos(elevationRad);
 
     if (createNew || !this.camera || !this.camera.isOrthographicCamera) {
       this.camera = new THREE.OrthographicCamera(
@@ -462,7 +489,6 @@ class WormBarChart3D extends Visualization {
         1000,
       );
     } else {
-      // Atualização dos limites caso haja resize da janela
       this.camera.left = (frustumHeight * aspect) / -2;
       this.camera.right = (frustumHeight * aspect) / 2;
       this.camera.top = frustumHeight / 2;
@@ -470,10 +496,7 @@ class WormBarChart3D extends Visualization {
     }
 
     this.camera.position.set(this.settings.cameraX, cameraY, finalCameraZ);
-
     this.camera.lookAt(0, cameraTargetY, 0);
-
-    // Essencial atualizar a matriz projetiva após alterar os limites do frustum
     this.camera.updateProjectionMatrix();
   }
 
@@ -888,9 +911,85 @@ class WormBarChart3D extends Visualization {
     );
     this.yAxisGroup.add(axisLine);
 
-    // Adiciona os Ticks e Labels baseados no valor do dado
-    const tickCount = Math.max(2, Math.floor(this.settings.height / this.settings.yAxisMinTickPixels));
-    const tickValues = d3.scaleLinear().domain([0, this.maxValue]).nice().ticks(tickCount);
+    // // Adiciona os Ticks e Labels baseados no valor do dado
+    // const tickCount = Math.max(2, Math.floor(this.settings.height / this.settings.yAxisMinTickPixels));
+    // const tickValues = d3.scaleLinear().domain([0, this.maxValue]).nice().ticks(tickCount);
+
+
+    // // 1. Calcula a quantidade de ticks base (comportamento para o gráfico reto em 100%)
+    // const baseTickCount = Math.max(2, Math.floor(this.settings.height / this.settings.yAxisMinTickPixels));
+
+    // // 2. Calcula o multiplicador com base no limiar atual.
+    // // Ex: Limiar de 0.5 (50%) = caminho 2x maior. Limiar de 0.1 (10%) = caminho 10x maior.
+    // // Usamos um Math.min para limitar o multiplicador máximo (ex: 15x).
+    // // Essa é uma trava de segurança visual crucial: como a projeção perspectiva esmaga
+    // // os objetos que estão muito no fundo do eixo Z, gerar milhares de sprites
+    // // em limiares próximos a 0.01 criaria uma mancha preta ilegível de números sobrepostos.
+    // const pathMultiplier = Math.min(1 / (this.settings.maxYLimitRatio*5), 15);
+    // const dynamicTickCount = Math.floor(baseTickCount * pathMultiplier);
+
+    // // 3. Pede ao D3 para gerar a nova quantidade ajustada de ticks
+    // const tickValues = d3.scaleLinear().domain([0, this.maxValue]).nice().ticks(dynamicTickCount);
+
+
+    // --- GERAÇÃO INTELIGENTE DE TICKS (Frontal vs Dobras) ---
+
+    // 1. Descobre qual valor de dado corresponde à primeira dobra (o Teto Y)
+    // Se o limite da dobra física for maior ou igual que a barra física máxima,
+    // o thresholdDataValue será o próprio maxValue (gráfico sem dobra).
+    let thresholdDataValue = this.maxValue;
+    
+    // O comprimento físico de um dado de valor máximo
+    const totalMaxPhysicalLength = this.layout.maxBarHeight / this.settings.maxYLimitRatio;
+    
+    // Se a primeira dobra (maxYLimit) acontecer antes do tamanho total...
+    if (this.layout.maxYLimit < totalMaxPhysicalLength) {
+       // Regra de três: se totalMaxPhysicalLength = maxValue, maxYLimit = X
+       thresholdDataValue = (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
+    }
+
+    // 2. Ticks da Face Frontal (Alta Densidade)
+    // Calculamos a altura disponível SÓ para a face da frente
+    const frontFaceHeight = Math.min(this.layout.maxBarHeight, this.layout.maxYLimit);
+    const frontTickCount = Math.max(2, Math.floor(frontFaceHeight / this.settings.yAxisMinTickPixels));
+    
+    // Pede ao D3 os ticks APENAS para o trecho [0, Primeira Dobra]
+    let tickValues = d3.scaleLinear().domain([0, thresholdDataValue]).nice().ticks(frontTickCount);
+
+    // 3. Ticks dos "Tetos" (Baixa Densidade)
+    // Se houver dobras para trás (threshold menor que maxValue)
+    if (thresholdDataValue < this.maxValue) {
+      let currentDataValue = thresholdDataValue;
+      let isTopFold = true; // A primeira dobra está no teto
+
+      while (currentDataValue < this.maxValue) {
+        // Se for um teto (olhando de cima, é o que o usuário vê), adiciona o tick
+        if (isTopFold) {
+          // Evita adicionar um tick se ele estiver muito colado ao último (ex: restou só 1% de dado no topo)
+          if (Math.abs(currentDataValue - tickValues[tickValues.length - 1]) > (this.maxValue * 0.05)) {
+             tickValues.push(currentDataValue);
+          }
+        }
+
+        // Avança o valor correspondente a UMA chapa inteira (a descida Y, ou a subida Y)
+        // O valor em dados de uma chapa vertical inteira é o próprio thresholdDataValue
+        // O valor em dados de um recuo Z é calculado proporcionalmente
+        const zDataValue = (this.layout.zStepDepth / totalMaxPhysicalLength) * this.maxValue;
+        
+        currentDataValue += zDataValue; // Soma o gasto do recuo
+        currentDataValue += thresholdDataValue; // Soma o gasto da chapa vertical inteira
+
+        // Inverte. Se ele desceu, o próximo será o chão. Se subiu, o próximo será o teto.
+        isTopFold = !isTopFold; 
+      }
+      
+      // Garante que o valor máximo absoluto sempre tenha um tick (para fechar a referência)
+      if (tickValues[tickValues.length - 1] !== this.maxValue) {
+        tickValues.push(this.maxValue);
+      }
+    }
+
+
 
     tickValues.forEach((value) => {
       const scaledLength = this._getScaledBarLength(value);
