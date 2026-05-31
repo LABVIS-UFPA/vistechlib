@@ -75,7 +75,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.yAxisColor = 0x333333;
     this.settings.yGridColor = 0xcfcfcf;
     this.settings.yAxisOffsetX = 0.9;
-    this.settings.yAxisMinTickPixels = 35;
+    this.settings.yAxisMinTickPixels = 80;
 
     // Zoom temporário no botão do meio
     this.settings.enableZoom = true;
@@ -939,10 +939,15 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     this.yAxisGroup.add(axisLine);
 
-    const tickCount = Math.max(
+    const visibleAxisLength = Math.max(this.layout.maxBarHeight, 1e-6);
+    const foldLengthFactor = totalFoldLength / visibleAxisLength;
+
+    const baseTickCount = Math.max(
       2,
       Math.floor(this.settings.height / this.settings.yAxisMinTickPixels),
     );
+
+    const tickCount = Math.max(2, Math.ceil(baseTickCount * foldLengthFactor));
 
     const tickValues = d3
       .scaleLinear()
