@@ -33,6 +33,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.defaultCameraState = null;
     this.raycaster = new THREE.Raycaster();
     this.pointerNdc = new THREE.Vector2();
+    this.hoveredBar = null;
+    this.highlightMaterial = null;
 
     this.svg.style("display", "none");
 
@@ -75,7 +77,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.yAxisColor = 0x333333;
     this.settings.yGridColor = 0xcfcfcf;
     this.settings.yAxisOffsetX = 0.9;
-    this.settings.yAxisMinTickPixels = 35;
+    this.settings.yAxisMinTickPixels = 80;
 
     // Zoom temporário no botão do meio
     this.settings.enableZoom = true;
@@ -378,8 +380,18 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       side: THREE.DoubleSide,
     });
 
+    this.highlightMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(this.settings.color).lerp(
+        new THREE.Color(0xffffff),
+        0.25, // clareamento sutil
+      ),
+      side: THREE.DoubleSide,
+    });
+
     if (this.settings.enableRotation) this._bindRotationEvents();
     if (this.settings.enableZoom) this._bindZoomEvents();
+
+    this._bindHoverEvents();
 
     this._animate();
   }
@@ -787,7 +799,11 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       this.settings.barDepth,
     );
 
-    group.add(new THREE.Mesh(geometry, this.material));
+    const mesh = new THREE.Mesh(geometry, this.material);
+    mesh.userData.isBarMesh = true;
+    mesh.userData.parentBar = group;
+
+    group.add(mesh);
 
     return group;
   }
@@ -939,10 +955,15 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
     this.yAxisGroup.add(axisLine);
 
-    const tickCount = Math.max(
+    const visibleAxisLength = Math.max(this.layout.maxBarHeight, 1e-6);
+    const foldLengthFactor = totalFoldLength / visibleAxisLength;
+
+    const baseTickCount = Math.max(
       2,
       Math.floor(this.settings.height / this.settings.yAxisMinTickPixels),
     );
+
+    const tickCount = Math.max(2, Math.ceil(baseTickCount * foldLengthFactor));
 
     const tickValues = d3
       .scaleLinear()
@@ -1136,6 +1157,51 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       position: new THREE.Vector3(this.settings.cameraX, cameraY, finalCameraZ),
       target: new THREE.Vector3(0, cameraTargetY, 0),
     };
+  }
+
+  _bindHoverEvents() {
+    const canvas = this.renderer.domElement;
+
+    canvas.addEventListener("pointermove", (e) => {
+      if (!this.camera || !this.chartGroup) return;
+
+      const rect = canvas.getBoundingClientRect();
+
+      this.pointerNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      this.pointerNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      this.raycaster.setFromCamera(this.pointerNdc, this.camera);
+
+      const intersects = this.raycaster
+        .intersectObjects(this.chartGroup.children, true)
+        .filter((hit) => hit.object?.userData?.isBarMesh);
+
+      const nextBarMesh = intersects.length > 0 ? intersects[0].object : null;
+
+      if (this.hoveredBar === nextBarMesh) return;
+
+      if (this.hoveredBar) {
+        this.hoveredBar.material = this.material;
+      }
+
+      this.hoveredBar = nextBarMesh;
+
+      if (this.hoveredBar) {
+        this.hoveredBar.material = this.highlightMaterial;
+        canvas.style.cursor = "pointer";
+      } else {
+        canvas.style.cursor = "default";
+      }
+    });
+
+    canvas.addEventListener("pointerleave", () => {
+      if (this.hoveredBar) {
+        this.hoveredBar.material = this.material;
+        this.hoveredBar = null;
+      }
+
+      canvas.style.cursor = "default";
+    });
   }
 
   _animateCameraTo(position, target, duration, onComplete) {
