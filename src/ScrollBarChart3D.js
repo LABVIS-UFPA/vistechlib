@@ -110,7 +110,7 @@ class ScrollBarChart3D extends Visualization {
     // Novas variáveis da espiral
     this.settings.spiralCoreRadius = 0.15; // Tamanho do "miolo" do rolo
     this.settings.spiralGrowthRate = 0.008; // Quão apertada é a curva (espessura do papel)
-    this.settings.scrollLabelVisibilityRate = 0.2;// Taxa de texto desenhados na bobina (1.0 = todos, 0.5 = metade)
+    this.settings.scrollLabelVisibilityRate = 0.2; // Taxa de texto desenhados na bobina (1.0 = todos, 0.5 = metade)
     this.settings.useFixedMaxRollRadius = false;
 
     // Detecção de outlier (Pode manter como estava)
@@ -126,6 +126,9 @@ class ScrollBarChart3D extends Visualization {
     // Controlar inspeção 3d
     this.settings.enableAutoReturnToggle = true;
     this.settings.autoReturnDuration = 600;
+    this.settings.hoverInspectTiltAngle = 20;
+    this.settings.hoverInspectTurnAngle = 70;
+    this.settings.hoverInspectDuration = 280;
   }
 
   data(d) {
@@ -702,7 +705,6 @@ class ScrollBarChart3D extends Visualization {
 
       // 4. Constrói o 3D passando os pontos já processados
       let bar = this._createFoldedBar(x, barPoints);
-      
 
       bar.userData = { datum: d, index: i };
 
@@ -790,7 +792,6 @@ class ScrollBarChart3D extends Visualization {
 
     return (value / this.maxValue) * totalUnfoldedLength;
   }
-
 
   _generateScrollPoints(scaledLength) {
     if (!this.layout) this._updateResponsiveGeometry();
@@ -889,25 +890,27 @@ class ScrollBarChart3D extends Visualization {
 
     const points = [];
     let accumulatedDistance = 0;
-    
+
     // O primeiro ponto sempre entra (a base no chão)
     points.push(masterPath[0]);
 
     for (let i = 1; i < masterPath.length; i++) {
       const p1 = masterPath[i - 1];
       const p2 = masterPath[i];
-      
+
       // Calcula a distância física entre os dois vértices atuais
-      const dist = Math.sqrt(Math.pow(p2.y - p1.y, 2) + Math.pow(p2.z - p1.z, 2));
+      const dist = Math.sqrt(
+        Math.pow(p2.y - p1.y, 2) + Math.pow(p2.z - p1.z, 2),
+      );
 
       if (accumulatedDistance + dist >= targetLength) {
         // A barra acaba neste segmento. Calculamos a proporção (t) para interpolar a ponta exata
         const remaining = targetLength - accumulatedDistance;
         const t = remaining / dist;
-        
+
         const finalY = p1.y + (p2.y - p1.y) * t;
         const finalZ = p1.z + (p2.z - p1.z) * t;
-        
+
         points.push({ y: finalY, z: finalZ });
         break; // Encerra o caminho para esta barra
       } else {
@@ -921,7 +924,6 @@ class ScrollBarChart3D extends Visualization {
   }
 
   _createFoldedBar(x, scaledLength) {
-
     if (this.settings.useFixedMaxRollRadius) {
       return this._createFoldedBar2(x, scaledLength);
     }
@@ -979,7 +981,6 @@ class ScrollBarChart3D extends Visualization {
     let group = new THREE.Group();
     group.position.set(x, this.layout.baseOffsetY, 0);
 
-    
     let geometry = this._createPrismFromYZProfile(
       points,
       this.layout.barWidth,
@@ -1220,12 +1221,14 @@ class ScrollBarChart3D extends Visualization {
 
       if (this.hoveredBar) {
         this.hoveredBar.material = this.material;
+        this._animateBarInspect(this.hoveredBar.parent, false);
       }
 
       this.hoveredBar = hovered;
 
       if (hovered) {
         hovered.material = this.highlightMaterial;
+        this._animateBarInspect(hovered.parent, true);
         canvas.style.cursor = "pointer";
       } else {
         canvas.style.cursor = "default";
@@ -1235,11 +1238,70 @@ class ScrollBarChart3D extends Visualization {
     canvas.addEventListener("pointerleave", () => {
       if (this.hoveredBar) {
         this.hoveredBar.material = this.material;
+        this._animateBarInspect(this.hoveredBar.parent, false);
         this.hoveredBar = null;
       }
 
       canvas.style.cursor = "default";
     });
+  }
+
+  _animateBarInspect(barGroup, active) {
+    if (!barGroup) return;
+
+    if (barGroup.userData.hoverAnimation) {
+      cancelAnimationFrame(barGroup.userData.hoverAnimation);
+    }
+
+    if (!barGroup.userData.baseRotation) {
+      barGroup.userData.baseRotation = {
+        x: barGroup.rotation.x,
+        y: barGroup.rotation.y,
+        z: barGroup.rotation.z,
+      };
+    }
+
+    const base = barGroup.userData.baseRotation;
+
+    const targetX = active
+      ? THREE.MathUtils.degToRad(this.settings.hoverInspectTiltAngle)
+      : base.x;
+
+    const targetY = active
+      ? THREE.MathUtils.degToRad(this.settings.hoverInspectTurnAngle)
+      : base.y;
+
+    const targetZ = base.z;
+
+    const startX = barGroup.rotation.x;
+    const startY = barGroup.rotation.y;
+    const startZ = barGroup.rotation.z;
+
+    const duration = this.settings.hoverInspectDuration || 280;
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const t = Math.min(elapsed / duration, 1);
+
+      const easedT = 1 - Math.pow(1 - t, 3);
+
+      barGroup.rotation.x = THREE.MathUtils.lerp(startX, targetX, easedT);
+
+      barGroup.rotation.y = THREE.MathUtils.lerp(startY, targetY, easedT);
+
+      barGroup.rotation.z = THREE.MathUtils.lerp(startZ, targetZ, easedT);
+
+      if (t < 1) {
+        barGroup.userData.hoverAnimation = requestAnimationFrame(animate);
+      } else {
+        barGroup.rotation.set(targetX, targetY, targetZ);
+
+        barGroup.userData.hoverAnimation = null;
+      }
+    };
+
+    barGroup.userData.hoverAnimation = requestAnimationFrame(animate);
   }
 
   _renderPerspectiveYAxis2() {
@@ -1248,8 +1310,10 @@ class ScrollBarChart3D extends Visualization {
     this.yAxisGroup = new THREE.Group();
 
     const spacing = this.layout.barWidth + this.layout.barGap;
-    const chartLeft = -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
-    const chartRight = ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
+    const chartLeft =
+      -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
+    const chartRight =
+      ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
     const axisX = chartLeft - this.layout.yAxisOffsetX;
 
     // 1. Gera o Caminho Mestre para o Eixo Y
@@ -1258,25 +1322,40 @@ class ScrollBarChart3D extends Visualization {
 
     // 2. Desenha a linha mestra contínua do eixo
     const axisPoints3D = axisMasterPath.map(
-      p => new THREE.Vector3(axisX, this.layout.baseOffsetY + p.y, p.z)
+      (p) => new THREE.Vector3(axisX, this.layout.baseOffsetY + p.y, p.z),
     );
-    const axisLine = this._createLineFromPoints(axisPoints3D, this.settings.yAxisColor);
+    const axisLine = this._createLineFromPoints(
+      axisPoints3D,
+      this.settings.yAxisColor,
+    );
     this.yAxisGroup.add(axisLine);
 
     // 3. Define onde termina a reta e começa a espiral
     let thresholdDataValue = this.maxValue;
-    const totalMaxPhysicalLength = this.layout.maxBarHeight / this.settings.maxYLimitRatio;
-    
+    const totalMaxPhysicalLength =
+      this.layout.maxBarHeight / this.settings.maxYLimitRatio;
+
     if (this.layout.maxYLimit < totalMaxPhysicalLength) {
-       thresholdDataValue = (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
+      thresholdDataValue =
+        (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
     }
 
     // 4. Calcula os Ticks da Face Frontal (Linear padrão)
-    const axisHeight = Math.min(this.layout.maxBarHeight, this.layout.maxYLimit);
-    const frontTickCount = Math.max(2, Math.floor(axisHeight / this.settings.yAxisMinTickPixels));
-    
-    let tickValues = d3.scaleLinear().domain([0, thresholdDataValue]).nice().ticks(frontTickCount);
-    
+    const axisHeight = Math.min(
+      this.layout.maxBarHeight,
+      this.layout.maxYLimit,
+    );
+    const frontTickCount = Math.max(
+      2,
+      Math.floor(axisHeight / this.settings.yAxisMinTickPixels),
+    );
+
+    let tickValues = d3
+      .scaleLinear()
+      .domain([0, thresholdDataValue])
+      .nice()
+      .ticks(frontTickCount);
+
     // Novo: Um Set para guardar quais valores vão receber o texto
     let labeledTicks = new Set(tickValues); // Todos da frente recebem rótulo
 
@@ -1308,7 +1387,7 @@ class ScrollBarChart3D extends Visualization {
       // FASE B: Recuar 2*PI iterativamente a partir do topo
       let scrollTicks = [];
       let turns = 1;
-      let targetTheta = maxTheta - (turns * Math.PI * 2);
+      let targetTheta = maxTheta - turns * Math.PI * 2;
 
       while (targetTheta > 0) {
         let lengthAtTurn = 0;
@@ -1326,12 +1405,14 @@ class ScrollBarChart3D extends Visualization {
           t += step;
         }
 
-        let physicalDistance = this.layout.maxYLimit + (remaining - lengthAtTurn);
-        let dataValueAtTurn = (physicalDistance / totalMaxPhysicalLength) * this.maxValue;
+        let physicalDistance =
+          this.layout.maxYLimit + (remaining - lengthAtTurn);
+        let dataValueAtTurn =
+          (physicalDistance / totalMaxPhysicalLength) * this.maxValue;
         scrollTicks.push(dataValueAtTurn);
 
         turns++;
-        targetTheta = maxTheta - (turns * Math.PI * 2);
+        targetTheta = maxTheta - turns * Math.PI * 2;
       }
 
       // FASE C: Processa a visibilidade baseada na porcentagem
@@ -1364,9 +1445,9 @@ class ScrollBarChart3D extends Visualization {
 
       // 1. Verificamos a hierarquia visual desta linha
       const hasLabel = labeledTicks.has(value);
-      
+
       // Se não tiver texto, a grade fica com 15% de opacidade (bem sutil)
-      const gridOpacity = hasLabel ? 0.85 : 0.35; 
+      const gridOpacity = hasLabel ? 0.85 : 0.35;
       // O tracinho do eixo pode ficar com 35% para não sumir totalmente
       const tickOpacity = hasLabel ? 0.85 : 0.35;
 
@@ -1374,7 +1455,7 @@ class ScrollBarChart3D extends Visualization {
       const gridLine = this._createLineFromPoints(
         [new THREE.Vector3(axisX, y, z), new THREE.Vector3(chartRight, y, z)],
         this.settings.yGridColor,
-        gridOpacity
+        gridOpacity,
       );
       this.yAxisGroup.add(gridLine);
 
@@ -1382,7 +1463,7 @@ class ScrollBarChart3D extends Visualization {
       const tickLine = this._createLineFromPoints(
         [new THREE.Vector3(axisX - 0.12, y, z), new THREE.Vector3(axisX, y, z)],
         this.settings.yAxisColor,
-        tickOpacity
+        tickOpacity,
       );
       this.yAxisGroup.add(tickLine);
 
