@@ -27,6 +27,10 @@ class ScrollBarChart3D extends Visualization {
     this.initialDepth = settings?.depth ?? 8;
     this.baseGeometrySpec = null;
     this.layout = null;
+    this.hoveredBar = null;
+    this.highlightMaterial = null;
+    this.raycaster = new THREE.Raycaster();
+    this.pointerNdc = new THREE.Vector2();
 
     this.svg.style("display", "none");
 
@@ -95,14 +99,14 @@ class ScrollBarChart3D extends Visualization {
     // 2. Novo parâmetro: Ângulo de elevação (em graus) para ver por cima do gráfico
     // this.settings.cameraElevationAngle = 3;
     this.settings.lensShiftOffset = 1;
-    this.settings.cameraMargin = 1.25;//1.25;
+    this.settings.cameraMargin = 1.25; //1.25;
     this.settings.cameraMode = "perspective";
 
-    
     // --- Scroll / Pergaminho Settings ---
-    this.settings.maxYLimitRatio = 0.9; 
-    this.settings.maxYLimit = this.settings.maxBarHeight * this.settings.maxYLimitRatio;
-    
+    this.settings.maxYLimitRatio = 0.9;
+    this.settings.maxYLimit =
+      this.settings.maxBarHeight * this.settings.maxYLimitRatio;
+
     // Novas variáveis da espiral
     this.settings.spiralCoreRadius = 0.15; // Tamanho do "miolo" do rolo
     this.settings.spiralGrowthRate = 0.008; // Quão apertada é a curva (espessura do papel)
@@ -172,16 +176,14 @@ class ScrollBarChart3D extends Visualization {
     return super.redraw();
   }
 
-  
-
   updateFoldThreshold(ratio) {
     // Garante que o limiar fique entre 1% e 100%
     this.settings.maxYLimitRatio = Math.max(0.01, Math.min(1.0, ratio));
-    
+
     // Opcional: Reduzir a opacidade/grossura se houver muitas dobras pode ser útil,
     // mas por hora apenas redesenhamos os vértices.
     this._renderBars();
-    
+
     return this;
   }
 
@@ -285,7 +287,7 @@ class ScrollBarChart3D extends Visualization {
       barGap,
       maxBarHeight,
       baseOffsetY,
-      maxYLimit: maxBarHeight,//maxBarHeight * this.settings.maxYLimitRatio, // Substitui o antigo breakStart
+      maxYLimit: maxBarHeight, //maxBarHeight * this.settings.maxYLimitRatio, // Substitui o antigo breakStart
       // zStepDepth: this.settings.zStepDepth,
       yAxisOffsetX: barWidth * this.baseGeometrySpec.axisOffsetToBarRatio,
       labelOffsetY: baseHeight * this.baseGeometrySpec.labelOffsetYRatio,
@@ -338,12 +340,20 @@ class ScrollBarChart3D extends Visualization {
       side: THREE.DoubleSide,
     });
 
+    this.highlightMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(this.settings.color).lerp(
+        new THREE.Color(0xffffff),
+        0.25,
+      ),
+      side: THREE.DoubleSide,
+    });
+
     // 1. Reduzimos a luz ambiente para permitir sombras
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
     // // 2. Luz direcional posicionada acima e levemente à direita
     // let light = new THREE.DirectionalLight(0xffffff, 0.8);
-    // light.position.set(0, 0, -10); 
+    // light.position.set(0, 0, -10);
     // this.scene.add(light);
 
     // // 3. Substituímos o Lambert pelo Standard, que reage melhor à luz
@@ -356,6 +366,8 @@ class ScrollBarChart3D extends Visualization {
 
     if (this.settings.enableRotation) this._bindRotationEvents();
     if (this.settings.enableZoom) this._bindZoomEvents();
+
+    this._bindHoverEvents();
 
     this._animate();
   }
@@ -403,7 +415,6 @@ class ScrollBarChart3D extends Visualization {
     const { minY, maxY } = this._getVerticalBounds();
     const cameraTargetY = (minY + maxY) / 2;
 
-
     // Calculamos o Y usando o ângulo que definimos nas configurações
     // const elevationRad = THREE.MathUtils.degToRad(this.settings.cameraElevationAngle || 0);
     // const cameraY = this.settings.cameraY ?? (cameraTargetY + finalCameraZ * Math.tan(elevationRad));
@@ -425,15 +436,15 @@ class ScrollBarChart3D extends Visualization {
 
     this.camera.position.set(this.settings.cameraX, cameraY, finalCameraZ);
 
-    this.camera.lookAt(0, cameraTargetY, 0);//0, cameraTargetY, 0);
+    this.camera.lookAt(0, cameraTargetY, 0); //0, cameraTargetY, 0);
 
     this.camera.position.multiplyScalar(2.1);
     // this.camera.fov = this.settings.cameraFov * 0.75;
 
-
     // Nós criamos uma tela virtual mais alta e capturamos apenas a metade de baixo.
     // Isso move o ponto de fuga central lá para o alto da sua div real.
-    const shiftAmount = this.settings.height * (this.settings.lensShiftOffset || 0);
+    const shiftAmount =
+      this.settings.height * (this.settings.lensShiftOffset || 0);
     if (shiftAmount > 0) {
       this.camera.setViewOffset(
         this.settings.width,
@@ -441,7 +452,7 @@ class ScrollBarChart3D extends Visualization {
         0,
         shiftAmount, // Corta a tela no topo, empurrando o gráfico visível "para baixo"
         this.settings.width,
-        this.settings.height
+        this.settings.height,
       );
     } else {
       this.camera.clearViewOffset();
@@ -469,13 +480,15 @@ class ScrollBarChart3D extends Visualization {
 
     const { minY, maxY } = this._getVerticalBounds();
     const cameraTargetY = (minY + maxY) / 2;
-    
+
     // --- ELEVAÇÃO ORTOGRÁFICA ---
     // Usamos o ângulo (ex: 12 a 20 graus) para subir a câmera e recuá-la.
     // Na câmera ortográfica, a distância Z não altera o tamanho, apenas a posição física da câmera.
-    const elevationRad = THREE.MathUtils.degToRad(this.settings.cameraElevationAngle || 15);
+    const elevationRad = THREE.MathUtils.degToRad(
+      this.settings.cameraElevationAngle || 15,
+    );
     const distance = 100; // Distância fixa segura
-    
+
     const cameraY = cameraTargetY + distance * Math.sin(elevationRad);
     const finalCameraZ = distance * Math.cos(elevationRad);
 
@@ -650,12 +663,14 @@ class ScrollBarChart3D extends Visualization {
 
     // 1. Calcula a largura total necessária para o painel (do eixo até o fim da última barra)
     const spacing = this.layout.barWidth + this.layout.barGap;
-    const chartLeft = -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
-    const chartRight = ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
-    
+    const chartLeft =
+      -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
+    const chartRight =
+      ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
+
     // Adicionamos uma margem extra para o painel cobrir bem a área do eixo Y
-    const margin = this.layout.barWidth; 
-    const totalWidth = (chartRight - chartLeft) + margin * 2;
+    const margin = this.layout.barWidth;
+    const totalWidth = chartRight - chartLeft + margin * 2;
     const centerX = (chartLeft + chartRight) / 2;
 
     // 2. Gera os vértices usando o limite máximo (o caminho mais longo possível)
@@ -674,14 +689,18 @@ class ScrollBarChart3D extends Visualization {
       depthWrite: false, // Fundamental para não conflitar com a transparência das linhas do eixo
       polygonOffset: true,
       polygonOffsetFactor: 1, // Empurra levemente para o fundo no Z-buffer
-      polygonOffsetUnits: 1
+      polygonOffsetUnits: 1,
     });
 
     this.backgroundMesh = new THREE.Mesh(geometry, material);
-    
+
     // Posiciona no centro do gráfico (com o deslocamento Y que as barras também usam)
     // O leve recuo extra no centerX acompanha o eixo Y
-    this.backgroundMesh.position.set(centerX - (margin / 2), this.layout.baseOffsetY, 0);
+    this.backgroundMesh.position.set(
+      centerX - margin / 2,
+      this.layout.baseOffsetY,
+      0,
+    );
 
     this.chartGroup.add(this.backgroundMesh);
   }
@@ -692,15 +711,15 @@ class ScrollBarChart3D extends Visualization {
 
     /*
      * O comprimento físico total se a barra não fosse dobrada.
-     * Exemplo: se ratio = 0.5 (50%), a barra máxima precisará de 2x a altura 
+     * Exemplo: se ratio = 0.5 (50%), a barra máxima precisará de 2x a altura
      * máxima do gráfico para ser desenhada totalmente.
      */
-    const totalUnfoldedLength = this.layout.maxBarHeight / this.settings.maxYLimitRatio;
+    const totalUnfoldedLength =
+      this.layout.maxBarHeight / this.settings.maxYLimitRatio;
 
     return (value / this.maxValue) * totalUnfoldedLength;
   }
 
-  
   _generateScrollPoints(scaledLength) {
     if (!this.layout) this._updateResponsiveGeometry();
 
@@ -717,8 +736,8 @@ class ScrollBarChart3D extends Visualization {
     if (remaining <= 0) return points;
 
     // 2. Parâmetros da Espiral
-    const a = this.settings.spiralCoreRadius;  
-    const b = this.settings.spiralGrowthRate; 
+    const a = this.settings.spiralCoreRadius;
+    const b = this.settings.spiralGrowthRate;
     const step = 0.1; // Resolução angular (suavidade da curva)
 
     let tempTheta = 0;
@@ -728,10 +747,10 @@ class ScrollBarChart3D extends Visualization {
     // FASE A: Construir a espiral localmente até consumir todo o "remaining"
     while (tempLength < remaining) {
       let r = a + b * tempTheta;
-      
+
       // Cálculo aproximado do comprimento do arco (ds)
       let ds = Math.sqrt(r * r + b * b) * step;
-      
+
       if (tempLength + ds > remaining) {
         // Ajuste fino para cravar exatamente o comprimento da barra
         let exactStep = ((remaining - tempLength) / ds) * step;
@@ -748,7 +767,7 @@ class ScrollBarChart3D extends Visualization {
     // FASE B: Rotação e Translação
     // Precisamos conectar o ÚLTIMO ponto gerado (o mais externo) ao topo da reta.
     const maxPoint = spiralPoints[spiralPoints.length - 1];
-    
+
     // A fórmula da tangente de uma Espiral de Arquimedes
     const tangentAngle = maxPoint.angle + Math.atan2(maxPoint.r, b);
 
@@ -773,13 +792,13 @@ class ScrollBarChart3D extends Visualization {
     for (let i = spiralPoints.length - 1; i >= 0; i--) {
       let p = spiralPoints[i];
       let z = p.r * Math.cos(p.angle + rotation) + offsetZ;
-      
+
       // Calcula o Y original (que enrola para baixo)
       let originalY = p.r * Math.sin(p.angle + rotation) + offsetY;
-      
+
       // Inverte o sentido da espiral espelhando o Y em relação à altura da conexão
       let y = connectY + (connectY - originalY);
-      
+
       points.push({ y, z });
     }
 
@@ -787,12 +806,11 @@ class ScrollBarChart3D extends Visualization {
     let originalCoreY = a * Math.sin(rotation) + offsetY;
     points.push({
       y: connectY + (connectY - originalCoreY),
-      z: a * Math.cos(rotation) + offsetZ
+      z: a * Math.cos(rotation) + offsetZ,
     });
 
     return points;
   }
-
 
   _createFoldedBar(x, scaledLength) {
     if (!this.layout) this._updateResponsiveGeometry();
@@ -821,6 +839,7 @@ class ScrollBarChart3D extends Visualization {
 
     // Adiciona o sólido da barra
     let mesh = new THREE.Mesh(geometry, this.material);
+    mesh.userData.isBarMesh = true;
     group.add(mesh);
 
     // Cria uma instância de cor do Three.js e multiplica a luminosidade por 0.5 (escurecendo-a)
@@ -828,14 +847,14 @@ class ScrollBarChart3D extends Visualization {
 
     // Cria as linhas de contorno apenas nos vincos
     let edgesGeometry = new THREE.EdgesGeometry(geometry, 15); // O 15 é o limite de ângulo
-    let edgesMaterial = new THREE.LineBasicMaterial({ 
-      color: edgeColor, 
+    let edgesMaterial = new THREE.LineBasicMaterial({
+      color: edgeColor,
       linewidth: 1, // Nota: a espessura da linha é restrita em alguns navegadores WebGL
       transparent: true,
-      opacity: 0.7
+      opacity: 0.7,
     });
     let wireframe = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-    
+
     group.add(wireframe);
 
     return group;
@@ -956,35 +975,53 @@ class ScrollBarChart3D extends Visualization {
     this.yAxisGroup = new THREE.Group();
 
     const spacing = this.layout.barWidth + this.layout.barGap;
-    const chartLeft = -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
-    const chartRight = ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
+    const chartLeft =
+      -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
+    const chartRight =
+      ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
     const axisX = chartLeft - this.layout.yAxisOffsetX;
 
     // 1. O eixo mestre agora é apenas uma linha reta
-    const axisHeight = Math.min(this.layout.maxBarHeight, this.layout.maxYLimit);
-    
-    const axisLine = this._createLineFromPoints([
-      new THREE.Vector3(axisX, this.layout.baseOffsetY, 0),
-      new THREE.Vector3(axisX, this.layout.baseOffsetY + axisHeight, 0)
-    ], this.settings.yAxisColor);
-    
+    const axisHeight = Math.min(
+      this.layout.maxBarHeight,
+      this.layout.maxYLimit,
+    );
+
+    const axisLine = this._createLineFromPoints(
+      [
+        new THREE.Vector3(axisX, this.layout.baseOffsetY, 0),
+        new THREE.Vector3(axisX, this.layout.baseOffsetY + axisHeight, 0),
+      ],
+      this.settings.yAxisColor,
+    );
+
     this.yAxisGroup.add(axisLine);
 
     // 2. Descobre qual valor máximo os dados atingem na face frontal
     let thresholdDataValue = this.maxValue;
-    const totalMaxPhysicalLength = this.layout.maxBarHeight / this.settings.maxYLimitRatio;
-    
+    const totalMaxPhysicalLength =
+      this.layout.maxBarHeight / this.settings.maxYLimitRatio;
+
     if (this.layout.maxYLimit < totalMaxPhysicalLength) {
-       thresholdDataValue = (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
+      thresholdDataValue =
+        (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
     }
 
     // 3. Ticks e Labels limitados à face frontal
-    const tickCount = Math.max(2, Math.floor(axisHeight / this.settings.yAxisMinTickPixels));
-    let tickValues = d3.scaleLinear().domain([0, thresholdDataValue]).nice().ticks(tickCount);
+    const tickCount = Math.max(
+      2,
+      Math.floor(axisHeight / this.settings.yAxisMinTickPixels),
+    );
+    let tickValues = d3
+      .scaleLinear()
+      .domain([0, thresholdDataValue])
+      .nice()
+      .ticks(tickCount);
 
     tickValues.forEach((value) => {
       // Cálculo linear simples (sem precisar se preocupar com as dobras em Z)
-      const y = this.layout.baseOffsetY + (value / thresholdDataValue) * axisHeight;
+      const y =
+        this.layout.baseOffsetY + (value / thresholdDataValue) * axisHeight;
       const z = 0;
 
       // Grade traseira
@@ -1011,6 +1048,50 @@ class ScrollBarChart3D extends Visualization {
     this.chartGroup.add(this.yAxisGroup);
   }
 
+  _bindHoverEvents() {
+    const canvas = this.renderer.domElement;
+
+    canvas.addEventListener("pointermove", (e) => {
+      if (this.isDragging) return;
+
+      const rect = canvas.getBoundingClientRect();
+
+      this.pointerNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      this.pointerNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      this.raycaster.setFromCamera(this.pointerNdc, this.camera);
+
+      const intersects = this.raycaster
+        .intersectObjects(this.chartGroup.children, true)
+        .filter((hit) => hit.object.userData?.isBarMesh);
+
+      const hovered = intersects.length > 0 ? intersects[0].object : null;
+
+      if (hovered === this.hoveredBar) return;
+
+      if (this.hoveredBar) {
+        this.hoveredBar.material = this.material;
+      }
+
+      this.hoveredBar = hovered;
+
+      if (hovered) {
+        hovered.material = this.highlightMaterial;
+        canvas.style.cursor = "pointer";
+      } else {
+        canvas.style.cursor = "default";
+      }
+    });
+
+    canvas.addEventListener("pointerleave", () => {
+      if (this.hoveredBar) {
+        this.hoveredBar.material = this.material;
+        this.hoveredBar = null;
+      }
+
+      canvas.style.cursor = "default";
+    });
+  }
 
   _createLineFromPoints(points, color) {
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
