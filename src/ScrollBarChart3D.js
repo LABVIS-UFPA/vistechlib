@@ -106,6 +106,8 @@ class ScrollBarChart3D extends Visualization {
     // Novas variáveis da espiral
     this.settings.spiralCoreRadius = 0.15; // Tamanho do "miolo" do rolo
     this.settings.spiralGrowthRate = 0.008; // Quão apertada é a curva (espessura do papel)
+    this.settings.scrollLabelVisibilityRate = 0.2;// Taxa de texto desenhados na bobina (1.0 = todos, 0.5 = metade)
+    this.settings.useFixedMaxRollRadius = false;
 
     // Detecção de outlier (Pode manter como estava)
     this.settings.outlierRatioThreshold = 3;
@@ -193,6 +195,16 @@ class ScrollBarChart3D extends Visualization {
 
     if (this.scene) {
       this._updateConfiguredCamera(true);
+    }
+
+    return this;
+  }
+
+  setRollRadiusMode(useFixedMaxRollRadius) {
+    this.settings.useFixedMaxRollRadius = !!useFixedMaxRollRadius;
+
+    if (this.scene && this.hasData) {
+      this._renderBars(this.settings.depth);
     }
 
     return this;
@@ -601,6 +613,11 @@ class ScrollBarChart3D extends Visualization {
   }
 
   _renderBars(depth) {
+    if (this.settings.useFixedMaxRollRadius) {
+      this._renderBars2(depth);
+      return;
+    }
+
     this._clearBars();
 
     if (!this.layout) this._updateResponsiveGeometry();
@@ -642,6 +659,61 @@ class ScrollBarChart3D extends Visualization {
       this.settings.showPerspectiveYAxis
     ) {
       this._renderPerspectiveYAxis(depth);
+    }
+  }
+
+  _renderBars2(depth) {
+    this._clearBars();
+
+    if (!this.layout) this._updateResponsiveGeometry();
+
+    // DESENHA O PAINEL DE FUNDO PRIMEIRO
+    this._renderFoldedBackground();
+
+    // 1. GERA O CAMINHO MESTRE (Master Path) UMA ÚNICA VEZ
+    // Usamos o comprimento do outlier máximo para balizar a espiral inteira
+    const maxScaledLength = this._getScaledBarLength(this.maxValue);
+    const masterPath = this._generateScrollPoints(maxScaledLength);
+
+    let spacing = this.layout.barWidth + this.layout.barGap;
+
+    this.d.forEach((d, i) => {
+      let value = +d[this.valueKey];
+      let x = i * spacing - ((this.d.length - 1) * spacing) / 2;
+
+      // 2. Comprimento físico que esta barra específica precisa ter
+      let scaledLength = this._getScaledBarLength(value);
+
+      // 3. Corta o caminho mestre para o tamanho exato da barra
+      let barPoints = this._truncatePath(masterPath, scaledLength);
+
+      // 4. Constrói o 3D passando os pontos já processados
+      let bar = this._createFoldedBar(x, barPoints);
+
+      console.log("bar", bar);
+
+      bar.userData = { datum: d, index: i };
+
+      this.chartGroup.add(bar);
+      this.bars.push(bar);
+
+      let label = this._createTextSprite(d[this.labelKey]);
+      label.position.set(
+        x,
+        this.layout.baseOffsetY - this.layout.labelOffsetY,
+        0,
+      );
+
+      this.chartGroup.add(label);
+      this.bars.push(label);
+    });
+
+    // Renderiza o eixo y somente na camera perspectiva
+    if (
+      this.settings.cameraMode === "perspective" &&
+      this.settings.showPerspectiveYAxis
+    ) {
+      this._renderPerspectiveYAxis2();
     }
   }
 
@@ -700,7 +772,6 @@ class ScrollBarChart3D extends Visualization {
     return (value / this.maxValue) * totalUnfoldedLength;
   }
 
-  
   _generateScrollPoints(scaledLength) {
     if (!this.layout) this._updateResponsiveGeometry();
 
@@ -717,8 +788,8 @@ class ScrollBarChart3D extends Visualization {
     if (remaining <= 0) return points;
 
     // 2. Parâmetros da Espiral
-    const a = this.settings.spiralCoreRadius;  
-    const b = this.settings.spiralGrowthRate; 
+    const a = this.settings.spiralCoreRadius;
+    const b = this.settings.spiralGrowthRate;
     const step = 0.1; // Resolução angular (suavidade da curva)
 
     let tempTheta = 0;
@@ -728,10 +799,10 @@ class ScrollBarChart3D extends Visualization {
     // FASE A: Construir a espiral localmente até consumir todo o "remaining"
     while (tempLength < remaining) {
       let r = a + b * tempTheta;
-      
+
       // Cálculo aproximado do comprimento do arco (ds)
       let ds = Math.sqrt(r * r + b * b) * step;
-      
+
       if (tempLength + ds > remaining) {
         // Ajuste fino para cravar exatamente o comprimento da barra
         let exactStep = ((remaining - tempLength) / ds) * step;
@@ -748,7 +819,7 @@ class ScrollBarChart3D extends Visualization {
     // FASE B: Rotação e Translação
     // Precisamos conectar o ÚLTIMO ponto gerado (o mais externo) ao topo da reta.
     const maxPoint = spiralPoints[spiralPoints.length - 1];
-    
+
     // A fórmula da tangente de uma Espiral de Arquimedes
     const tangentAngle = maxPoint.angle + Math.atan2(maxPoint.r, b);
 
@@ -773,13 +844,13 @@ class ScrollBarChart3D extends Visualization {
     for (let i = spiralPoints.length - 1; i >= 0; i--) {
       let p = spiralPoints[i];
       let z = p.r * Math.cos(p.angle + rotation) + offsetZ;
-      
+
       // Calcula o Y original (que enrola para baixo)
       let originalY = p.r * Math.sin(p.angle + rotation) + offsetY;
-      
+
       // Inverte o sentido da espiral espelhando o Y em relação à altura da conexão
       let y = connectY + (connectY - originalY);
-      
+
       points.push({ y, z });
     }
 
@@ -787,14 +858,54 @@ class ScrollBarChart3D extends Visualization {
     let originalCoreY = a * Math.sin(rotation) + offsetY;
     points.push({
       y: connectY + (connectY - originalCoreY),
-      z: a * Math.cos(rotation) + offsetZ
+      z: a * Math.cos(rotation) + offsetZ,
     });
 
     return points;
   }
 
+  _truncatePath(masterPath, targetLength) {
+    if (targetLength <= 0) return [{ y: 0, z: 0 }];
+
+    const points = [];
+    let accumulatedDistance = 0;
+    
+    // O primeiro ponto sempre entra (a base no chão)
+    points.push(masterPath[0]);
+
+    for (let i = 1; i < masterPath.length; i++) {
+      const p1 = masterPath[i - 1];
+      const p2 = masterPath[i];
+      
+      // Calcula a distância física entre os dois vértices atuais
+      const dist = Math.sqrt(Math.pow(p2.y - p1.y, 2) + Math.pow(p2.z - p1.z, 2));
+
+      if (accumulatedDistance + dist >= targetLength) {
+        // A barra acaba neste segmento. Calculamos a proporção (t) para interpolar a ponta exata
+        const remaining = targetLength - accumulatedDistance;
+        const t = remaining / dist;
+        
+        const finalY = p1.y + (p2.y - p1.y) * t;
+        const finalZ = p1.z + (p2.z - p1.z) * t;
+        
+        points.push({ y: finalY, z: finalZ });
+        break; // Encerra o caminho para esta barra
+      } else {
+        // A barra passa por este vértice inteiro, adiciona e continua
+        points.push(p2);
+        accumulatedDistance += dist;
+      }
+    }
+
+    return points;
+  }
 
   _createFoldedBar(x, scaledLength) {
+
+    if (this.settings.useFixedMaxRollRadius) {
+      return this._createFoldedBar2(x, scaledLength);
+    }
+
     if (!this.layout) this._updateResponsiveGeometry();
 
     let group = new THREE.Group();
@@ -813,6 +924,42 @@ class ScrollBarChart3D extends Visualization {
     // group.add(new THREE.Mesh(geometry, this.material));
 
     // return group;
+    let geometry = this._createPrismFromYZProfile(
+      points,
+      this.layout.barWidth,
+      this.settings.barDepth,
+    );
+
+    // Adiciona o sólido da barra
+    let mesh = new THREE.Mesh(geometry, this.material);
+    mesh.userData.isBarMesh = true;
+    group.add(mesh);
+
+    // Cria uma instância de cor do Three.js e multiplica a luminosidade por 0.5 (escurecendo-a)
+    let edgeColor = new THREE.Color(this.settings.color).multiplyScalar(0.5);
+
+    // Cria as linhas de contorno apenas nos vincos
+    let edgesGeometry = new THREE.EdgesGeometry(geometry, 15); // O 15 é o limite de ângulo
+    let edgesMaterial = new THREE.LineBasicMaterial({
+      color: edgeColor,
+      linewidth: 1, // Nota: a espessura da linha é restrita em alguns navegadores WebGL
+      transparent: true,
+      opacity: 0.7,
+    });
+    let wireframe = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+
+    group.add(wireframe);
+
+    return group;
+  }
+
+  _createFoldedBar2(x, points) {
+    if (!this.layout) this._updateResponsiveGeometry();
+
+    let group = new THREE.Group();
+    group.position.set(x, this.layout.baseOffsetY, 0);
+
+    
     let geometry = this._createPrismFromYZProfile(
       points,
       this.layout.barWidth,
@@ -956,35 +1103,53 @@ class ScrollBarChart3D extends Visualization {
     this.yAxisGroup = new THREE.Group();
 
     const spacing = this.layout.barWidth + this.layout.barGap;
-    const chartLeft = -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
-    const chartRight = ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
+    const chartLeft =
+      -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
+    const chartRight =
+      ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
     const axisX = chartLeft - this.layout.yAxisOffsetX;
 
     // 1. O eixo mestre agora é apenas uma linha reta
-    const axisHeight = Math.min(this.layout.maxBarHeight, this.layout.maxYLimit);
-    
-    const axisLine = this._createLineFromPoints([
-      new THREE.Vector3(axisX, this.layout.baseOffsetY, 0),
-      new THREE.Vector3(axisX, this.layout.baseOffsetY + axisHeight, 0)
-    ], this.settings.yAxisColor);
-    
+    const axisHeight = Math.min(
+      this.layout.maxBarHeight,
+      this.layout.maxYLimit,
+    );
+
+    const axisLine = this._createLineFromPoints(
+      [
+        new THREE.Vector3(axisX, this.layout.baseOffsetY, 0),
+        new THREE.Vector3(axisX, this.layout.baseOffsetY + axisHeight, 0),
+      ],
+      this.settings.yAxisColor,
+    );
+
     this.yAxisGroup.add(axisLine);
 
     // 2. Descobre qual valor máximo os dados atingem na face frontal
     let thresholdDataValue = this.maxValue;
-    const totalMaxPhysicalLength = this.layout.maxBarHeight / this.settings.maxYLimitRatio;
-    
+    const totalMaxPhysicalLength =
+      this.layout.maxBarHeight / this.settings.maxYLimitRatio;
+
     if (this.layout.maxYLimit < totalMaxPhysicalLength) {
-       thresholdDataValue = (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
+      thresholdDataValue =
+        (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
     }
 
     // 3. Ticks e Labels limitados à face frontal
-    const tickCount = Math.max(2, Math.floor(axisHeight / this.settings.yAxisMinTickPixels));
-    let tickValues = d3.scaleLinear().domain([0, thresholdDataValue]).nice().ticks(tickCount);
+    const tickCount = Math.max(
+      2,
+      Math.floor(axisHeight / this.settings.yAxisMinTickPixels),
+    );
+    let tickValues = d3
+      .scaleLinear()
+      .domain([0, thresholdDataValue])
+      .nice()
+      .ticks(tickCount);
 
     tickValues.forEach((value) => {
       // Cálculo linear simples (sem precisar se preocupar com as dobras em Z)
-      const y = this.layout.baseOffsetY + (value / thresholdDataValue) * axisHeight;
+      const y =
+        this.layout.baseOffsetY + (value / thresholdDataValue) * axisHeight;
       const z = 0;
 
       // Grade traseira
@@ -1012,13 +1177,169 @@ class ScrollBarChart3D extends Visualization {
   }
 
 
-  _createLineFromPoints(points, color) {
+  _renderPerspectiveYAxis2() {
+    if (!this.layout) this._updateResponsiveGeometry();
+
+    this.yAxisGroup = new THREE.Group();
+
+    const spacing = this.layout.barWidth + this.layout.barGap;
+    const chartLeft = -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
+    const chartRight = ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
+    const axisX = chartLeft - this.layout.yAxisOffsetX;
+
+    // 1. Gera o Caminho Mestre para o Eixo Y
+    const maxScaledLength = this._getScaledBarLength(this.maxValue);
+    const axisMasterPath = this._generateScrollPoints(maxScaledLength);
+
+    // 2. Desenha a linha mestra contínua do eixo
+    const axisPoints3D = axisMasterPath.map(
+      p => new THREE.Vector3(axisX, this.layout.baseOffsetY + p.y, p.z)
+    );
+    const axisLine = this._createLineFromPoints(axisPoints3D, this.settings.yAxisColor);
+    this.yAxisGroup.add(axisLine);
+
+    // 3. Define onde termina a reta e começa a espiral
+    let thresholdDataValue = this.maxValue;
+    const totalMaxPhysicalLength = this.layout.maxBarHeight / this.settings.maxYLimitRatio;
+    
+    if (this.layout.maxYLimit < totalMaxPhysicalLength) {
+       thresholdDataValue = (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
+    }
+
+    // 4. Calcula os Ticks da Face Frontal (Linear padrão)
+    const axisHeight = Math.min(this.layout.maxBarHeight, this.layout.maxYLimit);
+    const frontTickCount = Math.max(2, Math.floor(axisHeight / this.settings.yAxisMinTickPixels));
+    
+    let tickValues = d3.scaleLinear().domain([0, thresholdDataValue]).nice().ticks(frontTickCount);
+    
+    // Novo: Um Set para guardar quais valores vão receber o texto
+    let labeledTicks = new Set(tickValues); // Todos da frente recebem rótulo
+
+    // 5. Calcula os Ticks da Bobina: Exatamente uma marcação por volta (2*PI)
+    if (thresholdDataValue < this.maxValue) {
+      const a = this.settings.spiralCoreRadius;
+      const b = this.settings.spiralGrowthRate;
+      const step = 0.1;
+
+      let remaining = totalMaxPhysicalLength - this.layout.maxYLimit;
+      let tempTheta = 0;
+      let tempLength = 0;
+
+      // FASE A: Descobrir o ângulo total (maxTheta) da espiral
+      while (tempLength < remaining) {
+        let r = a + b * tempTheta;
+        let ds = Math.sqrt(r * r + b * b) * step;
+        if (tempLength + ds > remaining) {
+          let exactStep = ((remaining - tempLength) / ds) * step;
+          tempTheta += exactStep;
+          tempLength = remaining;
+        } else {
+          tempTheta += step;
+          tempLength += ds;
+        }
+      }
+      const maxTheta = tempTheta;
+
+      // FASE B: Recuar 2*PI iterativamente a partir do topo
+      let scrollTicks = [];
+      let turns = 1;
+      let targetTheta = maxTheta - (turns * Math.PI * 2);
+
+      while (targetTheta > 0) {
+        let lengthAtTurn = 0;
+        let t = 0;
+        while (t < targetTheta) {
+          let r = a + b * t;
+          let ds = Math.sqrt(r * r + b * b) * step;
+          if (t + step > targetTheta) {
+            let exactStep = targetTheta - t;
+            ds = Math.sqrt(r * r + b * b) * exactStep;
+            lengthAtTurn += ds;
+            break;
+          }
+          lengthAtTurn += ds;
+          t += step;
+        }
+
+        let physicalDistance = this.layout.maxYLimit + (remaining - lengthAtTurn);
+        let dataValueAtTurn = (physicalDistance / totalMaxPhysicalLength) * this.maxValue;
+        scrollTicks.push(dataValueAtTurn);
+
+        turns++;
+        targetTheta = maxTheta - (turns * Math.PI * 2);
+      }
+
+      // FASE C: Processa a visibilidade baseada na porcentagem
+      const rate = this.settings.scrollLabelVisibilityRate;
+      const labelStep = rate > 0 ? Math.max(1, Math.round(1 / rate)) : Infinity;
+
+      scrollTicks.reverse().forEach((val, index) => {
+        tickValues.push(val);
+        // O módulo decide se esse tick também ganha um rótulo de texto
+        if (index % labelStep === 0) {
+          labeledTicks.add(val);
+        }
+      });
+    }
+
+    // Garante que o valor máximo absoluto sempre tenha marca e texto
+    if (tickValues[tickValues.length - 1] !== this.maxValue) {
+      tickValues.push(this.maxValue);
+      labeledTicks.add(this.maxValue);
+    }
+
+    // 6. Desenha as linhas e os textos
+    tickValues.forEach((value) => {
+      const scaledLength = this._getScaledBarLength(value);
+      const pathAtValue = this._truncatePath(axisMasterPath, scaledLength);
+      const pt = pathAtValue[pathAtValue.length - 1];
+
+      const y = this.layout.baseOffsetY + pt.y;
+      const z = pt.z;
+
+      // 1. Verificamos a hierarquia visual desta linha
+      const hasLabel = labeledTicks.has(value);
+      
+      // Se não tiver texto, a grade fica com 15% de opacidade (bem sutil)
+      const gridOpacity = hasLabel ? 0.85 : 0.35; 
+      // O tracinho do eixo pode ficar com 35% para não sumir totalmente
+      const tickOpacity = hasLabel ? 0.85 : 0.35;
+
+      // Desenha a linha de grade (para TODOS os ticks)
+      const gridLine = this._createLineFromPoints(
+        [new THREE.Vector3(axisX, y, z), new THREE.Vector3(chartRight, y, z)],
+        this.settings.yGridColor,
+        gridOpacity
+      );
+      this.yAxisGroup.add(gridLine);
+
+      // Desenha o tracinho lateral (para TODOS os ticks)
+      const tickLine = this._createLineFromPoints(
+        [new THREE.Vector3(axisX - 0.12, y, z), new THREE.Vector3(axisX, y, z)],
+        this.settings.yAxisColor,
+        tickOpacity
+      );
+      this.yAxisGroup.add(tickLine);
+
+      // Desenha o Rótulo de Texto SOMENTE se o valor estiver no Set
+      if (hasLabel) {
+        const label = this._createTextSprite(this._formatYAxisValue(value));
+        label.position.set(axisX - 0.55, y, z);
+        label.scale.set(0.9, 0.45, 1);
+        this.yAxisGroup.add(label);
+      }
+    });
+
+    this.chartGroup.add(this.yAxisGroup);
+  }
+
+  _createLineFromPoints(points, color, opacity = 0.85) {
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
     const material = new THREE.LineBasicMaterial({
       color,
       transparent: true,
-      opacity: 0.85,
+      opacity: opacity,
     });
 
     return new THREE.Line(geometry, material);

@@ -28,6 +28,11 @@
             </select>
         </div>
 
+        <div style="display:flex; align-items:center; gap:8px;">
+            <input id="fixedRollRadius" type="checkbox" />
+            <label for="fixedRollRadius">Raio fixo (rolo máximo)</label>
+        </div>
+
         <div>
             <button id="btnReset">Resetar Rotação</button>
             <button id="btnToggleAutoReturn">Auto retorno: ON</button>
@@ -92,6 +97,7 @@
         const thresholdSlider = document.getElementById('foldThreshold');
         const thresholdValueText = document.getElementById('thresholdValue');
         const cameraModeSelect = document.getElementById('cameraMode');
+        const fixedRollRadiusCheckbox = document.getElementById('fixedRollRadius');
         const btnReset = document.getElementById('btnReset');
         const btnToggleAutoReturn = document.getElementById('btnToggleAutoReturn');
 
@@ -117,6 +123,11 @@
         // Alternar câmera
         cameraModeSelect.addEventListener('change', function (event) {
             chart.setCameraMode(event.target.value);
+        });
+
+        // Alternar modo de enrolamento: raio variável x raio fixo (maior rolo)
+        fixedRollRadiusCheckbox.addEventListener('change', function (event) {
+            chart.setRollRadiusMode(event.target.checked);
         });
 
         // Resetar view
