@@ -702,8 +702,7 @@ class ScrollBarChart3D extends Visualization {
 
       // 4. Constrói o 3D passando os pontos já processados
       let bar = this._createFoldedBar(x, barPoints);
-
-      console.log("bar", bar);
+      
 
       bar.userData = { datum: d, index: i };
 
