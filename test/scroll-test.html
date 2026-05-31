@@ -15,7 +15,8 @@
         <div style="display:flex; align-items:center; gap:10px;">
             <label for="foldThreshold">Limiar de Dobra (Teto Y):</label>
             <!-- O range vai de 0.01 (1%) a 1.0 (100%). Começamos em 1.0 para mostrar a transição fluida a partir do estado original -->
-            <input id="foldThreshold" type="range" min="0.01" max="1.0" step="0.01" value="1.0" />
+            <!-- <input id="foldThreshold" type="range" min="0.01" max="1.0" step="0.01" value="1.0" /> -->
+            <input id="foldThreshold" type="range" min="0" max="100" step="0.1" value="100" />
             <span id="thresholdValue" style="min-width: 45px; font-weight: bold;">100%</span>
         </div>
 
@@ -80,6 +81,13 @@
 
         chart.data(data);
 
+
+        // Configuração matemática para a escala logarítmica (1% a 100%)
+        const minRatio = 0.01;
+        const maxRatio = 1.0;
+        const minLog = Math.log(minRatio);
+        const maxLog = Math.log(maxRatio);
+
         // Referências da UI
         const thresholdSlider = document.getElementById('foldThreshold');
         const thresholdValueText = document.getElementById('thresholdValue');
@@ -89,8 +97,20 @@
 
         // Evento que ativa a "constância de objeto" chamando a função que criamos no Passo 3
         thresholdSlider.addEventListener('input', function (event) {
-            const ratio = Number(event.target.value);
-            thresholdValueText.innerText = Math.round(ratio * 100) + '%';
+            // const ratio = Number(event.target.value);
+            // thresholdValueText.innerText = Math.round(ratio * 100) + '%';
+            // chart.updateFoldThreshold(ratio);
+            // 1. Lê o valor linear do slider (0 a 100)
+            const linearValue = Number(event.target.value);
+
+            // 2. Transforma o valor linear na escala logarítmica (0.01 a 1.0)
+            const scaleFactor = linearValue / 100;
+            const ratio = Math.exp(minLog + scaleFactor * (maxLog - minLog));
+
+            // 3. Formata o valor na tela (ex: 12.5%)
+            thresholdValueText.innerText = (ratio * 100).toFixed(1) + '%';
+
+            // 4. Envia o ratio matemático correto para a visualização
             chart.updateFoldThreshold(ratio);
         });
 
