@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR" style="width:100%;height:100%;">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Combined 3D Charts Test - Vistechlib</title>
+    <script src="bundle.js"></script>
+</head>
+
+<body style="width:100%;height:100%;margin:0;font-family:Arial, sans-serif; display:flex; flex-direction:column;">
+
+    <body
+        style="width:100%;min-height:100vh;margin:0;font-family:Arial, sans-serif; display:flex; flex-direction:column;">
+
+        <div
+            style="padding:12px; display:flex; align-items:center; flex-wrap:wrap; gap:20px; background-color: #f8f9fa; border-bottom: 1px solid #ddd;">
+
+            <!-- Botão principal para alternar as visualizações -->
+            <button id="btnSwitchChart"
+                style="padding: 10px 18px; font-size: 14px; font-weight: bold; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                Gráfico Atual: Carregando...
+            </button>
+
+            <div style="width: 1px; height: 30px; background-color: #ccc;"></div>
+
+            <!-- Controles exclusivos do PSB -->
+            <div id="psbControls" style="display:flex; align-items:center; gap:15px;">
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <label for="depth" style="font-size:13px;">Profundidade:</label>
+                    <input id="depth" type="range" min="0" max="50" step="0.2" value="8" />
+                </div>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <label for="breakPosition" style="font-size:13px;">Posição da quebra:</label>
+                    <input id="breakPosition" type="range" min="0.2" max="0.85" step="0.01" value="0.4" />
+                </div>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <label for="breakHeight" style="font-size:13px;">Tamanho quebra:</label>
+                    <input id="breakHeight" type="range" min="0.2" max="4" step="0.1" value="1.4" />
+                </div>
+            </div>
+
+            <!-- Controles exclusivos do Scroll e Worm -->
+            <div id="foldControls" style="display:none; align-items:center; gap:15px;">
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <label for="foldThreshold" style="font-size:13px;">Limiar de Dobra (Teto Y):</label>
+                    <input id="foldThreshold" type="range" min="0.01" max="1.0" step="0.01" value="1.0" />
+                    <span id="thresholdValue" style="min-width: 40px; font-weight: bold; font-size: 13px;">100%</span>
+                </div>
+            </div>
+
+            <div style="width: 1px; height: 30px; background-color: #ccc;"></div>
+
+            <!-- Controles globais (Câmera e Interação) -->
+            <div style="display:flex; align-items:center; gap:10px;">
+                <label for="baseSelector" style="font-size:13px;">Base:</label>
+                <select id="baseSelector" style="padding:4px;">
+                    <option value="1" selected>Base 1</option>
+                    <option value="2">Base 2</option>
+                </select>
+            </div>
+
+            <!-- Novos Controles para Gerar a Base Dinamicamente na Tela -->
+            <div style="display:flex; align-items:center; gap:8px; background: #e9ecef; padding: 4px 8px; border-radius: 4px; border: 1px solid #ced4da;">
+                <label style="font-size:13px; font-weight:bold; color: #495057;">Gerador:</label>
+                <label for="inputTotal" style="font-size:13px;">Qtd:</label>
+                <input id="inputTotal" type="number" value="15" min="3" max="100" style="width:45px; padding:2px; border: 1px solid #ccc; border-radius: 3px;" />
+                <label for="inputOutlier" style="font-size:13px;">Outliers:</label>
+                <input id="inputOutlier" type="number" value="1" min="0" max="20" style="width:40px; padding:2px; border: 1px solid #ccc; border-radius: 3px;" />
+                <label for="inputPrecision" style="font-size:13px;">Precisão:</label>
+                <input id="inputPrecision" type="number" value="2" min="0" max="5" style="width:40px; padding:2px; border: 1px solid #ccc; border-radius: 3px;" />
+                <button id="btnGenerateData" style="padding: 4px 10px; font-size:12px; font-weight:bold; cursor:pointer; background: #28a745; color: white; border: none; border-radius: 3px;">Gerar</button>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px;">
+                <label for="cameraMode" style="font-size:13px;">Câmera:</label>
+                <select id="cameraMode" style="padding:4px;">
+                    <option value="perspective" selected>Perspectiva</option>
+                    <option value="orthographic">Ortográfica</option>
+                </select>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button id="btnReset" style="padding: 6px 12px; cursor:pointer;">Resetar View</button>
+                <button id="btnToggleAutoReturn" style="padding: 6px 12px; cursor:pointer;">Auto retorno: ON</button>
+            </div>
+        </div>
+
+        <div id="canvasTest" style="flex: 1; width:100%; overflow:hidden;"></div>
+
+        <script>
+            // Função auxiliar para gerar números aleatórios
+            function getRandomInRange(min, max, isInt = false) {
+                const val = Math.random() * (max - min) + min;
+                return isInt ? Math.round(val) : val;
+            }
+
+            // Função para gerar os dados dinamicamente
+            function generateData(totalValues, options = {}) {
+                // Gerar aleatoriamente os valores de basePower e outlierPower
+                const basePower = getRandomInRange(1, 4, true);
+                const outlierPower = getRandomInRange(1, 2, true);
+                let crescimento = 1;
+
+                const config = {
+                    basePower,
+                    outlierPower,
+                    outlierCount: 3,
+                    precision: 1,
+                    fatorCrescimento: 0,
+                    ...options,
+                };
+
+                if (config.outlierCount >= totalValues) {
+                    throw new Error("O número de outliers deve ser menor que totalValues");
+                }
+
+                let letterIndex = 0;
+
+                // Gerar valores normais
+                const normalScale = Math.pow(10, config.basePower);
+                const normalData = [];
+
+                for (let i = 0; i < totalValues - config.outlierCount; i++) {
+                    let randomValue = getRandomInRange(1 * normalScale, 9 * normalScale);
+                    randomValue = randomValue * crescimento;
+                    crescimento += config.fatorCrescimento;
+
+                    normalData.push({
+                        label: String.fromCharCode(65 + letterIndex++),
+                        valor: parseFloat(randomValue.toFixed(config.precision)),
+                    });
+                }
+
+                // Gerar outliers
+                const outlierScale = Math.pow(10, config.basePower + config.outlierPower);
+                const outlierData = [];
+
+                for (let i = 0; i < config.outlierCount; i++) {
+                    const randomValue = getRandomInRange(2 * outlierScale, 9 * outlierScale);
+                    outlierData.push({
+                        label: String.fromCharCode(65 + letterIndex++),
+                        valor: parseFloat(randomValue.toFixed(config.precision)),
+                    });
+                }
+
+                // Combinar e retornar todos os dados
+                return [...normalData, ...outlierData];
+            }
+
+            // Configurando as bases predefinidas
+            const novaBases = {
+                1: generateData(15, {
+                    outlierCount: 1,
+                    precision: 2,
+                }),
+                2: generateData(15, {
+                    outlierCount: 2,
+                    precision: 2,
+                })
+            };
+            let currentData = novaBases[1];
+
+            // Definição das 3 visualizações disponíveis
+            const chartTypes = [
+                { id: 'psb', name: 'Perspective Scale Break', classRef: vistechlib.PerspectiveScaleBreakBarChart },
+                { id: 'scroll', name: 'Scroll Bar Chart', classRef: vistechlib.ScrollBarChart3D },
+                { id: 'worm', name: 'Worm Bar Chart', classRef: vistechlib.WormBarChart3D }
+            ];
+
+            let currentChart = null;
+            let currentChartIndex = 0;
+            let autoReturnState = true;
+
+            // Elementos da UI
+            const container = document.getElementById('canvasTest');
+            const btnSwitchChart = document.getElementById('btnSwitchChart');
+            const psbControls = document.getElementById('psbControls');
+            const foldControls = document.getElementById('foldControls');
+            const thresholdValueText = document.getElementById('thresholdValue');
+            const btnToggleAutoReturn = document.getElementById('btnToggleAutoReturn');
+
+            function renderCurrentChart() {
+                // Destrói o gráfico anterior antes de instanciar o novo
+                if (currentChart) {
+                    currentChart.destroy();
+                    container.innerHTML = ""; // Esvazia o HTML para evitar sobreposição
+                }
+
+                const chartType = chartTypes[currentChartIndex];
+                btnSwitchChart.innerText = `Gráfico Atual: ${chartType.name} (Clique para Mudar)`;
+
+                // Alterna a exibição dos controles específicos
+                if (chartType.id === 'psb') {
+                    psbControls.style.display = 'flex';
+                    foldControls.style.display = 'none';
+                } else {
+                    psbControls.style.display = 'none';
+                    foldControls.style.display = 'flex';
+                }
+
+                // Configurações base compartilhadas
+                let settings = {
+                    size_type: 'fit',
+                    valueKey: 'valor',
+                    labelKey: 'label',
+                    cameraMode: document.getElementById('cameraMode').value,
+                    outlierRatioThreshold: 3
+                };
+
+                // Preenche propriedades específicas da instância atual
+                if (chartType.id === 'psb') {
+                    settings.depth = Number(document.getElementById('depth').value);
+                    settings.maxDepth = 50;
+                    settings.breakStartRatio = Number(document.getElementById('breakPosition').value);
+                    settings.foldVisualHeight = Number(document.getElementById('breakHeight').value);
+                } else {
+                    settings.maxYLimitRatio = Number(document.getElementById('foldThreshold').value);
+                    settings.zStepDepth = 1.5;
+                }
+
+                // Instancia
+                currentChart = new chartType.classRef(container, settings);
+
+                currentChart.data(currentData);
+                currentChart.autoReturnEnabled = autoReturnState;
+            }
+
+            // Inicializa a primeira renderização
+            renderCurrentChart();
+
+            // Eventos Globais
+            btnSwitchChart.addEventListener('click', () => {
+                currentChartIndex = (currentChartIndex + 1) % chartTypes.length;
+                renderCurrentChart();
+            });
+
+            document.getElementById('cameraMode').addEventListener('change', e => {
+                if (currentChart) currentChart.setCameraMode(e.target.value);
+            });
+
+            // Alternar base de dados
+            document.getElementById('baseSelector').addEventListener('change', e => {
+                currentData = novaBases[e.target.value];
+                // Se o gráfico já estiver instanciado, apenas passa os novos dados para atualizar
+                if (currentChart) currentChart.data(currentData);
+            });
+
+            // Gerar base dinamicamente pelos inputs da tela
+            document.getElementById('btnGenerateData').addEventListener('click', () => {
+                const total = parseInt(document.getElementById('inputTotal').value);
+                const outliers = parseInt(document.getElementById('inputOutlier').value);
+                const precision = parseInt(document.getElementById('inputPrecision').value);
+
+                try {
+                    currentData = generateData(total, {
+                        outlierCount: outliers,
+                        precision: precision
+                    });
+                    if (currentChart) currentChart.data(currentData);
+                } catch (error) {
+                    alert("Erro ao gerar dados: " + error.message);
+                }
+            });
+
+            document.getElementById('btnReset').addEventListener('click', () => {
+                if (currentChart && currentChart._returnToInitialRotation) currentChart._returnToInitialRotation();
+            });
+
+            btnToggleAutoReturn.addEventListener('click', () => {
+                autoReturnState = !autoReturnState;
+                if (currentChart) currentChart.autoReturnEnabled = autoReturnState;
+                btnToggleAutoReturn.innerText = autoReturnState ? 'Auto retorno: ON' : 'Auto retorno: OFF';
+            });
+
+            // Eventos dos Controles Específicos do PSB
+            document.getElementById('depth').addEventListener('input', e => { if (currentChart && currentChart.updateDepth) currentChart.updateDepth(Number(e.target.value)); });
+            document.getElementById('breakPosition').addEventListener('input', e => { if (currentChart && currentChart.updateBreakStartRatio) currentChart.updateBreakStartRatio(Number(e.target.value)); });
+            document.getElementById('breakHeight').addEventListener('input', e => { if (currentChart && currentChart.updateFoldVisualHeight) currentChart.updateFoldVisualHeight(Number(e.target.value)); });
+
+            // Eventos dos Controles Específicos do Scroll/Worm
+            document.getElementById('foldThreshold').addEventListener('input', e => {
+                thresholdValueText.innerText = Math.round(Number(e.target.value) * 100) + '%';
+                if (currentChart && currentChart.updateFoldThreshold) currentChart.updateFoldThreshold(Number(e.target.value));
+            });
+
+            window.addEventListener('resize', () => { if (currentChart) currentChart.resize(); });
+        </script>
+    </body>
+
+</html>
