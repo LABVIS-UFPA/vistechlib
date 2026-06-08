@@ -126,8 +126,8 @@ class ScrollBarChart3D extends Visualization {
     // Controlar inspeção 3d
     this.settings.enableAutoReturnToggle = true;
     this.settings.autoReturnDuration = 600;
-    this.settings.hoverInspectTiltAngle = 20;
-    this.settings.hoverInspectTurnAngle = 70;
+    this.settings.hoverInspectTiltAngle = 10;
+    this.settings.hoverInspectTurnAngle = 90;
     this.settings.hoverInspectDuration = 280;
   }
 
