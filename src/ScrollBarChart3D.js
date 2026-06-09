@@ -980,6 +980,8 @@ class ScrollBarChart3D extends Visualization {
 
     group.add(wireframe);
 
+    this._createBarHitbox(group, scaledLength);
+
     return group;
   }
 
@@ -1223,9 +1225,10 @@ class ScrollBarChart3D extends Visualization {
 
       const intersects = this.raycaster
         .intersectObjects(this.chartGroup.children, true)
-        .filter((hit) => hit.object.userData?.isBarMesh);
+        .filter((hit) => hit.object.userData?.isBarHitbox);
 
-      const hovered = intersects.length > 0 ? intersects[0].object : null;
+      const hovered =
+        intersects.length > 0 ? intersects[0].object.userData.barMesh : null;
 
       if (hovered === this.hoveredBar) return;
 
@@ -1605,6 +1608,37 @@ class ScrollBarChart3D extends Visualization {
     });
 
     return new THREE.Line(geometry, material);
+  }
+
+  _createBarHitbox(barGroup, scaledLength) {
+    const height = Math.min(scaledLength, this.layout.maxYLimit);
+
+    const geometry = new THREE.BoxGeometry(
+      this.layout.barWidth,
+      height,
+      Math.max(this.layout.barWidth, 0.35)
+    );
+
+    const material = new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+    });
+
+    const hitbox = new THREE.Mesh(geometry, material);
+
+    hitbox.position.set(
+      0,
+      height / 2,
+      0
+    );
+
+    hitbox.userData.isBarHitbox = true;
+    hitbox.userData.barMesh = barGroup.children.find(
+      (child) => child.userData?.isBarMesh
+    );
+
+    barGroup.add(hitbox);
   }
 
   _formatYAxisValue(value) {
