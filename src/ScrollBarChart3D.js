@@ -1203,6 +1203,8 @@ class ScrollBarChart3D extends Visualization {
       this.yAxisGroup.add(label);
     });
 
+    this._renderFoldContinuationAxis();
+
     this.chartGroup.add(this.yAxisGroup);
   }
 
@@ -1494,7 +1496,103 @@ class ScrollBarChart3D extends Visualization {
       }
     });
 
+    this._renderFoldContinuationAxis();
+
     this.chartGroup.add(this.yAxisGroup);
+  }
+
+  _renderFoldContinuationAxis() {
+    if (!this.layout) this._updateResponsiveGeometry();
+
+    const hasFoldedBar = this.d.some((d) => {
+      const value = +d[this.valueKey];
+      return this._getScaledBarLength(value) > this.layout.maxYLimit;
+    });
+
+    if (!hasFoldedBar) return;
+
+    const spacing = this.layout.barWidth + this.layout.barGap;
+
+    const chartLeft =
+      -((this.d.length - 1) * spacing) / 2 - this.layout.barWidth / 2;
+
+    const chartRight =
+      ((this.d.length - 1) * spacing) / 2 + this.layout.barWidth / 2;
+
+    const axisX = chartLeft - this.layout.yAxisOffsetX;
+
+    const axisY = this.layout.baseOffsetY + this.layout.maxYLimit;
+
+    const maxScaledLength = this._getScaledBarLength(this.maxValue);
+    const axisPath = this._generateScrollPoints(maxScaledLength);
+
+    const foldPoints = axisPath.filter((p) => p.y >= this.layout.maxYLimit);
+
+    if (foldPoints.length < 2) return;
+
+    const maxFoldPoint = axisPath.reduce((deepest, p) => {
+      return p.z < deepest.z ? p : deepest;
+    }, axisPath[0]);
+
+    const axisStartZ = 0;
+    const axisEndZ = maxFoldPoint.z;
+
+    const axisLine = this._createLineFromPoints(
+      [
+        new THREE.Vector3(axisX, axisY, axisStartZ),
+        new THREE.Vector3(axisX, axisY, axisEndZ),
+      ],
+      this.settings.yAxisColor,
+      0.95
+    );
+
+    this.yAxisGroup.add(axisLine);
+
+    const totalMaxPhysicalLength =
+      this.layout.maxBarHeight / this.settings.maxYLimitRatio;
+
+    const thresholdDataValue =
+      (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
+
+    const tickValues = d3
+      .scaleLinear()
+      .domain([thresholdDataValue, this.maxValue])
+      .nice()
+      .ticks(6)
+      .filter((value) => value > thresholdDataValue);
+
+    tickValues.forEach((value, index) => {
+      const tickZ =
+        axisStartZ + ((index + 1) / tickValues.length) * (axisEndZ - axisStartZ);
+
+      const tickLine = this._createLineFromPoints(
+        [
+          new THREE.Vector3(axisX - 0.12, axisY, tickZ),
+          new THREE.Vector3(axisX + 0.12, axisY, tickZ),
+        ],
+        this.settings.yAxisColor,
+        0.85
+      );
+
+      this.yAxisGroup.add(tickLine);
+
+      const gridLine = this._createLineFromPoints(
+        [
+          new THREE.Vector3(axisX, axisY, tickZ),
+          new THREE.Vector3(chartRight, axisY, tickZ),
+        ],
+        this.settings.yGridColor,
+        0.45
+      );
+
+      this.yAxisGroup.add(gridLine);
+
+      const label = this._createTextSprite(this._formatYAxisValue(value));
+      label.position.set(axisX - 0.45, axisY + 0.25, tickZ);
+      label.scale.set(0.8, 0.4, 1);
+
+      this.yAxisGroup.add(label);
+    });
   }
 
   _createLineFromPoints(points, color, opacity = 0.85) {
