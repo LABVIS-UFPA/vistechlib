@@ -653,7 +653,11 @@ class ScrollBarChart3D extends Visualization {
       // Todas as barras são desenhadas pela mesma montagem
       let bar = this._createFoldedBar(x, scaledLength);
 
-      bar.userData = { datum: d, index: i };
+      bar.userData = {
+        datum: d,
+        index: i,
+        hasFold: scaledLength > this.layout.maxYLimit
+      };
 
       this.chartGroup.add(bar);
       this.bars.push(bar);
@@ -706,7 +710,11 @@ class ScrollBarChart3D extends Visualization {
       // 4. Constrói o 3D passando os pontos já processados
       let bar = this._createFoldedBar(x, barPoints);
 
-      bar.userData = { datum: d, index: i };
+      bar.userData = {
+        datum: d,
+        index: i,
+        hasFold: scaledLength > this.layout.maxYLimit
+      };
 
       this.chartGroup.add(bar);
       this.bars.push(bar);
@@ -1221,14 +1229,20 @@ class ScrollBarChart3D extends Visualization {
 
       if (this.hoveredBar) {
         this.hoveredBar.material = this.material;
-        this._animateBarInspect(this.hoveredBar.parent, false);
+        if (this.hoveredBar.parent?.userData?.hasFold) {
+          this._animateBarInspect(this.hoveredBar.parent, false);
+        }
       }
 
       this.hoveredBar = hovered;
 
       if (hovered) {
         hovered.material = this.highlightMaterial;
-        this._animateBarInspect(hovered.parent, true);
+
+        if (hovered.parent?.userData?.hasFold) {
+          this._animateBarInspect(hovered.parent, true);
+        }
+
         canvas.style.cursor = "pointer";
       } else {
         canvas.style.cursor = "default";
@@ -1238,7 +1252,11 @@ class ScrollBarChart3D extends Visualization {
     canvas.addEventListener("pointerleave", () => {
       if (this.hoveredBar) {
         this.hoveredBar.material = this.material;
-        this._animateBarInspect(this.hoveredBar.parent, false);
+
+        if (this.hoveredBar.parent?.userData?.hasFold) {
+          this._animateBarInspect(this.hoveredBar.parent, false);
+        }
+
         this.hoveredBar = null;
       }
 
@@ -1515,7 +1533,7 @@ class ScrollBarChart3D extends Visualization {
 
         const nextDistance = THREE.MathUtils.clamp(
           currentDistance +
-            zoomDirection * this.settings.zoomSpeed * currentDistance,
+          zoomDirection * this.settings.zoomSpeed * currentDistance,
           this.settings.minCameraDistance,
           this.settings.maxCameraDistance,
         );
