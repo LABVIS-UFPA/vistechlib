@@ -28,8 +28,10 @@
         }
 
         .container {
+            position: relative;
+            overflow: hidden;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             background-color: var(--light-color);
             padding: 2rem 3rem;
             border-radius: 8px;
@@ -50,7 +52,7 @@
             display: none;
         }
 
-        h1, h2 {
+        h1, h2, h3 {
             text-align: center;
             color: var(--primary-color);
         }
@@ -61,7 +63,7 @@
         }
 
         .tcle-content {
-            height: 350px;
+            height: 280px;
             overflow-y: scroll;
             border: 1px solid #ccc;
             padding: 1rem;
@@ -96,131 +98,422 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+
+        .placeholder-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px dashed var(--primary-color);
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.25rem;
+        }
+
+        .actions button {
+            margin: 0;
+        }
+
+        .small-note {
+            margin-top: 0.75rem;
+            font-size: 0.92rem;
+            opacity: 0.85;
+            text-align: center;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .progress-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(69, 123, 157, 0.18);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary-color);
+            transition: width 0.25s ease;
+        }
+
+        .field {
+            margin: 0.75rem 0;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 0.6rem 0.7rem;
+            border: 1px solid #c7d2dc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font: inherit;
+        }
+
+        .field textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        @media (max-width: 820px) {
+            .container {
+                padding: 1.25rem;
+            }
+
+            .split {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Fase 1: Tela de Boas-vindas -->
-        <div id="welcome-screen" class="screen">
-            <h1>Estudo sobre Técnicas de Visualização de Dados</h1>
-            <p>
-                Olá! Agradecemos seu interesse em participar desta pesquisa.
-            </p>
-            <p>
-                Sua contribuição é muito valiosa para nos ajudar a entender como diferentes formatos de gráficos de barras podem facilitar a análise de dados, especialmente quando existem valores muito discrepantes (outliers).
-            </p>
-            <p>
-                O experimento consiste em analisar alguns gráficos e responder a perguntas sobre eles. Não há respostas "certas" ou "erradas", estamos interessados na sua percepção.
-            </p>
-            <button id="start-button">Iniciar</button>
+        <div id="flow-indicator" class="progress-track" aria-hidden="true">
+            <div id="flow-progress" class="progress-fill"></div>
         </div>
 
-        <!-- Fase 1: Termo de Consentimento Livre e Esclarecido (TCLE) -->
+        <div id="welcome-screen" class="screen">
+            <h1>Estudo sobre Técnicas de Visualização de Dados</h1>
+            <p>Esta é a tela de boas-vindas (placeholder). Aqui ficará a introdução completa do experimento.</p>
+            <div class="placeholder-box">Placeholder: resumo do estudo + instruções iniciais.</div>
+            <div class="actions">
+                <button data-next="tcle-screen">Next</button>
+            </div>
+        </div>
+
         <div id="tcle-screen" class="screen hidden">
             <h2>Termo de Consentimento Livre e Esclarecido (TCLE)</h2>
             <div class="tcle-content" id="tcle-scroll">
-                <p>
-                    Você está sendo convidado(a) a participar da pesquisa "Análise Comparativa de Técnicas de Visualização para Inspeção de Outliers em Gráficos de Barras". A sua participação é voluntária.
-                </p>
-                <h3>1. OBJETIVO DO ESTUDO</h3>
-                <p>
-                    Este estudo visa comparar a eficácia de quatro técnicas de visualização de gráficos de barras para identificar e interpretar dados, com foco em tarefas de análise que envolvem valores extremos (outliers).
-                </p>
-                <h3>2. PROCEDIMENTOS</h3>
-                <p>
-                    Se você concordar em participar, será solicitado(a) a realizar uma série de tarefas. Cada tarefa consistirá em observar um gráfico e responder a uma pergunta sobre os dados apresentados. O tempo de resposta e sua resposta serão registrados. Ao final de cada bloco de tarefas, você responderá a um breve questionário sobre a carga de trabalho mental (NASA-TLX). Ao final do experimento, pediremos sua preferência entre as visualizações.
-                </p>
-                <h3>3. RISCOS E DESCONFORTOS</h3>
-                <p>
-                    Os riscos associados a este estudo são mínimos e não maiores do que os encontrados na vida cotidiana ao usar um computador. Pode haver um leve cansaço visual ou mental. Você pode fazer pausas a qualquer momento.
-                </p>
-                <h3>4. BENEFÍCIOS</h3>
-                <p>
-                    Não há benefícios diretos para você por participar. No entanto, os resultados ajudarão a comunidade científica e de desenvolvimento de software a criar ferramentas de visualização de dados mais eficazes.
-                </p>
-                <h3>5. CONFIDENCIALIDADE E ANONIMATO</h3>
-                <p>
-                    Todos os dados coletados serão anônimos. Nenhum dado de identificação pessoal (como nome, e-mail ou IP) será armazenado. Os resultados da pesquisa poderão ser publicados em eventos científicos e revistas, mas sua identidade permanecerá em sigilo absoluto.
-                </p>
-                <h3>6. VOLUNTARIEDADE E DIREITO DE DESISTÊNCIA</h3>
-                <p>
-                    Sua participação é totalmente voluntária. Você tem o direito de se recusar a participar ou de retirar seu consentimento e interromper a participação a qualquer momento, sem qualquer tipo de penalidade ou prejuízo.
-                </p>
-                <p>
-                    Ao clicar no botão "Aceito", você declara que leu, compreendeu e concorda em participar do estudo nos termos descritos acima.
-                </p>
+                <p>Placeholder do texto completo do TCLE.</p>
+                <h3>1. Objetivo</h3>
+                <p>Placeholder.</p>
+                <h3>2. Procedimentos</h3>
+                <p>Placeholder.</p>
+                <h3>3. Riscos e benefícios</h3>
+                <p>Placeholder.</p>
+                <h3>4. Consentimento</h3>
+                <p>Placeholder para o texto final de aceite.</p>
+                <p>Fim do conteúdo.</p>
             </div>
-            <button id="accept-tcle-button" disabled>Aceito</button>
+            <p class="small-note">Neste esqueleto, o botão ativa quando você chega ao fim do texto.</p>
+            <div class="actions">
+                <button data-prev="welcome-screen">Back</button>
+                <button id="accept-tcle-button" data-next="demographic-screen" disabled>Aceito e Next</button>
+            </div>
         </div>
 
-        <!-- Fase 2 e 3: Placeholder -->
-        <div id="experiment-container" class="screen hidden">
-            <h2>Experimento em Andamento</h2>
-            <p>O tutorial e as tarefas do experimento serão exibidos aqui.</p>
-            <!-- O conteúdo das Fases 2 e 3 será renderizado dinamicamente aqui -->
+        <div id="demographic-screen" class="screen hidden">
+            <h2>Questionário Demográfico</h2>
+            <div class="split">
+                <div>
+                    <div class="field">
+                        <label for="age-range">Faixa Etária</label>
+                        <select id="age-range">
+                            <option>18-24</option>
+                            <option>25-34</option>
+                            <option>35-44</option>
+                            <option>45-54</option>
+                            <option>55-64</option>
+                            <option>65+</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="sex">Sexo</label>
+                        <select id="sex">
+                            <option>Masculino</option>
+                            <option>Feminino</option>
+                            <option>Prefiro não informar</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="education-level">Nível de Escolaridade</label>
+                        <select id="education-level">
+                            <option>Médio Incompleto</option>
+                            <option>Médio Completo</option>
+                            <option>Superior Incompleto</option>
+                            <option>Superior Completo</option>
+                            <option>Mestrado Completo</option>
+                            <option>Doutorado Completo</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="infovis-course">Fez disciplina de InfoVis</label>
+                        <select id="infovis-course">
+                            <option>Sim</option>
+                            <option>Não</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="visual-acuity">Acuidade Visual atual</label>
+                        <select id="visual-acuity">
+                            <option>Boa</option>
+                            <option>Corridida com óculos/lente</option>
+                            <option>Ruim</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="color-blindness">Daltonismo</label>
+                        <select id="color-blindness">
+                            <option>Sim</option>
+                            <option>Não</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="placeholder-box">
+                    Placeholder: estrutura dos campos demográficos atualizada conforme o protocolo.
+                </div>
+            </div>
+            <div class="actions">
+                <button data-prev="tcle-screen">Back</button>
+                <button data-next="tutorial-screen-1">Next</button>
+            </div>
         </div>
 
+        <div id="tutorial-screen-1" class="screen hidden">
+            <h2>Tutorial - Visualização 1 de 4</h2>
+            <div class="placeholder-box">Placeholder da Visualização 1.</div>
+            <div class="actions">
+                <button data-prev="demographic-screen">Back</button>
+                <button data-next="tutorial-screen-2">Next</button>
+            </div>
+        </div>
+
+        <div id="tutorial-screen-2" class="screen hidden">
+            <h2>Tutorial - Visualização 2 de 4</h2>
+            <div class="placeholder-box">Placeholder da Visualização 2.</div>
+            <div class="actions">
+                <button data-prev="tutorial-screen-1">Back</button>
+                <button data-next="tutorial-screen-3">Next</button>
+            </div>
+        </div>
+
+        <div id="tutorial-screen-3" class="screen hidden">
+            <h2>Tutorial - Visualização 3 de 4</h2>
+            <div class="placeholder-box">Placeholder da Visualização 3.</div>
+            <div class="actions">
+                <button data-prev="tutorial-screen-2">Back</button>
+                <button data-next="tutorial-screen-4">Next</button>
+            </div>
+        </div>
+
+        <div id="tutorial-screen-4" class="screen hidden">
+            <h2>Tutorial - Visualização 4 de 4</h2>
+            <div class="placeholder-box">Placeholder da Visualização 4.</div>
+            <div class="actions">
+                <button data-prev="tutorial-screen-3">Back</button>
+                <button data-next="task-instruction-screen">Next</button>
+            </div>
+        </div>
+
+        <div id="task-instruction-screen" class="screen hidden">
+            <h2>Fase 2 - Instrução da Tarefa (Blocos)</h2>
+            <p>Placeholder para instrução da tarefa atual antes de iniciar os blocos.</p>
+            <div class="placeholder-box">Placeholder: randomização de blocos/tarefas/visualizações/bases será implementada depois.</div>
+            <div class="actions">
+                <button data-prev="tutorial-screen-4">Back</button>
+                <button id="start-blocks-button">Next</button>
+            </div>
+        </div>
+
+        <div id="block-task-screen" class="screen hidden">
+            <h2 id="block-title">Bloco 1 de 5 - Tela da Tarefa</h2>
+            <p>Fluxo do bloco: questão/contexto -> gráfico + cronômetro -> participante clica em "Achei a resposta".</p>
+            <div class="split">
+                <div class="placeholder-box" id="block-context">Placeholder: questão e contexto da tarefa.</div>
+                <div class="placeholder-box">Placeholder: área do gráfico e cronômetro.</div>
+            </div>
+            <div class="actions">
+                <button data-prev="task-instruction-screen">Back</button>
+                <button id="found-answer-button">Achei a resposta</button>
+            </div>
+        </div>
+
+        <div id="block-answer-screen" class="screen hidden">
+            <h2 id="answer-title">Bloco 1 de 5 - Registro de Resposta</h2>
+            <div class="field">
+                <label for="block-answer">Resposta do participante</label>
+                <input id="block-answer" type="text" placeholder="Placeholder" />
+            </div>
+            <div class="field">
+                <label for="block-confidence">Confiança na resposta</label>
+                <select id="block-confidence">
+                    <option>Placeholder</option>
+                </select>
+            </div>
+            <div class="placeholder-box">Placeholder: aqui será salvo tempo + resposta + confiança.</div>
+            <div class="actions">
+                <button data-prev="block-task-screen">Back</button>
+                <button data-next="nasa-tlx-screen">Next</button>
+            </div>
+        </div>
+
+        <div id="nasa-tlx-screen" class="screen hidden">
+            <h2 id="tlx-title">NASA-TLX do Bloco 1</h2>
+            <div class="split">
+                <div>
+                    <div class="field">
+                        <label for="mental-demand">Demanda mental</label>
+                        <input id="mental-demand" type="range" min="0" max="100" value="50" />
+                    </div>
+                    <div class="field">
+                        <label for="effort">Esforço</label>
+                        <input id="effort" type="range" min="0" max="100" value="50" />
+                    </div>
+                    <div class="field">
+                        <label for="frustration">Frustração</label>
+                        <input id="frustration" type="range" min="0" max="100" value="50" />
+                    </div>
+                </div>
+                <div class="placeholder-box">Placeholder: formulário NASA-TLX completo por visualização/tarefa.</div>
+            </div>
+            <div class="actions">
+                <button data-prev="block-answer-screen">Back</button>
+                <button id="next-block-button">Next</button>
+            </div>
+        </div>
+
+        <div id="final-ranking-screen" class="screen hidden">
+            <h2>Fase 3 - Ranking de Preferência</h2>
+            <div class="split">
+                <div class="placeholder-box">Placeholder: 1º lugar</div>
+                <div class="placeholder-box">Placeholder: 2º lugar</div>
+                <div class="placeholder-box">Placeholder: 3º lugar</div>
+                <div class="placeholder-box">Placeholder: 4º lugar</div>
+            </div>
+            <div class="actions">
+                <button data-prev="nasa-tlx-screen">Back</button>
+                <button data-next="final-comments-screen">Next</button>
+            </div>
+        </div>
+
+        <div id="final-comments-screen" class="screen hidden">
+            <h2>Comentários Qualitativos</h2>
+            <div class="field">
+                <label for="ranking-why">Por que preferiu nessa ordem?</label>
+                <textarea id="ranking-why" placeholder="Placeholder"></textarea>
+            </div>
+            <div class="field">
+                <label for="other-comments">Outras observações</label>
+                <textarea id="other-comments" placeholder="Placeholder"></textarea>
+            </div>
+            <div class="actions">
+                <button data-prev="final-ranking-screen">Back</button>
+                <button data-next="thanks-screen">Next</button>
+            </div>
+        </div>
+
+        <div id="thanks-screen" class="screen hidden">
+            <h2>Obrigado por participar</h2>
+            <div class="placeholder-box">Placeholder: tela final com mensagem de agradecimento e futuro download dos resultados.</div>
+            <div class="actions">
+                <button data-prev="final-comments-screen">Back</button>
+                <button disabled>Finalizado</button>
+            </div>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Elementos da UI ---
-            const welcomeScreen = document.getElementById('welcome-screen');
-            const tcleScreen = document.getElementById('tcle-screen');
-            const experimentContainer = document.getElementById('experiment-container');
-
-            const startButton = document.getElementById('start-button');
-            const acceptTcleButton = document.getElementById('accept-tcle-button');
+            const screens = Array.from(document.querySelectorAll('.screen'));
+            const progressFill = document.getElementById('flow-progress');
             const tcleScroll = document.getElementById('tcle-scroll');
+            const acceptTcleButton = document.getElementById('accept-tcle-button');
 
-            // --- Lógica da Fase 1 ---
+            const blockTitle = document.getElementById('block-title');
+            const answerTitle = document.getElementById('answer-title');
+            const tlxTitle = document.getElementById('tlx-title');
+            const blockContext = document.getElementById('block-context');
 
-            // Habilita o botão de aceite do TCLE apenas após o usuário rolar até o final
+            const startBlocksButton = document.getElementById('start-blocks-button');
+            const foundAnswerButton = document.getElementById('found-answer-button');
+            const nextBlockButton = document.getElementById('next-block-button');
+
+            let currentBlock = 1;
+            const totalBlocks = 5;
+
+            function showScreen(screenId) {
+                screens.forEach(screen => {
+                    screen.classList.toggle('hidden', screen.id !== screenId);
+                });
+
+                const currentIndex = screens.findIndex(screen => screen.id === screenId);
+                const progress = ((currentIndex + 1) / screens.length) * 100;
+                progressFill.style.width = progress + '%';
+            }
+
+            function updateBlockPlaceholders() {
+                blockTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - Tela da Tarefa';
+                answerTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - Registro de Resposta';
+                tlxTitle.textContent = 'NASA-TLX do Bloco ' + currentBlock;
+                blockContext.textContent = 'Placeholder: questão e contexto da tarefa do bloco ' + currentBlock + '.';
+            }
+
+            document.querySelectorAll('[data-next]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const target = button.getAttribute('data-next');
+                    if (target) {
+                        showScreen(target);
+                    }
+                });
+            });
+
+            document.querySelectorAll('[data-prev]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const target = button.getAttribute('data-prev');
+                    if (target) {
+                        showScreen(target);
+                    }
+                });
+            });
+
             tcleScroll.addEventListener('scroll', () => {
-                // Verifica se o usuário rolou até o final (com uma margem de 5px)
                 if (tcleScroll.scrollHeight - tcleScroll.scrollTop <= tcleScroll.clientHeight + 5) {
                     acceptTcleButton.disabled = false;
                 }
             });
 
-            // 1. Transição: Boas-vindas -> TCLE
-            startButton.addEventListener('click', () => {
-                welcomeScreen.classList.add('hidden');
-                tcleScreen.classList.remove('hidden');
+            startBlocksButton.addEventListener('click', () => {
+                currentBlock = 1;
+                updateBlockPlaceholders();
+                showScreen('block-task-screen');
             });
 
-            // 2. Transição: TCLE -> Início do Experimento
-            acceptTcleButton.addEventListener('click', () => {
-                console.log('TCLE aceito. Iniciando o experimento.');
-                tcleScreen.classList.add('hidden');
-                experimentContainer.classList.remove('hidden');
-
-                // --- Início da Lógica da Fase 2 e 3 (a ser implementada) ---
-                runExperiment();
+            foundAnswerButton.addEventListener('click', () => {
+                showScreen('block-answer-screen');
             });
 
-            // --- Função principal do experimento ---
-            function runExperiment() {
-                console.log('Fase 1 (Preparação) concluída.');
+            nextBlockButton.addEventListener('click', () => {
+                if (currentBlock < totalBlocks) {
+                    currentBlock += 1;
+                    updateBlockPlaceholders();
+                    showScreen('block-task-screen');
+                } else {
+                    showScreen('final-ranking-screen');
+                }
+            });
 
-                // TODO: Implementar Fase 1.3: Tutorial das 4 visualizações.
-                // TODO: Implementar Fase 1.4: Exemplos de treinamento.
-
-                console.log('Iniciando Fase 2 (Experimento)...');
-                // TODO: Definir as 6 tarefas, 4 visualizações e 6 bases de dados.
-                // TODO: Gerar e randomizar as combinações de (tarefa, visualização, base de dados).
-                // TODO: Iterar sobre cada combinação, mostrando a instrução, o gráfico e o cronômetro.
-                // TODO: Coletar resposta, tempo e confiança.
-                // TODO: Aplicar NASA-TLX após cada bloco de tarefa.
-
-                console.log('Iniciando Fase 3 (Avaliação Final)...');
-                // TODO: Mostrar as 4 visualizações para ranking de preferência.
-                // TODO: Coletar comentários qualitativos.
-                // TODO: Consolidar todos os dados coletados (tempos, respostas, confiança, TLX, ranking, etc.).
-                // TODO: Gerar e oferecer o download dos resultados em JSON e CSV.
-                // TODO: Exibir tela de agradecimento.
-            }
+            updateBlockPlaceholders();
+            showScreen('welcome-screen');
         });
     </script>
 

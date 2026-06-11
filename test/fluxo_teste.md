@@ -5,7 +5,14 @@
 1. Tela de boas-vindas.
 2. Exibição e aceite do TCLE.
 3. Questionário demográfico.
+    1. Faixa Etária
+    2. Sexo
+    3. Nível de Escolaridade
+    4. Fez disciplina de InfoVis
+    5. Acuidade Visual atual
+    6. Daltonismo
 4. Tutorial das 4 visualizações.
+    1. Uma tela para cada visualização
 
 ---
 
