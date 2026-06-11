@@ -27,16 +27,13 @@ import * as utils from "./Utils.js";
 class BarChart extends Visualization {
 
 
-    constructor(parentElement, settings, corte, cortefinal) {
+    constructor(parentElement, settings) {
         super(parentElement, settings);
 
         this.drawStrategy = BarChart.strategies[this.settings.drawStrategy];
 
         this.name = "BarChart";
         this.x = d3.scaleBand().paddingInner(0.1).paddingOuter(0.1);
-
-        this.settings.corte = corte;
-        this.settings.cortefinal = cortefinal;
 
     }
 
@@ -51,14 +48,33 @@ class BarChart extends Visualization {
         this.settings.startZero = true;
         this.settings.drawStrategy = 'default';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
         this.settings.breakPoint = 0.2; //"parseFloat(document.getElementById('breakpointInput').value) ||"
+        this.settings.scaleBreakHiddenRatio = 0.55;
         this.settings.breakPoint2 = 0.96, 5; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
         this.settings.breakPoint3 = 0.88; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
         this.settings.breakPoint4 = 0.95, 5;
-        this.settings.corte; //"parseFloat(document.getElementById('breakpointInput4').value) ||"
-        this.settings.cortefinal;
+        this.settings.corte = undefined;
+        this.settings.cortefinal = undefined;
         this.settings.z = 0.28; //"parseFloat(document.getElementById('inputz').value) ||"
         this.settings.cols = {};
         this.settings.gap;
+    }
+
+    updateScaleBreakPosition(ratio) {
+        this.settings.breakPoint = Math.max(0.05, Math.min(0.9, Number(ratio)));
+        if (this.hasData) {
+            this.drawStrategy.data(this);
+            this.redraw();
+        }
+        return this;
+    }
+
+    updateScaleBreakHiddenRatio(ratio) {
+        this.settings.scaleBreakHiddenRatio = Math.max(0, Math.min(0.95, Number(ratio)));
+        if (this.hasData) {
+            this.drawStrategy.data(this);
+            this.redraw();
+        }
+        return this;
     }
 
     resize() {
@@ -409,21 +425,44 @@ BarChart.strategies = {
         data: (barchart) => {
 
             barchart.ybreak = {};
+            barchart.scaleBreakMeta = {};
             for (let k of barchart.keys_filter) {
                 let maximo = barchart.domain[k][1];
-                // let segundo_maior = d3.max(dado, (d) => d[k] === maximo ? NaN : d[k])
-                // let segundo_maior = 10000;
-                // let terceiro = (segundo_maior*40)/100+segundo_maior;
+                const lowerStart = barchart.settings.startZero ? 0 : Math.min(barchart.domain[k][0], 0);
+                const range = Math.max(maximo - lowerStart, 1e-6);
+                const hiddenRatio = Math.max(0, Math.min(0.95, Number(barchart.settings.scaleBreakHiddenRatio ?? 0.55)));
+                const breakPosition = Math.max(0.05, Math.min(0.9, Number(barchart.settings.breakPoint ?? 0.2)));
 
-                let corte = barchart.settings.corte;
-                let cortefinal = barchart.settings.cortefinal;
-
-                barchart.breakPoint = barchart.settings.breakPoint;
+                barchart.breakPoint = breakPosition;
                 barchart.gapSize = 25;
 
+                const yTop = 10;
+                const yLowerTop = barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2;
+                const yUpperBottom = barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2;
 
-                barchart.y[k] = d3.scaleLinear().domain([0, corte]).range([barchart.boxHeight, barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2]);
+                const lowerVisualHeight = Math.max(barchart.boxHeight - yLowerTop, 1e-6);
+                const upperVisualHeight = Math.max(yUpperBottom - yTop, 1e-6);
+                const totalVisibleHeight = lowerVisualHeight + upperVisualHeight;
+
+                // Base sem ocultacao: mantem a proporcao entre spans de dados e alturas visuais.
+                const lowerSpanNoHidden = range * (lowerVisualHeight / totalVisibleHeight);
+                const upperSpanNoHidden = range * (upperVisualHeight / totalVisibleHeight);
+
+                // X% escondido: parte de baixo perde X% no limite superior
+                // e parte de cima perde X% no limite inferior.
+                const lowerSpanVisible = lowerSpanNoHidden * (1 - hiddenRatio);
+                const upperSpanVisible = upperSpanNoHidden * (1 - hiddenRatio);
+
+                const corte = lowerStart + lowerSpanVisible;
+                const cortefinal = maximo - upperSpanVisible;
+
+                barchart.settings.corte = corte;
+                barchart.settings.cortefinal = cortefinal;
+
+
+                barchart.y[k] = d3.scaleLinear().domain([lowerStart, corte]).range([barchart.boxHeight, barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2]);
                 barchart.ybreak[k] = d3.scaleLinear().domain([cortefinal, maximo]).range([barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2, 10]);
+                barchart.scaleBreakMeta[k] = { lowerStart, corte, cortefinal, maximo };
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint - barchart.gapSize / 2;
             }
@@ -478,37 +517,68 @@ BarChart.strategies = {
                 g.selectAll("g.y.loweraxis").remove();
                 g.selectAll("g.Line1").remove();
 
-                //axis
+                // Usa a mesma ideia dos 3D: ticks globais "nice" e formatação compacta.
+                const meta = barchart.scaleBreakMeta[key];
+                const hiddenRatio = Math.max(0, Math.min(0.95, Number(barchart.settings.scaleBreakHiddenRatio ?? 0.55)));
+                const visibleRatio = Math.max(1 - hiddenRatio, 0.05);
+                const baseTickCount = Math.max(4, Math.floor(barchart.boxHeight / 60));
+                // Similar ao PSB: quando "estica" a escala (menos dominio visivel), aumenta a densidade de ticks.
+                const tickDensityFactor = 1 / visibleRatio;
+                const tickCount = Math.max(4, Math.min(40, Math.ceil(baseTickCount * tickDensityFactor)));
+                const allTicks = d3
+                    .scaleLinear()
+                    .domain([meta.lowerStart, meta.maximo])
+                    .nice()
+                    .ticks(tickCount);
+
+                const ensureSegmentTicks = (ticks, start, end) => {
+                    const filtered = ticks.filter((t) => t >= start && t <= end);
+                    const merged = filtered.concat([start, end]);
+                    return Array.from(new Set(merged))
+                        .sort((a, b) => a - b);
+                };
+
+                const lowerTicks = ensureSegmentTicks(allTicks, meta.lowerStart, meta.corte);
+                const upperTicks = ensureSegmentTicks(allTicks, meta.cortefinal, meta.maximo);
+
+                const formatTick = (value) => {
+                    if (Math.abs(value) >= 1000) {
+                        return d3.format(".2s")(value);
+                    }
+                    return d3.format(".0f")(value);
+                };
 
                 g.append("g")
                     .attr("class", "y upperaxis")
-                    .call(d3.axisLeft(barchart.ybreak[key]).ticks(4).tickFormat(d => d.toLocaleString('pt-BR')))
-                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
-                    .each(function (d) { // Para cada marca de tick
-                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
-                            .append("line") // Adiciona uma linha
-                            .attr("class", "grid-line") // Define a classe para estilização
-                            .attr("stroke", "black")
-                            .attr("x1", 0) // Posição inicial x da linha
-                            .attr("x2", barchart.innerWidth) // Posição final x da linha
-                            .attr("y1", barchart.ybreak[key](d[key])) // Posição inicial y da linha
-                            .attr("y2", barchart.ybreak[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
-                    });
+                    .call(
+                        d3.axisLeft(barchart.ybreak[key])
+                            .tickValues(upperTicks)
+                            .tickFormat(formatTick)
+                    )
+                    .selectAll(".tick")
+                    .append("line")
+                    .attr("class", "grid-line")
+                    .attr("stroke", "black")
+                    .attr("x1", 0)
+                    .attr("x2", barchart.innerWidth)
+                    .attr("y1", 0)
+                    .attr("y2", 0);
 
                 g.append("g")
                     .attr("class", "y loweraxis")
-                    .call(d3.axisLeft(barchart.y[key]).ticks(7).tickFormat(d => d.toLocaleString('pt-BR')))
-                    .selectAll("text") // Seleciona todos os elementos de texto do eixo y
-                    .each(function (d) { // Para cada marca de tick
-                        d3.select(this.parentNode) // Seleciona o pai (o elemento g)
-                            .append("line") // Adiciona uma linha
-                            .attr("class", "grid-line") // Define a classe para estilização
-                            .attr("stroke", "black")
-                            .attr("x1", 0) // Posição inicial x da linha
-                            .attr("x2", barchart.innerWidth) // Posição final x da linha
-                            .attr("y1", barchart.ybreak[key](d[key])) // Posição inicial y da linha
-                            .attr("y2", barchart.ybreak[key](d[key])); // Posição final y da linha, é a mesma que a inicial para uma linha horizontal
-                    });
+                    .call(
+                        d3.axisLeft(barchart.y[key])
+                            .tickValues(lowerTicks)
+                            .tickFormat(formatTick)
+                    )
+                    .selectAll(".tick")
+                    .append("line")
+                    .attr("class", "grid-line")
+                    .attr("stroke", "black")
+                    .attr("x1", 0)
+                    .attr("x2", barchart.innerWidth)
+                    .attr("y1", 0)
+                    .attr("y2", 0);
 
 
 

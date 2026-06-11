@@ -599,9 +599,26 @@
                     id: 'bar',
                     name: 'Quebra de Escala Clássica',
                     ClassRef: BarChart,
-                    settings: { size_type: 'fit' , drawStrategy: "scale-break"},
+                    settings: { size_type: 'fit', drawStrategy: 'scale-break', breakPoint: 0.3, scaleBreakHiddenRatio: 0.55 },
                     data: tutorialData3D.map(d => ({ valor: d.valor })),
-                    controls: []
+                    controls: [
+                        {
+                            label: 'Posição do break',
+                            min: 0.05,
+                            max: 0.9,
+                            step: 0.01,
+                            defaultValue: 0.3,
+                            onInput: (c, v) => c.updateScaleBreakPosition(Number(v)),
+                        },
+                        {
+                            label: 'Dados escondidos',
+                            min: 0,
+                            max: 0.95,
+                            step: 0.01,
+                            defaultValue: 0.55,
+                            onInput: (c, v) => c.updateScaleBreakHiddenRatio(Number(v)),
+                        },
+                    ]
                 },
                 {
                     id: 'psb',
@@ -654,24 +671,6 @@
             let tutorialOrder = shuffle(VISUALIZATIONS);
             let tutorialIndex = 0;
             let currentTutorialChart = null;
-
-            function getClassicBreakPoints(data) {
-                const values = data
-                    .map((d) => Number(d.valor))
-                    .filter((v) => Number.isFinite(v))
-                    .sort((a, b) => b - a);
-
-                if (values.length < 2) {
-                    return { corte: 1, cortefinal: 1.1 };
-                }
-
-                const secondMax = values[1];
-                // Mantem uma pequena janela de quebra acima da maior barra nao-outlier.
-                const corte = Math.max(1, secondMax * 0.75);
-                const cortefinal = Math.max(corte + 1, secondMax * 0.95);
-
-                return { corte, cortefinal };
-            }
 
             const tutorialTitle = document.getElementById('tutorial-title');
             const tutorialControls = document.getElementById('tutorial-controls');
@@ -781,17 +780,7 @@
                     const w = rect.width > 0 ? Math.round(rect.width) : 800;
                     const h = rect.height > 0 ? Math.round(rect.height) : 420;
 
-                    if (viz.id === 'bar') {
-                        const { corte, cortefinal } = getClassicBreakPoints(viz.data);
-                        currentTutorialChart = new viz.ClassRef(
-                            tutorialChartArea,
-                            { ...viz.settings, width: w, height: h },
-                            corte,
-                            cortefinal,
-                        );
-                    } else {
-                        currentTutorialChart = new viz.ClassRef(tutorialChartArea, { ...viz.settings, width: w, height: h });
-                    }
+                    currentTutorialChart = new viz.ClassRef(tutorialChartArea, { ...viz.settings, width: w, height: h });
 
                     currentTutorialChart.data(viz.data);
 
