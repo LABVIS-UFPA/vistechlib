@@ -1,7 +1,7 @@
-let d3 = require("d3");
-let _ = require("underscore");
-let Visualization = require("./Visualization.js");
-let utils = require("./Utils.js");
+import * as d3 from "d3";
+import _ from "underscore";
+import Visualization from "./Visualization.js";
+import * as utils from "./Utils.js";
 
 /**
  * @class
@@ -435,4 +435,4 @@ class ScatterplotMatrix extends Visualization {
     }
 }
 
-module.exports = ScatterplotMatrix;
+export default ScatterplotMatrix;

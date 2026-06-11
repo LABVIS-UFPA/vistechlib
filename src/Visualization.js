@@ -1,5 +1,5 @@
-let d3 = require("d3");
-let moment = require('moment');
+import * as d3 from "d3";
+import moment from "moment";
 
 class Visualization {
     /**
@@ -561,4 +561,4 @@ class Visualization {
 
 }
 
-module.exports = Visualization;
+export default Visualization;

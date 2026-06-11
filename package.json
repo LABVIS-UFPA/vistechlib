@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "browserify index.js --standalone vistechlib -o test/bundle.js",
+    "start": "browserify index.js -p esmify --standalone vistechlib -o test/bundle.js",
     "doc": "jsdoc -c jsdoc.json"
   },
   "repository": {
@@ -39,6 +39,7 @@
     "autoprefixer": "^10.4.18",
     "browserify": "^17.0.1",
     "doxdox": "^3.0.0",
+    "esmify": "^2.1.1",
     "jsdoc": "^3.6.3",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1"

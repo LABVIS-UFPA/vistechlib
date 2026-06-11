@@ -1,6 +1,6 @@
-let d3 = require("d3");
-let THREE = require("three");
-let Visualization = require("./Visualization.js");
+import * as d3 from "d3";
+import * as THREE from "three";
+import Visualization from "./Visualization.js";
 
 /**
  * @class
@@ -1253,4 +1253,4 @@ class WormBarChart3D extends Visualization {
   }
 }
 
-module.exports = WormBarChart3D;
+export default WormBarChart3D;

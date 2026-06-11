@@ -1,7 +1,8 @@
 
-let d3 = require("d3");
-let _ = require("underscore");
-let Visualization = require("./Visualization.js");
+import * as d3 from "d3";
+import _ from "underscore";
+import { path as d3Path } from "d3-path";
+import Visualization from "./Visualization.js";
 
 /**
  * @class
@@ -39,9 +40,8 @@ class ParallelBundling extends Visualization{
             }
         };
 
-        let Path = require('d3-path').path;
         this.lineFunction = d => {
-            let path = new Path();
+            let path = new d3Path();
             let x,y,x1,y1,x2,y2;
             let BOX1 = 1;
             let BOX2 = 20;
@@ -755,4 +755,4 @@ class ParallelBundling extends Visualization{
 }
 
 
-module.exports = ParallelBundling;
+export default ParallelBundling;

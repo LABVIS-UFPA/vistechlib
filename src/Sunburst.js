@@ -1,6 +1,6 @@
-let d3 = require("d3");
-let Visualization = require("./Visualization.js");
-let utils = require("./Utils.js");
+import * as d3 from "d3";
+import Visualization from "./Visualization.js";
+import * as utils from "./Utils.js";
 
 /**
  * @class
@@ -319,4 +319,4 @@ let _makeHierarchy = function(obj){
 };
 
 
-module.exports = Sunburst;
+export default Sunburst;

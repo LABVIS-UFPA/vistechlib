@@ -1,18 +1,17 @@
 
-
-
-exports.Visualization = require("./src/Visualization.js");
-exports.ParallelCoordinates = require("./src/ParallelCoordinates.js");
-exports.ParallelBundling = require("./src/ParallelBundling.js");
-exports.ScatterplotMatrix = require("./src/ScatterplotMatrix.js");
-exports.BeeswarmPlot = require("./src/BeeswarmPlot.js");
-exports.Treemap = require("./src/Treemap.js");
-exports.Histogram = require("./src/Histogram.js");
-exports.Sunburst = require("./src/Sunburst.js");
-exports.BarChart = require("./src/BarChart.js");
-exports.PieChart = require("./src/PieChart.js");
-exports.CirclePacking = require("./src/CirclePacking.js");
-exports.selection = require("./src/selections/selections.js")
-exports.PerspectiveScaleBreakBarChart = require("./src/PerspectiveScaleBreakBarChart.js");
-exports.WormBarChart3D = require("./src/WormBarChart3D.js");
-exports.ScrollBarChart3D = require("./src/ScrollBarChart3D.js");
+export { default as Visualization } from "./src/Visualization.js";
+export { default as ParallelCoordinates } from "./src/ParallelCoordinates.js";
+export { default as ParallelBundling } from "./src/ParallelBundling.js";
+export { default as ScatterplotMatrix } from "./src/ScatterplotMatrix.js";
+export { default as BeeswarmPlot } from "./src/BeeswarmPlot.js";
+export { default as Treemap } from "./src/Treemap.js";
+export { default as Histogram } from "./src/Histogram.js";
+export { default as Sunburst } from "./src/Sunburst.js";
+export { default as BarChart } from "./src/BarChart.js";
+export { default as PieChart } from "./src/PieChart.js";
+export { default as CirclePacking } from "./src/CirclePacking.js";
+import * as selection from "./src/selections/selections.js";
+export { selection };
+export { default as PerspectiveScaleBreakBarChart } from "./src/PerspectiveScaleBreakBarChart.js";
+export { default as WormBarChart3D } from "./src/WormBarChart3D.js";
+export { default as ScrollBarChart3D } from "./src/ScrollBarChart3D.js";

@@ -4,7 +4,17 @@
 <head>
     <meta charset="UTF-8" />
     <title>Combined 3D Charts Test - Vistechlib</title>
-    <script src="bundle.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "d3": "https://esm.sh/d3@6.7.0",
+                "d3-path": "https://esm.sh/d3-path@2.0.0",
+                "three": "https://esm.sh/three@0.124.0",
+                "underscore": "https://esm.sh/underscore@1.9.1",
+                "moment": "https://esm.sh/moment@2.24.0"
+            }
+        }
+    </script>
 </head>
 
 <body style="width:100%;height:100%;margin:0;font-family:Arial, sans-serif; display:flex; flex-direction:column;">
@@ -88,7 +98,11 @@
 
         <div id="canvasTest" style="flex: 1; width:100%; overflow:hidden;"></div>
 
-        <script>
+        <script type="module">
+            import PerspectiveScaleBreakBarChart from "../src/PerspectiveScaleBreakBarChart.js";
+            import ScrollBarChart3D from "../src/ScrollBarChart3D.js";
+            import WormBarChart3D from "../src/WormBarChart3D.js";
+
             // Função auxiliar para gerar números aleatórios
             function getRandomInRange(min, max, isInt = false) {
                 const val = Math.random() * (max - min) + min;
@@ -265,9 +279,9 @@
 
             // Definição das 3 visualizações disponíveis
             const chartTypes = [
-                { id: 'psb', name: 'Perspective Scale Break', classRef: vistechlib.PerspectiveScaleBreakBarChart },
-                { id: 'scroll', name: 'Scroll Bar Chart', classRef: vistechlib.ScrollBarChart3D },
-                { id: 'worm', name: 'Worm Bar Chart', classRef: vistechlib.WormBarChart3D }
+                { id: 'psb', name: 'Perspective Scale Break', classRef: PerspectiveScaleBreakBarChart },
+                { id: 'scroll', name: 'Scroll Bar Chart', classRef: ScrollBarChart3D },
+                { id: 'worm', name: 'Worm Bar Chart', classRef: WormBarChart3D }
             ];
 
             let currentChart = null;

@@ -1,7 +1,7 @@
 
-let d3 = require("d3");
-let Visualization = require("./Visualization.js");
-let sel = require("./selections/selections.js");
+import * as d3 from "d3";
+import Visualization from "./Visualization.js";
+import * as sel from "./selections/selections.js";
 /**
  * @class
  * @description Parallel coordinates are a common way of visualizing high-dimensional geometry and analyzing multivariate data.  
@@ -299,4 +299,4 @@ class ParallelCoordinates extends Visualization{
 
 }
 
-module.exports = ParallelCoordinates;
+export default ParallelCoordinates;

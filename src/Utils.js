@@ -10,7 +10,7 @@
  * @param s y2 line2
  * @returns {boolean} line1 intersects line2
  */
-module.exports.lineIntersects = (a, b, c, d, p, q, r, s) => {
+export const lineIntersects = (a, b, c, d, p, q, r, s) => {
     let det, gamma, lambda;
     det = (c - a) * (s - q) - (r - p) * (d - b);
     if (det === 0) {
@@ -23,7 +23,7 @@ module.exports.lineIntersects = (a, b, c, d, p, q, r, s) => {
 };
 
 
-module.exports.parseTranslate = (elem) => {
+export const parseTranslate = (elem) => {
     let m = elem.transform.baseVal.consolidate().matrix;
     return {
         x: m.e,
@@ -31,7 +31,7 @@ module.exports.parseTranslate = (elem) => {
     };
 };
 
-module.exports.fold_modulo = (value, min, max) => {
+export const fold_modulo = (value, min, max) => {
     let dif = Math.abs(max - min);
     let pos = Math.abs(value - min);
     let par = Math.floor(pos/dif)%2;
@@ -123,7 +123,7 @@ module.exports.fold_modulo = (value, min, max) => {
  * @description function to reduce arrays and count their frequencies
  * @param {string} domainInput - Data domain 
  */
-module.exports.reduce_and_count = (domainInput) => {
+export const reduce_and_count = (domainInput) => {
     domain = domainInput.reduce(function (domainCount, currentDomain) {
         if (typeof domainCount[currentDomain] !== "undefined") {
             domainCount[currentDomain]++;
@@ -146,7 +146,7 @@ module.exports.reduce_and_count = (domainInput) => {
  * @description function to define positions on the screen for the pie chart
  * @param {string} width - width display
  */
-module.exports.define_layout_positions = (width, height, numberViews) => {
+export const define_layout_positions = (width, height, numberViews) => {
     let containerBounds = Math.min(width, height);
     if (width < 2 * height && width <= 500) {
         return 'height';

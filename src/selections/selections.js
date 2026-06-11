@@ -1,4 +1,4 @@
-let utils = require("../Utils.js");
+import * as utils from "../Utils.js";
 
 class Selection {
     constructor(){
@@ -138,7 +138,7 @@ class LassoSelection extends Selection {
 }
 
 
-module.exports = {
+export {
     Selection,
     LineSelection,
     RectSelection,
