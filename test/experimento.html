@@ -74,6 +74,44 @@
 
         .tcle-content h3 {
             margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .tcle-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .tcle-document-links {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .tcle-document-links a {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .consent-confirmation {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            margin-top: 1rem;
+            padding: 0.9rem;
+            border: 1px solid #c7d2dc;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        .consent-confirmation input {
+            margin-top: 0.25rem;
+            flex: 0 0 auto;
+        }
+
+        .consent-confirmation label {
+            line-height: 1.45;
         }
 
         button {
@@ -203,22 +241,101 @@
 
         <div id="tcle-screen" class="screen hidden">
             <h2>Termo de Consentimento Livre e Esclarecido (TCLE)</h2>
-            <div class="tcle-content" id="tcle-scroll">
-                <p>Placeholder do texto completo do TCLE.</p>
-                <h3>1. Objetivo</h3>
-                <p>Placeholder.</p>
-                <h3>2. Procedimentos</h3>
-                <p>Placeholder.</p>
-                <h3>3. Riscos e benefícios</h3>
-                <p>Placeholder.</p>
-                <h3>4. Consentimento</h3>
-                <p>Placeholder para o texto final de aceite.</p>
-                <p>Fim do conteúdo.</p>
+            <div class="tcle-content" id="tcle-scroll" tabindex="0" aria-label="Texto completo do TCLE">
+                <h3>Convite, objetivo e procedimentos</h3>
+                <p>
+                    Convidamos o(a) Sr.(a) para participar da pesquisa
+                    <strong>Avaliação de Técnicas de Visualização da Informação: Um Estudo com Usuários</strong>,
+                    sob a responsabilidade do pesquisador
+                    <strong>Prof. Dr. Carlos Gustavo Resque dos Santos</strong>. A pesquisa pretende avaliar
+                    diferentes técnicas de visualização de dados, considerando aspectos como clareza,
+                    legibilidade, precisão na interpretação e eficácia na representação de informações complexas.
+                </p>
+                <p>
+                    Sua participação é voluntária e se dará por meio de testes de percepção para verificar a
+                    identificação de experiência consciente aos estímulos e, posteriormente, pela realização de
+                    tarefas de análise de dados, nas quais o participante irá interpretar e responder a estímulos
+                    que codificam dados abstratos.
+                </p>
+
+                <h3>Riscos e medidas de proteção</h3>
+                <p>
+                    A pesquisa apresenta riscos mínimos à integridade física ou psicológica dos participantes,
+                    pois todos os procedimentos são não invasivos. Os possíveis desconfortos incluem fadiga visual,
+                    esforço cognitivo e leve tensão devido à concentração necessária para a análise das
+                    visualizações. Para mitigar esses riscos, serão oferecidos intervalos de descanso durante o
+                    experimento, e os participantes poderão ajustar o posicionamento da cadeira e do monitor,
+                    garantindo conforto e reduzindo qualquer desconforto potencial.
+                </p>
+
+                <h3>Benefícios, voluntariedade e desistência</h3>
+                <p>
+                    Se o(a) Sr.(a) aceitar participar, suas respostas poderão contribuir para o aprimoramento de
+                    técnicas de visualização da informação, incluindo melhorias na clareza, legibilidade e
+                    interpretação de gráficos, facilitando a análise de informações complexas e a tomada de decisão.
+                </p>
+                <p>
+                    Mesmo depois de consentir, o(a) Sr.(a) tem o direito e a liberdade de retirar seu consentimento
+                    e interromper sua participação em qualquer fase da pesquisa, antes ou depois da coleta dos
+                    dados, independentemente do motivo e sem qualquer prejuízo.
+                </p>
+
+                <h3>Custos, remuneração, ressarcimento e confidencialidade</h3>
+                <p>
+                    O(a) Sr.(a) não terá nenhuma despesa e também não receberá remuneração referente a esta
+                    pesquisa. Os resultados serão analisados e poderão ser publicados, mas sua identidade não será
+                    divulgada e permanecerá sob sigilo. Além disso, fica assegurado o seu direito ao ressarcimento
+                    de quaisquer despesas diretas decorrentes de sua participação na pesquisa, tais como gastos com
+                    transporte e alimentação, bem como o direito a buscar indenização diante de eventuais danos
+                    comprovadamente decorrentes de sua participação neste estudo.
+                </p>
+
+                <h3>Contatos</h3>
+                <p>
+                    Para outras informações, entre em contato com o pesquisador responsável,
+                    <strong>Prof. Dr. Carlos Gustavo Resque dos Santos</strong>, pelo telefone
+                    <strong>(91) 98205-8491</strong>, pelo e-mail
+                    <a href="mailto:carlosresque@ufpa.br">carlosresque@ufpa.br</a>, ou no endereço:
+                    Rua Augusto Corrêa, 01, Campus Universitário do Guamá, Instituto de Ciências Exatas e Naturais,
+                    Programa de Pós-Graduação em Ciência da Computação, LABVIS, bairro Guamá, CEP 66075-110,
+                    Belém, Pará, Brasil.
+                </p>
+                <p>
+                    O Comitê de Ética em Pesquisa com Seres Humanos do Instituto de Ciências da Saúde da
+                    Universidade Federal do Pará (CEP-ICS/UFPA) pode ser contatado pelo telefone
+                    <strong>(91) 98883-9676</strong>, pelo e-mail
+                    <a href="mailto:cepccs@ufpa.br">cepccs@ufpa.br</a> ou no endereço: Rua Augusto Corrêa, nº 01,
+                    Campus do Guamá, Faculdade de Enfermagem do ICS, sala 13, 2º andar, CEP 66075-110,
+                    Belém, Pará. Horário de atendimento: segunda, terça e quinta-feira, das 08h às 12h e das
+                    13h às 17h; quarta e sexta-feira, das 08h às 12h.
+                </p>
+
+                <h3>Consentimento digital</h3>
+                <p>
+                    Este consentimento será registrado exclusivamente em meio digital. Ao marcar a declaração de
+                    leitura e selecionar <strong>Aceito e continuar</strong>, o participante declara que leu e
+                    compreendeu as informações acima, teve oportunidade de esclarecer suas dúvidas e concorda,
+                    de forma livre e esclarecida, em participar da pesquisa. A versão do TCLE e a data e hora do
+                    aceite serão registradas no navegador utilizado no experimento.
+                </p>
             </div>
-            <p class="small-note">Neste esqueleto, o botão ativa quando você chega ao fim do texto.</p>
+            <div class="tcle-document-links">
+                <a href="assets/tcle/MODELO_DE_TCLE_AJUSTADO.pdf" target="_blank" rel="noopener">
+                    Abrir TCLE em PDF
+                </a>
+            </div>
+            <div class="consent-confirmation">
+                <input id="tcle-confirmation" type="checkbox" />
+                <label for="tcle-confirmation">
+                    Declaro que li e compreendi o TCLE e concordo voluntariamente em participar da pesquisa.
+                </label>
+            </div>
+            <p class="small-note">
+                Leia o documento até o final e marque a declaração acima para prosseguir.
+            </p>
             <div class="actions">
                 <button data-prev="welcome-screen">Back</button>
-                <button id="accept-tcle-button" data-next="demographic-screen" disabled>Aceito e Next</button>
+                <button id="accept-tcle-button" disabled>Aceito e continuar</button>
             </div>
         </div>
 
@@ -437,7 +554,9 @@
             const screens = Array.from(document.querySelectorAll('.screen'));
             const progressFill = document.getElementById('flow-progress');
             const tcleScroll = document.getElementById('tcle-scroll');
+            const tcleConfirmation = document.getElementById('tcle-confirmation');
             const acceptTcleButton = document.getElementById('accept-tcle-button');
+            const TCLE_VERSION = "2026-06-11-digital-2";
 
             const blockTitle = document.getElementById('block-title');
             const answerTitle = document.getElementById('answer-title');
@@ -450,6 +569,7 @@
 
             let currentBlock = 1;
             const totalBlocks = 5;
+            let tcleReachedEnd = false;
             let maxProgressStep = 0;
 
             function getProgressStep(screenId) {
@@ -493,6 +613,7 @@
                 progressFill.style.width = progress + '%';
             }
 
+
             function showScreen(screenId) {
                 screens.forEach(screen => {
                     screen.classList.toggle('hidden', screen.id !== screenId);
@@ -525,10 +646,28 @@
                 });
             });
 
+            function updateTcleAcceptanceState() {
+                acceptTcleButton.disabled = !(tcleReachedEnd && tcleConfirmation.checked);
+            }
+
             tcleScroll.addEventListener('scroll', () => {
                 if (tcleScroll.scrollHeight - tcleScroll.scrollTop <= tcleScroll.clientHeight + 5) {
-                    acceptTcleButton.disabled = false;
+                    tcleReachedEnd = true;
+                    updateTcleAcceptanceState();
                 }
+            });
+
+            tcleConfirmation.addEventListener('change', updateTcleAcceptanceState);
+
+            acceptTcleButton.addEventListener('click', () => {
+                const consent = {
+                    accepted: true,
+                    acceptedAt: new Date().toISOString(),
+                    version: TCLE_VERSION
+                };
+
+                localStorage.setItem("tcleConsent", JSON.stringify(consent));
+                showScreen('demographic-screen');
             });
 
             startBlocksButton.addEventListener('click', () => {
