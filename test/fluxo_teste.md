@@ -4,7 +4,8 @@
 
 1. Tela de boas-vindas.
 2. Exibição e aceite do TCLE.
-3. Tutorial das 4 visualizações.
+3. Questionário demográfico.
+4. Tutorial das 4 visualizações.
 
 ---
 
