@@ -655,6 +655,24 @@
             let tutorialIndex = 0;
             let currentTutorialChart = null;
 
+            function getClassicBreakPoints(data) {
+                const values = data
+                    .map((d) => Number(d.valor))
+                    .filter((v) => Number.isFinite(v))
+                    .sort((a, b) => b - a);
+
+                if (values.length < 2) {
+                    return { corte: 1, cortefinal: 1.1 };
+                }
+
+                const secondMax = values[1];
+                // Mantem uma pequena janela de quebra acima da maior barra nao-outlier.
+                const corte = Math.max(1, secondMax * 0.75);
+                const cortefinal = Math.max(corte + 1, secondMax * 0.95);
+
+                return { corte, cortefinal };
+            }
+
             const tutorialTitle = document.getElementById('tutorial-title');
             const tutorialControls = document.getElementById('tutorial-controls');
             const tutorialChartArea = document.getElementById('tutorial-chart-area');
@@ -762,8 +780,25 @@
                     const rect = tutorialChartArea.getBoundingClientRect();
                     const w = rect.width > 0 ? Math.round(rect.width) : 800;
                     const h = rect.height > 0 ? Math.round(rect.height) : 420;
-                    currentTutorialChart = new viz.ClassRef(tutorialChartArea, { ...viz.settings, width: w, height: h });
+
+                    if (viz.id === 'bar') {
+                        const { corte, cortefinal } = getClassicBreakPoints(viz.data);
+                        currentTutorialChart = new viz.ClassRef(
+                            tutorialChartArea,
+                            { ...viz.settings, width: w, height: h },
+                            corte,
+                            cortefinal,
+                        );
+                    } else {
+                        currentTutorialChart = new viz.ClassRef(tutorialChartArea, { ...viz.settings, width: w, height: h });
+                    }
+
                     currentTutorialChart.data(viz.data);
+
+                    // BarChart nao desenha no data(); precisa redraw explicito.
+                    if (viz.id === 'bar' && currentTutorialChart.redraw) {
+                        currentTutorialChart.redraw();
+                    }
                 } catch (err) {
                     console.error('Tutorial chart error:', err);
                     tutorialChartArea.innerHTML = '<p style="color:var(--danger-color);padding:1rem;">Erro ao carregar a visualização.</p>';
@@ -771,8 +806,18 @@
             }
 
             function showTutorialScreen() {
+                const alreadyWide = container.style.maxWidth === VISUAL_CONTAINER_MAX_WIDTH;
                 showScreen('tutorial-screen');
-                renderTutorial();
+                if (alreadyWide) {
+                    renderTutorial();
+                } else {
+                    container.addEventListener('transitionend', function onEnd(e) {
+                        if (e.propertyName === 'max-width') {
+                            container.removeEventListener('transitionend', onEnd);
+                            renderTutorial();
+                        }
+                    });
+                }
             }
 
             tutorialBackBtn.addEventListener('click', () => {
