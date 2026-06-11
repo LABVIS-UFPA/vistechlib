@@ -21,7 +21,7 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.material = null;
     this.isDragging = false;
     this.lastPointer = null;
-    this.autoReturnEnabled = false;
+    this.autoReturnEnabled = true;
     this.returnAnimation = null;
     this.toggleButton = null;
     this.initialDepth = settings?.depth ?? 8;

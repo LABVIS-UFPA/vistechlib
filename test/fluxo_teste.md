@@ -5,12 +5,12 @@
 1. Tela de boas-vindas.
 2. Exibição e aceite do TCLE.
 3. Questionário demográfico.
-    1. Faixa Etária
-    2. Sexo
-    3. Nível de Escolaridade
-    4. Fez disciplina de InfoVis
-    5. Acuidade Visual atual
-    6. Daltonismo
+    1. Faixa Etária: select com algumas faixas.
+    2. Sexo: select com "Masculino, Feminino e Prefiro não informar".
+    3. Nível de Escolaridade: "Médio Incompleto", "Médio Completo", "Superior Incompleto", "Superior Completo","Mestrado Completo", "Doutorado Completo".
+    4. Fez disciplina de InfoVis: "Sim", "Não".
+    5. Acuidade Visual atual: "Boa", "Corridida com óculos/lente", "Ruim".
+    6. Daltonismo: "Sim", "Não".
 4. Tutorial das 4 visualizações.
     1. Uma tela para cada visualização
 
