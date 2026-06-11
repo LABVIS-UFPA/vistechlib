@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experimento de Visualização de Dados</title>
+    <style>
+        :root {
+            --primary-color: #457b9d;
+            --secondary-color: #a8dadc;
+            --background-color: #f1faee;
+            --text-color: #1d3557;
+            --light-color: #f8f9fa;
+            --danger-color: #e63946;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--light-color);
+            padding: 2rem 3rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .screen {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        p {
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .tcle-content {
+            height: 350px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        .tcle-content h3 {
+            margin-top: 1.5rem;
+        }
+
+        button {
+            display: block;
+            margin: 2rem auto 0;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #1d3557;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Fase 1: Tela de Boas-vindas -->
+        <div id="welcome-screen" class="screen">
+            <h1>Estudo sobre Técnicas de Visualização de Dados</h1>
+            <p>
+                Olá! Agradecemos seu interesse em participar desta pesquisa.
+            </p>
+            <p>
+                Sua contribuição é muito valiosa para nos ajudar a entender como diferentes formatos de gráficos de barras podem facilitar a análise de dados, especialmente quando existem valores muito discrepantes (outliers).
+            </p>
+            <p>
+                O experimento consiste em analisar alguns gráficos e responder a perguntas sobre eles. Não há respostas "certas" ou "erradas", estamos interessados na sua percepção.
+            </p>
+            <button id="start-button">Iniciar</button>
+        </div>
+
+        <!-- Fase 1: Termo de Consentimento Livre e Esclarecido (TCLE) -->
+        <div id="tcle-screen" class="screen hidden">
+            <h2>Termo de Consentimento Livre e Esclarecido (TCLE)</h2>
+            <div class="tcle-content" id="tcle-scroll">
+                <p>
+                    Você está sendo convidado(a) a participar da pesquisa "Análise Comparativa de Técnicas de Visualização para Inspeção de Outliers em Gráficos de Barras". A sua participação é voluntária.
+                </p>
+                <h3>1. OBJETIVO DO ESTUDO</h3>
+                <p>
+                    Este estudo visa comparar a eficácia de quatro técnicas de visualização de gráficos de barras para identificar e interpretar dados, com foco em tarefas de análise que envolvem valores extremos (outliers).
+                </p>
+                <h3>2. PROCEDIMENTOS</h3>
+                <p>
+                    Se você concordar em participar, será solicitado(a) a realizar uma série de tarefas. Cada tarefa consistirá em observar um gráfico e responder a uma pergunta sobre os dados apresentados. O tempo de resposta e sua resposta serão registrados. Ao final de cada bloco de tarefas, você responderá a um breve questionário sobre a carga de trabalho mental (NASA-TLX). Ao final do experimento, pediremos sua preferência entre as visualizações.
+                </p>
+                <h3>3. RISCOS E DESCONFORTOS</h3>
+                <p>
+                    Os riscos associados a este estudo são mínimos e não maiores do que os encontrados na vida cotidiana ao usar um computador. Pode haver um leve cansaço visual ou mental. Você pode fazer pausas a qualquer momento.
+                </p>
+                <h3>4. BENEFÍCIOS</h3>
+                <p>
+                    Não há benefícios diretos para você por participar. No entanto, os resultados ajudarão a comunidade científica e de desenvolvimento de software a criar ferramentas de visualização de dados mais eficazes.
+                </p>
+                <h3>5. CONFIDENCIALIDADE E ANONIMATO</h3>
+                <p>
+                    Todos os dados coletados serão anônimos. Nenhum dado de identificação pessoal (como nome, e-mail ou IP) será armazenado. Os resultados da pesquisa poderão ser publicados em eventos científicos e revistas, mas sua identidade permanecerá em sigilo absoluto.
+                </p>
+                <h3>6. VOLUNTARIEDADE E DIREITO DE DESISTÊNCIA</h3>
+                <p>
+                    Sua participação é totalmente voluntária. Você tem o direito de se recusar a participar ou de retirar seu consentimento e interromper a participação a qualquer momento, sem qualquer tipo de penalidade ou prejuízo.
+                </p>
+                <p>
+                    Ao clicar no botão "Aceito", você declara que leu, compreendeu e concorda em participar do estudo nos termos descritos acima.
+                </p>
+            </div>
+            <button id="accept-tcle-button" disabled>Aceito</button>
+        </div>
+
+        <!-- Fase 2 e 3: Placeholder -->
+        <div id="experiment-container" class="screen hidden">
+            <h2>Experimento em Andamento</h2>
+            <p>O tutorial e as tarefas do experimento serão exibidos aqui.</p>
+            <!-- O conteúdo das Fases 2 e 3 será renderizado dinamicamente aqui -->
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Elementos da UI ---
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const tcleScreen = document.getElementById('tcle-screen');
+            const experimentContainer = document.getElementById('experiment-container');
+
+            const startButton = document.getElementById('start-button');
+            const acceptTcleButton = document.getElementById('accept-tcle-button');
+            const tcleScroll = document.getElementById('tcle-scroll');
+
+            // --- Lógica da Fase 1 ---
+
+            // Habilita o botão de aceite do TCLE apenas após o usuário rolar até o final
+            tcleScroll.addEventListener('scroll', () => {
+                // Verifica se o usuário rolou até o final (com uma margem de 5px)
+                if (tcleScroll.scrollHeight - tcleScroll.scrollTop <= tcleScroll.clientHeight + 5) {
+                    acceptTcleButton.disabled = false;
+                }
+            });
+
+            // 1. Transição: Boas-vindas -> TCLE
+            startButton.addEventListener('click', () => {
+                welcomeScreen.classList.add('hidden');
+                tcleScreen.classList.remove('hidden');
+            });
+
+            // 2. Transição: TCLE -> Início do Experimento
+            acceptTcleButton.addEventListener('click', () => {
+                console.log('TCLE aceito. Iniciando o experimento.');
+                tcleScreen.classList.add('hidden');
+                experimentContainer.classList.remove('hidden');
+
+                // --- Início da Lógica da Fase 2 e 3 (a ser implementada) ---
+                runExperiment();
+            });
+
+            // --- Função principal do experimento ---
+            function runExperiment() {
+                console.log('Fase 1 (Preparação) concluída.');
+
+                // TODO: Implementar Fase 1.3: Tutorial das 4 visualizações.
+                // TODO: Implementar Fase 1.4: Exemplos de treinamento.
+
+                console.log('Iniciando Fase 2 (Experimento)...');
+                // TODO: Definir as 6 tarefas, 4 visualizações e 6 bases de dados.
+                // TODO: Gerar e randomizar as combinações de (tarefa, visualização, base de dados).
+                // TODO: Iterar sobre cada combinação, mostrando a instrução, o gráfico e o cronômetro.
+                // TODO: Coletar resposta, tempo e confiança.
+                // TODO: Aplicar NASA-TLX após cada bloco de tarefa.
+
+                console.log('Iniciando Fase 3 (Avaliação Final)...');
+                // TODO: Mostrar as 4 visualizações para ranking de preferência.
+                // TODO: Coletar comentários qualitativos.
+                // TODO: Consolidar todos os dados coletados (tempos, respostas, confiança, TLX, ranking, etc.).
+                // TODO: Gerar e oferecer o download dos resultados em JSON e CSV.
+                // TODO: Exibir tela de agradecimento.
+            }
+        });
+    </script>
+
+</body>
+</html>
