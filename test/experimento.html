@@ -450,15 +450,54 @@
 
             let currentBlock = 1;
             const totalBlocks = 5;
+            let maxProgressStep = 0;
+
+            function getProgressStep(screenId) {
+                const fixedStepMap = {
+                    'welcome-screen': 1,
+                    'tcle-screen': 2,
+                    'demographic-screen': 3,
+                    'tutorial-screen-1': 4,
+                    'tutorial-screen-2': 5,
+                    'tutorial-screen-3': 6,
+                    'tutorial-screen-4': 7,
+                    'task-instruction-screen': 8,
+                    'final-ranking-screen': 24,
+                    'final-comments-screen': 25,
+                    'thanks-screen': 26
+                };
+
+                if (fixedStepMap[screenId]) {
+                    return fixedStepMap[screenId];
+                }
+
+                const blockBase = 8 + (currentBlock - 1) * 3;
+                if (screenId === 'block-task-screen') {
+                    return blockBase + 1;
+                }
+                if (screenId === 'block-answer-screen') {
+                    return blockBase + 2;
+                }
+                if (screenId === 'nasa-tlx-screen') {
+                    return blockBase + 3;
+                }
+
+                return 1;
+            }
+
+            function updateProgress(screenId) {
+                const totalFlowSteps = 26;
+                const currentStep = getProgressStep(screenId);
+                maxProgressStep = Math.max(maxProgressStep, currentStep);
+                const progress = (maxProgressStep / totalFlowSteps) * 100;
+                progressFill.style.width = progress + '%';
+            }
 
             function showScreen(screenId) {
                 screens.forEach(screen => {
                     screen.classList.toggle('hidden', screen.id !== screenId);
                 });
-
-                const currentIndex = screens.findIndex(screen => screen.id === screenId);
-                const progress = ((currentIndex + 1) / screens.length) * 100;
-                progressFill.style.width = progress + '%';
+                updateProgress(screenId);
             }
 
             function updateBlockPlaceholders() {
