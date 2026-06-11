@@ -43,7 +43,7 @@
             <div id="foldControls" style="display:none; align-items:center; gap:15px;">
                 <div style="display:flex; align-items:center; gap:5px;">
                     <label for="foldThreshold" style="font-size:13px;">Limiar de Dobra (Teto Y):</label>
-                    <input id="foldThreshold" type="range" min="0.01" max="1.0" step="0.01" value="1.0" />
+                    <input id="foldThreshold" type="range" min="0" max="100" step="0.1" value="100" />
                     <span id="thresholdValue" style="min-width: 40px; font-weight: bold; font-size: 13px;">100%</span>
                 </div>
             </div>
@@ -282,6 +282,12 @@
             const thresholdValueText = document.getElementById('thresholdValue');
             const btnToggleAutoReturn = document.getElementById('btnToggleAutoReturn');
 
+            // Configuração matemática para a escala logarítmica (1% a 100%)
+            const minRatio = 0.01;
+            const maxRatio = 1.0;
+            const minLog = Math.log(minRatio);
+            const maxLog = Math.log(maxRatio);
+
             function renderCurrentChart() {
                 // Destrói o gráfico anterior antes de instanciar o novo
                 if (currentChart) {
@@ -317,7 +323,10 @@
                     settings.breakStartRatio = Number(document.getElementById('breakPosition').value);
                     settings.foldVisualHeight = Number(document.getElementById('breakHeight').value);
                 } else {
-                    settings.maxYLimitRatio = Number(document.getElementById('foldThreshold').value);
+                    const linearValue = Number(document.getElementById('foldThreshold').value);
+                    const scaleFactor = linearValue / 100;
+                    const ratio = Math.exp(minLog + scaleFactor * (maxLog - minLog));
+                    settings.maxYLimitRatio = ratio;
                     settings.zStepDepth = 1.5;
                 }
 
@@ -382,8 +391,11 @@
 
             // Eventos dos Controles Específicos do Scroll/Worm
             document.getElementById('foldThreshold').addEventListener('input', e => {
-                thresholdValueText.innerText = Math.round(Number(e.target.value) * 100) + '%';
-                if (currentChart && currentChart.updateFoldThreshold) currentChart.updateFoldThreshold(Number(e.target.value));
+                const linearValue = Number(e.target.value);
+                const scaleFactor = linearValue / 100;
+                const ratio = Math.exp(minLog + scaleFactor * (maxLog - minLog));
+                thresholdValueText.innerText = (ratio * 100).toFixed(1) + '%';
+                if (currentChart && currentChart.updateFoldThreshold) currentChart.updateFoldThreshold(ratio);
             });
 
             window.addEventListener('resize', () => { if (currentChart) currentChart.resize(); });
