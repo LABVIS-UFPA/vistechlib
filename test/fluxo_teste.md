@@ -5,7 +5,6 @@
 1. Tela de boas-vindas.
 2. Exibição e aceite do TCLE.
 3. Tutorial das 4 visualizações.
-4. Exemplos de treinamento (não contabilizados).
 
 ---
 
@@ -18,29 +17,23 @@
 
 ### Estrutura de cada Bloco
 
-1. 1 bloco = 1 tarefa.
-    * Dentro do bloco:
-    * Cada uma das 4 visualizações aparece exatamente uma vez.
-    * Para cada visualização, sorteia-se 1 base de dados dentre as 6 disponíveis, sem repetição dentro do bloco.
+* Contém uma tarefa escolhida aleatoriamente.
+* Cada uma das 4 visualizações aparece exatamente uma vez em ordem aleatória.
+* Para cada visualização, sorteia-se 1 base de dados dentre as 6 disponíveis, sem repetição dentro do bloco.
+* Antes de iniciar os blocos deve-se mostrar a instrução da tarefa.
 
-2. Randomizar a ordem dessas combinações.
+### Fluxo de cada Bloco
 
-3. Para cada combinação:
+* Exibir a questão e o contexto.
+* Exibir o gráfico e iniciar o cronômetro.
+* Participante analisa o gráfico.
+* Participante clica em "Achei a resposta".
+* Para o cronômetro e o participante deve registrar a resposta.
 
-   * Mostrar a instrução da tarefa.
-   * Exibir o gráfico.
-   * Iniciar o cronômetro.
-   * Participante analisa o gráfico.
-   * Participante clica em "Achei a resposta".
-   * Para o cronômetro.
-   * Registrar a resposta.
-   * Solicitar nível de confiança (Likert 1–5).
+### Finalização do Bloco:
 
-4. Após concluir todas as combinações do bloco:
-
-   * Aplicar um questionário NASA-TLX referente à tarefa executada pra cada visulização.
-
-5. Repetir o processo para os próximos blocos de tarefas.
+* Aplicar um questionário NASA-TLX referente à tarefa executada pra cada visulização.
+* Ir para o próximo bloco ou seguir para a fase final.
 
 ---
 
@@ -63,4 +56,3 @@ Após finalizar todos os blocos:
    * outras observações.
 
 4. Exibir tela de agradecimento.
-
