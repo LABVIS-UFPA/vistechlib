@@ -1,28 +1,36 @@
 # vistech
+Reusable Visualization Techniques Module produced by labvis ufpa containing the following visualization techniques
 
-This version marks the migration of the Reusable Visualization Techniques Module to a web environment, with a specific focus on bar chart techniques.
-The structure has been adapted to allow direct testing in the browser, with a participant registration interface and automated execution of experimental tasks.
+* BarChart
+* BeeswarmPlot
+* CirclePacking
+* Histogram
+* ParallelBundling
+* ParallelCoordinates
+* ScatterplotMatrix
+* Sunburst
+* Treemap
 
-# Main Features
 
-* Updated `BarChart.js` class: Responsible for generating different bar chart strategies based on the experiment parameters.
-* Participant registration page (`cadastro_user.html`): Registration interface with automatic redirection to the testing environment (`test_user_barchart.html`).
-* Additional demonstration page (`teste_barchart_padrao.html`): Displays a bar chart using the *Perspective Scale Break* technique. Includes buttons to download the chart in SVG or PNG format, facilitating its use in reports, articles, and other visual materials.
-* Web-compatible architecture: Can be run locally or hosted on servers (simple HTTP server) without additional installation requirements.
+# Scientific Paper
+The specific code used in the article:
 
-# How to Use
+Natã Ferreira Lobato, Kevin Washington Azevedo da Cruz, Bianchi Serique Meiguins, Carlos Gustavo Resque dos Santos, Perspective scale breaks: A user study and proposal to mitigate the impact of outliers in bar chart plots, Computers & Graphics, Volume 132, 2025, 104390
+DOI: 10.1016/j.cag.2025.104390
 
-Open the participant registration page
+is located in the Test_PSB2.5D branch of the repository: https://github.com/LABVIS-UFPA/vistechlib/tree/Test_PSB2.5D
 
-* In your browser, open the file `cadastro_user.html`.
-* Fill in the required information in the form.
 
-Run the tests
+## How to install
 
-* After submitting the registration form, you will be automatically redirected to the `test_user_barchart.html` page.
-* This page presents the visualization techniques discussed in the article, with all datasets and tasks used in the original study.
+You can install the application locally by running the code below:
+```
+npm install
+```
+## How to build
+use the library on the front end with the help of browserify, use the command
+```
+npm start
+```
 
-Complete and save the data
-
-* Once all tasks are completed, the generated data will be automatically saved in the same format used in the experiment described in the paper, allowing direct comparison of results.
-
+[Api documentation](https://doxdox.org/LABVIS-UFPA/vistechlib "documentation")

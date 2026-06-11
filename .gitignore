@@ -3,3 +3,4 @@ documentation
 .idea
 *.log
 package-lock.json
+test/bundle.js
