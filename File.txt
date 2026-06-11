@@ -1,0 +1,3 @@
+Title: Perspective Scale Breaks: a user study and proposal to mitigate the impact of outliers in bar chart plots.
+Authors: Natã Ferreira Lobato, Kevin Washington Azevedo da Cruz, Bianchi Serique Meiguins, Carlos Gustavo Resque dos Santos.
+System: Web.

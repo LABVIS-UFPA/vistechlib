@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Donut com Outlier Empilhado</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    #chart {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    text {
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header class="bg-slate-200 p-2">
+    <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
+  </header>
+
+  <main>
+    <h1 class="p-4">Gráfico de Rosca com Outlier Empilhado</h1>
+    <p class="p-4">Empilhamento do outlier dentro do próprio arco.</p>
+
+    <div id="chart" style="height: 600px; width: 90%;"></div>
+  </main>
+
+  <script>
+    const originalData = [
+      { label: "Outlier", value: 50 },  // outlier ocupa 50% do círculo
+      { label: "A", value: 20 },
+      { label: "B", value: 15 },
+      { label: "C", value: 15 }
+    ];
+
+    const width = 600;
+    const height = 500;
+    const radius = 150;
+    const depthOffset = 12;
+    const donutThickness = 60;
+
+    const svg = d3.select("#chart")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    const centerGroup = svg.append("g")
+      .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+    const total = d3.sum(originalData, d => d.value);
+
+    const pie = d3.pie()
+      .sort(null)
+      .value(d => d.value);
+
+    const arcs = pie(originalData);
+
+    const arcGen = d3.arc()
+      .innerRadius(radius - donutThickness)
+      .outerRadius(radius);
+
+    const color = d3.scaleOrdinal(d3.schemeTableau10);
+
+    // Identifica a fatia do outlier
+    const outlierArc = arcs.find(d => d.data.label === "Outlier");
+    const nStacks = 5;
+    const stackData = Array.from({ length: nStacks }, (_, i) => ({
+      ...outlierArc,
+      data: {
+        label: "Outlier_p" + (i + 1),
+        value: outlierArc.data.value / nStacks
+      },
+      depth: i
+    }));
+
+    // Desenha os elementos menores normalmente
+    centerGroup.selectAll("path.normal")
+      .data(arcs.filter(d => d.data.label !== "Outlier"))
+      .join("path")
+      .attr("class", "normal")
+      .attr("d", arcGen)
+      .attr("fill", d => color(d.data.label))
+      .attr("stroke", "white");
+
+    centerGroup.selectAll("text.normal")
+      .data(arcs.filter(d => d.data.label !== "Outlier"))
+      .join("text")
+      .attr("transform", d => `translate(${arcGen.centroid(d)})`)
+      .attr("text-anchor", "middle")
+      .text(d => d.data.label);
+
+    // Desenha as camadas do outlier empilhadas na mesma posição angular
+    const outlierGroup = svg.append("g")
+      .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+    outlierGroup.selectAll("path.outlier")
+      .data(stackData)
+      .join("path")
+      .attr("class", "outlier")
+      .attr("d", d => {
+        const arc3D = d3.arc()
+          .innerRadius(radius - donutThickness)
+          .outerRadius(radius);
+        return arc3D(d);
+      })
+      .attr("transform", d => `translate(0, ${-d.depth * depthOffset})`)
+      .attr("fill", color("Outlier"))
+      .attr("stroke", "white");
+
+    // Rótulo geral do outlier
+    outlierGroup.append("text")
+      .attr("text-anchor", "middle")
+      .attr("y", -nStacks * depthOffset - 10)
+      .attr("X", 100)
+      .text("D");
+
+  </script>
+</body>
+</html>

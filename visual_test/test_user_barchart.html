@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="d3.v7.min.js"></script>
+    <script src="moment.min.js"></script>
+    <script src="require.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+    <script src="../src/Visualization.js"></script>
+    <script src="../src/BarChart.js"></script>
+    <script src="../visual_test/Tarefa.js"></script>
+    <script src="../visual_test/BaseDeDados.js"></script>
+    <script src="../visual_test/Respostas.js"></script>
+    <script src="../visual_test/webcam.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/json2csv/dist/json2csv.umd.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Liga a camera
+            // const videoElement = document.getElementById('video');
+            // const web = new webcam(videoElement);
+            // web.startRecording();
+
+            console.log(localStorage.getItem("id"))
+
+            var bodyElement = document.body;
+            let layout = document.querySelector("#chart");
+            var continuarBotao = document.getElementById("continuarBotao");
+            var campoResposta = document.querySelector('fieldset');
+            let t0, t1;
+
+            let barchart = null; // Inicialmente, o gráfico é nulo
+            // Função para criar e exibir o gráfico com uma estratégia específica e uma base de dados
+            function createAndDisplayChart(strategy, data, break_inicial, breakfinal) {
+                // Limpa o gráfico anterior se existir
+                if (barchart) {
+                    layout.innerHTML = '';
+                }
+                // Cria um novo gráfico com a estratégia fornecida
+                let config = { drawStrategy: strategy };
+                barchart = new BarChart(layout, config, break_inicial, breakfinal);
+                // Define os dados
+                barchart.data(data);
+                // Redesenha o gráfico
+                barchart.redraw();
+
+            }
+
+            const minhaBaseDeDados = new BaseDeDados();
+            // Instanciando a classe Tarefa
+            const tarefa = new Tarefa();
+            const resposta = new Respostas();
+
+            var strategies = ["default", "log", "scale-break", "scale break perspective"];
+            var tarefas = ["1", "2", "3", "4"];
+
+            // Função para gerar todas as combinações possíveis entre os valores e as estratégias
+            function generateCombinations() {
+                let combinations = [];
+
+                // Loop pelas estratégias
+                for (let strategy of strategies) {
+                    // Loop pelos valores
+                    for (let [varName, values] of [['1', minhaBaseDeDados.base1], ['2', minhaBaseDeDados.base2], ['3', minhaBaseDeDados.base3], ['4', minhaBaseDeDados.base4]]) {  //
+                        // Loop pelas tarefas
+                        for (let tarefa of tarefas) {
+                            // Adiciona a combinação com o nome da variável, a estratégia e a tarefa
+                            combinations.push({ value: values, strategy, varName, tarefa });
+                        }
+                    }
+                }
+                return combinations;
+            }
+
+
+            // Função para embaralhar um array
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // Função para exibir as combinações uma por uma
+            function displayCombinations() {
+                let combinations = generateCombinations();
+                combinations = shuffle(combinations); // Embaralha as combinações
+                let index = 0;
+                let combination = [];
+                let value_t4_barra = 0;
+
+                // Função recursiva para exibir as combinações uma por uma
+                function displayNextCombination() {
+                    if (index < combinations.length) {
+                        combination = combinations[index++];
+                        minhaBaseDeDados.embaralhar(minhaBaseDeDados['base' + combination.varName]);
+                        combination.values = minhaBaseDeDados['base' + combination.varName];
+                        // console.log(combination.values)
+
+                        //valores dos breaks
+                        let break_dados = minhaBaseDeDados.breakdados(combination.varName);
+                        createAndDisplayChart(combination.strategy, combination.value, break_dados[0], break_dados[1]);
+                        //passa  a base para a função que grar o valor para t4
+                        let t4 = minhaBaseDeDados.gerarvalor(combination.varName);
+                        value_t4_barra = t4.valor;
+                        tarefa.reset(combination.tarefa, t4.valor);
+                        temp_visualizaçãoi = performance.now();
+                        // Limpa o conteúdo do campo
+                        campoResposta.innerHTML = '';
+                        createresp(combination.value);
+                        // if (tarefa.pergId == 4) {
+                        //     // createresp(combination.value, true);
+                        //     createrespinput()
+                        // } else {
+                        //     createresp(combination.value); //pulo do gATO COMO TRUE PARA PERMIRTIR SELAÇÃO MUTIPLA
+                        // }
+                    } else {
+                        // Todas as combinações foram exibidas, agora exporte para CSV
+                        resposta.exportToCSV();
+                        web.stopRecording();
+                    }
+                }
+                // Inicia a exibição das combinações
+                displayNextCombination();
+
+                let tempo_total = 0;
+
+                this.proximoBotao.addEventListener("click", function () {
+                    tarefa.pararTemporizador();// parar temporizador da classe tarefa
+
+                    var id = localStorage.getItem("id");
+                    var idade = localStorage.getItem("idade");
+                    var grauEscolaridade = localStorage.getItem("grauEscolaridade");
+                    var curso = localStorage.getItem("curso");
+                    var visualizacao = localStorage.getItem("visualizacao");
+                    var conhece = localStorage.getItem("conhece");
+
+                    var valorlikert = localStorage.getItem("respostaLikert");
+                    var valorlikert2 = localStorage.getItem("respostaLikert2", valorlikert2);
+                    var valorlikert3 = localStorage.getItem("respostaLikert3", valorlikert3);
+
+                    var res = minhaBaseDeDados.respostacorreta(combination.varName);
+                    var resposta_correta = res[tarefa.id_pergunta(tarefa.perg) - 1]; // tarefa 1 esta na posição [0]
+                    // console.log(resposta_correta)
+                    resposta_correta_posicao = resposta_correta.posicao;
+                    resposta_correta_valor = resposta_correta.valor;
+                    console.log(resposta_correta_posicao, resposta_correta_valor)
+
+
+
+                    temp_visualizaçãof = performance.now();
+                    let temp_D = temp_visualizaçãof - temp_visualizaçãoi;
+                    // Formata o tempo decorrido
+                    let temp_D_formatado = tarefa.formatatempo_performace(temp_D);
+
+                    let temp_janela_incicial = (temp_visualizaçãoi)
+                    let temp_janela_final = temp_janela_incicial + temp_D
+                    // console.log('Inicio', tarefa.formatatempo_performace(temp_janela_incicial), 'Fim', tarefa.formatatempo_performace(temp_janela_final))
+                    let tempoincicial = tarefa.formatatempo_performace(temp_janela_incicial)
+                    let tempofinal = tarefa.formatatempo_performace(temp_janela_final)
+
+                    //salvar resposta ussuario por pergunta
+                    resposta.saveCheckedCheckboxesToJson(id, idade, grauEscolaridade, curso, visualizacao, conhece,valorlikert, valorlikert2, valorlikert3, combination.strategy, combination.varName, tarefa.pergId, resposta_correta_posicao, resposta_correta_valor, tempoincicial, tempofinal, minhaBaseDeDados['base' + combination.varName]);
+                    tarefa.enviarpergunta();
+
+                });
+
+                continuarBotao.addEventListener('click', function () {
+                    displayNextCombination();
+                });
+
+            }
+
+            // Chama a função para exibir as combinações
+            displayCombinations();
+
+            //alinhar fieldset ao grafico
+            var ban = d3.select("svg .background .vis_background").node().getBoundingClientRect();
+            campoResposta.style.width = ban.width + "px";
+            campoResposta.style.marginLeft = ban.left - 10 + "px";
+            campoResposta.style.marginRight = 0 + "px";
+            campoResposta.style.padding = 0 + 'px';
+
+
+            function createresp(dados, allowMultipleSelection) {
+                campoResposta.classList.add("checkbox-form");
+                var gap = barchart.settings.gap;
+
+
+                dados.forEach((valor, index) => {
+
+                    var input = document.createElement("input");
+                    input.classList.add("checkbox-container");
+                    input.type = "checkbox";
+                    input.name = "resposta";
+                    input.value = index;
+                    input.id = "resp" + index;
+                    input.style.marginLeft = 0;
+                    input.style.marginRight = ((gap) * 4) + 'px';
+                    input.style.marginTop = 0;
+                    input.style.marginBottom = 0;
+                    campoResposta.appendChild(input);
+
+
+                    // if (dados.length > 15) {
+                    //     //  para o primeiro e o ultimo input
+                    //     if (index === 0) {
+                    //         input.style.marginLeft = barchart.x.bandwidth() / 3 + 'px';
+                    //     } else if (index === dados.length - 1) {
+                    //         input.style.marginRight = (barchart.x.bandwidth()) / 5 + 'px';
+                    //     }// if (index > 0) {
+                    //     //     input.style.marginRight = 109794;
+                    // } else {
+                    if (index === 0) {
+                        input.style.marginLeft = barchart.x.bandwidth() / 2 + 'px';
+                    } else if (index === dados.length - 1) {
+                        input.style.marginRight = (barchart.x.bandwidth()) / 2 + 'px';
+                    }
+                });
+
+                if (!allowMultipleSelection) {
+                    // Adicionar evento de clique para garantir apenas uma seleção
+                    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="resposta"]');
+                    checkboxes.forEach(function (checkbox) {
+                        checkbox.addEventListener('click', function () {
+                            checkboxes.forEach(function (cb) {
+                                if (cb !== checkbox) {
+                                    cb.checked = false;
+                                }
+                            });
+                        });
+                    });
+                }
+            }
+
+        });
+
+    </script>
+
+</head>
+
+<body>
+    <div>
+        <header>
+            <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
+        </header>
+        <main>
+            <div id="chart"></div>
+        </main>
+
+
+        <fieldset style="margin-bottom: 15px;">
+            <legend>Resposta</legend>
+        </fieldset>
+
+        <div id="perguntaContainer" style="margin-left: 20px; margin-bottom: 15px;"></div>
+        <div id="fimPerguntas" style="display: none;">
+            <p style="margin-left: 20px; margin-bottom: 15px;">Fim das perguntas, deseja continuar ?</p>
+            <button id="continuarBotao" style="margin-left: 20px; margin-bottom: 15px;">Continuar</button>
+        </div>
+
+        <div style="margin-left: 20px; margin-bottom: 15px;">
+            <button id="proximoBotao">Enviar</button>
+        </div>
+    </div>
+
+    <video id="video" autoplay muted></video>
+
+</body>
+
+</html>

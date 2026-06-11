@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Treemap com Outlier Empilhado</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    #chart {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .node rect {
+      stroke: #fff;
+      stroke-width: 1px;
+    }
+
+    .node text {
+      fill: white;
+      font-size: 12px;
+      pointer-events: none; /* Para que o texto não bloqueie eventos do mouse no retângulo */
+    }
+  </style>
+</head>
+<body>
+  <header class="bg-slate-200 p-2">
+    <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
+  </header>
+
+  <main>
+    <h1 class="p-4">Gráfico de Treemap com Outlier Empilhado</h1>
+    <p class="p-4">Empilhamento do outlier em uma categoria dominante.</p>
+
+    <div id="chart" style="height: 600px; width: 90%;"></div>
+  </main>
+
+  <script>
+    const originalData = {
+      name: "root",
+      children: [
+        { name: "Outlier", value: 500 },
+        { name: "A", value: 200 },
+        { name: "B", value: 150 },
+        { name: "C", value: 150 },
+        { name: "D", value: 100 },
+        { name: "E", value: 50 }
+      ]
+    };
+
+    const width = 800;
+    const height = 500;
+    const depthOffset = 8; // Deslocamento para o efeito 3D
+    const nStacks = 5; // Número de camadas para o outlier
+
+    const svg = d3.select("#chart")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    const color = d3.scaleOrdinal(d3.schemeTableau10);
+
+    // Criar a hierarquia de dados necessária para o treemap
+    const root = d3.hierarchy(originalData)
+      .sum(d => d.value)
+      .sort((a, b) => b.value - a.value);
+
+    // Criar o layout do treemap
+    const treemapLayout = d3.treemap()
+      .size([width, height]) // O layout usa toda a área disponível
+      .padding(2);
+
+    // Aplicar o layout aos dados
+    treemapLayout(root);
+
+    const nodes = root.leaves(); // Pega as folhas da árvore (os retângulos)
+
+    // Identifica o nó do outlier
+    const outlierNode = nodes.find(d => d.data.name === "Outlier");
+
+    // A pilha será desenhada DENTRO do espaço do outlier.
+    // O retângulo é encurtado para dar espaço para a pilha crescer para cima, dentro dos limites.
+    const originalOutlierHeight = outlierNode.y1 - outlierNode.y0;
+    const stackBaseHeight = (nStacks - 1) * depthOffset;
+    const mainOutlierHeight = originalOutlierHeight - stackBaseHeight; // A altura de cada fatia da pilha
+
+    const stackData = Array.from({ length: nStacks }, (_, i) => ({
+      ...outlierNode,
+      depth_stack: i // Usando um nome de propriedade diferente para não confundir
+    }));
+
+    // Grupo para os elementos normais
+    const normalGroup = svg.append("g").attr("class", "normal-nodes");
+
+    // Desenha os retângulos normais
+    normalGroup.selectAll("rect")
+      .data(nodes.filter(d => d.data.name !== "Outlier"))
+      .join("rect")
+      .attr('x', d => d.x0)
+      .attr('y', d => d.y0)
+      .attr('width', d => d.x1 - d.x0)
+      .attr('height', d => d.y1 - d.y0)
+      .attr("fill", d => color(d.data.name))
+      .attr("stroke", "white");
+
+    // Adiciona os rótulos para os retângulos normais
+    normalGroup.selectAll("text")
+      .data(nodes.filter(d => d.data.name !== "Outlier"))
+      .join("text")
+      .attr("x", d => d.x0 + 5)
+      .attr("y", d => d.y0 + 20)
+      .text(d => `${d.data.name} (${d.value})`)
+      .attr("font-size", "15px")
+      .attr("fill", "white");
+
+    // Grupo para o outlier empilhado
+    const outlierGroup = svg.append("g").attr("class", "outlier-node");
+
+    // Desenha as camadas do outlier empilhadas
+    // A direção foi invertida para empilhar para cima. A camada de baixo (depth_stack: 0) tem o maior 'y'.
+    // A camada de cima (depth_stack: n-1) tem o menor 'y' (y0), ficando no topo.
+    outlierGroup.selectAll("rect.outlier")
+      .data(stackData) // A ordem de desenho (de 0 a n-1) garante que a camada de cima seja desenhada por último.
+      .join("rect")
+      .attr("class", "outlier")
+      .attr('x', d => d.x0)
+      .attr('y', d => d.y0 + ( d.depth_stack) * depthOffset) // Inverte a direção do empilhamento para cima
+      .attr('width', d => d.x1 - d.x0)
+      .attr('height', mainOutlierHeight)
+      .attr("fill", color("Outlier"))
+      .attr("stroke", "white");
+
+    // Adiciona o rótulo para o outlier (apenas na camada superior)
+    outlierGroup.append("text")
+      .attr("x", outlierNode.x0 + 5)
+      .attr("y", outlierNode.y0 + 60) // O topo da pilha está em y0, então o texto fica em y0 + 20
+      .text(`${outlierNode.data.name} (${outlierNode.value})`)
+      .attr("font-size", "15px")
+      .attr("fill", "white");
+
+  </script>
+</body>
+</html>

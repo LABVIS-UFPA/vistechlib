@@ -1,0 +1,35 @@
+.checkbox-form {
+    display: flex;
+    justify-content: space-between;
+}
+
+
+/* fieldset {
+    margin-left: 2.5%;
+    width: 93.5%;
+} */
+
+img {
+    width: 90px;
+    height: 90px;
+
+}
+
+header {
+    background: rgba(119, 136, 153);
+    margin-left: -8px;
+    /* Adiciona margem à esquerda no fieldset */
+    margin-right: -8px;
+    /* Adiciona margem à esquerda no fieldset */
+}
+
+
+div#chart {
+    height: 710px;
+    width: 98%;
+}
+
+
+#video {
+    display: none;
+}
