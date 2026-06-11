@@ -62,3 +62,13 @@ test("aceite exige leitura e confirmacao e registra versao e horario", () => {
   assert.match(html, /localStorage\.setItem\("tcleConsent"/);
   assert.match(html, /exclusivamente em meio digital/);
 });
+
+test("questionario demografico nao exibe bloco de placeholder", () => {
+  const html = fs.readFileSync(htmlPath, "utf8");
+
+  assert.doesNotMatch(
+    html,
+    /Placeholder: estrutura dos campos demogr[aá]ficos/,
+  );
+  assert.match(html, /class="demographic-fields"/);
+});
