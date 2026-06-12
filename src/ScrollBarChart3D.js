@@ -1573,24 +1573,61 @@ class ScrollBarChart3D extends Visualization {
     const thresholdDataValue =
       (this.layout.maxYLimit / totalMaxPhysicalLength) * this.maxValue;
 
-    const tickValues = d3
-      .scaleLinear()
-      .domain([thresholdDataValue, this.maxValue])
-      .nice()
-      .ticks(6)
-      .filter((value) => {
-        const scaledLength = this._getScaledBarLength(value);
+    
+    // const tickValues = d3
+    //   .scaleSqrt()
+    //   .domain([thresholdDataValue, this.maxValue])
+    //   .nice()
+    //   .ticks(5)
+    //   .filter((value) => {
+    //     const scaledLength = this._getScaledBarLength(value);
+    //     return (
+    //       value > thresholdDataValue && scaledLength <= maxScaledLength + 1e-6
+    //     );
+    //   });
 
-        return (
-          value > thresholdDataValue && scaledLength <= maxScaledLength + 1e-6
-        );
-      });
+    // 1. Convertemos nossos limites de dados para o "espaço da raiz"
+    const minRoot = Math.sqrt(thresholdDataValue);
+    const maxRoot = Math.sqrt(this.maxValue);
 
-    tickValues.forEach((value, index) => {
-      const tickZ =
-        axisStartZ +
-        ((index + 1) / tickValues.length) * (axisEndZ - axisStartZ);
+    // 2. Pedimos ao D3 para gerar passos lineares e "bonitos" no espaço da raiz
+    // Exemplo: se minRoot=10 e maxRoot=50, o D3 gerará [10, 20, 30, 40, 50]
+    const rootTicks = d3.ticks(minRoot, maxRoot, 5);
 
+    // 3. Elevamos ao quadrado para voltar para o domínio real dos dados.
+    // O array acima viraria [100, 400, 900, 1600, 2500].
+    // Esses valores crescem rápido no papel, mas ocuparão espaços idênticos no eixo Z!
+    let tickValues = rootTicks.map(r => r * r);
+
+    // 4. Filtramos para garantir que nenhum tick fique fora da área do rolo
+    tickValues = tickValues.filter((value) => {
+      const scaledLength = this._getScaledBarLength(value);
+      return (
+        value > thresholdDataValue && scaledLength <= maxScaledLength + 1e-6
+      );
+    });
+    
+    // (Opcional) Garante que o valor máximo absoluto sempre tenha uma marcação no final
+    if (tickValues.length > 0 && tickValues[tickValues.length - 1] !== this.maxValue) {
+      tickValues.push(this.maxValue);
+    }
+
+
+    // O d3.scaleLinear() continua sendo usado APENAS para gerar números redondos (nice)
+    // para os rótulos (ex: 500, 1000, 1500). O mapeamento espacial (Z) será feito pela geometria.
+
+    tickValues.forEach((value) => {
+      // 1. Descobrimos o comprimento físico exato do papel para este valor
+      const tickScaledLength = this._getScaledBarLength(value);
+
+      // 2. A MÁGICA: Em vez de cortar a espiral mestre, nós geramos 
+      // uma geometria de rolo exclusiva e perfeita para este valor!
+      const pathAtValue = this._generateScrollPoints(tickScaledLength);
+
+      // 3. O "diâmetro" real deste rolo é a coordenada Z mais profunda que ele atinge
+      const tickZ = pathAtValue.reduce((minZ, p) => Math.min(minZ, p.z), 0);
+
+      // Desenha o tracinho do eixo usando o Z geometricamente preciso
       const tickLine = this._createLineFromPoints(
         [
           new THREE.Vector3(axisX - 0.12, axisY, tickZ),
@@ -1599,9 +1636,9 @@ class ScrollBarChart3D extends Visualization {
         this.settings.yAxisColor,
         0.85,
       );
-
       this.yAxisGroup.add(tickLine);
 
+      // Desenha a linha de grade
       const gridLine = this._createLineFromPoints(
         [
           new THREE.Vector3(axisX, axisY, tickZ),
@@ -1610,15 +1647,48 @@ class ScrollBarChart3D extends Visualization {
         this.settings.yGridColor,
         0.45,
       );
-
       this.yAxisGroup.add(gridLine);
 
+      // Posiciona o texto
       const label = this._createTextSprite(this._formatYAxisValue(value));
       label.position.set(axisX - 0.45, axisY + 0.25, tickZ);
       label.scale.set(0.8, 0.4, 1);
-
       this.yAxisGroup.add(label);
     });
+
+    // tickValues.forEach((value, index) => {
+    //   const tickZ =
+    //     axisStartZ +
+    //     ((index + 1) / tickValues.length) * (axisEndZ - axisStartZ);
+
+    //   const tickLine = this._createLineFromPoints(
+    //     [
+    //       new THREE.Vector3(axisX - 0.12, axisY, tickZ),
+    //       new THREE.Vector3(axisX + 0.12, axisY, tickZ),
+    //     ],
+    //     this.settings.yAxisColor,
+    //     0.85,
+    //   );
+
+    //   this.yAxisGroup.add(tickLine);
+
+    //   const gridLine = this._createLineFromPoints(
+    //     [
+    //       new THREE.Vector3(axisX, axisY, tickZ),
+    //       new THREE.Vector3(chartRight, axisY, tickZ),
+    //     ],
+    //     this.settings.yGridColor,
+    //     0.45,
+    //   );
+
+    //   this.yAxisGroup.add(gridLine);
+
+    //   const label = this._createTextSprite(this._formatYAxisValue(value));
+    //   label.position.set(axisX - 0.45, axisY + 0.25, tickZ);
+    //   label.scale.set(0.8, 0.4, 1);
+
+    //   this.yAxisGroup.add(label);
+    // });
   }
 
   _createLineFromPoints(points, color, opacity = 0.85) {
