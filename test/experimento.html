@@ -644,7 +644,8 @@
                 demographics: null,
                 blockTaskOrder: [],
                 tutorialOrder: [],
-                blocks: []
+                blocks: [],
+                blockNasaTlx: []
             };
 
             // --- Tutorial configuration ---
@@ -1057,6 +1058,32 @@
                 ].join('');
             }
 
+            function collectBlockNasaTlx() {
+                const taskKey = getTaskKeyForBlock(currentBlock);
+
+                const existingIndex = experimentData.blockNasaTlx.findIndex(
+                    item => item.blockNumber === currentBlock
+                );
+
+                const record = {
+                    blockNumber: currentBlock,
+                    taskKey,
+                    taskDescription: TASK_DESCRIPTION[taskKey].title,
+
+                    mentalDemand: Number(document.getElementById('mental-demand').value),
+                    effort: Number(document.getElementById('effort').value),
+                    frustration: Number(document.getElementById('frustration').value),
+
+                    recordedAt: new Date().toISOString()
+                };
+
+                if (existingIndex >= 0) {
+                    experimentData.blockNasaTlx[existingIndex] = record;
+                } else {
+                    experimentData.blockNasaTlx.push(record);
+                }
+            }
+
             function buildBlockPlan() {
                 const vizOrder = shuffle(VISUALIZATIONS);
                 const sampledDatasets = shuffle(DATASET_POOL).slice(0, TASKS_PER_BLOCK);
@@ -1438,6 +1465,7 @@
             });
 
             nextBlockButton.addEventListener('click', () => {
+                collectBlockNasaTlx();
                 if (currentBlock < totalBlocks) {
                     currentBlock += 1;
                     buildBlockPlan();
