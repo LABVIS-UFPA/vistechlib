@@ -85,6 +85,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
     this.settings.middleZoomMinTravelZ = 1;
     this.settings.middleZoomMaxTravelZ = 7;
     this.settings.middleZoomFocusOffsetZ = 1.2;
+    this.settings.zoomSpeed = 0.08;
+    this.settings.maxCameraDistance = 40;
 
     /*
      * Configuração da câmera perspectiva.
@@ -458,6 +460,10 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       new THREE.Vector3(this.settings.cameraX, cameraY, finalCameraZ),
       new THREE.Vector3(0, cameraTargetY, 0),
     );
+
+    if (createNew || this.initialCameraDistance == null) {
+      this.initialCameraDistance = this.camera.position.length();
+    }
 
     /*
      * Sempre que FOV, aspect, near ou far mudam, a matriz de projeção
@@ -1393,6 +1399,38 @@ class PerspectiveScaleBreakBarChart extends Visualization {
 
       this._startDoubleClickZoom(e);
     });
+
+    canvas.addEventListener(
+      "wheel",
+      (e) => {
+        if (!this.camera || !this.camera.isPerspectiveCamera) return;
+
+        e.preventDefault();
+
+        if (this.middleZoomActive) {
+          this._resetDoubleClickZoom();
+        }
+
+        const zoomDirection = e.deltaY > 0 ? 1 : -1;
+
+        const currentDistance = this.camera.position.length();
+
+        const minZoomDistance = this.initialCameraDistance ?? currentDistance;
+
+        const nextDistance = THREE.MathUtils.clamp(
+          currentDistance +
+            zoomDirection * this.settings.zoomSpeed * currentDistance,
+          minZoomDistance,
+          this.settings.maxCameraDistance,
+        );
+
+        const scale = nextDistance / currentDistance;
+
+        this.camera.position.multiplyScalar(scale);
+        this.camera.updateProjectionMatrix();
+      },
+      { passive: false },
+    );
   }
 
   _bindRotationEvents() {
