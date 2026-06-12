@@ -1022,12 +1022,14 @@ class WormBarChart3D extends Visualization {
         // Inverte. Se ele desceu, o próximo será o chão. Se subiu, o próximo será o teto.
         isTopFold = !isTopFold;
       }
-
-      // Garante que o valor máximo absoluto sempre tenha um tick (para fechar a referência)
-      if (tickValues[tickValues.length - 1] !== this.maxValue) {
-        tickValues.push(this.maxValue);
-      }
     }
+
+    tickValues = tickValues.filter((value) => {
+      const scaledLength = this._getScaledBarLength(value);
+      const maxScaledLength = this._getScaledBarLength(this.maxValue);
+
+      return scaledLength <= maxScaledLength + 1e-6;
+    });
 
     tickValues.forEach((value) => {
       const scaledLength = this._getScaledBarLength(value);
