@@ -446,9 +446,9 @@
         </div>
 
         <div id="task-instruction-screen" class="screen hidden">
-            <h2>Fase 2 - Instrução da Tarefa (Blocos)</h2>
-            <p>Placeholder para instrução da tarefa atual antes de iniciar os blocos.</p>
-            <div class="placeholder-box">Placeholder: randomização de blocos/tarefas/visualizações/bases será implementada depois.</div>
+            <h2 id="task-instruction-title">Fase 2 - Instrução da Tarefa</h2>
+            <p id="task-instruction-block-label">Bloco 1 de 5</p>
+            <div class="placeholder-box" id="task-instruction-description"></div>
             <div class="actions">
                 <button data-prev="tutorial-screen">Back</button>
                 <button id="start-blocks-button">Next</button>
@@ -569,6 +569,9 @@
             const container = document.querySelector('.container');
             const screens = Array.from(document.querySelectorAll('.screen'));
             const progressFill = document.getElementById('flow-progress');
+            const taskInstructionTitle = document.getElementById('task-instruction-title');
+            const taskInstructionBlockLabel = document.getElementById('task-instruction-block-label');
+            const taskInstructionDescription = document.getElementById('task-instruction-description');
             const tcleScroll = document.getElementById('tcle-scroll');
             const tcleConfirmation = document.getElementById('tcle-confirmation');
             const acceptTcleButton = document.getElementById('accept-tcle-button');
@@ -588,6 +591,8 @@
             const foundAnswerButton = document.getElementById('found-answer-button');
             const blockAnswerNextButton = document.getElementById('block-answer-next-button');
             const nextBlockButton = document.getElementById('next-block-button');
+            const blockAnswerInput = document.getElementById('block-answer');
+            const blockConfidence = document.getElementById('block-confidence');
 
             let currentBlock = 1;
             const totalBlocks = 5;
@@ -600,6 +605,8 @@
             let currentBlockTaskIndex = 0;
             let currentBlockPlan = [];
             let currentBlockChart = null;
+            let currentBlockTaskKey = 'T1';
+            let blockTaskOrder = [];
 
             // --- Tutorial configuration ---
             const tutorialData3D = [
@@ -679,42 +686,121 @@
 
             const DATASET_POOL = [
                 {
-                    id: 'dataset-a',
-                    name: 'Base A',
-                    values: [40536062, 9190033, 3887894, 2780522, 2441092, 1977330, 1901553],
-                    labels: ['BEL', 'BAR', 'ALT', 'MAR', 'ABA', 'BRA', 'CAM']
+                    "id": "base-1-pib",
+                    "name": "PIB dos Municípios",
+                    "description": "Produto Interno Bruto a preços correntes (Mil Reais) de municípios do estado do Pará.",
+                    "context": "Esta base de dados apresenta o Produto Interno Bruto (PIB) a preços correntes de diversos municípios. O objetivo é analisar a visualização para compreender a distribuição da riqueza gerada.",
+                    "labels": ["BEL", "BAR", "ALT", "MAR", "ABA", "BRA", "CAM", "DEL", "SMG", "IMI", "CDA", "CPO", "BAI", "AFU", "AUC", "MUA", "CUR", "CAR", "SSB", "COL"],
+                    "values": [40536062, 9190033, 3887894, 2780522, 2441092, 1977330, 1901553, 1332437, 1132578, 1021946, 985296, 900134, 799363, 665557, 490157, 464374, 396832, 354702, 309743, 136194],
+                    "tasks": {
+                    "T1": "Determine o valor aproximado do PIB do município de Marituba (PA).",
+                    "T2": "Determine a diferença aproximada de valor do PIB entre os municípios de Belém (PA) e Colares (PA).",
+                    "T3": "Determine a diferença aproximada de valor do PIB entre os municípios de Igarapé-Miri (PA) e Conceição do Araguaia (PA).",
+                    "T4": "Aproximadamente, quantas vezes o PIB de Barcarena (PA) é maior em relação ao PIB de Augusto Corrêa (PA)?",
+                    "T5": "Qual é a proporção aproximada entre os valores do PIB de Abaetetuba (PA) e Bragança (PA)?"
+                    }
                 },
                 {
-                    id: 'dataset-b',
-                    name: 'Base B',
-                    values: [32400000, 12150000, 6140000, 2870000, 1960000, 1650000, 1490000],
-                    labels: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7']
+                    "id": "base-2-ensino-superior",
+                    "name": "Ensino Superior Completo",
+                    "description": "Número de pessoas com ensino superior completo no ano de 2022.",
+                    "context": "Esta base de dados contabiliza a quantidade de habitantes que possuíam ensino superior completo em 2022 por município. Analise a visualização para extrair os dados demográficos educacionais.",
+                    "labels": ["ABA", "AFU", "ALT", "ANA", "AUC", "BAI", "BAR", "BEL", "BEN", "BRA", "CAM", "CAP", "CPO", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG"],
+                    "values": [10405, 1259, 9988, 55080, 1124, 1640, 8048, 207127, 3003, 6911, 7861, 5238, 2578, 4463, 1098, 1925, 2577, 7278, 1013, 2643],
+                    "tasks": {
+                    "T1": "Determine o número aproximado de pessoas com ensino superior completo em Capanema (PA).",
+                    "T2": "Determine a diferença no número de pessoas com ensino superior completo entre Belém (PA) e Muaná (PA).",
+                    "T3": "Determine a diferença no número de pessoas com ensino superior completo entre Capitão Poço (PA) e Igarapé-Miri (PA).",
+                    "T4": "Aproximadamente, quantas vezes o número de pessoas com ensino superior completo em Ananindeua (PA) é maior do que em Afuá (PA)?",
+                    "T5": "Qual é a proporção aproximada entre o número de pessoas com ensino superior completo em Benevides (PA) e São Miguel do Guamá (PA)?"
+                    }
                 },
                 {
-                    id: 'dataset-c',
-                    name: 'Base C',
-                    values: [17200000, 9800000, 7400000, 3880000, 3100000, 2700000, 2100000],
-                    labels: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7']
+                    "id": "base-3-matriculas-fundamental",
+                    "name": "Matrículas no Ensino Fundamental",
+                    "description": "Quantidade de matrículas registradas no Ensino Fundamental para o ano de 2025.",
+                    "context": "Esta base exibe o volume projetado de matrículas no Ensino Fundamental por município no ano de 2025. Utilize a visualização para identificar os padrões da rede de educação básica.",
+                    "labels": ["ABA", "AFU", "ALT", "AUC", "BAI", "BAR", "BEL", "BRA", "CAR", "CAM", "CPO", "COL", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG", "SSB"],
+                    "values": [24634, 10158, 21152, 8304, 5503, 21920, 145005, 19351, 3708, 23198, 7917, 1841, 6132, 7837, 6076, 11194, 15995, 6422, 9366, 4823],
+                    "tasks": {
+                    "T1": "Determine o número aproximado de matrículas no Ensino Fundamental em Cametá (PA).",
+                    "T2": "Determine a diferença no número de matrículas entre os municípios de Belém (PA) e Colares (PA).",
+                    "T3": "Determine a diferença no número de matrículas entre os municípios de Curralinho (PA) e Capitão Poço (PA).",
+                    "T4": "Aproximadamente, quantas vezes o número de matrículas em Altamira (PA) é maior que em Cachoeira do Arari (PA)?",
+                    "T5": "Qual é a proporção aproximada entre as matrículas de Conceição do Araguaia (PA) e Dom Eliseu (PA)?"
+                    }
                 },
                 {
-                    id: 'dataset-d',
-                    name: 'Base D',
-                    values: [68000000, 12400000, 9100000, 4400000, 2890000, 2100000, 1600000],
-                    labels: ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7']
+                    "id": "base-4-populacao-residente",
+                    "name": "População Residente",
+                    "description": "Total da população residente nos municípios contabilizada em 2022.",
+                    "context": "Esta base de dados detalha a contagem total de habitantes residentes em diversos municípios no ano de 2022. Observe a visualização para avaliar as discrepâncias populacionais.",
+                    "labels": ["ABA", "AFU", "ALT", "AUC", "BAI", "BAR", "BEL", "BRA", "CAR", "CAM", "CPO", "COL", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG", "SSB"],
+                    "values": [158188, 37765, 126279, 44573, 51641, 126650, 1303403, 123082, 23981, 134184, 56506, 12868, 44617, 33903, 58484, 64831, 111785, 45368, 52894, 25643],
+                    "tasks": {
+                    "T1": "Determine o valor aproximado da população residente de Bragança (PA).",
+                    "T2": "Determine a diferença populacional entre os municípios de Belém (PA) e Colares (PA).",
+                    "T3": "Determine a diferença populacional entre os municípios de Augusto Corrêa (PA) e Muaná (PA).",
+                    "T4": "Aproximadamente, quantas vezes a população residente de Marituba (PA) é maior que a de São Sebastião da Boa Vista (PA)?",
+                    "T5": "Qual é a proporção aproximada entre a população residente de Igarapé-Miri (PA) e Dom Eliseu (PA)?"
+                    }
                 },
                 {
-                    id: 'dataset-e',
-                    name: 'Base E',
-                    values: [25100000, 11800000, 5200000, 4700000, 2900000, 2200000, 1750000],
-                    labels: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7']
+                    "id": "base-5-receita-impostos",
+                    "name": "Receita de Impostos e Taxas",
+                    "description": "Valores arrecadados em impostos, taxas e contribuições (em Reais) no ano de 2024.",
+                    "context": "Esta base de dados demonstra o volume financeiro arrecadado pelos municípios através de impostos e taxas em 2024. A análise requer a extração de valores tributários a partir da visualização.",
+                    "labels": ["ABA", "BRE", "ALT", "ANA", "AUC", "TUC", "BAR", "BEL", "BEN", "BRA", "CAM", "CAP", "SAL", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG"],
+                    "values": [36437783.61, 40441343.14, 72491969.43, 201474865.79, 11540181.11, 50170347.92, 535155385.44, 1561985767.49, 26396970.93, 39849155.60, 36511936.09, 27585543.21, 24014348.01, 32437791.06, 13307123.96, 20617509.55, 16060110.60, 66844578.57, 12017472.56, 16993260.97],
+                    "tasks": {
+                    "T1": "Determine o valor aproximado arrecadado em impostos por Tucuruí (PA).",
+                    "T2": "Determine a diferença de arrecadação tributária entre Belém (PA) e Augusto Corrêa (PA).",
+                    "T3": "Determine a diferença de arrecadação tributária entre Abaetetuba (PA) e Cametá (PA).",
+                    "T4": "Aproximadamente, quantas vezes a arrecadação de Barcarena (PA) é maior em comparação com a de Muaná (PA)?",
+                    "T5": "Qual é a proporção aproximada entre a arrecadação de Capanema (PA) e Salinópolis (PA)?"
+                    }
                 },
                 {
-                    id: 'dataset-f',
-                    name: 'Base F',
-                    values: [44900000, 13300000, 8800000, 6100000, 3000000, 2400000, 1900000],
-                    labels: ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7']
+                    "id": "base-6-frota-motocicletas",
+                    "name": "Frota de Motocicletas",
+                    "description": "Tamanho da frota de motocicletas registrada por município no ano de 2025.",
+                    "context": "Esta base reflete a quantidade de motocicletas registradas na frota veicular de cada município projetada para 2025. Consulte o gráfico gerado para analisar a frota local.",
+                    "labels": ["ABA", "BRE", "ALT", "ANA", "AUC", "TUC", "BAR", "BEL", "BEN", "BRA", "CAM", "CAP", "SAL", "CDA", "BAI", "DEL", "IMI", "MAR", "MUA", "SMG"],
+                    "values": [27071, 9139, 43078, 77251, 2945, 21902, 18411, 191736, 10127, 19287, 16965, 18794, 7951, 11301, 2794, 7869, 5579, 17177, 1504, 9766],
+                    "tasks": {
+                    "T1": "Determine o tamanho aproximado da frota de motocicletas em Marituba (PA).",
+                    "T2": "Determine a diferença no tamanho da frota de motocicletas entre Belém (PA) e Muaná (PA).",
+                    "T3": "Determine a diferença no tamanho da frota de motocicletas entre Capanema (PA) e Barcarena (PA).",
+                    "T4": "Aproximadamente, quantas vezes a frota de motocicletas de Ananindeua (PA) é maior que a de Baião (PA)?",
+                    "T5": "Qual é a proporção aproximada entre a frota de motocicletas de Breves (PA) e Dom Eliseu (PA)?"
+                    }
                 }
             ];
+
+            const TASK_DESCRIPTION = {
+                "T1": {
+                    title: "Determinar o valor de um elemento.",
+                    description: "Localize a barra correspondente ao item solicitado e utilize a escala do eixo vertical (Y) para estimar e informar o seu valor numérico aproximado. Fique atento a possíveis dobras ou quebras na visualização para garantir uma leitura correta."
+                },
+                "T2": {
+                    title: "Determinar a diferença entre dois elementos distantes.",
+                    description: "Identifique as duas barras mencionadas, que possuem valores visivelmente discrepantes (uma muito maior que a outra). Estime o valor de cada uma usando o eixo de referência e subtraia o menor valor do maior para encontrar a diferença entre eles."
+                },
+                "T3": {
+                    title: "Determinar a diferença entre dois elementos próximos.",
+                    description: "Identifique as duas barras mencionadas, que possuem tamanhos ou valores muito semelhantes. Estime o valor de cada uma com o maior grau de precisão possível através do eixo e calcule a diferença subtraindo o valor menor do maior."
+                },
+                "T4": {
+                    title: "Determinar a proporção (razão) entre dois elementos distantes.",
+                    description: "Localize as duas barras indicadas, que apresentam tamanhos muito distintos. Estime o valor numérico de ambas e calcule quantas vezes a barra maior contém a barra menor (dividindo o valor maior pelo menor)."
+                },
+                "T5": {
+                    title: "Determinar a proporção (razão) entre dois elementos próximos.",
+                    description: "Localize as duas barras indicadas, que têm tamanhos muito parecidos. Estime o valor de ambas e avalie a proporção entre elas, indicando a razão de tamanho entre a maior e a menor."
+                }
+            };
+
+            blockTaskOrder = shuffle(Object.keys(TASK_DESCRIPTION));
 
             function datasetToObjects(dataset) {
                 return dataset.values.map((valor, i) => ({
@@ -748,10 +834,9 @@
                     'welcome-screen': 1,
                     'tcle-screen': 2,
                     'demographic-screen': 3,
-                    'task-instruction-screen': 8,
-                    'final-ranking-screen': 74,
-                    'final-comments-screen': 75,
-                    'thanks-screen': 76
+                    'final-ranking-screen': 78,
+                    'final-comments-screen': 79,
+                    'thanks-screen': 80
                 };
 
                 if (screenId === 'tutorial-screen') {
@@ -762,7 +847,10 @@
                     return fixedStepMap[screenId];
                 }
 
-                const blockBase = 8 + (currentBlock - 1) * 13;
+                const instructionStep = 8 + (currentBlock - 1) * 14;
+                if (screenId === 'task-instruction-screen') return instructionStep;
+
+                const blockBase = instructionStep;
                 if (screenId === 'block-context-screen') return blockBase + currentBlockTaskIndex * 3 + 1;
                 if (screenId === 'block-task-screen') return blockBase + currentBlockTaskIndex * 3 + 2;
                 if (screenId === 'block-answer-screen') return blockBase + currentBlockTaskIndex * 3 + 3;
@@ -772,7 +860,7 @@
             }
 
             function updateProgress(screenId) {
-                const totalFlowSteps = 76;
+                const totalFlowSteps = 80;
                 const currentStep = getProgressStep(screenId);
                 maxProgressStep = Math.max(maxProgressStep, currentStep);
                 const progress = (maxProgressStep / totalFlowSteps) * 100;
@@ -801,26 +889,71 @@
                 updateProgress(screenId);
             }
 
+            function getTaskKeyForBlock(blockNumber) {
+                return blockTaskOrder[Math.max(0, Math.min(blockTaskOrder.length - 1, blockNumber - 1))];
+            }
+
+            function updateTaskInstructionScreen() {
+                // Always derive the instruction task from the current randomized block order.
+                currentBlockTaskKey = getTaskKeyForBlock(currentBlock) || currentBlockTaskKey;
+                const taskMeta = TASK_DESCRIPTION[currentBlockTaskKey];
+                taskInstructionTitle.textContent = taskMeta
+                    ? taskMeta.title
+                    : 'Fase 2 - Instrução da Tarefa';
+                taskInstructionBlockLabel.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks;
+                taskInstructionDescription.innerHTML = [
+                    '<strong>Descrição geral da tarefa:</strong><br>',
+                    taskMeta ? taskMeta.description : ''
+                ].join('');
+            }
+
             function updateBlockPlaceholders() {
                 const task = currentBlockPlan[currentBlockTaskIndex];
                 const taskLabel = (currentBlockTaskIndex + 1) + ' de ' + TASKS_PER_BLOCK;
                 const vizName = task ? task.visualization.name : 'Visualização';
                 const datasetName = task ? task.dataset.name : 'Base';
+                const taskMeta = task ? TASK_DESCRIPTION[task.taskKey] : null;
+                const taskQuestion = task ? task.dataset.tasks[task.taskKey] : '';
 
-                blockContextTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - Contexto da Tarefa';
-                blockTitle.textContent = 'Pergunta do bloco ' + currentBlock + ' de ' + totalBlocks + ' (' + taskLabel + ')';
+                blockContextTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - ' + (taskMeta ? taskMeta.title : 'Contexto da Tarefa');
+                blockTitle.textContent = taskQuestion || ('Pergunta do bloco ' + currentBlock + ' de ' + totalBlocks + ' (' + taskLabel + ')');
                 answerTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - Registro de Resposta (' + taskLabel + ')';
                 tlxTitle.textContent = 'NASA-TLX do Bloco ' + currentBlock;
-                blockContext.textContent = 'Contexto: usar ' + vizName + ' com a ' + datasetName + ' para analisar os dados deste bloco.';
-                blockQuestionContext.textContent = 'Pergunta: com base na visualização, qual categoria possui o segundo maior valor?';
+
+                blockContext.innerHTML = [
+                    '<strong>Visualização:</strong> ' + vizName + '<br>',
+                    '<strong>Base:</strong> ' + datasetName + '<br>',
+                    '<strong>Descrição da base:</strong> ' + (task ? task.dataset.description : '') + '<br><br>',
+                    '<strong>Contexto:</strong> ' + (task ? task.dataset.context : '') + '<br><br>',
+                    '<strong>Objetivo da tarefa:</strong> ' + (taskMeta ? taskMeta.description : '')
+                ].join('');
+
+                blockQuestionContext.innerHTML = [
+                    '<strong>Pergunta da tarefa (' + taskLabel + '):</strong><br>',
+                    taskQuestion || ''
+                ].join('');
+
+                const isRatioTask = task && (task.taskKey === 'T4' || task.taskKey === 'T5');
+
+                blockAnswerInput.placeholder = isRatioTask
+                    ? 'Informe a razão aproximada'
+                    : 'Informe a resposta numérica aproximada';
+
+                blockConfidence.innerHTML = [
+                    '<option>Baixa</option>',
+                    '<option selected>Média</option>',
+                    '<option>Alta</option>'
+                ].join('');
             }
 
             function buildBlockPlan() {
                 const vizOrder = shuffle(VISUALIZATIONS);
                 const sampledDatasets = shuffle(DATASET_POOL).slice(0, TASKS_PER_BLOCK);
+                currentBlockTaskKey = getTaskKeyForBlock(currentBlock);
                 currentBlockPlan = vizOrder.map((visualization, i) => ({
                     visualization,
-                    dataset: sampledDatasets[i]
+                    dataset: sampledDatasets[i],
+                    taskKey: currentBlockTaskKey
                 }));
                 currentBlockTaskIndex = 0;
             }
@@ -1038,9 +1171,15 @@
             });
 
             startBlocksButton.addEventListener('click', () => {
-                currentBlock = 1;
-                buildBlockPlan();
-                updateBlockPlaceholders();
+                if (currentBlockPlan.length === 0) {
+                    currentBlock = 1;
+                    if (blockTaskOrder.length === 0) {
+                        blockTaskOrder = shuffle(Object.keys(TASK_DESCRIPTION));
+                    }
+                    buildBlockPlan();
+                    updateTaskInstructionScreen();
+                    updateBlockPlaceholders();
+                }
                 showScreen('block-context-screen');
             });
 
@@ -1077,8 +1216,9 @@
                 if (currentBlock < totalBlocks) {
                     currentBlock += 1;
                     buildBlockPlan();
+                    updateTaskInstructionScreen();
                     updateBlockPlaceholders();
-                    showScreen('block-context-screen');
+                    showScreen('task-instruction-screen');
                 } else {
                     showScreen('final-ranking-screen');
                 }
@@ -1088,6 +1228,7 @@
                 if (currentBlockChart && currentBlockChart.resize) currentBlockChart.resize();
             });
 
+            updateTaskInstructionScreen();
             updateBlockPlaceholders();
             showScreen('welcome-screen');
         });
