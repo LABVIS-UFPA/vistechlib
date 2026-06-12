@@ -31,6 +31,10 @@ class WormBarChart3D extends Visualization {
     this.highlightMaterial = null;
     this.raycaster = new THREE.Raycaster();
     this.pointerNdc = new THREE.Vector2();
+    this.cameraLookTarget = new THREE.Vector3();
+    this.middleZoomAnimation = null;
+    this.middleZoomActive = false;
+    this.defaultCameraState = null;
 
     this.svg.style("display", "none");
 
@@ -80,6 +84,7 @@ class WormBarChart3D extends Visualization {
     this.settings.zoomSpeed = 0.08;
     this.settings.minCameraDistance = 4;
     this.settings.maxCameraDistance = 40;
+    this.settings.middleZoomDuration = 320;
 
     /*
      * Configuração da câmera perspectiva.
@@ -436,11 +441,9 @@ class WormBarChart3D extends Visualization {
     this.camera.far = this.settings.cameraFar;
 
     this.camera.position.set(this.settings.cameraX, cameraY, finalCameraZ);
-
-    this.camera.lookAt(0, cameraTargetY, 0); //0, cameraTargetY, 0);
-
+    this.camera.lookAt(0, cameraTargetY, 0);
     this.camera.position.multiplyScalar(2.1);
-    // this.camera.fov = this.settings.cameraFov * 0.75;
+    this.cameraLookTarget.set(0, cameraTargetY, 0);
 
     if (createNew || this.initialCameraDistance == null) {
       this.initialCameraDistance = this.camera.position.length();
@@ -1066,6 +1069,39 @@ class WormBarChart3D extends Visualization {
     this.chartGroup.add(this.yAxisGroup);
   }
 
+  _setCameraView(position, target) {
+    if (!this.camera) return;
+
+    this.camera.position.copy(position);
+    this.cameraLookTarget.copy(target);
+    this.camera.lookAt(this.cameraLookTarget);
+  }
+
+  _getDefaultPerspectiveCameraState() {
+    const aspect = this.settings.width / this.settings.height;
+    const { chartWidth, chartHeight } = this._getChartBounds();
+    const cameraDistance = this._calculatePerspectiveDistance(
+      chartWidth,
+      chartHeight,
+      this.settings.cameraFov,
+      aspect,
+    );
+
+    const finalCameraZ = this.settings.cameraZ ?? cameraDistance;
+    const { minY, maxY } = this._getVerticalBounds();
+    const cameraTargetY = (minY + maxY) / 2;
+    const cameraY = this.settings.cameraY ?? cameraTargetY;
+
+    return {
+      position: new THREE.Vector3(
+        this.settings.cameraX,
+        cameraY,
+        finalCameraZ,
+      ).multiplyScalar(2.1),
+      target: new THREE.Vector3(0, cameraTargetY, 0),
+    };
+  }
+
   _bindHoverEvents() {
     const canvas = this.renderer.domElement;
 
@@ -1110,6 +1146,127 @@ class WormBarChart3D extends Visualization {
 
       canvas.style.cursor = "default";
     });
+  }
+
+  _animateCameraTo(position, target, duration, onComplete) {
+    if (!this.camera) return;
+
+    if (this.middleZoomAnimation) {
+      cancelAnimationFrame(this.middleZoomAnimation);
+      this.middleZoomAnimation = null;
+    }
+
+    const startPosition = this.camera.position.clone();
+    const startTarget = this.cameraLookTarget.clone();
+    const targetPosition = position.clone();
+    const targetLookAt = target.clone();
+    const startTime = performance.now();
+
+    const animateStep = (now) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / Math.max(duration, 1), 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+
+      this.camera.position.lerpVectors(startPosition, targetPosition, eased);
+      this.cameraLookTarget.lerpVectors(startTarget, targetLookAt, eased);
+      this.camera.lookAt(this.cameraLookTarget);
+
+      if (t < 1) {
+        this.middleZoomAnimation = requestAnimationFrame(animateStep);
+        return;
+      }
+
+      this.middleZoomAnimation = null;
+
+      if (onComplete) onComplete();
+    };
+
+    this.middleZoomAnimation = requestAnimationFrame(animateStep);
+  }
+
+  _getFocusPointFromPointerEvent(e) {
+    if (!this.renderer || !this.camera || !this.chartGroup) {
+      return null;
+    }
+
+    const rect = this.renderer.domElement.getBoundingClientRect();
+
+    this.pointerNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    this.pointerNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.pointerNdc, this.camera);
+
+    const intersections = this.raycaster
+      .intersectObjects(this.chartGroup.children, true)
+      .filter((hit) => hit.object && hit.object.isMesh);
+
+    if (intersections.length > 0) {
+      return intersections[0].point.clone();
+    }
+
+    const fallbackPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const fallbackPoint = new THREE.Vector3();
+
+    if (this.raycaster.ray.intersectPlane(fallbackPlane, fallbackPoint)) {
+      return fallbackPoint;
+    }
+
+    const { minY, maxY } = this._getVerticalBounds();
+    return new THREE.Vector3(0, (minY + maxY) / 2, 0);
+  }
+
+  _startDoubleClickZoom(e) {
+    const focusPoint = this._getFocusPointFromPointerEvent(e);
+    if (!focusPoint) return;
+
+    if (!this.defaultCameraState) {
+      this.defaultCameraState = {
+        position: this.camera.position.clone(),
+        target: this.cameraLookTarget.clone(),
+        rotation: this.chartGroup.rotation.clone(),
+      };
+    }
+
+    this.middleZoomActive = true;
+
+    const currentDistance = this.camera.position.distanceTo(focusPoint);
+    const zoomDistance = currentDistance * 0.4;
+
+    const direction = new THREE.Vector3()
+      .subVectors(this.camera.position, focusPoint)
+      .normalize();
+
+    const zoomedPosition = new THREE.Vector3()
+      .copy(focusPoint)
+      .add(direction.multiplyScalar(zoomDistance));
+
+    this._animateCameraTo(
+      zoomedPosition,
+      focusPoint,
+      this.settings.middleZoomDuration || 320,
+    );
+  }
+
+  _resetDoubleClickZoom() {
+    if (!this.middleZoomActive) return;
+
+    this.middleZoomActive = false;
+
+    if (this.middleZoomAnimation) {
+      cancelAnimationFrame(this.middleZoomAnimation);
+      this.middleZoomAnimation = null;
+    }
+
+    if (this.returnAnimation) {
+      cancelAnimationFrame(this.returnAnimation);
+      this.returnAnimation = null;
+    }
+
+    this.chartGroup.rotation.set(0, 0, 0);
+
+    this._updateConfiguredCamera(true);
+
+    this.defaultCameraState = null;
   }
 
   _getPointAlongWormPath(scaledLength) {
@@ -1158,6 +1315,14 @@ class WormBarChart3D extends Visualization {
   _bindZoomEvents() {
     const canvas = this.renderer.domElement;
 
+    canvas.addEventListener("dblclick", (e) => {
+      if (!this.camera || !this.camera.isPerspectiveCamera) return;
+
+      e.preventDefault();
+
+      this._startDoubleClickZoom(e);
+    });
+
     canvas.addEventListener(
       "wheel",
       (e) => {
@@ -1165,13 +1330,15 @@ class WormBarChart3D extends Visualization {
 
         e.preventDefault();
 
+        if (this.middleZoomActive) {
+          this._resetDoubleClickZoom();
+        }
+
         const zoomDirection = e.deltaY > 0 ? 1 : -1;
 
         const currentDistance = this.camera.position.length();
 
-        const initialDistance = this.initialCameraDistance ?? currentDistance;
-
-        const minZoomDistance = initialDistance;
+        const minZoomDistance = this.initialCameraDistance ?? currentDistance;
 
         const nextDistance = THREE.MathUtils.clamp(
           currentDistance +
@@ -1193,6 +1360,13 @@ class WormBarChart3D extends Visualization {
     let canvas = this.renderer.domElement;
 
     canvas.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+
+      if (this.middleZoomActive) {
+        this._resetDoubleClickZoom();
+        return;
+      }
+
       this.isDragging = true;
       this.lastPointer = { x: e.clientX, y: e.clientY };
     });
