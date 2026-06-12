@@ -246,6 +246,17 @@
             position: relative;
         }
 
+        .block-task-topbar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding: 0.2rem 0;
+            border-bottom: 1px solid #c7d2dc;
+            min-height: 2rem;
+            margin-bottom: 0.35rem;
+        }
+
         @media (max-width: 820px) {
             .container {
                 padding: 1.25rem;
@@ -468,6 +479,7 @@
 
         <div id="block-task-screen" class="screen hidden">
             <h2 id="block-title">Pergunta do bloco 1 de 5</h2>
+            <div id="block-controls" class="block-task-topbar"></div>
             <div id="block-chart-area" class="tutorial-chart-area"></div>
             <div class="actions">
                 <button data-prev="block-context-screen">Back</button>
@@ -583,6 +595,7 @@
             const tlxTitle = document.getElementById('tlx-title');
             const blockContext = document.getElementById('block-context');
             const blockQuestionContext = document.getElementById('block-question-context');
+            const blockControls = document.getElementById('block-controls');
             const blockChartArea = document.getElementById('block-chart-area');
 
             const startBlocksButton = document.getElementById('start-blocks-button');
@@ -619,6 +632,24 @@
                 { label: 'CAM', valor:  1901553 },
             ];
 
+            const LOG_MIN_RATIO = 0.01;
+            const LOG_MAX_RATIO = 1.0;
+            const LOG_MIN = Math.log(LOG_MIN_RATIO);
+            const LOG_MAX = Math.log(LOG_MAX_RATIO);
+
+            function sliderToLogRatio(linearValue) {
+                const scaleFactor = Number(linearValue) / 100;
+                return Math.exp(LOG_MIN + scaleFactor * (LOG_MAX - LOG_MIN));
+            }
+
+            function formatFoldThreshold(linearValue) {
+                return (sliderToLogRatio(linearValue) * 100).toFixed(1) + '%';
+            }
+
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
             const VISUALIZATIONS = [
                 {
                     id: 'bar',
@@ -649,11 +680,59 @@
                     id: 'psb',
                     name: 'Quebra de Escala Perspectiva',
                     ClassRef: PerspectiveScaleBreakBarChart,
-                    settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', depth: 8, outlierRatioThreshold: 3, breakStartRatio: 0.6 },
+                    settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', depth: 8, minDepth: 0, maxDepth: 50, outlierRatioThreshold: 3, breakStartRatio: 0.6 },
                     data: tutorialData3D,
                     controls: [
-                        { label: 'Profundidade', min: 0, max: 50, step: 0.2, defaultValue: 8, onInput: (c, v) => c.updateDepth(Number(v)) },
-                        { label: 'Posição da quebra', min: 0.2, max: 0.85, step: 0.01, defaultValue: 0.6, onInput: (c, v) => c.updateBreakStartRatio(Number(v)) },
+                        {
+                            key: 'psbDepth',
+                            label: 'Profundidade',
+                            min: 0,
+                            max: 50,
+                            step: 0.2,
+                            defaultValue: 8,
+                            formatValue: v => Number(v).toFixed(1),
+                            onInput: (c, v) => c.updateDepth(Number(v))
+                        },
+                        {
+                            key: 'psbBreakStartRatio',
+                            label: 'Posição da quebra',
+                            min: 0.2,
+                            max: 0.85,
+                            step: 0.01,
+                            defaultValue: 0.6,
+                            formatValue: v => Number(v).toFixed(2),
+                            onInput: (c, v) => c.updateBreakStartRatio(Number(v))
+                        },
+                        {
+                            key: 'psbFoldVisualHeight',
+                            label: 'Tamanho da quebra',
+                            min: 0.2,
+                            max: 4,
+                            step: 0.1,
+                            defaultValue: 1.4,
+                            formatValue: v => Number(v).toFixed(1),
+                            onInput: (c, v, helpers) => {
+                                const nextFoldVisualHeight = Number(v);
+                                const maxBarHeight = c.settings?.maxBarHeight ?? 6;
+                                const currentBreakStartRatio = helpers?.getValue('psbBreakStartRatio') ?? c.settings.breakStartRatio;
+                                const currentFoldVisualHeight = c.settings?.foldVisualHeight ?? 1.4;
+
+                                const currentBreakCenter =
+                                    currentBreakStartRatio * maxBarHeight + currentFoldVisualHeight / 2;
+
+                                const nextBreakStartRatio =
+                                    (currentBreakCenter - nextFoldVisualHeight / 2) / maxBarHeight;
+
+                                const clampedBreakStartRatio = clamp(nextBreakStartRatio, 0.2, 0.85);
+
+                                c.updateBreakStartRatio(clampedBreakStartRatio);
+                                c.updateFoldVisualHeight(nextFoldVisualHeight);
+
+                                if (helpers) {
+                                    helpers.setValue('psbBreakStartRatio', clampedBreakStartRatio);
+                                }
+                            }
+                        }
                     ]
                 },
                 {
@@ -665,9 +744,9 @@
                     controls: [
                         {
                             label: 'Limiar de Dobra', min: 0, max: 100, step: 0.1, defaultValue: 100,
+                            formatValue: v => formatFoldThreshold(v),
                             onInput: (c, v) => {
-                                const r = Math.exp(Math.log(0.01) + (Number(v) / 100) * (Math.log(1) - Math.log(0.01)));
-                                c.updateFoldThreshold(r);
+                                c.updateFoldThreshold(sliderToLogRatio(v));
                             }
                         }
                     ]
@@ -679,7 +758,11 @@
                     settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', maxYLimitRatio: 1.0, zStepDepth: 1.5 },
                     data: tutorialData3D,
                     controls: [
-                        { label: 'Limiar de Dobra', min: 0.01, max: 1.0, step: 0.01, defaultValue: 1.0, onInput: (c, v) => c.updateFoldThreshold(Number(v)) }
+                        {
+                            label: 'Limiar de Dobra', min: 0, max: 100, step: 0.1, defaultValue: 100,
+                            formatValue: v => formatFoldThreshold(v),
+                            onInput: (c, v) => c.updateFoldThreshold(sliderToLogRatio(v))
+                        }
                     ]
                 }
             ];
@@ -971,7 +1054,70 @@
                     if (currentBlockChart.destroy) currentBlockChart.destroy();
                     currentBlockChart = null;
                 }
+                blockControls.innerHTML = '';
                 blockChartArea.innerHTML = '';
+            }
+
+            function renderControlBar(viz, controlsContainer, chartGetter) {
+                controlsContainer.innerHTML = '';
+
+                const controlRegistry = {};
+                const controlHelpers = {
+                    getValue: key => {
+                        const entry = controlRegistry[key];
+                        return entry ? Number(entry.input.value) : null;
+                    },
+                    setValue: (key, rawValue) => {
+                        const entry = controlRegistry[key];
+                        if (!entry) return;
+
+                        const min = Number(entry.input.min);
+                        const max = Number(entry.input.max);
+                        const clampedValue = clamp(Number(rawValue), min, max);
+
+                        entry.input.value = String(clampedValue);
+                        entry.updateLabel(entry.input.value);
+                    }
+                };
+
+                viz.controls.forEach(ctrl => {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.cssText = 'display:flex;align-items:center;gap:0.4rem;';
+                    const lbl = document.createElement('label');
+                    lbl.textContent = ctrl.label;
+                    lbl.style.cssText = 'font-size:0.88rem;font-weight:600;white-space:nowrap;';
+                    const inp = document.createElement('input');
+                    inp.type = 'range';
+                    inp.min = ctrl.min;
+                    inp.max = ctrl.max;
+                    inp.step = ctrl.step;
+                    inp.value = ctrl.defaultValue;
+                    inp.style.width = '120px';
+                    const value = document.createElement('span');
+                    value.style.cssText = 'font-size:0.84rem;font-weight:700;min-width:48px;text-align:left;';
+                    const updateControlValue = rawValue => {
+                        value.textContent = ctrl.formatValue ? ctrl.formatValue(rawValue) : String(rawValue);
+                    };
+
+                    if (ctrl.key) {
+                        controlRegistry[ctrl.key] = {
+                            input: inp,
+                            updateLabel: updateControlValue
+                        };
+                    }
+
+                    updateControlValue(inp.value);
+                    inp.addEventListener('input', e => {
+                        updateControlValue(e.target.value);
+
+                        const chart = chartGetter();
+                        if (chart) ctrl.onInput(chart, e.target.value, controlHelpers);
+                    });
+                    wrapper.appendChild(lbl);
+                    wrapper.appendChild(inp);
+                    wrapper.appendChild(value);
+                    controlsContainer.appendChild(wrapper);
+                });
             }
 
             function renderBlockTaskChart() {
@@ -979,6 +1125,8 @@
 
                 const task = currentBlockPlan[currentBlockTaskIndex];
                 if (!task) return;
+
+                renderControlBar(task.visualization, blockControls, () => currentBlockChart);
 
                 const data = getTaskDataForVisualization(task);
 
@@ -1032,26 +1180,7 @@
                 tutorialBackBtn.textContent = tutorialIndex === 0 ? 'Back' : 'Visualização anterior';
                 tutorialNextBtn.textContent = tutorialIndex === tutorialOrder.length - 1 ? 'Próxima fase' : 'Próxima visualização';
 
-                viz.controls.forEach(ctrl => {
-                    const wrapper = document.createElement('div');
-                    wrapper.style.cssText = 'display:flex;align-items:center;gap:0.4rem;';
-                    const lbl = document.createElement('label');
-                    lbl.textContent = ctrl.label;
-                    lbl.style.cssText = 'font-size:0.88rem;font-weight:600;white-space:nowrap;';
-                    const inp = document.createElement('input');
-                    inp.type = 'range';
-                    inp.min = ctrl.min;
-                    inp.max = ctrl.max;
-                    inp.step = ctrl.step;
-                    inp.value = ctrl.defaultValue;
-                    inp.style.width = '120px';
-                    inp.addEventListener('input', e => {
-                        if (currentTutorialChart) ctrl.onInput(currentTutorialChart, e.target.value);
-                    });
-                    wrapper.appendChild(lbl);
-                    wrapper.appendChild(inp);
-                    tutorialControls.appendChild(wrapper);
-                });
+                renderControlBar(viz, tutorialControls, () => currentTutorialChart);
 
                 try {
                     const rect = tutorialChartArea.getBoundingClientRect();
