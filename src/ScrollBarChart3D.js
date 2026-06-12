@@ -456,6 +456,10 @@ class ScrollBarChart3D extends Visualization {
     this.camera.position.multiplyScalar(2.1);
     // this.camera.fov = this.settings.cameraFov * 0.75;
 
+    if (createNew || this.initialCameraDistance == null) {
+      this.initialCameraDistance = this.camera.position.length();
+    }
+
     // Nós criamos uma tela virtual mais alta e capturamos apenas a metade de baixo.
     // Isso move o ponto de fuga central lá para o alto da sua div real.
     const shiftAmount =
@@ -1678,10 +1682,12 @@ class ScrollBarChart3D extends Visualization {
 
         const currentDistance = this.camera.position.length();
 
+        const minZoomDistance = this.initialCameraDistance ?? currentDistance;
+
         const nextDistance = THREE.MathUtils.clamp(
           currentDistance +
             zoomDirection * this.settings.zoomSpeed * currentDistance,
-          this.settings.minCameraDistance,
+          minZoomDistance,
           this.settings.maxCameraDistance,
         );
 
