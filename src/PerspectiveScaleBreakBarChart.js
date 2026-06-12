@@ -969,7 +969,8 @@ class PerspectiveScaleBreakBarChart extends Visualization {
       .scaleLinear()
       .domain([0, this.maxValue])
       .nice()
-      .ticks(tickCount);
+      .ticks(tickCount)
+      .filter((value) => value <= this.maxValue);
 
     tickValues.forEach((value) => {
       const scaledLength = (value / this.maxValue) * totalFoldLength;
