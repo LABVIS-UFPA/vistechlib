@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,15 +56,24 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .hidden {
             display: none;
         }
 
-        h1, h2, h3 {
+        h1,
+        h2,
+        h3 {
             text-align: center;
             color: var(--primary-color);
         }
@@ -268,6 +278,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -388,56 +399,56 @@
             <h2>Questionário Demográfico</h2>
             <div class="demographic-fields">
                 <div class="field">
-                        <label for="age-range">Faixa Etária</label>
-                        <select id="age-range">
-                            <option>18-24</option>
-                            <option>25-34</option>
-                            <option>35-44</option>
-                            <option>45-54</option>
-                            <option>55-64</option>
-                            <option>65+</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="sex">Sexo</label>
-                        <select id="sex">
-                            <option>Masculino</option>
-                            <option>Feminino</option>
-                            <option>Prefiro não informar</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="education-level">Nível de Escolaridade</label>
-                        <select id="education-level">
-                            <option>Médio Incompleto</option>
-                            <option>Médio Completo</option>
-                            <option>Superior Incompleto</option>
-                            <option>Superior Completo</option>
-                            <option>Mestrado Completo</option>
-                            <option>Doutorado Completo</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="infovis-course">Fez disciplina de InfoVis</label>
-                        <select id="infovis-course">
-                            <option>Sim</option>
-                            <option>Não</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="visual-acuity">Acuidade Visual atual</label>
-                        <select id="visual-acuity">
-                            <option>Boa</option>
-                            <option>Corridida com óculos/lente</option>
-                            <option>Ruim</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="color-blindness">Daltonismo</label>
-                        <select id="color-blindness">
-                            <option>Sim</option>
-                            <option>Não</option>
-                        </select>
+                    <label for="age-range">Faixa Etária</label>
+                    <select id="age-range">
+                        <option>18-24</option>
+                        <option>25-34</option>
+                        <option>35-44</option>
+                        <option>45-54</option>
+                        <option>55-64</option>
+                        <option>65+</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="sex">Sexo</label>
+                    <select id="sex">
+                        <option>Masculino</option>
+                        <option>Feminino</option>
+                        <option>Prefiro não informar</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="education-level">Nível de Escolaridade</label>
+                    <select id="education-level">
+                        <option>Médio Incompleto</option>
+                        <option>Médio Completo</option>
+                        <option>Superior Incompleto</option>
+                        <option>Superior Completo</option>
+                        <option>Mestrado Completo</option>
+                        <option>Doutorado Completo</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="infovis-course">Fez disciplina de InfoVis</label>
+                    <select id="infovis-course">
+                        <option>Sim</option>
+                        <option>Não</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="visual-acuity">Acuidade Visual atual</label>
+                    <select id="visual-acuity">
+                        <option>Boa</option>
+                        <option>Corridida com óculos/lente</option>
+                        <option>Ruim</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="color-blindness">Daltonismo</label>
+                    <select id="color-blindness">
+                        <option>Sim</option>
+                        <option>Não</option>
+                    </select>
                 </div>
             </div>
             <div class="actions">
@@ -470,7 +481,8 @@
             <h2 id="block-context-title">Bloco 1 de 5 - Contexto da Tarefa</h2>
             <p>Leia o contexto e a pergunta antes de iniciar a visualização.</p>
             <div class="placeholder-box" id="block-context">Placeholder: contexto da tarefa do bloco.</div>
-            <div class="placeholder-box" id="block-question-context">Placeholder: pergunta a ser respondida no bloco.</div>
+            <div class="placeholder-box" id="block-question-context">Placeholder: pergunta a ser respondida no bloco.
+            </div>
             <div class="actions">
                 <button id="block-context-back-button">Back</button>
                 <button id="go-to-block-task-button">Iniciar tarefa</button>
@@ -563,7 +575,8 @@
 
         <div id="thanks-screen" class="screen hidden">
             <h2>Obrigado por participar</h2>
-            <div class="placeholder-box">Placeholder: tela final com mensagem de agradecimento e futuro download dos resultados.</div>
+            <div class="placeholder-box">Placeholder: tela final com mensagem de agradecimento e futuro download dos
+                resultados.</div>
             <div class="actions">
                 <button data-prev="final-comments-screen">Back</button>
                 <button disabled>Finalizado</button>
@@ -621,15 +634,28 @@
             let currentBlockTaskKey = 'T1';
             let blockTaskOrder = [];
 
+            let blockTaskStartedAt = null;
+            let currentTaskRecord = null;
+
+            // Json geral
+            const experimentData = {
+                participantId: crypto.randomUUID(),
+                startedAt: new Date().toISOString(),
+                demographics: null,
+                blockTaskOrder: [],
+                tutorialOrder: [],
+                blocks: []
+            };
+
             // --- Tutorial configuration ---
             const tutorialData3D = [
                 { label: 'BEL', valor: 40536062 },
-                { label: 'BAR', valor:  9190033 },
-                { label: 'ALT', valor:  3887894 },
-                { label: 'MAR', valor:  2780522 },
-                { label: 'ABA', valor:  2441092 },
-                { label: 'BRA', valor:  1977330 },
-                { label: 'CAM', valor:  1901553 },
+                { label: 'BAR', valor: 9190033 },
+                { label: 'ALT', valor: 3887894 },
+                { label: 'MAR', valor: 2780522 },
+                { label: 'ABA', valor: 2441092 },
+                { label: 'BRA', valor: 1977330 },
+                { label: 'CAM', valor: 1901553 },
             ];
 
             const LOG_MIN_RATIO = 0.01;
@@ -776,11 +802,11 @@
                     "labels": ["BEL", "BAR", "ALT", "MAR", "ABA", "BRA", "CAM", "DEL", "SMG", "IMI", "CDA", "CPO", "BAI", "AFU", "AUC", "MUA", "CUR", "CAR", "SSB", "COL"],
                     "values": [40536062, 9190033, 3887894, 2780522, 2441092, 1977330, 1901553, 1332437, 1132578, 1021946, 985296, 900134, 799363, 665557, 490157, 464374, 396832, 354702, 309743, 136194],
                     "tasks": {
-                    "T1": "Determine o valor aproximado do PIB do município de Marituba (PA).",
-                    "T2": "Determine a diferença aproximada de valor do PIB entre os municípios de Belém (PA) e Colares (PA).",
-                    "T3": "Determine a diferença aproximada de valor do PIB entre os municípios de Igarapé-Miri (PA) e Conceição do Araguaia (PA).",
-                    "T4": "Aproximadamente, quantas vezes o PIB de Barcarena (PA) é maior em relação ao PIB de Augusto Corrêa (PA)?",
-                    "T5": "Qual é a proporção aproximada entre os valores do PIB de Abaetetuba (PA) e Bragança (PA)?"
+                        "T1": "Determine o valor aproximado do PIB do município de Marituba (PA).",
+                        "T2": "Determine a diferença aproximada de valor do PIB entre os municípios de Belém (PA) e Colares (PA).",
+                        "T3": "Determine a diferença aproximada de valor do PIB entre os municípios de Igarapé-Miri (PA) e Conceição do Araguaia (PA).",
+                        "T4": "Aproximadamente, quantas vezes o PIB de Barcarena (PA) é maior em relação ao PIB de Augusto Corrêa (PA)?",
+                        "T5": "Qual é a proporção aproximada entre os valores do PIB de Abaetetuba (PA) e Bragança (PA)?"
                     }
                 },
                 {
@@ -791,11 +817,11 @@
                     "labels": ["ABA", "AFU", "ALT", "ANA", "AUC", "BAI", "BAR", "BEL", "BEN", "BRA", "CAM", "CAP", "CPO", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG"],
                     "values": [10405, 1259, 9988, 55080, 1124, 1640, 8048, 207127, 3003, 6911, 7861, 5238, 2578, 4463, 1098, 1925, 2577, 7278, 1013, 2643],
                     "tasks": {
-                    "T1": "Determine o número aproximado de pessoas com ensino superior completo em Capanema (PA).",
-                    "T2": "Determine a diferença no número de pessoas com ensino superior completo entre Belém (PA) e Muaná (PA).",
-                    "T3": "Determine a diferença no número de pessoas com ensino superior completo entre Capitão Poço (PA) e Igarapé-Miri (PA).",
-                    "T4": "Aproximadamente, quantas vezes o número de pessoas com ensino superior completo em Ananindeua (PA) é maior do que em Afuá (PA)?",
-                    "T5": "Qual é a proporção aproximada entre o número de pessoas com ensino superior completo em Benevides (PA) e São Miguel do Guamá (PA)?"
+                        "T1": "Determine o número aproximado de pessoas com ensino superior completo em Capanema (PA).",
+                        "T2": "Determine a diferença no número de pessoas com ensino superior completo entre Belém (PA) e Muaná (PA).",
+                        "T3": "Determine a diferença no número de pessoas com ensino superior completo entre Capitão Poço (PA) e Igarapé-Miri (PA).",
+                        "T4": "Aproximadamente, quantas vezes o número de pessoas com ensino superior completo em Ananindeua (PA) é maior do que em Afuá (PA)?",
+                        "T5": "Qual é a proporção aproximada entre o número de pessoas com ensino superior completo em Benevides (PA) e São Miguel do Guamá (PA)?"
                     }
                 },
                 {
@@ -806,11 +832,11 @@
                     "labels": ["ABA", "AFU", "ALT", "AUC", "BAI", "BAR", "BEL", "BRA", "CAR", "CAM", "CPO", "COL", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG", "SSB"],
                     "values": [24634, 10158, 21152, 8304, 5503, 21920, 145005, 19351, 3708, 23198, 7917, 1841, 6132, 7837, 6076, 11194, 15995, 6422, 9366, 4823],
                     "tasks": {
-                    "T1": "Determine o número aproximado de matrículas no Ensino Fundamental em Cametá (PA).",
-                    "T2": "Determine a diferença no número de matrículas entre os municípios de Belém (PA) e Colares (PA).",
-                    "T3": "Determine a diferença no número de matrículas entre os municípios de Curralinho (PA) e Capitão Poço (PA).",
-                    "T4": "Aproximadamente, quantas vezes o número de matrículas em Altamira (PA) é maior que em Cachoeira do Arari (PA)?",
-                    "T5": "Qual é a proporção aproximada entre as matrículas de Conceição do Araguaia (PA) e Dom Eliseu (PA)?"
+                        "T1": "Determine o número aproximado de matrículas no Ensino Fundamental em Cametá (PA).",
+                        "T2": "Determine a diferença no número de matrículas entre os municípios de Belém (PA) e Colares (PA).",
+                        "T3": "Determine a diferença no número de matrículas entre os municípios de Curralinho (PA) e Capitão Poço (PA).",
+                        "T4": "Aproximadamente, quantas vezes o número de matrículas em Altamira (PA) é maior que em Cachoeira do Arari (PA)?",
+                        "T5": "Qual é a proporção aproximada entre as matrículas de Conceição do Araguaia (PA) e Dom Eliseu (PA)?"
                     }
                 },
                 {
@@ -821,11 +847,11 @@
                     "labels": ["ABA", "AFU", "ALT", "AUC", "BAI", "BAR", "BEL", "BRA", "CAR", "CAM", "CPO", "COL", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG", "SSB"],
                     "values": [158188, 37765, 126279, 44573, 51641, 126650, 1303403, 123082, 23981, 134184, 56506, 12868, 44617, 33903, 58484, 64831, 111785, 45368, 52894, 25643],
                     "tasks": {
-                    "T1": "Determine o valor aproximado da população residente de Bragança (PA).",
-                    "T2": "Determine a diferença populacional entre os municípios de Belém (PA) e Colares (PA).",
-                    "T3": "Determine a diferença populacional entre os municípios de Augusto Corrêa (PA) e Muaná (PA).",
-                    "T4": "Aproximadamente, quantas vezes a população residente de Marituba (PA) é maior que a de São Sebastião da Boa Vista (PA)?",
-                    "T5": "Qual é a proporção aproximada entre a população residente de Igarapé-Miri (PA) e Dom Eliseu (PA)?"
+                        "T1": "Determine o valor aproximado da população residente de Bragança (PA).",
+                        "T2": "Determine a diferença populacional entre os municípios de Belém (PA) e Colares (PA).",
+                        "T3": "Determine a diferença populacional entre os municípios de Augusto Corrêa (PA) e Muaná (PA).",
+                        "T4": "Aproximadamente, quantas vezes a população residente de Marituba (PA) é maior que a de São Sebastião da Boa Vista (PA)?",
+                        "T5": "Qual é a proporção aproximada entre a população residente de Igarapé-Miri (PA) e Dom Eliseu (PA)?"
                     }
                 },
                 {
@@ -836,11 +862,11 @@
                     "labels": ["ABA", "BRE", "ALT", "ANA", "AUC", "TUC", "BAR", "BEL", "BEN", "BRA", "CAM", "CAP", "SAL", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG"],
                     "values": [36437783.61, 40441343.14, 72491969.43, 201474865.79, 11540181.11, 50170347.92, 535155385.44, 1561985767.49, 26396970.93, 39849155.60, 36511936.09, 27585543.21, 24014348.01, 32437791.06, 13307123.96, 20617509.55, 16060110.60, 66844578.57, 12017472.56, 16993260.97],
                     "tasks": {
-                    "T1": "Determine o valor aproximado arrecadado em impostos por Tucuruí (PA).",
-                    "T2": "Determine a diferença de arrecadação tributária entre Belém (PA) e Augusto Corrêa (PA).",
-                    "T3": "Determine a diferença de arrecadação tributária entre Abaetetuba (PA) e Cametá (PA).",
-                    "T4": "Aproximadamente, quantas vezes a arrecadação de Barcarena (PA) é maior em comparação com a de Muaná (PA)?",
-                    "T5": "Qual é a proporção aproximada entre a arrecadação de Capanema (PA) e Salinópolis (PA)?"
+                        "T1": "Determine o valor aproximado arrecadado em impostos por Tucuruí (PA).",
+                        "T2": "Determine a diferença de arrecadação tributária entre Belém (PA) e Augusto Corrêa (PA).",
+                        "T3": "Determine a diferença de arrecadação tributária entre Abaetetuba (PA) e Cametá (PA).",
+                        "T4": "Aproximadamente, quantas vezes a arrecadação de Barcarena (PA) é maior em comparação com a de Muaná (PA)?",
+                        "T5": "Qual é a proporção aproximada entre a arrecadação de Capanema (PA) e Salinópolis (PA)?"
                     }
                 },
                 {
@@ -851,11 +877,11 @@
                     "labels": ["ABA", "BRE", "ALT", "ANA", "AUC", "TUC", "BAR", "BEL", "BEN", "BRA", "CAM", "CAP", "SAL", "CDA", "BAI", "DEL", "IMI", "MAR", "MUA", "SMG"],
                     "values": [27071, 9139, 43078, 77251, 2945, 21902, 18411, 191736, 10127, 19287, 16965, 18794, 7951, 11301, 2794, 7869, 5579, 17177, 1504, 9766],
                     "tasks": {
-                    "T1": "Determine o tamanho aproximado da frota de motocicletas em Marituba (PA).",
-                    "T2": "Determine a diferença no tamanho da frota de motocicletas entre Belém (PA) e Muaná (PA).",
-                    "T3": "Determine a diferença no tamanho da frota de motocicletas entre Capanema (PA) e Barcarena (PA).",
-                    "T4": "Aproximadamente, quantas vezes a frota de motocicletas de Ananindeua (PA) é maior que a de Baião (PA)?",
-                    "T5": "Qual é a proporção aproximada entre a frota de motocicletas de Breves (PA) e Dom Eliseu (PA)?"
+                        "T1": "Determine o tamanho aproximado da frota de motocicletas em Marituba (PA).",
+                        "T2": "Determine a diferença no tamanho da frota de motocicletas entre Belém (PA) e Muaná (PA).",
+                        "T3": "Determine a diferença no tamanho da frota de motocicletas entre Capanema (PA) e Barcarena (PA).",
+                        "T4": "Aproximadamente, quantas vezes a frota de motocicletas de Ananindeua (PA) é maior que a de Baião (PA)?",
+                        "T5": "Qual é a proporção aproximada entre a frota de motocicletas de Breves (PA) e Dom Eliseu (PA)?"
                     }
                 }
             ];
@@ -884,6 +910,8 @@
             };
 
             blockTaskOrder = shuffle(Object.keys(TASK_DESCRIPTION));
+
+            experimentData.blockTaskOrder = blockTaskOrder;
 
             function datasetToObjects(dataset) {
                 return dataset.values.map((valor, i) => ({
@@ -1154,6 +1182,37 @@
             function showBlockTaskScreen() {
                 const alreadyWide = container.style.maxWidth === VISUAL_CONTAINER_MAX_WIDTH;
                 showScreen('block-task-screen');
+
+                blockTaskStartedAt = performance.now();
+
+                const task = currentBlockPlan[currentBlockTaskIndex];
+
+                currentTaskRecord = {
+                    blockNumber: currentBlock,
+                    taskIndexInBlock: currentBlockTaskIndex + 1,
+
+                    taskKey: task.taskKey,
+                    taskDescription: TASK_DESCRIPTION[task.taskKey].title,
+
+                    visualizationId: task.visualization.id,
+                    visualizationName: task.visualization.name,
+
+                    datasetId: task.dataset.id,
+                    datasetName: task.dataset.name,
+                    datasetDescription: task.dataset.description,
+
+                    question: task.dataset.tasks[task.taskKey],
+
+                    startedAt: new Date().toISOString(),
+                    endedAt: null,
+
+                    timeOnBlockTaskScreenMs: null,
+                    timeOnBlockTaskScreenSeconds: null,
+
+                    answer: null,
+                    confidence: null
+                };
+
                 if (alreadyWide) {
                     renderBlockTaskChart();
                 } else {
@@ -1253,6 +1312,21 @@
                     if (target === 'tutorial-screen') {
                         tutorialIndex = 0;
                         tutorialOrder = shuffle(VISUALIZATIONS);
+
+                        experimentData.tutorialOrder = tutorialOrder.map(v => ({
+                            id: v.id,
+                            name: v.name
+                        }));
+
+                        experimentData.demographics = {
+                            ageRange: document.getElementById('age-range').value,
+                            sex: document.getElementById('sex').value,
+                            educationLevel: document.getElementById('education-level').value,
+                            infovisCourse: document.getElementById('infovis-course').value,
+                            visualAcuity: document.getElementById('visual-acuity').value,
+                            colorBlindness: document.getElementById('color-blindness').value
+                        };
+
                         showTutorialScreen();
                     } else {
                         showScreen(target);
@@ -1327,11 +1401,33 @@
             });
 
             foundAnswerButton.addEventListener('click', () => {
+                if (currentTaskRecord && blockTaskStartedAt !== null) {
+                    const elapsedMs = Math.round(performance.now() - blockTaskStartedAt);
+
+                    currentTaskRecord.endedAt = new Date().toISOString();
+                    currentTaskRecord.timeOnBlockTaskScreenMs = elapsedMs;
+                    currentTaskRecord.timeOnBlockTaskScreenSeconds = Number((elapsedMs / 1000).toFixed(2));
+                }
+
+                console.log(experimentData);
+
                 destroyBlockChart();
                 showScreen('block-answer-screen');
             });
 
             blockAnswerNextButton.addEventListener('click', () => {
+                if (currentTaskRecord) {
+                    currentTaskRecord.answer = blockAnswerInput.value;
+                    currentTaskRecord.confidence = blockConfidence.value;
+                    currentTaskRecord.responseRegisteredAt = new Date().toISOString();
+
+                    experimentData.blocks.push(currentTaskRecord);
+
+                    currentTaskRecord = null;
+                    blockTaskStartedAt = null;
+                    blockAnswerInput.value = '';
+                }
+
                 if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
                     currentBlockTaskIndex += 1;
                     updateBlockPlaceholders();
@@ -1364,4 +1460,5 @@
     </script>
 
 </body>
+
 </html>
