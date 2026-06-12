@@ -656,7 +656,7 @@ class ScrollBarChart3D extends Visualization {
       bar.userData = {
         datum: d,
         index: i,
-        hasFold: scaledLength > this.layout.maxYLimit
+        hasFold: scaledLength > this.layout.maxYLimit,
       };
 
       this.chartGroup.add(bar);
@@ -713,7 +713,7 @@ class ScrollBarChart3D extends Visualization {
       bar.userData = {
         datum: d,
         index: i,
-        hasFold: scaledLength > this.layout.maxYLimit
+        hasFold: scaledLength > this.layout.maxYLimit,
       };
 
       this.chartGroup.add(bar);
@@ -1178,6 +1178,14 @@ class ScrollBarChart3D extends Visualization {
       .nice()
       .ticks(tickCount);
 
+    const maxScaledLength = this._getScaledBarLength(this.maxValue);
+
+    tickValues = tickValues.filter((value) => {
+      const scaledLength = this._getScaledBarLength(value);
+
+      return scaledLength <= maxScaledLength + 1e-6;
+    });
+
     tickValues.forEach((value) => {
       // Cálculo linear simples (sem precisar se preocupar com as dobras em Z)
       const y =
@@ -1451,11 +1459,15 @@ class ScrollBarChart3D extends Visualization {
       });
     }
 
-    // Garante que o valor máximo absoluto sempre tenha marca e texto
-    if (tickValues[tickValues.length - 1] !== this.maxValue) {
-      tickValues.push(this.maxValue);
-      labeledTicks.add(this.maxValue);
-    }
+    tickValues = tickValues.filter((value) => {
+      const scaledLength = this._getScaledBarLength(value);
+
+      return scaledLength <= maxScaledLength + 1e-6;
+    });
+
+    labeledTicks = new Set(
+      [...labeledTicks].filter((value) => tickValues.includes(value)),
+    );
 
     // 6. Desenha as linhas e os textos
     tickValues.forEach((value) => {
@@ -1546,7 +1558,7 @@ class ScrollBarChart3D extends Visualization {
         new THREE.Vector3(axisX, axisY, axisEndZ),
       ],
       this.settings.yAxisColor,
-      0.95
+      0.95,
     );
 
     this.yAxisGroup.add(axisLine);
@@ -1562,11 +1574,18 @@ class ScrollBarChart3D extends Visualization {
       .domain([thresholdDataValue, this.maxValue])
       .nice()
       .ticks(6)
-      .filter((value) => value > thresholdDataValue);
+      .filter((value) => {
+        const scaledLength = this._getScaledBarLength(value);
+
+        return (
+          value > thresholdDataValue && scaledLength <= maxScaledLength + 1e-6
+        );
+      });
 
     tickValues.forEach((value, index) => {
       const tickZ =
-        axisStartZ + ((index + 1) / tickValues.length) * (axisEndZ - axisStartZ);
+        axisStartZ +
+        ((index + 1) / tickValues.length) * (axisEndZ - axisStartZ);
 
       const tickLine = this._createLineFromPoints(
         [
@@ -1574,7 +1593,7 @@ class ScrollBarChart3D extends Visualization {
           new THREE.Vector3(axisX + 0.12, axisY, tickZ),
         ],
         this.settings.yAxisColor,
-        0.85
+        0.85,
       );
 
       this.yAxisGroup.add(tickLine);
@@ -1585,7 +1604,7 @@ class ScrollBarChart3D extends Visualization {
           new THREE.Vector3(chartRight, axisY, tickZ),
         ],
         this.settings.yGridColor,
-        0.45
+        0.45,
       );
 
       this.yAxisGroup.add(gridLine);
@@ -1616,7 +1635,7 @@ class ScrollBarChart3D extends Visualization {
     const geometry = new THREE.BoxGeometry(
       this.layout.barWidth,
       height,
-      Math.max(this.layout.barWidth, 0.35)
+      Math.max(this.layout.barWidth, 0.35),
     );
 
     const material = new THREE.MeshBasicMaterial({
@@ -1627,15 +1646,11 @@ class ScrollBarChart3D extends Visualization {
 
     const hitbox = new THREE.Mesh(geometry, material);
 
-    hitbox.position.set(
-      0,
-      height / 2,
-      0
-    );
+    hitbox.position.set(0, height / 2, 0);
 
     hitbox.userData.isBarHitbox = true;
     hitbox.userData.barMesh = barGroup.children.find(
-      (child) => child.userData?.isBarMesh
+      (child) => child.userData?.isBarMesh,
     );
 
     barGroup.add(hitbox);
@@ -1665,7 +1680,7 @@ class ScrollBarChart3D extends Visualization {
 
         const nextDistance = THREE.MathUtils.clamp(
           currentDistance +
-          zoomDirection * this.settings.zoomSpeed * currentDistance,
+            zoomDirection * this.settings.zoomSpeed * currentDistance,
           this.settings.minCameraDistance,
           this.settings.maxCameraDistance,
         );
