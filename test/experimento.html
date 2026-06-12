@@ -455,15 +455,22 @@
             </div>
         </div>
 
-        <div id="block-task-screen" class="screen hidden">
-            <h2 id="block-title">Bloco 1 de 5 - Tela da Tarefa</h2>
-            <p>Fluxo do bloco: questão/contexto -> gráfico + cronômetro -> participante clica em "Achei a resposta".</p>
-            <div class="split">
-                <div class="placeholder-box" id="block-context">Placeholder: questão e contexto da tarefa.</div>
-                <div class="placeholder-box">Placeholder: área do gráfico e cronômetro.</div>
-            </div>
+        <div id="block-context-screen" class="screen hidden">
+            <h2 id="block-context-title">Bloco 1 de 5 - Contexto da Tarefa</h2>
+            <p>Leia o contexto e a pergunta antes de iniciar a visualização.</p>
+            <div class="placeholder-box" id="block-context">Placeholder: contexto da tarefa do bloco.</div>
+            <div class="placeholder-box" id="block-question-context">Placeholder: pergunta a ser respondida no bloco.</div>
             <div class="actions">
-                <button data-prev="task-instruction-screen">Back</button>
+                <button id="block-context-back-button">Back</button>
+                <button id="go-to-block-task-button">Iniciar tarefa</button>
+            </div>
+        </div>
+
+        <div id="block-task-screen" class="screen hidden">
+            <h2 id="block-title">Pergunta do bloco 1 de 5</h2>
+            <div id="block-chart-area" class="tutorial-chart-area"></div>
+            <div class="actions">
+                <button data-prev="block-context-screen">Back</button>
                 <button id="found-answer-button">Achei a resposta</button>
             </div>
         </div>
@@ -483,7 +490,7 @@
             <div class="placeholder-box">Placeholder: aqui será salvo tempo + resposta + confiança.</div>
             <div class="actions">
                 <button data-prev="block-task-screen">Back</button>
-                <button data-next="nasa-tlx-screen">Next</button>
+                <button id="block-answer-next-button">Next</button>
             </div>
         </div>
 
@@ -568,12 +575,18 @@
             const TCLE_VERSION = "2026-06-11-digital-2";
 
             const blockTitle = document.getElementById('block-title');
+            const blockContextTitle = document.getElementById('block-context-title');
             const answerTitle = document.getElementById('answer-title');
             const tlxTitle = document.getElementById('tlx-title');
             const blockContext = document.getElementById('block-context');
+            const blockQuestionContext = document.getElementById('block-question-context');
+            const blockChartArea = document.getElementById('block-chart-area');
 
             const startBlocksButton = document.getElementById('start-blocks-button');
+            const blockContextBackButton = document.getElementById('block-context-back-button');
+            const goToBlockTaskButton = document.getElementById('go-to-block-task-button');
             const foundAnswerButton = document.getElementById('found-answer-button');
+            const blockAnswerNextButton = document.getElementById('block-answer-next-button');
             const nextBlockButton = document.getElementById('next-block-button');
 
             let currentBlock = 1;
@@ -582,6 +595,11 @@
             let maxProgressStep = 0;
             const DEFAULT_CONTAINER_MAX_WIDTH = '900px';
             const VISUAL_CONTAINER_MAX_WIDTH = '1500px';
+            const TASKS_PER_BLOCK = 4;
+
+            let currentBlockTaskIndex = 0;
+            let currentBlockPlan = [];
+            let currentBlockChart = null;
 
             // --- Tutorial configuration ---
             const tutorialData3D = [
@@ -659,6 +677,52 @@
                 }
             ];
 
+            const DATASET_POOL = [
+                {
+                    id: 'dataset-a',
+                    name: 'Base A',
+                    values: [40536062, 9190033, 3887894, 2780522, 2441092, 1977330, 1901553],
+                    labels: ['BEL', 'BAR', 'ALT', 'MAR', 'ABA', 'BRA', 'CAM']
+                },
+                {
+                    id: 'dataset-b',
+                    name: 'Base B',
+                    values: [32400000, 12150000, 6140000, 2870000, 1960000, 1650000, 1490000],
+                    labels: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7']
+                },
+                {
+                    id: 'dataset-c',
+                    name: 'Base C',
+                    values: [17200000, 9800000, 7400000, 3880000, 3100000, 2700000, 2100000],
+                    labels: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7']
+                },
+                {
+                    id: 'dataset-d',
+                    name: 'Base D',
+                    values: [68000000, 12400000, 9100000, 4400000, 2890000, 2100000, 1600000],
+                    labels: ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7']
+                },
+                {
+                    id: 'dataset-e',
+                    name: 'Base E',
+                    values: [25100000, 11800000, 5200000, 4700000, 2900000, 2200000, 1750000],
+                    labels: ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7']
+                },
+                {
+                    id: 'dataset-f',
+                    name: 'Base F',
+                    values: [44900000, 13300000, 8800000, 6100000, 3000000, 2400000, 1900000],
+                    labels: ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7']
+                }
+            ];
+
+            function datasetToObjects(dataset) {
+                return dataset.values.map((valor, i) => ({
+                    label: dataset.labels[i],
+                    valor
+                }));
+            }
+
             function shuffle(arr) {
                 const a = [...arr];
                 for (let i = a.length - 1; i > 0; i--) {
@@ -685,9 +749,9 @@
                     'tcle-screen': 2,
                     'demographic-screen': 3,
                     'task-instruction-screen': 8,
-                    'final-ranking-screen': 24,
-                    'final-comments-screen': 25,
-                    'thanks-screen': 26
+                    'final-ranking-screen': 74,
+                    'final-comments-screen': 75,
+                    'thanks-screen': 76
                 };
 
                 if (screenId === 'tutorial-screen') {
@@ -698,16 +762,17 @@
                     return fixedStepMap[screenId];
                 }
 
-                const blockBase = 8 + (currentBlock - 1) * 3;
-                if (screenId === 'block-task-screen') return blockBase + 1;
-                if (screenId === 'block-answer-screen') return blockBase + 2;
-                if (screenId === 'nasa-tlx-screen') return blockBase + 3;
+                const blockBase = 8 + (currentBlock - 1) * 13;
+                if (screenId === 'block-context-screen') return blockBase + currentBlockTaskIndex * 3 + 1;
+                if (screenId === 'block-task-screen') return blockBase + currentBlockTaskIndex * 3 + 2;
+                if (screenId === 'block-answer-screen') return blockBase + currentBlockTaskIndex * 3 + 3;
+                if (screenId === 'nasa-tlx-screen') return blockBase + 13;
 
                 return 1;
             }
 
             function updateProgress(screenId) {
-                const totalFlowSteps = 26;
+                const totalFlowSteps = 76;
                 const currentStep = getProgressStep(screenId);
                 maxProgressStep = Math.max(maxProgressStep, currentStep);
                 const progress = (maxProgressStep / totalFlowSteps) * 100;
@@ -726,6 +791,9 @@
 
 
             function showScreen(screenId) {
+                if (screenId !== 'block-task-screen' && currentBlockChart) {
+                    destroyBlockChart();
+                }
                 screens.forEach(screen => {
                     screen.classList.toggle('hidden', screen.id !== screenId);
                 });
@@ -734,10 +802,87 @@
             }
 
             function updateBlockPlaceholders() {
-                blockTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - Tela da Tarefa';
-                answerTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - Registro de Resposta';
+                const task = currentBlockPlan[currentBlockTaskIndex];
+                const taskLabel = (currentBlockTaskIndex + 1) + ' de ' + TASKS_PER_BLOCK;
+                const vizName = task ? task.visualization.name : 'Visualização';
+                const datasetName = task ? task.dataset.name : 'Base';
+
+                blockContextTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - Contexto da Tarefa';
+                blockTitle.textContent = 'Pergunta do bloco ' + currentBlock + ' de ' + totalBlocks + ' (' + taskLabel + ')';
+                answerTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - Registro de Resposta (' + taskLabel + ')';
                 tlxTitle.textContent = 'NASA-TLX do Bloco ' + currentBlock;
-                blockContext.textContent = 'Placeholder: questão e contexto da tarefa do bloco ' + currentBlock + '.';
+                blockContext.textContent = 'Contexto: usar ' + vizName + ' com a ' + datasetName + ' para analisar os dados deste bloco.';
+                blockQuestionContext.textContent = 'Pergunta: com base na visualização, qual categoria possui o segundo maior valor?';
+            }
+
+            function buildBlockPlan() {
+                const vizOrder = shuffle(VISUALIZATIONS);
+                const sampledDatasets = shuffle(DATASET_POOL).slice(0, TASKS_PER_BLOCK);
+                currentBlockPlan = vizOrder.map((visualization, i) => ({
+                    visualization,
+                    dataset: sampledDatasets[i]
+                }));
+                currentBlockTaskIndex = 0;
+            }
+
+            function getTaskDataForVisualization(task) {
+                const objects = datasetToObjects(task.dataset);
+                if (task.visualization.id === 'bar') {
+                    return objects.map((d) => ({ valor: d.valor }));
+                }
+                return objects;
+            }
+
+            function destroyBlockChart() {
+                if (currentBlockChart) {
+                    if (currentBlockChart.destroy) currentBlockChart.destroy();
+                    currentBlockChart = null;
+                }
+                blockChartArea.innerHTML = '';
+            }
+
+            function renderBlockTaskChart() {
+                destroyBlockChart();
+
+                const task = currentBlockPlan[currentBlockTaskIndex];
+                if (!task) return;
+
+                const data = getTaskDataForVisualization(task);
+
+                try {
+                    const rect = blockChartArea.getBoundingClientRect();
+                    const w = rect.width > 0 ? Math.round(rect.width) : 900;
+                    const h = rect.height > 0 ? Math.round(rect.height) : 520;
+
+                    currentBlockChart = new task.visualization.ClassRef(blockChartArea, {
+                        ...task.visualization.settings,
+                        width: w,
+                        height: h
+                    });
+                    currentBlockChart.data(data);
+
+                    if (task.visualization.id === 'bar' && currentBlockChart.redraw) {
+                        currentBlockChart.redraw();
+                    }
+                } catch (err) {
+                    console.error('Block task chart error:', err);
+                    blockChartArea.innerHTML = '<p style="color:var(--danger-color);padding:1rem;">Erro ao carregar a visualização da tarefa.</p>';
+                }
+            }
+
+            function showBlockTaskScreen() {
+                const alreadyWide = container.style.maxWidth === VISUAL_CONTAINER_MAX_WIDTH;
+                showScreen('block-task-screen');
+                if (alreadyWide) {
+                    renderBlockTaskChart();
+                } else {
+                    container.addEventListener('transitionend', function onEnd(e) {
+                        if (e.propertyName === 'max-width') {
+                            container.removeEventListener('transitionend', onEnd);
+                            renderBlockTaskChart();
+                        }
+                    });
+                }
             }
 
             // --- Tutorial rendering ---
@@ -860,6 +1005,8 @@
                     if (target === 'tutorial-screen') {
                         tutorialIndex = tutorialOrder.length - 1;
                         showTutorialScreen();
+                    } else if (target === 'block-task-screen') {
+                        showBlockTaskScreen();
                     } else {
                         showScreen(target);
                     }
@@ -892,22 +1039,53 @@
 
             startBlocksButton.addEventListener('click', () => {
                 currentBlock = 1;
+                buildBlockPlan();
                 updateBlockPlaceholders();
-                showScreen('block-task-screen');
+                showScreen('block-context-screen');
+            });
+
+            blockContextBackButton.addEventListener('click', () => {
+                if (currentBlockTaskIndex > 0) {
+                    currentBlockTaskIndex -= 1;
+                    updateBlockPlaceholders();
+                    showScreen('block-answer-screen');
+                    return;
+                }
+                showScreen('task-instruction-screen');
+            });
+
+            goToBlockTaskButton.addEventListener('click', () => {
+                showBlockTaskScreen();
             });
 
             foundAnswerButton.addEventListener('click', () => {
+                destroyBlockChart();
                 showScreen('block-answer-screen');
+            });
+
+            blockAnswerNextButton.addEventListener('click', () => {
+                if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
+                    currentBlockTaskIndex += 1;
+                    updateBlockPlaceholders();
+                    showScreen('block-context-screen');
+                } else {
+                    showScreen('nasa-tlx-screen');
+                }
             });
 
             nextBlockButton.addEventListener('click', () => {
                 if (currentBlock < totalBlocks) {
                     currentBlock += 1;
+                    buildBlockPlan();
                     updateBlockPlaceholders();
-                    showScreen('block-task-screen');
+                    showScreen('block-context-screen');
                 } else {
                     showScreen('final-ranking-screen');
                 }
+            });
+
+            window.addEventListener('resize', () => {
+                if (currentBlockChart && currentBlockChart.resize) currentBlockChart.resize();
             });
 
             updateBlockPlaceholders();
