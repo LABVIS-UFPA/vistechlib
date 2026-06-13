@@ -40,7 +40,10 @@
 
 ### Finalização do Bloco:
 
-* Aplicar um questionário NASA-TLX referente à tarefa executada pra cada visulização.
+* Ao final do bloco, aplicar o NASA-TLX adaptado em uma única página.
+* A página contém cinco seções, uma para cada dimensão avaliada.
+* Em cada seção, mostrar as quatro visualizações na mesma ordem em que foram apresentadas, com o print à esquerda e a escala correspondente à direita.
+* Exigir o preenchimento das vinte escalas antes de concluir o bloco.
 * Ir para o próximo bloco ou seguir para a fase final.
 
 ---

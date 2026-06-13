@@ -197,6 +197,165 @@
             margin: 0 auto;
         }
 
+        .tlx-visualization-header {
+            margin: 0 0 1.5rem;
+            padding: 0.75rem;
+            border-bottom: 2px solid var(--primary-color);
+            text-align: center;
+        }
+
+        .tlx-visualization-header h3,
+        .tlx-visualization-header p {
+            margin: 0.15rem 0;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .tlx-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .tlx-dimension-group {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 1.5rem;
+        }
+
+        .tlx-dimension-group:last-child {
+            border-bottom: none;
+        }
+
+        .tlx-dimension-group-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .tlx-items-grid {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .tlx-item {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: #fafbfc;
+        }
+
+        .tlx-item-visualization {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .tlx-visualization-image {
+            display: block;
+            width: 100%;
+            height: 200px;
+            border: 1px solid #c7d2dc;
+            border-radius: 6px;
+            background: #fff;
+            object-fit: contain;
+        }
+
+        .tlx-item-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        .tlx-dimension {
+            position: relative;
+            padding: 0.85rem 0;
+        }
+
+        .tlx-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .tlx-label-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            color: var(--text-color);
+            background: transparent;
+            font: inherit;
+            font-weight: 700;
+            text-decoration: underline dotted;
+            text-underline-offset: 0.25rem;
+            cursor: help;
+        }
+
+        .tlx-label-trigger:hover,
+        .tlx-label-trigger:focus-visible {
+            color: var(--primary-color);
+            background: transparent;
+            outline: 2px solid var(--secondary-color);
+            outline-offset: 3px;
+        }
+
+        .tlx-tooltip {
+            position: absolute;
+            z-index: 2;
+            left: 1rem;
+            right: 1rem;
+            top: 2.8rem;
+            display: none;
+            padding: 0.75rem;
+            border-radius: 5px;
+            color: #fff;
+            background: var(--text-color);
+            font-size: 0.9rem;
+            line-height: 1.45;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .tlx-label-trigger:hover + .tlx-tooltip,
+        .tlx-label-trigger:focus + .tlx-tooltip,
+        .tlx-tooltip.is-open {
+            display: block;
+        }
+
+        .tlx-value {
+            min-width: 7.2rem;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .tlx-range {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            accent-color: var(--primary-color);
+        }
+
+        .tlx-range[data-answered="false"] {
+            opacity: 0.55;
+        }
+
+        .tlx-scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.25rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
         .progress-track {
             position: absolute;
             top: 0;
@@ -274,6 +433,17 @@
 
             .split {
                 grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 720px) {
+            .tlx-item {
+                grid-template-columns: 1fr;
+            }
+
+            .tlx-visualization-image {
+                height: 180px;
             }
         }
     </style>
@@ -520,26 +690,14 @@
 
         <div id="nasa-tlx-screen" class="screen hidden">
             <h2 id="tlx-title">NASA-TLX do Bloco 1</h2>
-            <div class="split">
-                <div>
-                    <div class="field">
-                        <label for="mental-demand">Demanda mental</label>
-                        <input id="mental-demand" type="range" min="0" max="100" value="50" />
-                    </div>
-                    <div class="field">
-                        <label for="effort">Esforço</label>
-                        <input id="effort" type="range" min="0" max="100" value="50" />
-                    </div>
-                    <div class="field">
-                        <label for="frustration">Frustração</label>
-                        <input id="frustration" type="range" min="0" max="100" value="50" />
-                    </div>
-                </div>
-                <div class="placeholder-box">Placeholder: formulário NASA-TLX completo por visualização/tarefa.</div>
+            <div class="tlx-visualization-header">
+                <h3>Avaliação das visualizações</h3>
+                <p>Avalie as quatro visualizações em cada dimensão abaixo.</p>
             </div>
+            <div id="tlx-form" class="tlx-form"></div>
             <div class="actions">
-                <button data-prev="block-answer-screen">Back</button>
-                <button id="next-block-button">Next</button>
+                <button id="back-from-tlx-button">Voltar para a resposta</button>
+                <button id="complete-tlx-button" disabled>Concluir bloco</button>
             </div>
         </div>
 
@@ -616,9 +774,11 @@
             const goToBlockTaskButton = document.getElementById('go-to-block-task-button');
             const foundAnswerButton = document.getElementById('found-answer-button');
             const blockAnswerNextButton = document.getElementById('block-answer-next-button');
-            const nextBlockButton = document.getElementById('next-block-button');
             const blockAnswerInput = document.getElementById('block-answer');
             const blockConfidence = document.getElementById('block-confidence');
+            const tlxForm = document.getElementById('tlx-form');
+            const backFromTlxButton = document.getElementById('back-from-tlx-button');
+            const completeTlxButton = document.getElementById('complete-tlx-button');
 
             let currentBlock = 1;
             const totalBlocks = 5;
@@ -633,6 +793,39 @@
             let currentBlockChart = null;
             let currentBlockTaskKey = 'T1';
             let blockTaskOrder = [];
+            const tlxDrafts = new Map();
+            const TLX_DIMENSIONS = [
+                {
+                    id: 'mental-demand',
+                    field: 'mentalDemand',
+                    label: 'Demanda mental',
+                    description: 'Quanto esforço mental e perceptivo foi necessário para interpretar a visualização e responder à tarefa? A atividade foi simples ou complexa?'
+                },
+                {
+                    id: 'temporal-demand',
+                    field: 'temporalDemand',
+                    label: 'Demanda temporal',
+                    description: 'Quanta pressão de tempo você sentiu enquanto analisava a visualização e respondia à tarefa? O ritmo foi tranquilo ou acelerado?'
+                },
+                {
+                    id: 'performance-rating',
+                    field: 'performance',
+                    label: 'Desempenho',
+                    description: 'Quão bem-sucedido(a) você considera que foi ao interpretar a visualização e responder à tarefa? Quão satisfeito(a) ficou com seu desempenho?'
+                },
+                {
+                    id: 'effort',
+                    field: 'effort',
+                    label: 'Esforço',
+                    description: 'Quanto esforço foi necessário para alcançar seu nível de desempenho nesta tarefa?'
+                },
+                {
+                    id: 'frustration',
+                    field: 'frustration',
+                    label: 'Frustração',
+                    description: 'Quanto você se sentiu frustrado(a), estressado(a), irritado(a) ou inseguro(a) durante a tarefa, em oposição a satisfeito(a), relaxado(a) e confiante?'
+                }
+            ];
 
             let blockTaskStartedAt = null;
             let currentTaskRecord = null;
@@ -681,6 +874,7 @@
                 {
                     id: 'bar',
                     name: 'Quebra de Escala Clássica',
+                    previewImage: 'assets/nasa/quebra-escala-classica.jpeg',
                     ClassRef: BarChart,
                     settings: { size_type: 'fit', drawStrategy: 'scale-break', breakPoint: 0.3, scaleBreakHiddenRatio: 0.55 },
                     data: tutorialData3D.map(d => ({ valor: d.valor })),
@@ -706,6 +900,7 @@
                 {
                     id: 'psb',
                     name: 'Quebra de Escala Perspectiva',
+                    previewImage: 'assets/nasa/quebra-escala-perspectiva.jpeg',
                     ClassRef: PerspectiveScaleBreakBarChart,
                     settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', depth: 8, minDepth: 0, maxDepth: 50, outlierRatioThreshold: 3, breakStartRatio: 0.6 },
                     data: tutorialData3D,
@@ -765,6 +960,7 @@
                 {
                     id: 'scroll',
                     name: 'Gráfico de Barras Pergaminho',
+                    previewImage: 'assets/nasa/grafico-barras-pergaminho.jpeg',
                     ClassRef: ScrollBarChart3D,
                     settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', maxYLimitRatio: 1.0, zStepDepth: 1.5 },
                     data: tutorialData3D,
@@ -781,6 +977,7 @@
                 {
                     id: 'worm',
                     name: 'Gráfico de Barras Minhoca',
+                    previewImage: 'assets/nasa/grafico-barras-minhoca.jpeg',
                     ClassRef: WormBarChart3D,
                     settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', maxYLimitRatio: 1.0, zStepDepth: 1.5 },
                     data: tutorialData3D,
@@ -982,7 +1179,8 @@
             function updateContainerWidth(screenId) {
                 const isVisualizationScreen =
                     screenId === 'tutorial-screen' ||
-                    screenId === 'block-task-screen';
+                    screenId === 'block-task-screen' ||
+                    screenId === 'nasa-tlx-screen';
 
                 container.style.maxWidth = isVisualizationScreen
                     ? VISUAL_CONTAINER_MAX_WIDTH
@@ -1060,20 +1258,31 @@
 
             function collectBlockNasaTlx() {
                 const taskKey = getTaskKeyForBlock(currentBlock);
-
                 const existingIndex = experimentData.blockNasaTlx.findIndex(
                     item => item.blockNumber === currentBlock
                 );
+                const evaluations = currentBlockPlan.map((task, visualizationIndex) => ({
+                    visualizationId: task.visualization.id,
+                    visualizationName: task.visualization.name,
+                    ratings: Object.fromEntries(
+                        TLX_DIMENSIONS.map((dimension, dimensionIndex) => [
+                            dimension.field,
+                            tlxDrafts.get(
+                                getTlxResponseKey(
+                                    currentBlock,
+                                    dimensionIndex,
+                                    visualizationIndex
+                                )
+                            )
+                        ])
+                    )
+                }));
 
                 const record = {
                     blockNumber: currentBlock,
                     taskKey,
                     taskDescription: TASK_DESCRIPTION[taskKey].title,
-
-                    mentalDemand: Number(document.getElementById('mental-demand').value),
-                    effort: Number(document.getElementById('effort').value),
-                    frustration: Number(document.getElementById('frustration').value),
-
+                    evaluations,
                     recordedAt: new Date().toISOString()
                 };
 
@@ -1094,6 +1303,147 @@
                     taskKey: currentBlockTaskKey
                 }));
                 currentBlockTaskIndex = 0;
+            }
+
+            function getTlxResponseKey(blockNumber, dimensionIndex, visualizationIndex) {
+                return `${blockNumber}-${dimensionIndex}-${visualizationIndex}`;
+            }
+
+            function updateTlxCompletionState() {
+                const tlxRanges = Array.from(tlxForm.querySelectorAll('.tlx-range'));
+                const hasAllRanges =
+                    tlxRanges.length === TLX_DIMENSIONS.length * TASKS_PER_BLOCK;
+                const allAnswered =
+                    hasAllRanges &&
+                    tlxRanges.every((input) => input.dataset.answered === 'true');
+                completeTlxButton.disabled = !allAnswered;
+            }
+
+            function closeTlxTooltips(exceptTrigger = null) {
+                tlxForm.querySelectorAll('.tlx-label-trigger').forEach((trigger) => {
+                    if (trigger === exceptTrigger) return;
+                    trigger.setAttribute('aria-expanded', 'false');
+                    const tooltip = trigger.nextElementSibling;
+                    if (tooltip) tooltip.classList.remove('is-open');
+                });
+            }
+
+            function renderTlxScreen() {
+                tlxTitle.textContent = `NASA-TLX do Bloco ${currentBlock}`;
+                tlxForm.innerHTML = '';
+
+                TLX_DIMENSIONS.forEach((dimension, dimensionIndex) => {
+                    const group = document.createElement('section');
+                    group.className = 'tlx-dimension-group';
+
+                    const title = document.createElement('h3');
+                    title.className = 'tlx-dimension-group-title';
+                    title.textContent = dimension.label;
+                    group.appendChild(title);
+
+                    const items = document.createElement('div');
+                    items.className = 'tlx-items-grid';
+
+                    currentBlockPlan.forEach((task, visualizationIndex) => {
+                        const key = getTlxResponseKey(currentBlock, dimensionIndex, visualizationIndex);
+                        const savedValue = tlxDrafts.get(key);
+                        const hasValue = Number.isFinite(savedValue);
+                        const inputId = `tlx-${dimension.id}-${visualizationIndex}`;
+                        const tooltipId = `${inputId}-tooltip`;
+
+                        const item = document.createElement('div');
+                        item.className = 'tlx-item';
+
+                        const visualization = document.createElement('div');
+                        visualization.className = 'tlx-item-visualization';
+
+                        const image = document.createElement('img');
+                        image.className = 'tlx-visualization-image';
+                        image.src = task.visualization.previewImage;
+                        image.alt = `Exemplo da visualização ${task.visualization.name}`;
+
+                        const visualizationLabel = document.createElement('div');
+                        visualizationLabel.className = 'tlx-item-label';
+                        visualizationLabel.textContent = task.visualization.name;
+                        visualization.append(image, visualizationLabel);
+
+                        const control = document.createElement('div');
+                        control.className = 'tlx-dimension';
+                        control.dataset.tlxDimension = dimension.id;
+
+                        const labelRow = document.createElement('div');
+                        labelRow.className = 'tlx-label-row';
+
+                        const trigger = document.createElement('button');
+                        trigger.className = 'tlx-label-trigger';
+                        trigger.type = 'button';
+                        trigger.setAttribute('aria-expanded', 'false');
+                        trigger.setAttribute('aria-describedby', tooltipId);
+                        trigger.innerHTML = `${dimension.label} <span aria-hidden="true">ⓘ</span>`;
+
+                        const tooltip = document.createElement('span');
+                        tooltip.className = 'tlx-tooltip';
+                        tooltip.id = tooltipId;
+                        tooltip.setAttribute('role', 'tooltip');
+                        tooltip.textContent = dimension.description;
+
+                        const output = document.createElement('output');
+                        output.className = 'tlx-value';
+                        output.setAttribute('for', inputId);
+                        output.textContent = hasValue ? String(savedValue) : 'Não respondido';
+                        labelRow.append(trigger, tooltip, output);
+
+                        const input = document.createElement('input');
+                        input.className = 'tlx-range';
+                        input.id = inputId;
+                        input.type = 'range';
+                        input.min = '0';
+                        input.max = '100';
+                        input.step = '1';
+                        input.value = hasValue ? String(savedValue) : '50';
+                        input.dataset.answered = hasValue ? 'true' : 'false';
+                        input.setAttribute('aria-label', `${dimension.label}: ${task.visualization.name}`);
+
+                        const scaleLabels = document.createElement('div');
+                        scaleLabels.className = 'tlx-scale-labels';
+                        scaleLabels.innerHTML = '<span>Baixo</span><span>Alto</span>';
+
+                        input.addEventListener('input', () => {
+                            input.dataset.answered = 'true';
+                            output.textContent = input.value;
+                            tlxDrafts.set(key, Number(input.value));
+                            updateTlxCompletionState();
+                        });
+
+                        trigger.addEventListener('click', (event) => {
+                            event.stopPropagation();
+                            const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+                            closeTlxTooltips(trigger);
+                            trigger.setAttribute('aria-expanded', String(willOpen));
+                            tooltip.classList.toggle('is-open', willOpen);
+                        });
+
+                        trigger.addEventListener('keydown', (event) => {
+                            if (event.key === 'Escape') {
+                                trigger.setAttribute('aria-expanded', 'false');
+                                tooltip.classList.remove('is-open');
+                            }
+                        });
+
+                        control.append(labelRow, input, scaleLabels);
+                        item.append(visualization, control);
+                        items.appendChild(item);
+                    });
+
+                    group.appendChild(items);
+                    tlxForm.appendChild(group);
+                });
+
+                completeTlxButton.textContent =
+                    currentBlock === totalBlocks ? 'Ir para o ranking final' : 'Concluir bloco';
+                closeTlxTooltips();
+                updateTlxCompletionState();
+                updateProgress('nasa-tlx-screen');
             }
 
             function getTaskDataForVisualization(task) {
@@ -1327,6 +1677,8 @@
                 }
             });
 
+            document.addEventListener('click', () => closeTlxTooltips());
+
             window.addEventListener('resize', () => {
                 if (currentTutorialChart && currentTutorialChart.resize) currentTutorialChart.resize();
             });
@@ -1368,6 +1720,9 @@
                     if (target === 'tutorial-screen') {
                         tutorialIndex = tutorialOrder.length - 1;
                         showTutorialScreen();
+                    } else if (target === 'nasa-tlx-screen') {
+                        showScreen('nasa-tlx-screen');
+                        renderTlxScreen();
                     } else if (target === 'block-task-screen') {
                         showBlockTaskScreen();
                     } else {
@@ -1461,11 +1816,17 @@
                     showScreen('block-context-screen');
                 } else {
                     showScreen('nasa-tlx-screen');
+                    renderTlxScreen();
                 }
             });
 
-            nextBlockButton.addEventListener('click', () => {
+            backFromTlxButton.addEventListener('click', () => {
+                showScreen('block-answer-screen');
+            });
+
+            completeTlxButton.addEventListener('click', () => {
                 collectBlockNasaTlx();
+
                 if (currentBlock < totalBlocks) {
                     currentBlock += 1;
                     buildBlockPlan();
