@@ -3,9 +3,11 @@
   "version": "1.0.20",
   "description": "Information Visualization Technique Library",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "browserify index.js -p esmify --standalone vistechlib -o test/bundle.js",
+    "serve": "node server.js",
     "doc": "jsdoc -c jsdoc.json"
   },
   "repository": {
@@ -33,7 +35,8 @@
     "docdash": "^1.2.0",
     "moment": "^2.24.0",
     "three": "^0.124.0",
-    "underscore": "^1.9.1"
+    "underscore": "^1.9.1",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.18",

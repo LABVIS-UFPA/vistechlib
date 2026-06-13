@@ -841,6 +841,66 @@
                 blockNasaTlx: []
             };
 
+            /*
+            * Trecho relacionado a comunicação com server
+            * - Início
+            */
+            let experimentSocket = null;
+            let experimentAlreadySent = false;
+
+            function connectExperimentWebSocket() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}`;
+
+                experimentSocket = new WebSocket(wsUrl);
+
+                experimentSocket.addEventListener('open', () => {
+                    console.log('WebSocket conectado ao servidor do experimento');
+                });
+
+                experimentSocket.addEventListener('close', () => {
+                    console.warn('WebSocket desconectado');
+                });
+
+                experimentSocket.addEventListener('error', (err) => {
+                    console.error('Erro no WebSocket:', err);
+                });
+
+                experimentSocket.addEventListener('message', (event) => {
+                    const message = JSON.parse(event.data);
+
+                    if (message.type === 'SAVE_EXPERIMENT_OK') {
+                        console.log('Experimento salvo no servidor');
+                    }
+
+                    if (message.type === 'SAVE_EXPERIMENT_ERROR') {
+                        console.error('Erro ao salvar experimento:', message.message);
+                    }
+                });
+            }
+
+            function sendExperimentDataToServer() {
+                if (experimentAlreadySent) return;
+
+                experimentData.finishedAt = new Date().toISOString();
+
+                if (!experimentSocket || experimentSocket.readyState !== WebSocket.OPEN) {
+                    console.error('WebSocket não está conectado. Experimento não enviado.');
+                    return;
+                }
+
+                experimentSocket.send(JSON.stringify({
+                    type: 'SAVE_EXPERIMENT',
+                    experimentData
+                }));
+
+                experimentAlreadySent = true;
+            }
+            /*
+            * Trecho relacionado a comunicação com server
+            * - Fim
+            */
+
             // --- Tutorial configuration ---
             const tutorialData3D = [
                 { label: 'BEL', valor: 40536062 },
@@ -890,7 +950,7 @@
                         paddingBottom: 35,
                         paddingLeft: 65,
                         yAxisFontSize: 20,
-                        categoryLabelFontSize:20
+                        categoryLabelFontSize: 20
                     },
                     data: tutorialData3D.map(d => ({ valor: d.valor })),
                     controls: [
@@ -1725,6 +1785,7 @@
 
                         showTutorialScreen();
                     } else {
+                        if (target === 'thanks-screen') sendExperimentDataToServer();
                         showScreen(target);
                     }
                 });
@@ -1861,6 +1922,9 @@
 
             updateTaskInstructionScreen();
             updateBlockPlaceholders();
+
+            connectExperimentWebSocket();
+
             showScreen('welcome-screen');
         });
     </script>
