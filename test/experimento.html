@@ -876,7 +876,22 @@
                     name: 'Quebra de Escala Clássica',
                     previewImage: 'assets/nasa/quebra-escala-classica.jpeg',
                     ClassRef: BarChart,
-                    settings: { size_type: 'fit', drawStrategy: 'scale-break', breakPoint: 0.3, scaleBreakHiddenRatio: 0.55 },
+                    settings: {
+                        size_type: 'fit',
+                        drawStrategy: 'scale-break',
+                        breakPoint: 0.3,
+                        scaleBreakHiddenRatio: 0.55,
+                        showAxisLabel: false,
+                        showCategoryLabels: true,
+                        categoryLabels: tutorialData3D.map(d => d.label),
+                        // categoryLabelRotate: -35,
+                        categoryLabelOffset: 25,
+                        categoryLabelFontSize: 9,
+                        paddingBottom: 35,
+                        paddingLeft: 65,
+                        yAxisFontSize: 20,
+                        categoryLabelFontSize:20
+                    },
                     data: tutorialData3D.map(d => ({ valor: d.valor })),
                     controls: [
                         {
@@ -1540,10 +1555,20 @@
                     const w = rect.width > 0 ? Math.round(rect.width) : 900;
                     const h = rect.height > 0 ? Math.round(rect.height) : 520;
 
-                    currentBlockChart = new task.visualization.ClassRef(blockChartArea, {
+                    const chartSettings = {
                         ...task.visualization.settings,
                         width: w,
                         height: h
+                    };
+
+                    if (task.visualization.id === 'bar') {
+                        chartSettings.categoryLabels = Array.isArray(task.dataset?.labels)
+                            ? task.dataset.labels
+                            : [];
+                    }
+
+                    currentBlockChart = new task.visualization.ClassRef(blockChartArea, {
+                        ...chartSettings
                     });
                     currentBlockChart.data(data);
 

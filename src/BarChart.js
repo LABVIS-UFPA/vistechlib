@@ -44,6 +44,7 @@ class BarChart extends Visualization {
         this.settings.paddingBottom = 10;
         this.settings.paddingLeft = 55;
         this.settings.paddingRight = 10;
+        this.settings.yAxisFontSize = 10;
         this.settings.negativeMode = "disabled";
         this.settings.startZero = true;
         this.settings.drawStrategy = 'default';// "default" "scale-break", "perspective", "perspective escalonada", "scale break perspective"
@@ -57,6 +58,52 @@ class BarChart extends Visualization {
         this.settings.z = 0.28; //"parseFloat(document.getElementById('inputz').value) ||"
         this.settings.cols = {};
         this.settings.gap;
+        this.settings.labelKey = "label";
+        this.settings.categoryLabels = null;
+        this.settings.showAxisLabel = true;
+        this.settings.showCategoryLabels = false;
+        this.settings.categoryLabelOffset = 12;
+        this.settings.categoryLabelFontSize = 10;
+        this.settings.categoryLabelRotate = 0;
+        this.settings.categoryLabelColor = "#111";
+    }
+
+    _getCategoryLabel(d, i) {
+        if (Array.isArray(this.settings.categoryLabels) && this.settings.categoryLabels[i] != null) {
+            return this.settings.categoryLabels[i];
+        }
+
+        const key = this.settings.labelKey || "label";
+        if (d && d[key] != null) {
+            return d[key];
+        }
+
+        return String(i + 1);
+    }
+
+    _drawCategoryLabels(group) {
+        if (!this.settings.showCategoryLabels) {
+            group.selectAll("text.categoryLabel").remove();
+            return;
+        }
+
+        const rotation = Number(this.settings.categoryLabelRotate || 0);
+        const y = this.boxHeight + Number(this.settings.categoryLabelOffset || 12);
+
+        group.selectAll("text.categoryLabel")
+            .data(this.d)
+            .join("text")
+            .attr("class", "categoryLabel")
+            .attr("x", (d, i) => this.x(i) + this.x.bandwidth() / 2)
+            .attr("y", y)
+            .attr("text-anchor", rotation === 0 ? "middle" : "end")
+            .attr("transform", (d, i) => {
+                const x = this.x(i) + this.x.bandwidth() / 2;
+                return `rotate(${rotation},${x},${y})`;
+            })
+            .style("font-size", `${this.settings.categoryLabelFontSize || 10}px`)
+            .style("fill", this.settings.categoryLabelColor || "#111")
+            .text((d, i) => this._getCategoryLabel(d, i));
     }
 
     updateScaleBreakPosition(ratio) {
@@ -211,12 +258,21 @@ class BarChart extends Visualization {
         group_join.selectAll(".rule.bottom")
             .attr("x1", "0").attr("y1", barchart.boxHeight)
             .attr("x2", barchart.innerWidth).attr("y2", barchart.boxHeight);
+        group_join.selectAll("text.axisLabel")
+            .style("display", this.settings.showAxisLabel ? null : "none")
+            .style("font-size", `${this.settings.yAxisFontSize || 10}px`)
+            .text(d => d);
         // group_join.selectAll(".rule.rigth")
         //     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
         //     .attr("x2", barchart.innerWidth).attr("y2", 0);
 
 
         this.drawStrategy.draw(barchart); // chama a estrategia
+
+        this.foreground
+            .selectAll("g.y text")
+            .style("font-size", `${this.settings.yAxisFontSize || 10}px`);
+
         // let t1 = performance.now();
         // console.log("TIme: "+(t1-t0));
 
@@ -354,6 +410,8 @@ BarChart.strategies = {
                     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
                     .attr("x2", barchart.innerWidth).attr("y2", 0);
 
+                barchart._drawCategoryLabels(g);
+
 
             });
 
@@ -415,6 +473,8 @@ BarChart.strategies = {
                 g.selectAll(".rule.rigth")
                     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
                     .attr("x2", barchart.innerWidth).attr("y2", 0);
+
+                barchart._drawCategoryLabels(g);
             });
         },
         data: (barchart) => {
@@ -582,9 +642,11 @@ BarChart.strategies = {
 
 
 
-                g.selectAll(".rule.rigth")
-                    .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
-                    .attr("x2", barchart.innerWidth).attr("y2", 0);
+                // g.selectAll(".rule.rigth")
+                //     .attr("x1", barchart.innerWidth).attr("y1", barchart.boxHeight)
+                //     .attr("x2", barchart.innerWidth).attr("y2", 0);
+
+                barchart._drawCategoryLabels(g);
 
 
             });
