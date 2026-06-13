@@ -325,8 +325,8 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .tlx-label-trigger:hover + .tlx-tooltip,
-        .tlx-label-trigger:focus + .tlx-tooltip,
+        .tlx-label-trigger:hover+.tlx-tooltip,
+        .tlx-label-trigger:focus+.tlx-tooltip,
         .tlx-tooltip.is-open {
             display: block;
         }
@@ -1273,31 +1273,34 @@
 
             function collectBlockNasaTlx() {
                 const taskKey = getTaskKeyForBlock(currentBlock);
+
                 const existingIndex = experimentData.blockNasaTlx.findIndex(
                     item => item.blockNumber === currentBlock
                 );
-                const evaluations = currentBlockPlan.map((task, visualizationIndex) => ({
-                    visualizationId: task.visualization.id,
-                    visualizationName: task.visualization.name,
-                    ratings: Object.fromEntries(
-                        TLX_DIMENSIONS.map((dimension, dimensionIndex) => [
-                            dimension.field,
-                            tlxDrafts.get(
-                                getTlxResponseKey(
-                                    currentBlock,
-                                    dimensionIndex,
-                                    visualizationIndex
-                                )
-                            )
-                        ])
-                    )
-                }));
+
+                const visualizations = currentBlockPlan.map((task, visualizationIndex) => {
+                    const result = {
+                        visualizationId: task.visualization.id
+                    };
+
+                    TLX_DIMENSIONS.forEach((dimension, dimensionIndex) => {
+                        const key = getTlxResponseKey(
+                            currentBlock,
+                            dimensionIndex,
+                            visualizationIndex
+                        );
+
+                        result[dimension.field] =
+                            tlxDrafts.get(key) ?? null;
+                    });
+
+                    return result;
+                });
 
                 const record = {
                     blockNumber: currentBlock,
                     taskKey,
-                    taskDescription: TASK_DESCRIPTION[taskKey].title,
-                    evaluations,
+                    visualizations,
                     recordedAt: new Date().toISOString()
                 };
 
@@ -1594,16 +1597,8 @@
                     taskIndexInBlock: currentBlockTaskIndex + 1,
 
                     taskKey: task.taskKey,
-                    taskDescription: TASK_DESCRIPTION[task.taskKey].title,
-
                     visualizationId: task.visualization.id,
-                    visualizationName: task.visualization.name,
-
                     datasetId: task.dataset.id,
-                    datasetName: task.dataset.name,
-                    datasetDescription: task.dataset.description,
-
-                    question: task.dataset.tasks[task.taskKey],
 
                     startedAt: new Date().toISOString(),
                     endedAt: null,
@@ -1717,10 +1712,7 @@
                         tutorialIndex = 0;
                         tutorialOrder = shuffle(VISUALIZATIONS);
 
-                        experimentData.tutorialOrder = tutorialOrder.map(v => ({
-                            id: v.id,
-                            name: v.name
-                        }));
+                        experimentData.tutorialOrder = tutorialOrder.map(v => v.id);
 
                         experimentData.demographics = {
                             ageRange: document.getElementById('age-range').value,
