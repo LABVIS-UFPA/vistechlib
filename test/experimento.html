@@ -460,7 +460,8 @@
             <h1>Estudo sobre Técnicas de Visualização de Dados</h1>
             <p>Esta é a tela de boas-vindas (placeholder). Aqui ficará a introdução completa do experimento.</p>
             <div class="placeholder-box">Placeholder: resumo do estudo + instruções iniciais.</div>
-            <div id="ws-status-banner" style="margin-top:1rem;padding:0.75rem 1rem;border-radius:4px;font-weight:600;text-align:center;background:#fff3cd;color:#856404;border:1px solid #ffc107;">
+            <div id="ws-status-banner"
+                style="margin-top:1rem;padding:0.75rem 1rem;border-radius:4px;font-weight:600;text-align:center;background:#fff3cd;color:#856404;border:1px solid #ffc107;">
                 ⏳ Aguardando conexão com o servidor…
             </div>
             <div class="actions">
@@ -1955,9 +1956,51 @@
                 showScreen('block-answer-screen');
             });
 
+            function normalizeNumericAnswer(value) {
+                if (value === null || value === undefined) return null;
+
+                const normalized = String(value)
+                    .trim()
+                    .replace(/\./g, '')
+                    .replace(',', '.');
+
+                const number = Number(normalized);
+
+                return Number.isFinite(number) ? number : null;
+            }
+
+            function checkAnswer(userAnswer, correctAnswer, taskKey) {
+                const userValue = normalizeNumericAnswer(userAnswer);
+                const correctValue = Number(correctAnswer);
+
+                if (userValue === null || !Number.isFinite(correctValue)) {
+                    return false;
+                }
+
+                const toleranceByTask = {
+                    T1: 0.05,
+                    T2: 0.05,
+                    T3: 0.10,
+                    T4: 0.10,
+                    T5: 0.10
+                };
+
+                const tolerance = toleranceByTask[taskKey] ?? 0.05;
+                const difference = Math.abs(userValue - correctValue);
+                const allowedDifference = Math.abs(correctValue) * tolerance;
+
+                return difference <= allowedDifference;
+            }
+
             blockAnswerNextButton.addEventListener('click', () => {
                 if (currentTaskRecord) {
-                    currentTaskRecord.answer = blockAnswerInput.value;
+                    const task = currentBlockPlan[currentBlockTaskIndex];
+                    const userAnswer = blockAnswerInput.value;
+                    const correctAnswer = task.dataset.correct_answer[task.taskKey];
+
+                    currentTaskRecord.answer = userAnswer;
+                    currentTaskRecord.correctAnswer = correctAnswer;
+                    currentTaskRecord.isCorrect = checkAnswer(userAnswer, correctAnswer, task.taskKey);
                     currentTaskRecord.confidence = blockConfidence.value;
                     currentTaskRecord.responseRegisteredAt = new Date().toISOString();
 
