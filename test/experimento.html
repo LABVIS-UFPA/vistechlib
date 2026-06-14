@@ -1970,7 +1970,10 @@
             }
 
             function checkAnswer(userAnswer, correctAnswer, taskKey) {
-                const userValue = normalizeNumericAnswer(userAnswer);
+                const userValue = typeof userAnswer === 'number'
+                    ? userAnswer
+                    : normalizeNumericAnswer(userAnswer);
+
                 const correctValue = Number(correctAnswer);
 
                 if (userValue === null || !Number.isFinite(correctValue)) {
@@ -1993,14 +1996,26 @@
             }
 
             blockAnswerNextButton.addEventListener('click', () => {
+                {
+                    alert('Informe apenas uma resposta numérica. Exemplo: 1234, 1234.56 ou 1234,56');
+                    blockAnswerInput.focus();
+                    return;
+                }
+
+                if (answerNumber < 0) {
+                    alert('A resposta não pode ser negativa.');
+                    blockAnswerInput.focus();
+                    return;
+                }
+
                 if (currentTaskRecord) {
                     const task = currentBlockPlan[currentBlockTaskIndex];
-                    const userAnswer = blockAnswerInput.value;
                     const correctAnswer = task.dataset.correct_answer[task.taskKey];
 
-                    currentTaskRecord.answer = userAnswer;
+                    currentTaskRecord.answer = answerRaw;
+                    currentTaskRecord.answerNumber = answerNumber;
                     currentTaskRecord.correctAnswer = correctAnswer;
-                    currentTaskRecord.isCorrect = checkAnswer(userAnswer, correctAnswer, task.taskKey);
+                    currentTaskRecord.isCorrect = checkAnswer(answerNumber, correctAnswer, task.taskKey);
                     currentTaskRecord.confidence = blockConfidence.value;
                     currentTaskRecord.responseRegisteredAt = new Date().toISOString();
 
