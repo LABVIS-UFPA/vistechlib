@@ -677,7 +677,8 @@
             <h2 id="answer-title">Bloco 1 de 5 - Registro de Resposta</h2>
             <div class="field">
                 <label for="block-answer">Resposta do participante</label>
-                <input id="block-answer" type="text" placeholder="Placeholder" />
+                <input id="block-answer" type="text" inputmode="decimal" autocomplete="off"
+                    placeholder="Ex.: 5.000,50" />
             </div>
             <div class="field">
                 <label for="block-confidence">Confiança na resposta</label>
@@ -1957,16 +1958,32 @@
             });
 
             function normalizeNumericAnswer(value) {
-                if (value === null || value === undefined) return null;
+                if (!value) return null;
 
-                const normalized = String(value)
-                    .trim()
+                const normalized = value
                     .replace(/\./g, '')
                     .replace(',', '.');
 
                 const number = Number(normalized);
 
-                return Number.isFinite(number) ? number : null;
+                return Number.isFinite(number)
+                    ? number
+                    : null;
+            }
+
+            function formatBrazilianDecimal(value) {
+                const digits = value.replace(/\D/g, '');
+
+                if (!digits) {
+                    return '';
+                }
+
+                const number = Number(digits) / 100;
+
+                return number.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
             }
 
             function checkAnswer(userAnswer, correctAnswer, taskKey) {
@@ -1995,9 +2012,23 @@
                 return difference <= allowedDifference;
             }
 
+            blockAnswerInput.addEventListener('input', () => {
+                blockAnswerInput.value =
+                    formatBrazilianDecimal(blockAnswerInput.value);
+            });
+
             blockAnswerNextButton.addEventListener('click', () => {
-                {
-                    alert('Informe apenas uma resposta numérica. Exemplo: 1234, 1234.56 ou 1234,56');
+                const answerRaw = blockAnswerInput.value.trim();
+                const answerNumber = normalizeNumericAnswer(answerRaw);
+
+                if (!answerRaw) {
+                    alert('Informe uma resposta antes de continuar.');
+                    blockAnswerInput.focus();
+                    return;
+                }
+
+                if (answerNumber === null) {
+                    alert('Informe apenas uma resposta numérica. Exemplo: 1234, 1234.56, 1234,56 ou 5.000,00');
                     blockAnswerInput.focus();
                     return;
                 }
