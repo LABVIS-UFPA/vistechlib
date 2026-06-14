@@ -1,6 +1,7 @@
 import http from "http";
 import fs from "fs";
 import path from "path";
+import { exec } from "child_process";
 import { WebSocketServer } from "ws";
 
 const PORT = 3000;
@@ -121,6 +122,18 @@ wss.on("connection", (ws) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  const url = `http://localhost:${PORT}`;
+  console.log(`Servidor rodando em ${url}`);
   console.log(`WebSocket rodando em ws://localhost:${PORT}`);
+
+  const openCmd =
+    process.platform === "win32"
+      ? `start "" "${url}"`
+      : process.platform === "darwin"
+        ? `open "${url}"`
+        : `xdg-open "${url}"`;
+
+  exec(openCmd, (err) => {
+    if (err) console.warn("Não foi possível abrir o navegador:", err.message);
+  });
 });

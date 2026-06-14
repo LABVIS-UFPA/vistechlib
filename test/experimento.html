@@ -460,8 +460,11 @@
             <h1>Estudo sobre Técnicas de Visualização de Dados</h1>
             <p>Esta é a tela de boas-vindas (placeholder). Aqui ficará a introdução completa do experimento.</p>
             <div class="placeholder-box">Placeholder: resumo do estudo + instruções iniciais.</div>
+            <div id="ws-status-banner" style="margin-top:1rem;padding:0.75rem 1rem;border-radius:4px;font-weight:600;text-align:center;background:#fff3cd;color:#856404;border:1px solid #ffc107;">
+                ⏳ Aguardando conexão com o servidor…
+            </div>
             <div class="actions">
-                <button data-next="tcle-screen">Next</button>
+                <button id="welcome-next-btn" data-next="tcle-screen" disabled>Next</button>
             </div>
         </div>
 
@@ -856,14 +859,17 @@
 
                 experimentSocket.addEventListener('open', () => {
                     console.log('WebSocket conectado ao servidor do experimento');
+                    setWsStatus('connected');
                 });
 
                 experimentSocket.addEventListener('close', () => {
                     console.warn('WebSocket desconectado');
+                    setWsStatus('disconnected');
                 });
 
                 experimentSocket.addEventListener('error', (err) => {
                     console.error('Erro no WebSocket:', err);
+                    setWsStatus('error');
                 });
 
                 experimentSocket.addEventListener('message', (event) => {
@@ -877,6 +883,37 @@
                         console.error('Erro ao salvar experimento:', message.message);
                     }
                 });
+            }
+
+            const wsBanner = document.getElementById('ws-status-banner');
+            const welcomeNextBtn = document.getElementById('welcome-next-btn');
+
+            function setWsStatus(status) {
+                if (status === 'connected') {
+                    wsBanner.style.background = '#d1e7dd';
+                    wsBanner.style.color = '#0f5132';
+                    wsBanner.style.borderColor = '#badbcc';
+                    wsBanner.textContent = '✅ Conectado ao servidor. Você pode prosseguir.';
+                    welcomeNextBtn.disabled = false;
+                } else if (status === 'disconnected') {
+                    wsBanner.style.background = '#f8d7da';
+                    wsBanner.style.color = '#842029';
+                    wsBanner.style.borderColor = '#f5c2c7';
+                    wsBanner.textContent = '❌ Conexão com o servidor perdida. Recarregue a página.';
+                    welcomeNextBtn.disabled = true;
+                } else if (status === 'error') {
+                    wsBanner.style.background = '#f8d7da';
+                    wsBanner.style.color = '#842029';
+                    wsBanner.style.borderColor = '#f5c2c7';
+                    wsBanner.textContent = '❌ Erro na conexão com o servidor. Verifique se o servidor está rodando.';
+                    welcomeNextBtn.disabled = true;
+                } else {
+                    wsBanner.style.background = '#fff3cd';
+                    wsBanner.style.color = '#856404';
+                    wsBanner.style.borderColor = '#ffc107';
+                    wsBanner.textContent = '⏳ Aguardando conexão com o servidor…';
+                    welcomeNextBtn.disabled = true;
+                }
             }
 
             function sendExperimentDataToServer() {
