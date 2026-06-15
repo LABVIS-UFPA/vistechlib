@@ -4,6 +4,62 @@ import { WebSocketServer } from "ws";
 
 const PORT = 3000;
 const RESULTS_FILE = path.join(process.cwd(), "results.json");
+const INTERACTION_LOG_FILE = path.join(
+  process.cwd(),
+  "interaction-log.csv"
+);
+
+function ensureInteractionCsvHeader() {
+  if (fs.existsSync(INTERACTION_LOG_FILE)) return;
+
+  const header =
+    "participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,timestamp\n";
+
+  fs.writeFileSync(INTERACTION_LOG_FILE, header, "utf8");
+}
+
+function saveInteractionLog(interactionLog = []) {
+  if (!Array.isArray(interactionLog) || interactionLog.length === 0) {
+    return;
+  }
+
+  ensureInteractionCsvHeader();
+
+  const rows = interactionLog.map(interaction => {
+    const eventTarget =
+      interaction.details?.controlKey ??
+      interaction.details?.target ??
+      "";
+
+    const eventValue =
+      interaction.details?.value ??
+      interaction.details?.dataIndex ??
+      (
+        interaction.details?.innerX !== undefined && interaction.details?.innerY !== undefined
+          ? `${interaction.details.innerX};${interaction.details.innerY}`
+          : ""
+      );
+
+    return [
+      interaction.participantId,
+      interaction.blockNumber,
+      interaction.taskIndexInBlock,
+      interaction.taskKey,
+      interaction.visualizationId,
+      interaction.datasetId,
+      interaction.eventType,
+      eventTarget,
+      eventValue,
+      interaction.timestamp
+    ].join(",");
+  });
+
+  fs.appendFileSync(
+    INTERACTION_LOG_FILE,
+    rows.join("\n") + "\n",
+    "utf8"
+  );
+}
 
 function readResults() {
   if (!fs.existsSync(RESULTS_FILE)) return [];
@@ -39,6 +95,8 @@ wss.on("connection", (ws) => {
 
       if (payload.type === "SAVE_EXPERIMENT") {
         saveExperiment(payload.experimentData);
+
+        saveInteractionLog(payload.interactionLog);
 
         ws.send(JSON.stringify({
           type: "SAVE_EXPERIMENT_OK",
