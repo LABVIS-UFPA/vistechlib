@@ -854,8 +854,7 @@
             let experimentAlreadySent = false;
 
             function connectExperimentWebSocket() {
-                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                const wsUrl = `${protocol}//${window.location.host}`;
+                const wsUrl = 'ws://localhost:3000';
 
                 experimentSocket = new WebSocket(wsUrl);
 
