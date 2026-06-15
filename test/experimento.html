@@ -198,15 +198,45 @@
             color: #52606d;
         }
 
-        .final-ranking-list {
-            list-style: none;
-            margin: 1rem 0 0;
-            padding: 0;
+        .final-ranking-board {
+            margin-top: 1rem;
             display: grid;
-            gap: 0.85rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: start;
         }
 
-        .final-ranking-item {
+        .final-ranking-column {
+            border: 1px solid #d5dfeb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0.85rem;
+        }
+
+        .final-ranking-column h3 {
+            margin: 0 0 0.7rem;
+            font-size: 1rem;
+            text-align: left;
+            color: var(--text-color);
+        }
+
+        .final-ranking-options,
+        .final-ranking-slots {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 0.7rem;
+            min-height: 120px;
+        }
+
+        .final-ranking-options.is-drop-target {
+            outline: 2px dashed var(--secondary-color);
+            outline-offset: 3px;
+            border-radius: 8px;
+        }
+
+        .final-ranking-card {
             display: grid;
             grid-template-columns: auto 110px minmax(0, 1fr) auto;
             gap: 1rem;
@@ -219,18 +249,35 @@
             box-shadow: 0 3px 8px rgba(29, 53, 87, 0.08);
         }
 
-        .final-ranking-item:active {
+        .final-ranking-card:active {
             cursor: grabbing;
         }
 
-        .final-ranking-item.dragging {
-            opacity: 0.55;
-            border-style: dashed;
+        .final-ranking-slot {
+            min-height: 96px;
+            border: 2px dashed #9fb3c8;
+            border-radius: 10px;
+            background: #f8fbff;
+            padding: 0.55rem;
+            display: grid;
+            gap: 0.55rem;
+            align-content: start;
         }
 
-        .final-ranking-item.is-drop-target {
+        .final-ranking-slot.is-drop-target {
             outline: 2px solid var(--secondary-color);
             outline-offset: 2px;
+        }
+
+        .final-ranking-slot-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #52606d;
+        }
+
+        .final-ranking-slot-empty {
+            font-size: 0.88rem;
+            color: #7a8a99;
         }
 
         .final-ranking-position {
@@ -277,6 +324,12 @@
             font-size: 1.4rem;
             font-weight: 700;
             user-select: none;
+        }
+
+        @media (max-width: 900px) {
+            .final-ranking-board {
+                grid-template-columns: 1fr;
+            }
         }
 
         .final-comments-note {
@@ -781,7 +834,6 @@
                     <option>Placeholder</option>
                 </select>
             </div>
-            <div class="placeholder-box">Placeholder: aqui será salvo tempo + resposta + confiança.</div>
             <div class="actions">
                 <button data-prev="block-task-screen">Back</button>
                 <button id="block-answer-next-button">Next</button>
@@ -804,7 +856,16 @@
         <div id="final-ranking-screen" class="screen hidden">
             <h2>Fase 3 - Ranking de Preferência</h2>
             <p class="final-ranking-instructions">Arraste as quatro visualizações para ordenar da mais preferida para a menos preferida.</p>
-            <ol id="final-ranking-list" class="final-ranking-list" aria-label="Ranking final das visualizações"></ol>
+            <div class="final-ranking-board">
+                <section class="final-ranking-column" aria-label="Visualizações disponíveis">
+                    <h3>Visualizações</h3>
+                    <ul id="final-ranking-options" class="final-ranking-options"></ul>
+                </section>
+                <section class="final-ranking-column" aria-label="Posições do ranking">
+                    <h3>Posições do ranking</h3>
+                    <ol id="final-ranking-slots" class="final-ranking-slots"></ol>
+                </section>
+            </div>
             <div class="actions">
                 <button data-prev="nasa-tlx-screen">Back</button>
                 <button data-next="final-comments-screen">Next</button>
@@ -856,6 +917,7 @@
             const tcleConfirmation = document.getElementById('tcle-confirmation');
             const acceptTcleButton = document.getElementById('accept-tcle-button');
             const TCLE_VERSION = "2026-06-11-digital-2";
+            const devMode = true;
 
             const blockTitle = document.getElementById('block-title');
             const blockContextTitle = document.getElementById('block-context-title');
@@ -865,7 +927,8 @@
             const blockQuestionContext = document.getElementById('block-question-context');
             const blockControls = document.getElementById('block-controls');
             const blockChartArea = document.getElementById('block-chart-area');
-            const finalRankingList = document.getElementById('final-ranking-list');
+            const finalRankingOptions = document.getElementById('final-ranking-options');
+            const finalRankingSlots = document.getElementById('final-ranking-slots');
             const rankingWhyInput = document.getElementById('ranking-why');
             const otherCommentsInput = document.getElementById('other-comments');
 
@@ -994,6 +1057,24 @@
             const wsBanner = document.getElementById('ws-status-banner');
             const welcomeNextBtn = document.getElementById('welcome-next-btn');
 
+            function applyDevModeBehavior() {
+                const backButtons = document.querySelectorAll(
+                    'button[data-prev], #tutorial-back-btn, #block-context-back-button, #back-from-tlx-button'
+                );
+
+                backButtons.forEach((button) => {
+                    button.classList.toggle('hidden', !devMode);
+                });
+
+                otherCommentsInput.required = !devMode;
+
+                if (devMode) {
+                    welcomeNextBtn.disabled = false;
+                    acceptTcleButton.disabled = false;
+                    completeTlxButton.disabled = false;
+                }
+            }
+
             function setWsStatus(status) {
                 if (status === 'connected') {
                     wsBanner.style.background = '#d1e7dd';
@@ -1019,6 +1100,10 @@
                     wsBanner.style.borderColor = '#ffc107';
                     wsBanner.textContent = '⏳ Aguardando conexão com o servidor…';
                     welcomeNextBtn.disabled = true;
+                }
+
+                if (devMode) {
+                    welcomeNextBtn.disabled = false;
                 }
             }
 
@@ -1210,62 +1295,127 @@
                 }
             ];
 
-            const finalRankingOrder = VISUALIZATIONS.map(visualization => visualization.id);
             const finalRankingById = new Map(VISUALIZATIONS.map(visualization => [visualization.id, visualization]));
+            const finalRankingSlotsState = Array(VISUALIZATIONS.length).fill(null);
             let draggedFinalRankingId = null;
+            let draggedFromSlotIndex = null;
 
             function persistFinalRankingOrder() {
-                experimentData.finalRanking.order = [...finalRankingOrder];
+                experimentData.finalRanking.order = finalRankingSlotsState.filter(Boolean);
+            }
+
+            function buildFinalRankingCard(visualizationId, slotIndex = null) {
+                const visualization = finalRankingById.get(visualizationId);
+                if (!visualization) return null;
+
+                const card = document.createElement('div');
+                card.className = 'final-ranking-card';
+                card.draggable = true;
+                card.dataset.visualizationId = visualization.id;
+
+                if (slotIndex !== null) {
+                    card.dataset.slotIndex = String(slotIndex);
+                }
+
+                card.innerHTML = [
+                    '<span class="final-ranking-position">' + (slotIndex === null ? '•' : (slotIndex + 1)) + '</span>',
+                    '<img class="final-ranking-preview" src="' + visualization.previewImage + '" alt="Prévia da visualização ' + visualization.name + '">',
+                    '<div class="final-ranking-copy">',
+                    '<strong>' + visualization.name + '</strong>',
+                    '<span>' + (slotIndex === null ? 'Arraste para uma posição à direita' : 'Visualização atribuída a esta posição') + '</span>',
+                    '</div>',
+                    '<span class="final-ranking-handle" aria-hidden="true">⋮⋮</span>'
+                ].join('');
+
+                return card;
+            }
+
+            function isFinalRankingComplete() {
+                return finalRankingSlotsState.every(Boolean);
             }
 
             function renderFinalRankingScreen() {
-                if (!finalRankingList) return;
+                if (!finalRankingOptions || !finalRankingSlots) return;
 
-                finalRankingList.innerHTML = '';
+                finalRankingOptions.innerHTML = '';
+                finalRankingSlots.innerHTML = '';
 
-                finalRankingOrder.forEach((visualizationId, index) => {
-                    const visualization = finalRankingById.get(visualizationId);
-                    if (!visualization) return;
+                const assignedIds = new Set(finalRankingSlotsState.filter(Boolean));
 
-                    const item = document.createElement('li');
-                    item.className = 'final-ranking-item';
-                    item.draggable = true;
-                    item.dataset.visualizationId = visualization.id;
-                    item.setAttribute('aria-label', (index + 1) + 'º lugar: ' + visualization.name);
-                    item.innerHTML = [
-                        '<span class="final-ranking-position">' + (index + 1) + '</span>',
-                        '<img class="final-ranking-preview" src="' + visualization.previewImage + '" alt="Prévia da visualização ' + visualization.name + '">',
-                        '<div class="final-ranking-copy">',
-                        '<strong>' + visualization.name + '</strong>',
-                        '<span>Solte aqui para alterar a ordem</span>',
-                        '</div>',
-                        '<span class="final-ranking-handle" aria-hidden="true">⋮⋮</span>'
-                    ].join('');
+                VISUALIZATIONS.forEach((visualization) => {
+                    if (assignedIds.has(visualization.id)) return;
 
-                    finalRankingList.appendChild(item);
+                    const optionItem = document.createElement('li');
+                    optionItem.dataset.visualizationId = visualization.id;
+                    optionItem.appendChild(buildFinalRankingCard(visualization.id));
+                    finalRankingOptions.appendChild(optionItem);
                 });
+
+                for (let index = 0; index < finalRankingSlotsState.length; index += 1) {
+                    const slotItem = document.createElement('li');
+                    slotItem.className = 'final-ranking-slot';
+                    slotItem.dataset.slotIndex = String(index);
+
+                    const slotLabel = document.createElement('div');
+                    slotLabel.className = 'final-ranking-slot-label';
+                    slotLabel.textContent = (index + 1) + 'º lugar';
+                    slotItem.appendChild(slotLabel);
+
+                    const assignedId = finalRankingSlotsState[index];
+                    if (assignedId) {
+                        const card = buildFinalRankingCard(assignedId, index);
+                        if (card) slotItem.appendChild(card);
+                    } else {
+                        const emptyState = document.createElement('div');
+                        emptyState.className = 'final-ranking-slot-empty';
+                        emptyState.textContent = 'Solte uma visualização aqui';
+                        slotItem.appendChild(emptyState);
+                    }
+
+                    finalRankingSlots.appendChild(slotItem);
+                }
 
                 persistFinalRankingOrder();
             }
 
-            function moveFinalRankingItem(activeId, targetId) {
-                if (!activeId || !targetId || activeId === targetId) return;
+            function clearFinalRankingDragState() {
+                draggedFinalRankingId = null;
+                draggedFromSlotIndex = null;
 
-                const nextOrder = finalRankingOrder.filter(visualizationId => visualizationId !== activeId);
-                const targetIndex = nextOrder.indexOf(targetId);
-                nextOrder.splice(targetIndex, 0, activeId);
+                if (finalRankingOptions) {
+                    finalRankingOptions.classList.remove('is-drop-target');
+                }
 
-                finalRankingOrder.splice(0, finalRankingOrder.length, ...nextOrder);
-                renderFinalRankingScreen();
+                if (finalRankingSlots) {
+                    finalRankingSlots.querySelectorAll('.is-drop-target').forEach((slot) => {
+                        slot.classList.remove('is-drop-target');
+                    });
+                }
+            }
+
+            function assignDraggedVisualizationToSlot(slotIndex) {
+                if (!draggedFinalRankingId || !Number.isInteger(slotIndex)) return;
+
+                const currentIndex = finalRankingSlotsState.indexOf(draggedFinalRankingId);
+                if (currentIndex >= 0) {
+                    finalRankingSlotsState[currentIndex] = null;
+                }
+
+                if (draggedFromSlotIndex !== null && draggedFromSlotIndex >= 0) {
+                    const targetId = finalRankingSlotsState[slotIndex];
+                    finalRankingSlotsState[draggedFromSlotIndex] = targetId ?? null;
+                }
+
+                finalRankingSlotsState[slotIndex] = draggedFinalRankingId;
             }
 
             function collectFinalRanking() {
-                experimentData.finalRanking.order = [...finalRankingOrder];
+                experimentData.finalRanking.order = finalRankingSlotsState.filter(Boolean);
                 experimentData.finalRanking.recordedAt = new Date().toISOString();
             }
 
             function collectFinalComments() {
-                if (!otherCommentsInput.reportValidity()) {
+                if (!devMode && !otherCommentsInput.reportValidity()) {
                     otherCommentsInput.focus();
                     return false;
                 }
@@ -1647,6 +1797,11 @@
             }
 
             function updateTlxCompletionState() {
+                if (devMode) {
+                    completeTlxButton.disabled = false;
+                    return;
+                }
+
                 const tlxRanges = Array.from(tlxForm.querySelectorAll('.tlx-range'));
                 const hasAllRanges =
                     tlxRanges.length === TLX_DIMENSIONS.length * TASKS_PER_BLOCK;
@@ -2044,6 +2199,11 @@
 
                         showTutorialScreen();
                     } else if (target === 'final-comments-screen') {
+                        if (!devMode && !isFinalRankingComplete()) {
+                            alert('Preencha as 4 posições do ranking antes de continuar.');
+                            return;
+                        }
+
                         collectFinalRanking();
                         showScreen(target);
                     } else if (target === 'thanks-screen') {
@@ -2078,6 +2238,11 @@
             });
 
             function updateTcleAcceptanceState() {
+                if (devMode) {
+                    acceptTcleButton.disabled = false;
+                    return;
+                }
+
                 acceptTcleButton.disabled = !(tcleReachedEnd && tcleConfirmation.checked);
             }
 
@@ -2207,19 +2372,19 @@
                 const answerRaw = blockAnswerInput.value.trim();
                 const answerNumber = normalizeNumericAnswer(answerRaw);
 
-                if (!answerRaw) {
+                if (!devMode && !answerRaw) {
                     alert('Informe uma resposta antes de continuar.');
                     blockAnswerInput.focus();
                     return;
                 }
 
-                if (answerNumber === null) {
+                if (!devMode && answerNumber === null) {
                     alert('Informe apenas uma resposta numérica. Exemplo: 1234, 1234.56, 1234,56 ou 5.000,00');
                     blockAnswerInput.focus();
                     return;
                 }
 
-                if (answerNumber < 0) {
+                if (!devMode && answerNumber < 0) {
                     alert('A resposta não pode ser negativa.');
                     blockAnswerInput.focus();
                     return;
@@ -2232,7 +2397,9 @@
                     currentTaskRecord.answer = answerRaw;
                     currentTaskRecord.answerNumber = answerNumber;
                     currentTaskRecord.correctAnswer = correctAnswer;
-                    currentTaskRecord.isCorrect = checkAnswer(answerNumber, correctAnswer, task.taskKey);
+                    currentTaskRecord.isCorrect = answerNumber === null
+                        ? null
+                        : checkAnswer(answerNumber, correctAnswer, task.taskKey);
                     currentTaskRecord.confidence = blockConfidence.value;
                     currentTaskRecord.responseRegisteredAt = new Date().toISOString();
 
@@ -2271,52 +2438,78 @@
                 }
             });
 
-            if (finalRankingList) {
-                finalRankingList.addEventListener('dragstart', (event) => {
-                    const item = event.target.closest('.final-ranking-item');
-                    if (!item) return;
+            if (finalRankingOptions && finalRankingSlots) {
+                const onFinalRankingDragStart = (event) => {
+                    const card = event.target.closest('.final-ranking-card');
+                    if (!card || !event.dataTransfer) return;
 
-                    draggedFinalRankingId = item.dataset.visualizationId;
-                    item.classList.add('dragging');
-                    event.dataTransfer.effectAllowed = 'move';
-                    event.dataTransfer.setData('text/plain', draggedFinalRankingId);
-                });
+                    draggedFinalRankingId = card.dataset.visualizationId || null;
+                    draggedFromSlotIndex = card.dataset.slotIndex !== undefined
+                        ? Number(card.dataset.slotIndex)
+                        : null;
 
-                finalRankingList.addEventListener('dragend', () => {
-                    draggedFinalRankingId = null;
-                    finalRankingList.querySelectorAll('.dragging, .is-drop-target').forEach(element => {
-                        element.classList.remove('dragging', 'is-drop-target');
-                    });
-                });
-
-                finalRankingList.addEventListener('dragover', (event) => {
-                    event.preventDefault();
-                    const targetItem = event.target.closest('.final-ranking-item');
-
-                    finalRankingList.querySelectorAll('.is-drop-target').forEach(element => {
-                        if (element !== targetItem) element.classList.remove('is-drop-target');
-                    });
-
-                    if (targetItem && targetItem.dataset.visualizationId !== draggedFinalRankingId) {
-                        targetItem.classList.add('is-drop-target');
-                    }
-                });
-
-                finalRankingList.addEventListener('drop', (event) => {
-                    event.preventDefault();
-
-                    const targetItem = event.target.closest('.final-ranking-item');
-                    if (!draggedFinalRankingId) return;
-
-                    if (!targetItem) {
-                        const nextOrder = finalRankingOrder.filter(visualizationId => visualizationId !== draggedFinalRankingId);
-                        nextOrder.push(draggedFinalRankingId);
-                        finalRankingOrder.splice(0, finalRankingOrder.length, ...nextOrder);
-                        renderFinalRankingScreen();
+                    if (!draggedFinalRankingId) {
+                        clearFinalRankingDragState();
                         return;
                     }
 
-                    moveFinalRankingItem(draggedFinalRankingId, targetItem.dataset.visualizationId);
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', draggedFinalRankingId);
+                };
+
+                finalRankingOptions.addEventListener('dragstart', onFinalRankingDragStart);
+                finalRankingSlots.addEventListener('dragstart', onFinalRankingDragStart);
+
+                finalRankingOptions.addEventListener('dragover', (event) => {
+                    if (draggedFromSlotIndex === null) return;
+                    event.preventDefault();
+                    finalRankingOptions.classList.add('is-drop-target');
+                });
+
+                finalRankingOptions.addEventListener('dragleave', () => {
+                    finalRankingOptions.classList.remove('is-drop-target');
+                });
+
+                finalRankingOptions.addEventListener('drop', (event) => {
+                    if (draggedFromSlotIndex === null) return;
+
+                    event.preventDefault();
+
+                    if (draggedFromSlotIndex >= 0) {
+                        finalRankingSlotsState[draggedFromSlotIndex] = null;
+                    }
+
+                    renderFinalRankingScreen();
+                    clearFinalRankingDragState();
+                });
+
+                finalRankingSlots.addEventListener('dragover', (event) => {
+                    const slot = event.target.closest('.final-ranking-slot');
+                    if (!slot || !draggedFinalRankingId) return;
+
+                    event.preventDefault();
+
+                    finalRankingSlots.querySelectorAll('.is-drop-target').forEach((item) => {
+                        if (item !== slot) item.classList.remove('is-drop-target');
+                    });
+
+                    slot.classList.add('is-drop-target');
+                });
+
+                finalRankingSlots.addEventListener('drop', (event) => {
+                    const slot = event.target.closest('.final-ranking-slot');
+                    if (!slot || !draggedFinalRankingId) return;
+
+                    event.preventDefault();
+
+                    const slotIndex = Number(slot.dataset.slotIndex);
+                    assignDraggedVisualizationToSlot(slotIndex);
+                    renderFinalRankingScreen();
+                    clearFinalRankingDragState();
+                });
+
+                document.addEventListener('dragend', () => {
+                    clearFinalRankingDragState();
                 });
             }
 
@@ -2326,6 +2519,7 @@
 
             updateTaskInstructionScreen();
             updateBlockPlaceholders();
+            applyDevModeBehavior();
 
             connectExperimentWebSocket();
 
