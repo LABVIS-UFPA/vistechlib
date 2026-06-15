@@ -533,6 +533,7 @@ BarChart.strategies = {
                 let miny = barchart.boxHeight * barchart.breakPoint + barchart.gapSize / 2
                 let maxh = barchart.boxHeight - miny;
                 let g = d3.select(this);
+                const meta = barchart.scaleBreakMeta[key];
                 g.selectAll("rect.lower")
                     .data(barchart.d)
                     .join(
@@ -569,6 +570,63 @@ BarChart.strategies = {
                     .attr("y", (d) => barchart.ybreak[key](d[key]))
                     .attr("height", (d) => Math.max(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), 0))
                     .style("fill", barchart.settings.color);
+
+                // Paper-tear indicator on both cut edges.
+                // Lower segment: teeth point up into the break.
+                // Upper segment (when visible): complementary teeth point down.
+                const targetNotchWidthPx = 15;
+                const bandWidth = barchart.x.bandwidth();
+                const notchCount = Math.max(2, Math.round(bandWidth / targetNotchWidthPx));
+                const notchWidth = bandWidth / notchCount;
+                const notchDepth = Math.max(4, Math.min(10, barchart.gapSize * 0.42));
+
+                const lowerPoints = d3.range(notchCount).map((idx) => {
+                    const left = idx * notchWidth;
+                    const right = left + notchWidth;
+                    const center = left + notchWidth / 2;
+                    return `${left},0 ${center},${-notchDepth} ${right},0`;
+                });
+
+                const upperPoints = d3.range(1, notchCount).map((idx) => {
+                    const center = idx * notchWidth;
+                    const left = center - notchWidth / 2;
+                    const right = center + notchWidth / 2;
+                    return `${left},0 ${center},${notchDepth} ${right},0`;
+                });
+
+                const lowerCutNotches = g.selectAll("g.scale-break-cut-lower")
+                    .data(barchart.d)
+                    .join(
+                        enter => enter.append("g").attr("class", "scale-break-cut-lower"),
+                        update => update,
+                        exit => exit.remove()
+                    )
+                    .attr("transform", (d, i) => `translate(${barchart.x(i)},${miny})`)
+                    .style("display", (d) => (meta && d[key] > meta.corte ? null : "none"));
+
+                lowerCutNotches.selectAll("polygon")
+                    .data(lowerPoints)
+                    .join("polygon")
+                    .attr("points", (points) => points)
+                    .attr("fill", barchart.settings.color)
+                    .attr("stroke", "none");
+
+                const upperCutNotches = g.selectAll("g.scale-break-cut-upper")
+                    .data(barchart.d)
+                    .join(
+                        enter => enter.append("g").attr("class", "scale-break-cut-upper"),
+                        update => update,
+                        exit => exit.remove()
+                    )
+                    .attr("transform", (d, i) => `translate(${barchart.x(i)},${barchart.boxHeightBreak})`)
+                    .style("display", (d) => (meta && d[key] > meta.cortefinal ? null : "none"));
+
+                upperCutNotches.selectAll("polygon")
+                    .data(upperPoints)
+                    .join("polygon")
+                    .attr("points", (points) => points)
+                    .attr("fill", barchart.settings.color)
+                    .attr("stroke", "none");
                 barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
 
@@ -578,7 +636,6 @@ BarChart.strategies = {
                 g.selectAll("g.Line1").remove();
 
                 // Usa a mesma ideia dos 3D: ticks globais "nice" e formatação compacta.
-                const meta = barchart.scaleBreakMeta[key];
                 const hiddenRatio = Math.max(0, Math.min(0.95, Number(barchart.settings.scaleBreakHiddenRatio ?? 0.55)));
                 const visibleRatio = Math.max(1 - hiddenRatio, 0.05);
                 const baseTickCount = Math.max(4, Math.floor(barchart.boxHeight / 60));
