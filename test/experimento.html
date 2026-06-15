@@ -491,6 +491,12 @@
             accent-color: var(--primary-color);
         }
 
+        .tlx-range::-webkit-slider-runnable-track {
+            background-color: #ddd;
+            border-radius: 4px;
+        }
+
+
         .tlx-range[data-answered="false"] {
             opacity: 0.55;
         }
@@ -919,6 +925,7 @@
 
     <script src="../node_modules/extenso/dist/extenso.js"></script>
     <script type="module">
+        import * as d3 from "d3";
         import PerspectiveScaleBreakBarChart from "../src/PerspectiveScaleBreakBarChart.js";
         import ScrollBarChart3D from "../src/ScrollBarChart3D.js";
         import WormBarChart3D from "../src/WormBarChart3D.js";
@@ -1175,6 +1182,25 @@
 
             function clamp(value, min, max) {
                 return Math.max(min, Math.min(max, value));
+            }
+
+            const tlxColorScale = d3.scaleDiverging(
+                (scaleValue) => {
+                    if (scaleValue <= 0.5) {
+                        return d3.interpolateRgb('#2ca25f', '#bdbdbd')(scaleValue * 2);
+                    }
+
+                    return d3.interpolateRgb('#bdbdbd', '#d73027')((scaleValue - 0.5) * 2);
+                }
+            ).domain([0, 50, 100]);
+
+            function updateTlxRangeColor(input, dimensionId) {
+                const currentValue = Number(input.value);
+                const scaleValue = dimensionId === 'performance-rating'
+                    ? 100 - currentValue
+                    : currentValue;
+
+                input.style.accentColor = tlxColorScale(scaleValue);
             }
 
             const VISUALIZATIONS = [
@@ -1914,6 +1940,7 @@
                         input.value = hasValue ? String(savedValue) : '50';
                         input.dataset.answered = hasValue ? 'true' : 'false';
                         input.setAttribute('aria-label', `${dimension.label}: ${task.visualization.name}`);
+                        updateTlxRangeColor(input, dimension.id);
 
                         const scaleLabels = document.createElement('div');
                         scaleLabels.className = 'tlx-scale-labels';
@@ -1922,6 +1949,7 @@
                         input.addEventListener('input', () => {
                             input.dataset.answered = 'true';
                             output.textContent = input.value;
+                            updateTlxRangeColor(input, dimension.id);
                             tlxDrafts.set(key, Number(input.value));
                             updateTlxCompletionState();
                         });
