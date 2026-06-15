@@ -191,6 +191,100 @@
             gap: 1rem;
         }
 
+        .final-ranking-instructions {
+            margin: 0.75rem 0 0;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #52606d;
+        }
+
+        .final-ranking-list {
+            list-style: none;
+            margin: 1rem 0 0;
+            padding: 0;
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .final-ranking-item {
+            display: grid;
+            grid-template-columns: auto 110px minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.9rem;
+            border: 1px solid #c7d2dc;
+            border-radius: 10px;
+            background: #fff;
+            cursor: grab;
+            box-shadow: 0 3px 8px rgba(29, 53, 87, 0.08);
+        }
+
+        .final-ranking-item:active {
+            cursor: grabbing;
+        }
+
+        .final-ranking-item.dragging {
+            opacity: 0.55;
+            border-style: dashed;
+        }
+
+        .final-ranking-item.is-drop-target {
+            outline: 2px solid var(--secondary-color);
+            outline-offset: 2px;
+        }
+
+        .final-ranking-position {
+            width: 2.25rem;
+            height: 2.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            color: #fff;
+            background: var(--primary-color);
+            font-weight: 700;
+            flex: 0 0 auto;
+        }
+
+        .final-ranking-preview {
+            width: 110px;
+            height: 74px;
+            object-fit: contain;
+            background: #f8fafc;
+            border: 1px solid #dbe4ee;
+            border-radius: 8px;
+        }
+
+        .final-ranking-copy {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .final-ranking-copy strong {
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+
+        .final-ranking-copy span {
+            font-size: 0.9rem;
+            color: #52606d;
+        }
+
+        .final-ranking-handle {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        .final-comments-note {
+            margin-top: 0.5rem;
+            font-size: 0.92rem;
+            color: #52606d;
+        }
+
         .demographic-fields {
             width: 100%;
             max-width: 620px;
@@ -605,7 +699,8 @@
                 <div class="field">
                     <label for="infovis-course">Fez disciplina de InfoVis</label>
                     <select id="infovis-course">
-                        <option>Sim</option>
+                        <option>Sim, completo</option>
+                        <option>Sim, em andamento</option>
                         <option>Não</option>
                     </select>
                 </div>
@@ -708,12 +803,8 @@
 
         <div id="final-ranking-screen" class="screen hidden">
             <h2>Fase 3 - Ranking de Preferência</h2>
-            <div class="split">
-                <div class="placeholder-box">Placeholder: 1º lugar</div>
-                <div class="placeholder-box">Placeholder: 2º lugar</div>
-                <div class="placeholder-box">Placeholder: 3º lugar</div>
-                <div class="placeholder-box">Placeholder: 4º lugar</div>
-            </div>
+            <p class="final-ranking-instructions">Arraste as quatro visualizações para ordenar da mais preferida para a menos preferida.</p>
+            <ol id="final-ranking-list" class="final-ranking-list" aria-label="Ranking final das visualizações"></ol>
             <div class="actions">
                 <button data-prev="nasa-tlx-screen">Back</button>
                 <button data-next="final-comments-screen">Next</button>
@@ -728,7 +819,8 @@
             </div>
             <div class="field">
                 <label for="other-comments">Outras observações</label>
-                <textarea id="other-comments" placeholder="Placeholder"></textarea>
+                <textarea id="other-comments" placeholder="Placeholder" required></textarea>
+                <div class="final-comments-note">Este campo é obrigatório para concluir o teste.</div>
             </div>
             <div class="actions">
                 <button data-prev="final-ranking-screen">Back</button>
@@ -773,6 +865,9 @@
             const blockQuestionContext = document.getElementById('block-question-context');
             const blockControls = document.getElementById('block-controls');
             const blockChartArea = document.getElementById('block-chart-area');
+            const finalRankingList = document.getElementById('final-ranking-list');
+            const rankingWhyInput = document.getElementById('ranking-why');
+            const otherCommentsInput = document.getElementById('other-comments');
 
             const startBlocksButton = document.getElementById('start-blocks-button');
             const blockContextBackButton = document.getElementById('block-context-back-button');
@@ -843,7 +938,16 @@
                 blockTaskOrder: [],
                 tutorialOrder: [],
                 blocks: [],
-                blockNasaTlx: []
+                blockNasaTlx: [],
+                finalRanking: {
+                    order: [],
+                    recordedAt: null
+                },
+                finalComments: {
+                    rankingWhy: '',
+                    otherComments: '',
+                    recordedAt: null
+                }
             };
 
             /*
@@ -1106,6 +1210,75 @@
                 }
             ];
 
+            const finalRankingOrder = VISUALIZATIONS.map(visualization => visualization.id);
+            const finalRankingById = new Map(VISUALIZATIONS.map(visualization => [visualization.id, visualization]));
+            let draggedFinalRankingId = null;
+
+            function persistFinalRankingOrder() {
+                experimentData.finalRanking.order = [...finalRankingOrder];
+            }
+
+            function renderFinalRankingScreen() {
+                if (!finalRankingList) return;
+
+                finalRankingList.innerHTML = '';
+
+                finalRankingOrder.forEach((visualizationId, index) => {
+                    const visualization = finalRankingById.get(visualizationId);
+                    if (!visualization) return;
+
+                    const item = document.createElement('li');
+                    item.className = 'final-ranking-item';
+                    item.draggable = true;
+                    item.dataset.visualizationId = visualization.id;
+                    item.setAttribute('aria-label', (index + 1) + 'º lugar: ' + visualization.name);
+                    item.innerHTML = [
+                        '<span class="final-ranking-position">' + (index + 1) + '</span>',
+                        '<img class="final-ranking-preview" src="' + visualization.previewImage + '" alt="Prévia da visualização ' + visualization.name + '">',
+                        '<div class="final-ranking-copy">',
+                        '<strong>' + visualization.name + '</strong>',
+                        '<span>Solte aqui para alterar a ordem</span>',
+                        '</div>',
+                        '<span class="final-ranking-handle" aria-hidden="true">⋮⋮</span>'
+                    ].join('');
+
+                    finalRankingList.appendChild(item);
+                });
+
+                persistFinalRankingOrder();
+            }
+
+            function moveFinalRankingItem(activeId, targetId) {
+                if (!activeId || !targetId || activeId === targetId) return;
+
+                const nextOrder = finalRankingOrder.filter(visualizationId => visualizationId !== activeId);
+                const targetIndex = nextOrder.indexOf(targetId);
+                nextOrder.splice(targetIndex, 0, activeId);
+
+                finalRankingOrder.splice(0, finalRankingOrder.length, ...nextOrder);
+                renderFinalRankingScreen();
+            }
+
+            function collectFinalRanking() {
+                experimentData.finalRanking.order = [...finalRankingOrder];
+                experimentData.finalRanking.recordedAt = new Date().toISOString();
+            }
+
+            function collectFinalComments() {
+                if (!otherCommentsInput.reportValidity()) {
+                    otherCommentsInput.focus();
+                    return false;
+                }
+
+                experimentData.finalComments = {
+                    rankingWhy: rankingWhyInput.value.trim(),
+                    otherComments: otherCommentsInput.value.trim(),
+                    recordedAt: new Date().toISOString()
+                };
+
+                return true;
+            }
+
             const DATASET_POOL = [
                 {
                     "id": "base-1-pib",
@@ -1337,7 +1510,8 @@
                 const isVisualizationScreen =
                     screenId === 'tutorial-screen' ||
                     screenId === 'block-task-screen' ||
-                    screenId === 'nasa-tlx-screen';
+                    screenId === 'nasa-tlx-screen' ||
+                    screenId === 'final-ranking-screen';
 
                 container.style.maxWidth = isVisualizationScreen
                     ? VISUAL_CONTAINER_MAX_WIDTH
@@ -1348,6 +1522,9 @@
             function showScreen(screenId) {
                 if (screenId !== 'block-task-screen' && currentBlockChart) {
                     destroyBlockChart();
+                }
+                if (screenId === 'final-ranking-screen') {
+                    renderFinalRankingScreen();
                 }
                 screens.forEach(screen => {
                     screen.classList.toggle('hidden', screen.id !== screenId);
@@ -1866,8 +2043,17 @@
                         };
 
                         showTutorialScreen();
+                    } else if (target === 'final-comments-screen') {
+                        collectFinalRanking();
+                        showScreen(target);
+                    } else if (target === 'thanks-screen') {
+                        if (!collectFinalComments()) {
+                            return;
+                        }
+
+                        sendExperimentDataToServer();
+                        showScreen(target);
                     } else {
-                        if (target === 'thanks-screen') sendExperimentDataToServer();
                         showScreen(target);
                     }
                 });
@@ -2084,6 +2270,55 @@
                     showScreen('final-ranking-screen');
                 }
             });
+
+            if (finalRankingList) {
+                finalRankingList.addEventListener('dragstart', (event) => {
+                    const item = event.target.closest('.final-ranking-item');
+                    if (!item) return;
+
+                    draggedFinalRankingId = item.dataset.visualizationId;
+                    item.classList.add('dragging');
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', draggedFinalRankingId);
+                });
+
+                finalRankingList.addEventListener('dragend', () => {
+                    draggedFinalRankingId = null;
+                    finalRankingList.querySelectorAll('.dragging, .is-drop-target').forEach(element => {
+                        element.classList.remove('dragging', 'is-drop-target');
+                    });
+                });
+
+                finalRankingList.addEventListener('dragover', (event) => {
+                    event.preventDefault();
+                    const targetItem = event.target.closest('.final-ranking-item');
+
+                    finalRankingList.querySelectorAll('.is-drop-target').forEach(element => {
+                        if (element !== targetItem) element.classList.remove('is-drop-target');
+                    });
+
+                    if (targetItem && targetItem.dataset.visualizationId !== draggedFinalRankingId) {
+                        targetItem.classList.add('is-drop-target');
+                    }
+                });
+
+                finalRankingList.addEventListener('drop', (event) => {
+                    event.preventDefault();
+
+                    const targetItem = event.target.closest('.final-ranking-item');
+                    if (!draggedFinalRankingId) return;
+
+                    if (!targetItem) {
+                        const nextOrder = finalRankingOrder.filter(visualizationId => visualizationId !== draggedFinalRankingId);
+                        nextOrder.push(draggedFinalRankingId);
+                        finalRankingOrder.splice(0, finalRankingOrder.length, ...nextOrder);
+                        renderFinalRankingScreen();
+                        return;
+                    }
+
+                    moveFinalRankingItem(draggedFinalRankingId, targetItem.dataset.visualizationId);
+                });
+            }
 
             window.addEventListener('resize', () => {
                 if (currentBlockChart && currentBlockChart.resize) currentBlockChart.resize();
