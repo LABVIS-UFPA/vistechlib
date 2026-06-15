@@ -839,8 +839,11 @@
             <h2 id="answer-title">Bloco 1 de 5 - Registro de Resposta</h2>
             <div class="field">
                 <label for="block-answer">Resposta do participante</label>
-                <input id="block-answer" type="text" inputmode="decimal" autocomplete="off"
-                    placeholder="Ex.: 5.000,50" />
+                <input id="block-answer" type="text" inputmode="numeric" autocomplete="off"
+                    placeholder="Ex.: 5.000" />
+            </div>
+            <div class="field">
+                <label>Resposta por extenso: <span id="block-answer-words"></span></label>
             </div>
             <div class="field">
                 <label for="block-confidence">Confiança na resposta</label>
@@ -914,6 +917,7 @@
         </div>
     </div>
 
+    <script src="../node_modules/extenso/dist/extenso.js"></script>
     <script type="module">
         import PerspectiveScaleBreakBarChart from "../src/PerspectiveScaleBreakBarChart.js";
         import ScrollBarChart3D from "../src/ScrollBarChart3D.js";
@@ -945,6 +949,8 @@
             const finalRankingSlots = document.getElementById('final-ranking-slots');
             const rankingWhyInput = document.getElementById('ranking-why');
             const otherCommentsInput = document.getElementById('other-comments');
+            const blockAnswerWords = document.getElementById('block-answer-words');
+            const extenso = window.extenso;
 
             const startBlocksButton = document.getElementById('start-blocks-button');
             const blockContextBackButton = document.getElementById('block-context-back-button');
@@ -1175,7 +1181,7 @@
                 {
                     id: 'bar',
                     name: 'Quebra de Escala Clássica',
-                    previewImage: 'test/assets/nasa/quebra-escala-classica.jpeg',
+                    previewImage: 'assets/nasa/quebra-escala-classica.jpeg',
                     ClassRef: BarChart,
                     settings: {
                         size_type: 'fit',
@@ -1217,7 +1223,7 @@
                 {
                     id: 'psb',
                     name: 'Quebra de Escala Perspectiva',
-                    previewImage: 'test/assets/nasa/quebra-escala-perspectiva.jpeg',
+                    previewImage: 'assets/nasa/quebra-escala-perspectiva.jpeg',
                     ClassRef: PerspectiveScaleBreakBarChart,
                     settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', depth: 8, minDepth: 0, maxDepth: 50, outlierRatioThreshold: 3, breakStartRatio: 0.6 },
                     data: tutorialData3D,
@@ -1277,7 +1283,7 @@
                 {
                     id: 'scroll',
                     name: 'Gráfico de Barras Pergaminho',
-                    previewImage: 'test/assets/nasa/grafico-barras-pergaminho.jpeg',
+                    previewImage: 'assets/nasa/grafico-barras-pergaminho.jpeg',
                     ClassRef: ScrollBarChart3D,
                     settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', maxYLimitRatio: 1.0, zStepDepth: 1.5 },
                     data: tutorialData3D,
@@ -1294,7 +1300,7 @@
                 {
                     id: 'worm',
                     name: 'Gráfico de Barras Minhoca',
-                    previewImage: 'test/assets/nasa/grafico-barras-minhoca.jpeg',
+                    previewImage: 'assets/nasa/grafico-barras-minhoca.jpeg',
                     ClassRef: WormBarChart3D,
                     settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', maxYLimitRatio: 1.0, zStepDepth: 1.5 },
                     data: tutorialData3D,
@@ -2321,39 +2327,85 @@
                 showScreen('block-answer-screen');
             });
 
-            function normalizeNumericAnswer(value) {
+            function getTaskGender(taskKey) {
+                return taskKey === 'T4' || taskKey === 'T5' ? 'f' : 'm';
+            }
+
+            function normalizeIntegerAnswer(value) {
                 if (!value) return null;
 
-                const normalized = value
-                    .replace(/\./g, '')
-                    .replace(',', '.');
+                const rawValue = String(value).trim();
 
-                const number = Number(normalized);
+                if (!rawValue) return null;
+
+                if (/,/.test(rawValue) || /\.\d{1,2}\s*$/.test(rawValue)) {
+                    return null;
+                }
+
+                const digits = rawValue.replace(/\D/g, '');
+
+                if (!digits) return null;
+
+                const number = Number.parseInt(digits, 10);
 
                 return Number.isFinite(number)
                     ? number
                     : null;
             }
 
-            function formatBrazilianDecimal(value) {
-                const digits = value.replace(/\D/g, '');
+            function formatBrazilianInteger(value) {
+                const digits = String(value).replace(/\D/g, '');
 
                 if (!digits) {
                     return '';
                 }
 
-                const number = Number(digits) / 100;
+                const number = Number.parseInt(digits, 10);
 
                 return number.toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+                    maximumFractionDigits: 0
                 });
+            }
+
+            function buildBlockAnswerWords(answerNumber, taskKey) {
+                if (!Number.isFinite(answerNumber) || typeof extenso !== 'function') {
+                    return '';
+                }
+
+                const written = extenso(String(answerNumber), {
+                    number: {
+                        gender: getTaskGender(taskKey)
+                    }
+                });
+
+                if (taskKey === 'T2' || taskKey === 'T3') {
+                    return `${written} de diferença.`;
+                }
+
+                if (taskKey === 'T4' || taskKey === 'T5') {
+                    return `${written} vezes maior.`;
+                }
+
+                return written;
+            }
+
+            function updateBlockAnswerWords() {
+                if (!blockAnswerWords) {
+                    return;
+                }
+
+                const taskKey = currentBlockPlan[currentBlockTaskIndex]?.taskKey;
+                const answerNumber = normalizeIntegerAnswer(blockAnswerInput.value.trim());
+
+                blockAnswerWords.textContent  = answerNumber === null
+                    ? ''
+                    : buildBlockAnswerWords(answerNumber, taskKey);
             }
 
             function checkAnswer(userAnswer, correctAnswer, taskKey) {
                 const userValue = typeof userAnswer === 'number'
                     ? userAnswer
-                    : normalizeNumericAnswer(userAnswer);
+                    : normalizeIntegerAnswer(userAnswer);
 
                 const correctValue = Number(correctAnswer);
 
@@ -2378,12 +2430,18 @@
 
             blockAnswerInput.addEventListener('input', () => {
                 blockAnswerInput.value =
-                    formatBrazilianDecimal(blockAnswerInput.value);
+                    formatBrazilianInteger(blockAnswerInput.value);
+                updateBlockAnswerWords();
+            });
+
+            blockAnswerInput.addEventListener('blur', () => {
+                blockAnswerInput.value = formatBrazilianInteger(blockAnswerInput.value);
+                updateBlockAnswerWords();
             });
 
             blockAnswerNextButton.addEventListener('click', () => {
                 const answerRaw = blockAnswerInput.value.trim();
-                const answerNumber = normalizeNumericAnswer(answerRaw);
+                const answerNumber = normalizeIntegerAnswer(answerRaw);
 
                 if (!devMode && !answerRaw) {
                     alert('Informe uma resposta antes de continuar.');
@@ -2392,7 +2450,7 @@
                 }
 
                 if (!devMode && answerNumber === null) {
-                    alert('Informe apenas uma resposta numérica. Exemplo: 1234, 1234.56, 1234,56 ou 5.000,00');
+                    alert('Informe apenas uma resposta numérica inteira. Exemplo: 1234 ou 5.000');
                     blockAnswerInput.focus();
                     return;
                 }
@@ -2421,6 +2479,7 @@
                     currentTaskRecord = null;
                     blockTaskStartedAt = null;
                     blockAnswerInput.value = '';
+                    updateBlockAnswerWords();
                 }
 
                 if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
@@ -2432,6 +2491,8 @@
                     renderTlxScreen();
                 }
             });
+
+            updateBlockAnswerWords();
 
             backFromTlxButton.addEventListener('click', () => {
                 showScreen('block-answer-screen');
