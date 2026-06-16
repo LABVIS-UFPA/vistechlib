@@ -52,46 +52,62 @@ def load_and_flatten_data(filepath):
             task = block.get('taskKey', 'Unknown')
             vis = block.get('visualizationId', 'Unknown')
             
-            # Se isCorrect não existir, lida de forma segura (considera 0)
-            is_correct = 1 if block.get('isCorrect') == True else 0
             rt = block.get('timeOnBlockTaskScreenSeconds', np.nan)
+            
+            # --- Cálculo do Log Error ---
+            answer = block.get('answerNumber', 0)
+            correct = block.get('correctAnswer', 0)
+            epsilon = 1e-9 # Pequena constante para evitar log(0) ou divisão por zero
+
+            # A fórmula abs(log10(ratio)) é simétrica para super/subestimação
+            # Ex: err(200/100) = |log(2)| = 0.3; err(50/100) = |log(0.5)| = |-0.3| = 0.3
+            log_error = np.abs(np.log10( (answer + epsilon) / (correct + epsilon) ))
             
             perf_rows.append({
                 'Participant': current_pid,
                 'Task': task,
                 'Diff': 'Geral', # Sem níveis de dificuldade extras
                 'Visualization': vis,
-                'Correct': is_correct,
+                'LogError': log_error,
                 'RT': rt
             })
 
-        # --- Questionários (NASA-TLX) ---
+        # --- NASATLX (NASA-TLX) ---
         for tlx in exp_data.get('blockNasaTlx', []):
             task = tlx.get('taskKey', 'Unknown')
             for vis_eval in tlx.get('visualizations', []):
                 vis = vis_eval.get('visualizationId', 'Unknown')
                 mental = vis_eval.get('mentalDemand', 0)
                 temporal = vis_eval.get('temporalDemand', 0)
-                perf = vis_eval.get('performance', 0)
+                perf_raw = vis_eval.get('performance', 0)
                 effort = vis_eval.get('effort', 0)
                 frust = vis_eval.get('frustration', 0)
 
-                # Calcula a carga de trabalho média das 5 dimensões (Raw TLX)
-                workload = (mental + temporal + perf + effort + frust) / 5.0
+                # INVERSÃO: A dimensão 'Performance' é invertida (100=bom -> 0=baixa carga)
+                # para alinhar com as outras dimensões onde "menor é melhor".
+                perf_inverted = 100 - perf_raw
+
+                # Calcula a carga de trabalho média com a dimensão de performance já invertida.
+                workload = (mental + temporal + perf_inverted + effort + frust) / 5.0
 
                 quest_rows.append({
                     'Participant': current_pid,
                     'Task_Full': f"TLX_{task}",
                     'Task': task,
                     'Visualization': vis,
-                    'Workload': workload
+                    'Workload': workload,
+                    'Mental': mental,
+                    'Temporal': temporal,
+                    'Performance': perf_inverted,
+                    'Effort': effort,
+                    'Frustration': frust
                 })
 
         # --- Ranking de Preferência (Fase 3) ---
-        evaluation = exp_data.get('evaluation')
-        if evaluation and 'ranking' in evaluation:
-            ranking = evaluation['ranking']
-            for rank_idx, vis in enumerate(ranking):
+        final_ranking = exp_data.get('finalRanking')
+        if final_ranking and 'order' in final_ranking:
+            ranking_order = final_ranking['order']
+            for rank_idx, vis in enumerate(ranking_order):
                 rank_rows.append({
                     'Participant': current_pid,
                     'Visualization': vis,
@@ -104,26 +120,24 @@ def load_and_flatten_data(filepath):
     
     return df_perf, df_quest, df_rank
 
-def filter_low_accuracy_participants(df, threshold=0.25):
+def filter_high_error_participants(df, threshold=2.0):
     """
-    Remove participantes que tiveram acurácia média <= threshold 
-    em uma tarefa específica (indicando que não entenderam a tarefa).
+    Remove participantes que tiveram LogError médio > threshold 
+    em uma tarefa específica (indicando que não entenderam a tarefa ou chutaram).
     """
-    print(f"\n{'='*20} FILTRO DE QUALIDADE DE DADOS {'='*20}")
+    print(f"\n{'='*20} FILTRO DE QUALIDADE DE DADOS (LOG ERROR) {'='*20}")
     
-    # 1. Calcula a acurácia média de cada participante POR TAREFA
-    # Agrupamos por Task e Participant para ver o desempenho global naquela tarefa
-    acc_summary = df.groupby(['Task', 'Participant'])['Correct'].mean().reset_index()
+    # 1. Calcula o LogError médio de cada participante POR TAREFA
+    error_summary = df.groupby(['Task', 'Participant'])['LogError'].mean().reset_index()
     
-    # 2. Identifica quem falhou no critério (Acurácia <= 0.25)
-    bad_performers = acc_summary[acc_summary['Correct'] <= threshold]
+    # 2. Identifica quem falhou no critério (LogError > threshold)
+    bad_performers = error_summary[error_summary['LogError'] > threshold]
     
     if bad_performers.empty:
-        print(">> Nenhum participante removido (Todos acima do limiar).")
+        print(">> Nenhum participante removido (Todos abaixo do limiar de erro).")
         return df
 
     # 3. Cria uma lista de pares (Task, Participant) para remover
-    # Usamos um set de strings "Task_Participant" para filtragem rápida
     keys_to_remove = set(bad_performers['Task'] + "_" + bad_performers['Participant'])
     
     # Cria coluna temporária no DF original para comparar
@@ -136,12 +150,12 @@ def filter_low_accuracy_participants(df, threshold=0.25):
     df_clean.drop(columns=['temp_key'], inplace=True)
     
     # Relatório de quem saiu
-    print(f">> Critério: Remover participantes com Acurácia <= {threshold:.0%} na tarefa.")
+    print(f">> Critério: Remover participantes com LogError médio > {threshold:.1f} na tarefa.")
     for _, row in bad_performers.iterrows():
-        print(f"   [REMOVIDO] {row['Participant']} da tarefa '{row['Task']}' (Acc média: {row['Correct']:.1%})")
+        print(f"   [REMOVIDO] {row['Participant']} da tarefa '{row['Task']}' (Erro médio: {row['LogError']:.2f})")
         
     print(f">> Registros restantes: {len(df_clean)} (de {len(df)})")
-    print("="*65 + "\n")
+    print("="*70 + "\n")
     
     return df_clean
 
@@ -187,18 +201,19 @@ def run_friedman_test(df, metric_col, group_col='Visualization', block_col='Part
     # 1. Descritiva
     desc_stats = df.groupby(group_col)[metric_col].mean()
     desc_count = df.groupby(group_col)[metric_col].count()
-    is_lower_better = metric_col in ['RT', 'LagTime', 'Replays', 'Workload', 'Rank']
+    is_lower_better = metric_col in ['RT', 'LagTime', 'Replays', 'Workload', 'Rank', 'LogError', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration']
     sorted_stats = desc_stats.sort_values(ascending=is_lower_better)
     
     print("   Médias (Descritiva):")
     if is_lower_better:
         if metric_col == 'RT': unit = "s"
         elif metric_col == 'Rank': unit = "º"
+        elif metric_col == 'LogError': unit = "" # A unidade já está implícita no nome
         else: unit = " pts"
         print("   " + ", ".join([f"{k}={v:.2f}{unit} (n={desc_count[k]})" for k, v in sorted_stats.items()]))
     else:
-        unit = "%" if metric_col == 'Correct' else ""
-        multiplier = 100 if metric_col == 'Correct' else 1
+        unit = "%"
+        multiplier = 100
         print("   " + ", ".join([f"{k}={v*multiplier:.1f}{unit} (n={desc_count[k]})" for k, v in sorted_stats.items()]))
     # 2. Pivot e Limpeza
     pivot = df.pivot_table(index=block_col, columns=group_col, values=metric_col, aggfunc='mean')
@@ -245,7 +260,7 @@ def run_posthoc_tests(friedman_result, metric_col='Correct'):
     groups = pivot.columns.tolist()
     pairs = list(itertools.combinations(groups, 2))
     
-    is_lower_better = metric_col in ['RT', 'LagTime', 'Replays', 'Workload', 'Rank']
+    is_lower_better = metric_col in ['RT', 'LagTime', 'Replays', 'Workload', 'Rank', 'LogError', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration']
     
     for g1, g2 in pairs:
         p_val = posthoc.loc[g1, g2]
@@ -296,7 +311,7 @@ df_perf, df_quest, df_rank = load_and_flatten_data(RESULTS_PATH)
 
 # --- NOVO: APLICA O FILTRO DE ACURÁCIA ---
 if df_perf is not None and not df_perf.empty:
-    df_perf = filter_low_accuracy_participants(df_perf, threshold=0.25)
+    df_perf = filter_high_error_participants(df_perf, threshold=4.0)
 
 if df_perf is not None and not df_perf.empty:
     
@@ -306,16 +321,16 @@ if df_perf is not None and not df_perf.empty:
         print_separator(f"TAREFA: {TASK_MAP.get(task, task)} | DIFICULDADE: {diff}")
         subset = df_perf[(df_perf['Task'] == task) & (df_perf['Diff'] == diff)]
         
-        # --- A. ACURÁCIA ---
-        print(f"\n--- Acurácia ---")
-        res = run_friedman_test(subset, 'Correct')
+        # --- A. LOG ERROR ---
+        print(f"\n--- Log Error ---")
+        res = run_friedman_test(subset, 'LogError')
         
         if isinstance(res, dict):
             print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} | p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
             
             # Armazena para Power Analysis
             power_analysis_data.append({
-                'Label': f"{TASK_MAP.get(task, task)} {diff} (Acc)",
+                'Label': f"{TASK_MAP.get(task, task)} {diff} (LogError)",
                 'N': res['N'],
                 'k': res['k'],
                 'W': res['KendallW'],
@@ -323,12 +338,12 @@ if df_perf is not None and not df_perf.empty:
             })
 
             if res['Significant']:
-                print(">> DIFERENÇA DETECTADA! Rodando Post-hoc...")
-                pairs = run_posthoc_tests(res, 'Correct')
+                pairs = run_posthoc_tests(res, 'LogError')
                 if pairs:
-                    print("\n   Diferenças Reais encontradas:")
+                    print("\n   Diferenças Reais encontradas (menor erro é melhor):")
                     for g1, g2, p, winner in pairs:
-                         print(f"   * {winner} foi melhor que {g1 if winner==g2 else g2} (p={p:.4f})")
+                         loser = g2 if winner == g1 else g1
+                         print(f"   * {winner} teve erro menor que {loser} (p={p:.4f})")
         else:
             print(res)
 
@@ -387,37 +402,55 @@ if df_perf is not None and not df_perf.empty:
             print(res)
 
        
-# --- QUESTIONÁRIOS ---
+# --- NASATLX ---
 if df_quest is not None and not df_quest.empty:
-    print_separator("QUESTIONÁRIOS (SUBJETIVO)")
-    tasks_q = df_quest['Task_Full'].unique()
-    
-    for task_q in tasks_q:
-        print(f"\n> {task_q}")
-        subset_q = df_quest[df_quest['Task_Full'] == task_q]
-        res = run_friedman_test(subset_q, 'Workload')
-        
-        if isinstance(res, dict):
-            print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} |  p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
-            
-            # Armazena para Power Analysis
-            power_analysis_data.append({
-                'Label': f"Quest. {task_q}",
-                'N': res['N'],
-                'k': res['k'],
-                'W': res['KendallW'],
-                'Sig': res['Significant']
-            })
+    print_separator("NASATLX (SUBJETIVO)")
 
-            if res['Significant']:
-                pairs = run_posthoc_tests(res, 'Workload')
-                if pairs:
-                    print("\n   Menor Carga de Trabalho Confirmada:")
-                    for g1, g2, p, winner in pairs:
-                        loser = g2 if winner == g1 else g1
-                        print(f"   * {winner} teve MENOR carga de trabalho que {loser} (p={p:.4f})")
-        else:
-            print(res)
+    # Lista de métricas do TLX para analisar
+    tlx_metrics = ['Workload', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration']
+    
+    # Mapeamento para nomes mais amigáveis no output
+    tlx_metric_names = {
+        'Workload': 'Carga de Trabalho Geral (Média)',
+        'Mental': 'Demanda Mental',
+        'Temporal': 'Demanda Temporal',
+        'Performance': 'Performance (Auto-avaliada)',
+        'Effort': 'Esforço',
+        'Frustration': 'Frustração'
+    }
+
+    tasks_q = df_quest['Task'].unique()
+    
+    for task_q in sorted(tasks_q):
+        print_separator(f"NASATLX - TAREFA: {TASK_MAP.get(task_q, task_q)}")
+        subset_q = df_quest[df_quest['Task'] == task_q]
+        
+        for metric in tlx_metrics:
+            metric_name = tlx_metric_names.get(metric, metric)
+            print(f"\n--- {metric_name} ---")
+            
+            res = run_friedman_test(subset_q, metric)
+            
+            if isinstance(res, dict):
+                print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} |  p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
+                
+                power_analysis_data.append({
+                    'Label': f"TLX {task_q} ({metric})",
+                    'N': res['N'],
+                    'k': res['k'],
+                    'W': res['KendallW'],
+                    'Sig': res['Significant']
+                })
+
+                if res['Significant']:
+                    pairs = run_posthoc_tests(res, metric)
+                    if pairs:
+                        print(f"\n   Menor '{metric_name}' Confirmada:")
+                        for g1, g2, p, winner in pairs:
+                            loser = g2 if winner == g1 else g1
+                            print(f"   * {winner} teve MENOR pontuação que {loser} (p={p:.4f})")
+            else:
+                print(res)
 
 # --- RANKING ---
 if df_rank is not None and not df_rank.empty:
