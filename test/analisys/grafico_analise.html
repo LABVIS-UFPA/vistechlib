@@ -95,6 +95,11 @@
   <br>
   <button onclick="downloadSVG('chart-questionnaire-frustration')">Download Frustration SVG</button>
 
+  <h2>Ranking de Preferência</h2>
+  <svg id="chart-ranking"></svg>
+  <br>
+  <button onclick="downloadSVG('chart-ranking')">Download Ranking SVG</button>
+
   <script>
     // Mapeamento de cores para as visualizações
     const visualizationColors = {
@@ -516,7 +521,9 @@
         col1Header = "Task",
         posStrategyFactor = 0.75,
         posEstimateFactor = 0.43,
-        chartTitle = "NASA-TLX Workload (0-100)"
+        chartTitle = "NASA-TLX Workload (0-100)",
+        domain = [0, 100],
+        scaleType = 'linear'
       } = options || {};
 
       const margin = { top: 30, right: 40, bottom: 40, left: controlewidth };
@@ -532,12 +539,21 @@
       g.append("line").attr("x1", -controlewidth).attr("x2", 0).attr("y1", -5).attr("y2", -5).attr("stroke", "black").attr("stroke-width", 2);
       g.append("text").attr("x", -controlewidth).attr("y", -15).text(col1Header).attr("font-weight", "bold").style("font-size", "15pt");
       g.append("text").attr("x", posstrategy).attr("y", -15).text("Visualization").attr("font-weight", "bold").style("font-size", "15pt");
-      g.append("text").attr("x", posestimate).attr("y", -15).text("Rating (95% CI)").attr("font-weight", "bold").style("font-size", "15pt");
+      g.append("text").attr("x", posestimate).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt");
 
-      // Escala X (0 a 100 para NASA-TLX)
-      const x = d3.scaleLinear()
-        .domain([0, 100])
-        .range([0, width]);
+      // Escala X
+      let x;
+      if (scaleType === 'ordinal') {
+        // For ordinal-like axis, we still use a linear scale to plot continuous CIs.
+        // The domain is padded to prevent points from sitting on the very edge.
+        x = d3.scaleLinear()
+          .domain([d3.min(domain) - 0.5, d3.max(domain) + 0.5])
+          .range([0, width]);
+      } else {
+        x = d3.scaleLinear()
+          .domain(domain)
+          .range([0, width]);
+      }
 
       g.append("text")
         .attr("x", width / 2)
@@ -553,9 +569,15 @@
         .padding(0.2);
 
       // Eixo X
+      const xAxis = d3.axisBottom(x);
+      if (scaleType === 'ordinal') {
+        xAxis.tickValues(domain).tickFormat(d => d + 'º');
+      } else {
+        xAxis.ticks(5);
+      }
       g.append("g")
         .attr("transform", `translate(0,${rowHeight * rawData.length})`)
-        .call(d3.axisBottom(x).ticks(5))
+        .call(xAxis)
         .selectAll("text").style("font-size", "15pt");
 
       // Linhas de IC
@@ -760,6 +782,20 @@
             });
           });
         });
+
+        // Process Final Ranking
+        const finalRanking = expData.finalRanking;
+        if (finalRanking && finalRanking.order) {
+          finalRanking.order.forEach((vis, rankIndex) => {
+            allLogs.push({
+              participantId: pID,
+              task: 'geral', // Ranking é geral, não por tarefa
+              type: 'ranking',
+              vis: vis,
+              ratings: { rank: rankIndex + 1 }
+            });
+          });
+        }
       });
 
       return allLogs;
@@ -860,6 +896,37 @@
             svgQuest.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para questionários.`).style("fill", "red");
         }
       });
+
+      // --- RENDERIZAÇÃO GRÁFICO RANKING ---
+      const rankingLogs = filteredLogs.filter(d => d.type === 'ranking');
+      const svgRanking = d3.select("#chart-ranking");
+
+      if (rankingLogs.length > 0) {
+        const rankingData = rankingLogs.map(d => ({
+          Difficulty: 'Preferência Geral',
+          Visualization: d.vis,
+          Response: d.ratings.rank
+        }));
+
+        const rankingOrder = ['Preferência Geral'];
+        const processedRankingData = processData(rankingData, 'Response', rankingOrder);
+
+        const controleWidthRanking = 380;
+        const totalWidthRanking = controleWidthRanking + plotWidth + 40;
+        const heightRanking = 30 * Math.max(processedRankingData.length, 1) + 80;
+
+        svgRanking.attr("width", totalWidthRanking).attr("height", heightRanking);
+        renderSubjectiveChart(svgRanking, processedRankingData, totalWidthRanking, {
+          controlewidth: controleWidthRanking,
+          col1Header: "Agrupamento",
+          chartTitle: "Ranking de Preferência",
+          domain: [1, 2, 3, 4],
+          scaleType: 'ordinal'
+        });
+      } else {
+        svgRanking.attr("width", 400).attr("height", 50);
+        svgRanking.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para ranking.`).style("fill", "red");
+      }
     }).catch(error => {
       console.error("Erro ao carregar o JSON:", error);
       d3.select("body").insert("p", ":first-child")
