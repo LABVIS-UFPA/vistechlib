@@ -488,8 +488,49 @@
             width: 100%;
             margin: 0;
             padding: 0;
+            appearance: none;
+            -webkit-appearance: none;
             accent-color: var(--primary-color);
+            --tlx-range-color: var(--primary-color);
+            --tlx-track-border-color: #9da7b2;
+            background: transparent;
         }
+
+        .tlx-range::-webkit-slider-runnable-track {
+            height: 0.45rem;
+            background-color: #f7f7f7;
+            border: 1px solid var(--tlx-track-border-color);
+            border-radius: 7px;
+        }
+
+        .tlx-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            margin-top: -0.32rem;
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            background: var(--tlx-range-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .tlx-range::-moz-range-track {
+            height: 0.45rem;
+            background-color: #f7f7f7;
+            border: 1px solid var(--tlx-track-border-color);
+            border-radius: 7px;
+        }
+
+        .tlx-range::-moz-range-thumb {
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            background: var(--tlx-range-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
 
         .tlx-range[data-answered="false"] {
             opacity: 0.55;
@@ -919,6 +960,7 @@
 
     <script src="../node_modules/extenso/dist/extenso.js"></script>
     <script type="module">
+        import * as d3 from "d3";
         import PerspectiveScaleBreakBarChart from "../src/PerspectiveScaleBreakBarChart.js";
         import ScrollBarChart3D from "../src/ScrollBarChart3D.js";
         import WormBarChart3D from "../src/WormBarChart3D.js";
@@ -1274,6 +1316,29 @@
 
             function clamp(value, min, max) {
                 return Math.max(min, Math.min(max, value));
+            }
+
+            const tlxColorScale = d3.scaleDiverging(
+                (scaleValue) => {
+                    if (scaleValue <= 0.5) {
+                        return d3.interpolateRgb('#2ca25f', '#bdbdbd')(scaleValue * 2);
+                    }
+
+                    return d3.interpolateRgb('#bdbdbd', '#d73027')((scaleValue - 0.5) * 2);
+                }
+            ).domain([0, 50, 100]);
+
+            function updateTlxRangeColor(input, dimensionId) {
+                const currentValue = Number(input.value);
+                const scaleValue = dimensionId === 'performance-rating'
+                    ? 100 - currentValue
+                    : currentValue;
+
+                const rangeColor = tlxColorScale(scaleValue);
+
+                input.style.accentColor = rangeColor;
+                input.style.setProperty('--tlx-range-color', rangeColor);
+                input.style.setProperty('--tlx-track-border-color', rangeColor);
             }
 
             const VISUALIZATIONS = [
@@ -2009,10 +2074,11 @@
                         input.type = 'range';
                         input.min = '0';
                         input.max = '100';
-                        input.step = '1';
+                        input.step = '5';
                         input.value = hasValue ? String(savedValue) : '50';
                         input.dataset.answered = hasValue ? 'true' : 'false';
                         input.setAttribute('aria-label', `${dimension.label}: ${task.visualization.name}`);
+                        updateTlxRangeColor(input, dimension.id);
 
                         const scaleLabels = document.createElement('div');
                         scaleLabels.className = 'tlx-scale-labels';
@@ -2021,6 +2087,7 @@
                         input.addEventListener('input', () => {
                             input.dataset.answered = 'true';
                             output.textContent = input.value;
+                            updateTlxRangeColor(input, dimension.id);
                             tlxDrafts.set(key, Number(input.value));
                             updateTlxCompletionState();
                         });
