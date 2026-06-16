@@ -489,11 +489,13 @@
             margin: 0;
             padding: 0;
             accent-color: var(--primary-color);
+            --tlx-track-border-color: #9da7b2;
         }
 
         .tlx-range::-webkit-slider-runnable-track {
-            background-color: #ddd;
-            border-radius: 4px;
+            background-color: #f7f7f7;
+            border: 1px solid var(--tlx-track-border-color);
+            border-radius: 7px;
         }
 
 
@@ -1200,7 +1202,10 @@
                     ? 100 - currentValue
                     : currentValue;
 
-                input.style.accentColor = tlxColorScale(scaleValue);
+                const rangeColor = tlxColorScale(scaleValue);
+
+                input.style.accentColor = rangeColor;
+                input.style.setProperty('--tlx-track-border-color', rangeColor);
             }
 
             const VISUALIZATIONS = [
