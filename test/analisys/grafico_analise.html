@@ -178,8 +178,7 @@
       const {
         controlewidth = 340,
         col1Header = "Difficulty",
-        posStrategyFactor = 0.75,
-        posEstimateFactor = 0.43,
+        posStrategyFactor = 0.7,
         significant = [] // Adicionado para receber dados de significância
       } = options || {};
 
@@ -188,7 +187,6 @@
       const rowHeight = 30;
 
       const posstrategy = -controlewidth * posStrategyFactor;
-      const posestimate = -controlewidth * posEstimateFactor;
 
       const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -203,7 +201,7 @@
 
       g.append("text").attr("x", -controlewidth).attr("y", -15).text(col1Header).attr("font-weight", "bold").style("font-size", "15pt");
       g.append("text").attr("x", posstrategy).attr("y", -15).text("Visualization").attr("font-weight", "bold").style("font-size", "15pt");
-      g.append("text").attr("x", posestimate).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt");
+      g.append("text").attr("x", -10).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end");
 
       // Escala X (Log Error)
       const maxValue = d3.max(rawData, d => d.IC95_superior);
@@ -326,7 +324,8 @@
         .data(rawData)
         .enter()
         .append("text")
-        .attr("x", posestimate)
+        .attr("x", -10)
+        .attr("text-anchor", "end")
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
         .style("font-size", "15pt")
@@ -375,20 +374,18 @@
       const width = 350;
       const rowHeight = 30;
 
-      const posestimate = -controlewidth * 0.90;
-
       const g = svg.append("g").attr("transform", `translate(${offsetX + margin.left},${margin.top})`);
 
       // Cabeçalhos
       g.append("line")
-        .attr("x1", posestimate)
+        .attr("x1", -controlewidth)
         .attr("x2", 1)
         .attr("y1", -5)
         .attr("y2", -5)
         .attr("stroke", "black")
         .attr("stroke-width", 2);
 
-      g.append("text").attr("x", posestimate).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt");
+      g.append("text").attr("x", -10).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end");
 
       const maxValue = d3.max(rawData, d => d.IC95_superior);
 
@@ -508,7 +505,8 @@
         .data(rawData)
         .enter()
         .append("text")
-        .attr("x", posestimate)
+        .attr("x", -10)
+        .attr("text-anchor", "end")
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
         .style("font-size", "15pt")
@@ -519,8 +517,7 @@
       const {
         controlewidth = 340,
         col1Header = "Task",
-        posStrategyFactor = 0.75,
-        posEstimateFactor = 0.43,
+        posStrategyFactor = 0.81,
         chartTitle = "NASA-TLX Workload (0-100)",
         domain = [0, 100],
         scaleType = 'linear'
@@ -531,7 +528,6 @@
       const rowHeight = 30;
 
       const posstrategy = -controlewidth * posStrategyFactor;
-      const posestimate = -controlewidth * posEstimateFactor;
 
       const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -539,7 +535,7 @@
       g.append("line").attr("x1", -controlewidth).attr("x2", 0).attr("y1", -5).attr("y2", -5).attr("stroke", "black").attr("stroke-width", 2);
       g.append("text").attr("x", -controlewidth).attr("y", -15).text(col1Header).attr("font-weight", "bold").style("font-size", "15pt");
       g.append("text").attr("x", posstrategy).attr("y", -15).text("Visualization").attr("font-weight", "bold").style("font-size", "15pt");
-      g.append("text").attr("x", posestimate).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt");
+      g.append("text").attr("x", -10).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end");
 
       // Escala X
       let x;
@@ -618,7 +614,8 @@
         .data(rawData)
         .enter()
         .append("text")
-        .attr("x", posestimate)
+        .attr("x", -10)
+        .attr("text-anchor", "end")
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
         .style("font-size", "15pt")
@@ -645,12 +642,27 @@
         const yMean = d3.mean(indices, i => y(i) + y.bandwidth() / 2);
 
         g.append("text")
-          .attr("x", -controlewidth + 5)
-          .attr("y", yMean + 4)
+          .attr("x", -controlewidth + 5) // X position for the start of the text
+          .attr("y", yMean + 4) // Y position for the first line of text
           .attr("text-anchor", "start")
           .style("font-weight", "bold")
           .style("font-size", "15pt")
-          .text(pergunta);
+          .each(function() {
+            const textElement = d3.select(this);
+            const parts = pergunta.split(' ('); // Split by " ("
+            
+            // Append the first part (e.g., "T1")
+            textElement.append("tspan")
+              .text(parts[0]);
+
+            // // If there's a second part (e.g., "(Valor Exato)"), append it on a new line
+            // if (parts.length > 1) {
+            //   textElement.append("tspan")
+            //     .attr("x", -controlewidth + 5) // Align with the first line's X position
+            //     .attr("dy", "1.2em") // Move down by 1.2 times the font size for a new line
+            //     .text(`(${parts[1]}`); // Add the opening parenthesis back
+            // }
+          });
       });
     }
 

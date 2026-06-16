@@ -2,18 +2,28 @@
 <html>
 
 <head>
-    <script src="d3.v7.min.js"></script>
-    <script src="moment.min.js"></script>
-    <script src="require.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "d3": "https://esm.sh/d3@6.7.0",
+                "d3-path": "https://esm.sh/d3-path@2.0.0",
+                "three": "https://esm.sh/three@0.124.0",
+                "underscore": "https://esm.sh/underscore@1.9.1",
+                "moment": "https://esm.sh/moment@2.24.0"
+            }
+        }
+    </script>
 
-    <script src="../src/Visualization.js"></script>
-    <script src="../src/BarChart.js"></script>
-    <script>
+    <script type="module">
+        import BarChart from "../src/BarChart.js";
+
         document.addEventListener("DOMContentLoaded", () => {
             let layout = document.querySelector("#chart");
 
             let config = {
-                drawStrategy: "scale break perspective"
+                drawStrategy: "scale break perspective",
+                corte: 11000, // Passa break_inicial como settings.corte
+                cortefinal: 76000 // Passa breakfinal como settings.cortefinal
             };
 
             let break_inicial = 11000;
@@ -21,24 +31,25 @@
 
             let barchart = new BarChart(layout, config, break_inicial, breakfinal);
 
-            this.base4 = [
-                { Value: 2086.788469112473 },
-                { Value: 77412.47462722816 },
+            const base4Data = [ // Renomeado para evitar conflito com 'base4' no contexto original
+                { Value: 2086.788469112473 },                
                 { Value: 798.87765686746255 },
                 { Value: 85685.42065542887 },
                 { Value: 875.6592439886408 },
                 { Value: 680.341495589178564 },
                 { Value: 555.6272574356251 },
+                { Value: 77412.47462722816 },
                 { Value: 9878.030571097508 },
                 { Value: 420.07647618035685 },
                 { Value: 10858.416405323893 },
+                { Value: 77412.47462722816 },
                 { Value: 634.4914334661673 },
                 { Value: 302.267786914083707 },
                 { Value: 396.77761749210134 },
                 { Value: 7398.659925373594 },
                 { Value: 5661.633142901761 }
             ];
-            barchart.data(base4);
+            barchart.data(base4Data);
             barchart.redraw();
 
         });
