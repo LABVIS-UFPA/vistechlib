@@ -775,7 +775,7 @@
                     <label for="visual-acuity">Acuidade Visual atual</label>
                     <select id="visual-acuity">
                         <option>Boa</option>
-                        <option>Corridida com óculos/lente</option>
+                        <option>Corrigida com óculos/lente</option>
                         <option>Ruim</option>
                     </select>
                 </div>
@@ -1069,20 +1069,6 @@
             function bindChartInteractionLogger(chart) {
                 if (!chart || typeof chart.on !== 'function') return;
 
-                chart.on('dataclick.interactionLogger', (d, i) => {
-                    registerInteraction('dataClick', {
-                        target: 'bar',
-                        dataIndex: i
-                    });
-                });
-
-                chart.on('datamouseover.interactionLogger', (d, i) => {
-                    registerInteraction('dataMouseOver', {
-                        target: 'bar',
-                        dataIndex: i
-                    });
-                });
-
                 chart.on('datacanvasmousedown.interactionLogger', event => {
                     registerInteraction('canvasMouseDown', {
                         target: 'canvas',
@@ -1101,12 +1087,45 @@
 
                 const chartElement = chart?.parentElement;
 
-                if (chartElement) {
+                if (chartElement && !chartElement.dataset.interactionWheelLoggerBound) {
+                    chartElement.dataset.interactionWheelLoggerBound = 'true';
+
+                    let zoomTimeout = null;
+                    let isZooming = false;
+                    let zoomDirection = null;
+                    let zoomSteps = 0;
+
                     chartElement.addEventListener('wheel', event => {
-                        registerInteraction('wheelZoom', {
-                            target: 'canvas',
-                            value: event.deltaY < 0 ? 'zoomIn' : 'zoomOut'
-                        });
+                        const currentDirection = event.deltaY < 0 ? 'zoomIn' : 'zoomOut';
+
+                        if (!isZooming) {
+                            isZooming = true;
+                            zoomDirection = currentDirection;
+                            zoomSteps = 0;
+
+                            registerInteraction('zoomStart', {
+                                target: 'canvas',
+                                value: zoomDirection
+                            });
+                        }
+
+                        zoomSteps += 1;
+                        zoomDirection = currentDirection;
+
+                        clearTimeout(zoomTimeout);
+
+                        zoomTimeout = setTimeout(() => {
+                            registerInteraction('zoomEnd', {
+                                target: 'canvas',
+                                value: zoomDirection,
+                                steps: zoomSteps
+                            });
+
+                            isZooming = false;
+                            zoomDirection = null;
+                            zoomSteps = 0;
+                            zoomTimeout = null;
+                        }, 300);
                     });
                 }
             }
@@ -2058,11 +2077,13 @@
                 controlsContainer.innerHTML = '';
 
                 const controlRegistry = {};
+
                 const controlHelpers = {
                     getValue: key => {
                         const entry = controlRegistry[key];
                         return entry ? Number(entry.input.value) : null;
                     },
+
                     setValue: (key, rawValue) => {
                         const entry = controlRegistry[key];
                         if (!entry) return;
@@ -2078,10 +2099,14 @@
 
                 viz.controls.forEach(ctrl => {
                     const wrapper = document.createElement('div');
-                    wrapper.style.cssText = 'display:flex;align-items:center;gap:0.4rem;';
+                    wrapper.style.cssText =
+                        'display:flex;align-items:center;gap:0.4rem;';
+
                     const lbl = document.createElement('label');
                     lbl.textContent = ctrl.label;
-                    lbl.style.cssText = 'font-size:0.88rem;font-weight:600;white-space:nowrap;';
+                    lbl.style.cssText =
+                        'font-size:0.88rem;font-weight:600;white-space:nowrap;';
+
                     const inp = document.createElement('input');
                     inp.type = 'range';
                     inp.min = ctrl.min;
@@ -2089,10 +2114,15 @@
                     inp.step = ctrl.step;
                     inp.value = ctrl.defaultValue;
                     inp.style.width = '120px';
+
                     const value = document.createElement('span');
-                    value.style.cssText = 'font-size:0.84rem;font-weight:700;min-width:48px;text-align:left;';
+                    value.style.cssText =
+                        'font-size:0.84rem;font-weight:700;min-width:48px;text-align:left;';
+
                     const updateControlValue = rawValue => {
-                        value.textContent = ctrl.formatValue ? ctrl.formatValue(rawValue) : String(rawValue);
+                        value.textContent = ctrl.formatValue
+                            ? ctrl.formatValue(rawValue)
+                            : String(rawValue);
                     };
 
                     if (ctrl.key) {
@@ -2103,23 +2133,59 @@
                     }
 
                     updateControlValue(inp.value);
+
+                    let sliderStartValue = null;
+                    let sliderInteractionActive = false;
+
+                    const finishSliderInteraction = e => {
+                        if (!sliderInteractionActive) return;
+
+                        const sliderEndValue = Number(e.target.value);
+
+                        registerInteraction('sliderEnd', {
+                            controlKey: ctrl.key || ctrl.label,
+                            value: sliderEndValue,
+                            startValue: sliderStartValue
+                        });
+
+                        sliderStartValue = null;
+                        sliderInteractionActive = false;
+                    };
+
+                    inp.addEventListener('pointerdown', e => {
+                        if (sliderInteractionActive) return;
+
+                        sliderStartValue = Number(e.target.value);
+                        sliderInteractionActive = true;
+
+                        registerInteraction('sliderStart', {
+                            controlKey: ctrl.key || ctrl.label,
+                            value: sliderStartValue
+                        });
+                    });
+
                     inp.addEventListener('input', e => {
                         updateControlValue(e.target.value);
 
                         const chart = chartGetter();
 
                         if (chart) {
-                            ctrl.onInput(chart, e.target.value, controlHelpers);
-
-                            registerInteraction('sliderChange', {
-                                controlKey: ctrl.key || ctrl.label,
-                                value: Number(e.target.value)
-                            });
+                            ctrl.onInput(
+                                chart,
+                                e.target.value,
+                                controlHelpers
+                            );
                         }
                     });
+
+                    inp.addEventListener('pointerup', finishSliderInteraction);
+                    inp.addEventListener('change', finishSliderInteraction);
+                    inp.addEventListener('blur', finishSliderInteraction);
+
                     wrapper.appendChild(lbl);
                     wrapper.appendChild(inp);
                     wrapper.appendChild(value);
+
                     controlsContainer.appendChild(wrapper);
                 });
             }
