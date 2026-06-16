@@ -65,10 +65,35 @@
   <br>
   <button onclick="downloadSVG('chart-t5')">Download T5 SVG</button>
 
-  <h2>QUESTIONNAIRES (NASA-TLX Workload)</h2>
-  <svg id="chart-questionnaire"></svg>
+  <h2>NASA-TLX (Geral Workload)</h2>
+  <svg id="chart-questionnaire-workload"></svg>
   <br>
-  <button onclick="downloadSVG('chart-questionnaire')">Download Questionnaire SVG</button>
+  <button onclick="downloadSVG('chart-questionnaire-workload')">Download Workload SVG</button>
+
+  <h2>NASA-TLX (Mental Demand)</h2>
+  <svg id="chart-questionnaire-mental"></svg>
+  <br>
+  <button onclick="downloadSVG('chart-questionnaire-mental')">Download Mental Demand SVG</button>
+
+  <h2>NASA-TLX (Temporal Demand)</h2>
+  <svg id="chart-questionnaire-temporal"></svg>
+  <br>
+  <button onclick="downloadSVG('chart-questionnaire-temporal')">Download Temporal Demand SVG</button>
+
+  <h2>NASA-TLX (Performance - self-assessed)</h2>
+  <svg id="chart-questionnaire-performance"></svg>
+  <br>
+  <button onclick="downloadSVG('chart-questionnaire-performance')">Download Performance SVG</button>
+
+  <h2>NASA-TLX (Effort)</h2>
+  <svg id="chart-questionnaire-effort"></svg>
+  <br>
+  <button onclick="downloadSVG('chart-questionnaire-effort')">Download Effort SVG</button>
+
+  <h2>NASA-TLX (Frustration)</h2>
+  <svg id="chart-questionnaire-frustration"></svg>
+  <br>
+  <button onclick="downloadSVG('chart-questionnaire-frustration')">Download Frustration SVG</button>
 
   <script>
     // Mapeamento de cores para as visualizações
@@ -490,7 +515,8 @@
         controlewidth = 340,
         col1Header = "Task",
         posStrategyFactor = 0.75,
-        posEstimateFactor = 0.43
+        posEstimateFactor = 0.43,
+        chartTitle = "NASA-TLX Workload (0-100)"
       } = options || {};
 
       const margin = { top: 30, right: 40, bottom: 40, left: controlewidth };
@@ -516,7 +542,7 @@
       g.append("text")
         .attr("x", width / 2)
         .attr("y", rowHeight * rawData.length + 45)
-        .text("NASA-TLX Workload (0-100)")
+        .text(chartTitle)
         .attr("font-weight", "bold")
         .attr("text-anchor", "middle")
         .attr("font-size", "15pt");
@@ -718,14 +744,18 @@
             const frust = visTlx.frustration || 0;
             const perf_inverted = 100 - perf_raw;
             const workload = (mental + temporal + perf_inverted + effort + frust) / 5.0;
-
             allLogs.push({
               participantId: pID,
               task: tlxBlock.taskKey,
               type: 'questionnaire',
               vis: visTlx.visualizationId,
               ratings: {
-                workload: workload
+                workload: workload,
+                mental: mental,
+                temporal: temporal,
+                performance: perf_inverted,
+                effort: effort,
+                frustration: frust
               }
             });
           });
@@ -743,7 +773,7 @@
       // const filteredLogs = allLogs; // Descomente esta linha para desativar o filtro de acurácia
 
       const allLogs = transformData(rawJsonData);
-      const filteredLogs = filterHighErrorParticipants(allLogs, 4.0);
+      const filteredLogs = allLogs //filterHighErrorParticipants(allLogs, 4.0);
 
       const TASKS = ['T1', 'T2', 'T3', 'T4', 'T5'];
       const TASK_MAP = {
@@ -792,29 +822,44 @@
 
       // --- RENDERIZAÇÃO GRÁFICO QUESTIONNAIRE ---
       const questLogs = filteredLogs.filter(d => d.type === 'questionnaire');
-      const svgQuest = d3.select("#chart-questionnaire");
+      
+      const tlxDimensions = [
+        { key: 'workload', title: 'Workload', id: 'workload' },
+        { key: 'mental', title: 'Mental Demand', id: 'mental' },
+        { key: 'temporal', title: 'Temporal Demand', id: 'temporal' },
+        { key: 'performance', title: 'Performance (self-assessed)', id: 'performance' },
+        { key: 'effort', title: 'Effort', id: 'effort' },
+        { key: 'frustration', title: 'Frustration', id: 'frustration' }
+      ];
 
-      if (questLogs.length > 0) {
-        const questData = questLogs.map(d => ({
-          Difficulty: TASK_MAP[d.task] || d.task,
-          Visualization: d.vis,
-          Response: d.ratings.workload
-        }));
+      tlxDimensions.forEach(dim => {
+        const svgQuest = d3.select(`#chart-questionnaire-${dim.id}`);
 
-        const questOrder = TASKS.map(t => TASK_MAP[t]);
-        const processedQuestData = processData(questData, 'Response', questOrder);
+        if (questLogs.length > 0) {
+          const questData = questLogs.map(d => ({
+            Difficulty: TASK_MAP[d.task] || d.task,
+            Visualization: d.vis,
+            Response: d.ratings[dim.key]
+          }));
 
-        const accControleWidthQuest = 380;
-        const totalWidthQuest = accControleWidthQuest + plotWidth + 40;
-        const heightQuest = 30 * Math.max(processedQuestData.length, 1) + 80;
+          const questOrder = TASKS.map(t => TASK_MAP[t]);
+          const processedQuestData = processData(questData, 'Response', questOrder);
 
-        svgQuest.attr("width", totalWidthQuest).attr("height", heightQuest);
-        renderSubjectiveChart(svgQuest, processedQuestData, totalWidthQuest, {
-          controlewidth: accControleWidthQuest,
-          col1Header: "Task"
-        });
-      }
+          const accControleWidthQuest = 380;
+          const totalWidthQuest = accControleWidthQuest + plotWidth + 40;
+          const heightQuest = 30 * Math.max(processedQuestData.length, 1) + 80;
 
+          svgQuest.attr("width", totalWidthQuest).attr("height", heightQuest);
+          renderSubjectiveChart(svgQuest, processedQuestData, totalWidthQuest, {
+            controlewidth: accControleWidthQuest,
+            col1Header: "Task",
+            chartTitle: `${dim.title} (0-100)`
+          });
+        } else {
+            svgQuest.attr("width", 400).attr("height", 50);
+            svgQuest.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para questionários.`).style("fill", "red");
+        }
+      });
     }).catch(error => {
       console.error("Erro ao carregar o JSON:", error);
       d3.select("body").insert("p", ":first-child")
