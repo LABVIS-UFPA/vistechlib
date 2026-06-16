@@ -783,7 +783,7 @@
                     <label for="visual-acuity">Acuidade Visual atual</label>
                     <select id="visual-acuity">
                         <option>Boa</option>
-                        <option>Corridida com óculos/lente</option>
+                        <option>Corrigida com óculos/lente</option>
                         <option>Ruim</option>
                     </select>
                 </div>
@@ -847,8 +847,7 @@
             <h2 id="answer-title">Bloco 1 de 5 - Registro de Resposta</h2>
             <div class="field">
                 <label for="block-answer">Resposta do participante</label>
-                <input id="block-answer" type="text" inputmode="numeric" autocomplete="off"
-                    placeholder="Ex.: 5.000" />
+                <input id="block-answer" type="text" inputmode="numeric" autocomplete="off" placeholder="Ex.: 5.000" />
             </div>
             <div class="field">
                 <label>Resposta por extenso: <span id="block-answer-words"></span></label>
@@ -880,7 +879,8 @@
 
         <div id="final-ranking-screen" class="screen hidden">
             <h2>Fase 3 - Ranking de Preferência</h2>
-            <p class="final-ranking-instructions">Arraste as quatro visualizações para ordenar da mais preferida para a menos preferida.</p>
+            <p class="final-ranking-instructions">Arraste as quatro visualizações para ordenar da mais preferida para a
+                menos preferida.</p>
             <div class="final-ranking-board">
                 <section class="final-ranking-column" aria-label="Visualizações disponíveis">
                     <h3>Visualizações</h3>
@@ -927,7 +927,6 @@
 
     <script src="../node_modules/extenso/dist/extenso.js"></script>
     <script type="module">
-        import * as d3 from "d3";
         import PerspectiveScaleBreakBarChart from "../src/PerspectiveScaleBreakBarChart.js";
         import ScrollBarChart3D from "../src/ScrollBarChart3D.js";
         import WormBarChart3D from "../src/WormBarChart3D.js";
@@ -1042,6 +1041,103 @@
                 }
             };
 
+            const interactionLog = [];
+
+            function createInteractionSummary() {
+                return {
+                    total: 0,
+                    byType: {}
+                };
+            }
+
+            function registerInteraction(eventType, details = {}) {
+                if (!currentTaskRecord) return;
+
+                const interaction = {
+                    timestamp: new Date().toISOString(),
+                    participantId: experimentData.participantId,
+
+                    blockNumber: currentTaskRecord.blockNumber,
+                    taskIndexInBlock: currentTaskRecord.taskIndexInBlock,
+                    taskKey: currentTaskRecord.taskKey,
+                    visualizationId: currentTaskRecord.visualizationId,
+                    datasetId: currentTaskRecord.datasetId,
+
+                    eventType,
+                    details
+                };
+
+                interactionLog.push(interaction);
+
+                currentTaskRecord.interactions.total += 1;
+                currentTaskRecord.interactions.byType[eventType] =
+                    (currentTaskRecord.interactions.byType[eventType] || 0) + 1;
+            }
+
+            function bindChartInteractionLogger(chart) {
+                if (!chart || typeof chart.on !== 'function') return;
+
+                chart.on('datacanvasmousedown.interactionLogger', event => {
+                    registerInteraction('canvasMouseDown', {
+                        target: 'canvas',
+                        innerX: Math.round(event.innerX),
+                        innerY: Math.round(event.innerY)
+                    });
+                });
+
+                chart.on('datacanvasmouseup.interactionLogger', event => {
+                    registerInteraction('canvasMouseUp', {
+                        target: 'canvas',
+                        innerX: Math.round(event.innerX),
+                        innerY: Math.round(event.innerY)
+                    });
+                });
+
+                const chartElement = chart?.parentElement;
+
+                if (chartElement && !chartElement.dataset.interactionWheelLoggerBound) {
+                    chartElement.dataset.interactionWheelLoggerBound = 'true';
+
+                    let zoomTimeout = null;
+                    let isZooming = false;
+                    let zoomDirection = null;
+                    let zoomSteps = 0;
+
+                    chartElement.addEventListener('wheel', event => {
+                        const currentDirection = event.deltaY < 0 ? 'zoomIn' : 'zoomOut';
+
+                        if (!isZooming) {
+                            isZooming = true;
+                            zoomDirection = currentDirection;
+                            zoomSteps = 0;
+
+                            registerInteraction('zoomStart', {
+                                target: 'canvas',
+                                value: zoomDirection
+                            });
+                        }
+
+                        zoomSteps += 1;
+                        zoomDirection = currentDirection;
+
+                        clearTimeout(zoomTimeout);
+
+                        zoomTimeout = setTimeout(() => {
+                            registerInteraction('zoomEnd', {
+                                target: 'canvas',
+                                value: zoomDirection,
+                                steps: zoomSteps
+                            });
+
+                            isZooming = false;
+                            zoomDirection = null;
+                            zoomSteps = 0;
+                            zoomTimeout = null;
+                        }, 300);
+                    });
+                }
+            }
+
             /*
             * Trecho relacionado a comunicação com server
             * - Início
@@ -1147,11 +1243,13 @@
 
                 experimentSocket.send(JSON.stringify({
                     type: 'SAVE_EXPERIMENT',
-                    experimentData
+                    experimentData,
+                    interactionLog
                 }));
 
                 experimentAlreadySent = true;
             }
+
             /*
             * Trecho relacionado a comunicação com server
             * - Fim
@@ -1945,7 +2043,6 @@
                         input.value = hasValue ? String(savedValue) : '50';
                         input.dataset.answered = hasValue ? 'true' : 'false';
                         input.setAttribute('aria-label', `${dimension.label}: ${task.visualization.name}`);
-                        updateTlxRangeColor(input, dimension.id);
 
                         const scaleLabels = document.createElement('div');
                         scaleLabels.className = 'tlx-scale-labels';
@@ -1954,7 +2051,6 @@
                         input.addEventListener('input', () => {
                             input.dataset.answered = 'true';
                             output.textContent = input.value;
-                            updateTlxRangeColor(input, dimension.id);
                             tlxDrafts.set(key, Number(input.value));
                             updateTlxCompletionState();
                         });
@@ -2011,11 +2107,13 @@
                 controlsContainer.innerHTML = '';
 
                 const controlRegistry = {};
+
                 const controlHelpers = {
                     getValue: key => {
                         const entry = controlRegistry[key];
                         return entry ? Number(entry.input.value) : null;
                     },
+
                     setValue: (key, rawValue) => {
                         const entry = controlRegistry[key];
                         if (!entry) return;
@@ -2031,10 +2129,14 @@
 
                 viz.controls.forEach(ctrl => {
                     const wrapper = document.createElement('div');
-                    wrapper.style.cssText = 'display:flex;align-items:center;gap:0.4rem;';
+                    wrapper.style.cssText =
+                        'display:flex;align-items:center;gap:0.4rem;';
+
                     const lbl = document.createElement('label');
                     lbl.textContent = ctrl.label;
-                    lbl.style.cssText = 'font-size:0.88rem;font-weight:600;white-space:nowrap;';
+                    lbl.style.cssText =
+                        'font-size:0.88rem;font-weight:600;white-space:nowrap;';
+
                     const inp = document.createElement('input');
                     inp.type = 'range';
                     inp.min = ctrl.min;
@@ -2042,10 +2144,15 @@
                     inp.step = ctrl.step;
                     inp.value = ctrl.defaultValue;
                     inp.style.width = '120px';
+
                     const value = document.createElement('span');
-                    value.style.cssText = 'font-size:0.84rem;font-weight:700;min-width:48px;text-align:left;';
+                    value.style.cssText =
+                        'font-size:0.84rem;font-weight:700;min-width:48px;text-align:left;';
+
                     const updateControlValue = rawValue => {
-                        value.textContent = ctrl.formatValue ? ctrl.formatValue(rawValue) : String(rawValue);
+                        value.textContent = ctrl.formatValue
+                            ? ctrl.formatValue(rawValue)
+                            : String(rawValue);
                     };
 
                     if (ctrl.key) {
@@ -2056,15 +2163,59 @@
                     }
 
                     updateControlValue(inp.value);
+
+                    let sliderStartValue = null;
+                    let sliderInteractionActive = false;
+
+                    const finishSliderInteraction = e => {
+                        if (!sliderInteractionActive) return;
+
+                        const sliderEndValue = Number(e.target.value);
+
+                        registerInteraction('sliderEnd', {
+                            controlKey: ctrl.key || ctrl.label,
+                            value: sliderEndValue,
+                            startValue: sliderStartValue
+                        });
+
+                        sliderStartValue = null;
+                        sliderInteractionActive = false;
+                    };
+
+                    inp.addEventListener('pointerdown', e => {
+                        if (sliderInteractionActive) return;
+
+                        sliderStartValue = Number(e.target.value);
+                        sliderInteractionActive = true;
+
+                        registerInteraction('sliderStart', {
+                            controlKey: ctrl.key || ctrl.label,
+                            value: sliderStartValue
+                        });
+                    });
+
                     inp.addEventListener('input', e => {
                         updateControlValue(e.target.value);
 
                         const chart = chartGetter();
-                        if (chart) ctrl.onInput(chart, e.target.value, controlHelpers);
+
+                        if (chart) {
+                            ctrl.onInput(
+                                chart,
+                                e.target.value,
+                                controlHelpers
+                            );
+                        }
                     });
+
+                    inp.addEventListener('pointerup', finishSliderInteraction);
+                    inp.addEventListener('change', finishSliderInteraction);
+                    inp.addEventListener('blur', finishSliderInteraction);
+
                     wrapper.appendChild(lbl);
                     wrapper.appendChild(inp);
                     wrapper.appendChild(value);
+
                     controlsContainer.appendChild(wrapper);
                 });
             }
@@ -2101,6 +2252,8 @@
                     });
                     currentBlockChart.data(data);
 
+                    bindChartInteractionLogger(currentBlockChart);
+
                     if (task.visualization.id === 'bar' && currentBlockChart.redraw) {
                         currentBlockChart.redraw();
                     }
@@ -2133,7 +2286,9 @@
                     timeOnBlockTaskScreenSeconds: null,
 
                     answer: null,
-                    confidence: null
+                    confidence: null,
+
+                    interactions: createInteractionSummary()
                 };
 
                 if (alreadyWide) {
@@ -2430,7 +2585,7 @@
                 const taskKey = currentBlockPlan[currentBlockTaskIndex]?.taskKey;
                 const answerNumber = normalizeIntegerAnswer(blockAnswerInput.value.trim());
 
-                blockAnswerWords.textContent  = answerNumber === null
+                blockAnswerWords.textContent = answerNumber === null
                     ? ''
                     : buildBlockAnswerWords(answerNumber, taskKey);
             }
