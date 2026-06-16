@@ -291,27 +291,36 @@ class BeeswarmPlot extends Visualization{
         let highlighted;
         if(args[0] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            // this.foreground.select
-            // d3.select(args[0])
-            let str = "M ";
-            highlighted = this.foreground
-                .selectAll('circle[data-index="'+args[1]+'"]')
-                .style("stroke", this.settings.highlightColor)
-                .each(function(){
-                    let circle = d3.select(this);
-                    let t = utils.parseTranslate(this.parentElement);
-                    str += (parseFloat(circle.attr("cx")) + t.x)
-                        +","+circle.attr("cy") + " L "
-                });
+        }else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
 
-            str = str.substring(0, str.length - 3);
-            this.background
-                .append("path")
-                .attr("class", "lineHighlight")
-                .style("fill", "none")
-                .style("stroke", this.settings.highlightColor)
-                .attr("d", str)
+            highlighted = this.foreground
+                .selectAll(indices.map(i => 'circle[data-index="'+i+'"]').join(","))
+                .style("stroke", this.settings.highlightColor);
+
+            this.background.selectAll(".lineHighlight").remove();
+            for(let idx of indices){
+                let str = "M ";
+                this.foreground.selectAll('circle[data-index="'+idx+'"]')
+                    .each(function(){
+                        let circle = d3.select(this);
+                        let t = utils.parseTranslate(this.parentElement);
+                        str += (parseFloat(circle.attr("cx")) + t.x)
+                            +","+circle.attr("cy") + " L ";
+                    });
+
+                if(str.length > 3){
+                    str = str.substring(0, str.length - 3);
+                    this.background
+                        .append("path")
+                        .attr("class", "lineHighlight")
+                        .style("fill", "none")
+                        .style("stroke", this.settings.highlightColor)
+                        .attr("d", str);
+                }
+            }
         }
 
 
@@ -321,8 +330,12 @@ class BeeswarmPlot extends Visualization{
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            let elem = this.foreground.selectAll('circle[data-index="'+args[1]+'"]').style("stroke", "none");
+        }else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
+
+            let elem = this.foreground.selectAll(indices.map(i => 'circle[data-index="'+i+'"]').join(",")).style("stroke", "none");
             this.background.selectAll(".lineHighlight").remove();
             super.removeHighlight(elem.node(), elem.datum(), args[1]);
         }

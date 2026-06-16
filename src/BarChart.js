@@ -34,7 +34,7 @@ class BarChart extends Visualization {
 
         this.name = "BarChart";
         this.x = d3.scaleBand().paddingInner(0.1).paddingOuter(0.1);
-
+        this.highlightedIndices = new Set();
     }
 
     _putDefaultSettings() {
@@ -311,10 +311,17 @@ class BarChart extends Visualization {
         let highlighted;
         if (args[0] instanceof SVGElement) {
 
-        } else if (typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
-            highlighted = this.foreground.selectAll(`.data[data-index="${args[1]}"]`)
-                .style("stroke", this.settings.highlightColor)
-                .style("stroke-width", "2")
+        } else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
+
+            indices.forEach(i => this.highlightedIndices.add(i));
+
+            const lighterColor = d3.interpolateRgb(this.settings.color, "#ffffff")(0.25);
+
+            highlighted = this.foreground.selectAll(indices.map(i => `.data[data-index="${i}"]`).join(","))
+                .style("fill", lighterColor)
                 .each(function () {
                     this.parentNode.appendChild(this);
                 });
@@ -325,9 +332,15 @@ class BarChart extends Visualization {
     removeHighlight(...args) {
         if (args[1] instanceof SVGElement) {
 
-        } else if (typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
-            let dataSelect = this.foreground.selectAll(`.data[data-index="${args[1]}"]`)
-                .style("stroke", "none");
+        } else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
+
+            indices.forEach(i => this.highlightedIndices.delete(i));
+
+            let dataSelect = this.foreground.selectAll(indices.map(i => `.data[data-index="${i}"]`).join(","))
+                .style("fill", this.settings.color);
             if (dataSelect.nodes().length > 0)
                 super.removeHighlight(dataSelect.node(), dataSelect.datum(), args[1]);
         }
@@ -382,7 +395,9 @@ BarChart.strategies = {
                             return enter_result;
                         }
                     )
-                    .style("fill", barchart.settings.color)
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color)
                     .attr("x", (d, i) => barchart.x(i))
                     .attr("y", (d) => barchart.y[key](d[key]))  //fazer Math.min
                     .attr("width", barchart.x.bandwidth())
@@ -437,7 +452,9 @@ BarChart.strategies = {
                             return enter_result;
                         }
                     )
-                    .style("fill", barchart.settings.color)
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color)
                     .attr("x", (d, i) => barchart.x(i))
                     .attr("y", (d) => barchart.y[key](d[key]))  // Aqui estamos usando a chave para selecionar a propriedade correta no seu dado
                     .attr("width", barchart.x.bandwidth())
@@ -539,7 +556,7 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("rect")
-                                .attr("class", "lower")
+                                .attr("class", "lower data")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
@@ -550,7 +567,9 @@ BarChart.strategies = {
                     .attr("y", (d) => Math.max(barchart.y[key](d[key]), miny))
                     .attr("width", barchart.x.bandwidth())
                     .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
-                    .style("fill", barchart.settings.color);
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color);
 
 
                 g.selectAll("rect.upper")
@@ -558,7 +577,7 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("rect")
-                                .attr("class", "upper")
+                                .attr("class", "upper data")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
@@ -569,7 +588,9 @@ BarChart.strategies = {
                     .attr("width", barchart.x.bandwidth())
                     .attr("y", (d) => barchart.ybreak[key](d[key]))
                     .attr("height", (d) => Math.max(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), 0))
-                    .style("fill", barchart.settings.color);
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color);
 
                 // Paper-tear indicator on both cut edges.
                 // Lower segment: teeth point up into the break.
@@ -601,15 +622,22 @@ BarChart.strategies = {
                         update => update,
                         exit => exit.remove()
                     )
+                    .attr("data-index", (d, i) => i)
                     .attr("transform", (d, i) => `translate(${barchart.x(i)},${miny})`)
                     .style("display", (d) => (meta && d[key] > meta.corte ? null : "none"));
 
-                lowerCutNotches.selectAll("polygon")
-                    .data(lowerPoints)
-                    .join("polygon")
-                    .attr("points", (points) => points)
-                    .attr("fill", barchart.settings.color)
-                    .attr("stroke", "none");
+                lowerCutNotches.each(function(d, parentIndex) {
+                    d3.select(this).selectAll("polygon")
+                        .data(lowerPoints)
+                        .join("polygon")
+                        .attr("class", "teeth data")
+                        .attr("data-index", parentIndex)
+                        .attr("points", (points) => points)
+                        .attr("fill", barchart.highlightedIndices.has(parentIndex)
+                            ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                            : barchart.settings.color)
+                        .attr("stroke", "none");
+                });
 
                 const upperCutNotches = g.selectAll("g.scale-break-cut-upper")
                     .data(barchart.d)
@@ -618,15 +646,22 @@ BarChart.strategies = {
                         update => update,
                         exit => exit.remove()
                     )
+                    .attr("data-index", (d, i) => i)
                     .attr("transform", (d, i) => `translate(${barchart.x(i)},${barchart.boxHeightBreak})`)
                     .style("display", (d) => (meta && d[key] > meta.cortefinal ? null : "none"));
 
-                upperCutNotches.selectAll("polygon")
-                    .data(upperPoints)
-                    .join("polygon")
-                    .attr("points", (points) => points)
-                    .attr("fill", barchart.settings.color)
-                    .attr("stroke", "none");
+                upperCutNotches.each(function(d, parentIndex) {
+                    d3.select(this).selectAll("polygon")
+                        .data(upperPoints)
+                        .join("polygon")
+                        .attr("class", "teeth data")
+                        .attr("data-index", parentIndex)
+                        .attr("points", (points) => points)
+                        .attr("fill", barchart.highlightedIndices.has(parentIndex)
+                            ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                            : barchart.settings.color)
+                        .attr("stroke", "none");
+                });
                 barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
 
@@ -724,7 +759,11 @@ BarChart.strategies = {
                     .data(barchart.d)
                     .enter()
                     .append("path")
-                    .style("fill", barchart.settings.color)
+                    .attr("class", "data")
+                    .attr("data-index", (d, i) => i)
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let y = barchart.y[key](d[key]);
@@ -781,12 +820,15 @@ BarChart.strategies = {
                     .data(barchart.d)
                     .enter()
                     .append("rect")
-                    .attr("class", "lower")
+                    .attr("class", "lower data")
+                    .attr("data-index", (d, i) => i)
                     .attr("x", (d, i) => barchart.x(i))
                     .attr("y", (d) => Math.max(barchart.y[key](d[key]), barchart.boxHeightBreak))
                     .attr("width", barchart.x.bandwidth())
                     .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
-                    .style("fill", barchart.settings.color);
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color);
 
 
                 let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
@@ -795,8 +837,11 @@ BarChart.strategies = {
                     .data(barchart.d)
                     .enter()
                     .append("path")
-                    .attr("class", "meio")
-                    .style("fill", barchart.settings.color)
+                    .attr("class", "meio data")
+                    .attr("data-index", (d, i) => i)
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
@@ -809,8 +854,11 @@ BarChart.strategies = {
                     .data(barchart.d)
                     .enter()
                     .append("path")
-                    .attr("class", "upper")
-                    .style("fill", barchart.settings.color)
+                    .attr("class", "upper data")
+                    .attr("data-index", (d, i) => i)
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let y = barchart.ybreak2[key](d[key]);
@@ -900,7 +948,7 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("rect")
-                                .attr("class", "lower")
+                                .attr("class", "lower data")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
@@ -911,7 +959,9 @@ BarChart.strategies = {
                     .attr("y", (d) => Math.max(barchart.y[key](d[key]), barchart.boxHeightBreak))
                     .attr("width", barchart.x.bandwidth())
                     .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
-                    .style("fill", barchart.settings.color);
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color);
 
                 barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
@@ -924,14 +974,16 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("path")
-                                .attr("class", "meio1")
+                                .attr("class", "meio1 data")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
                     )
-                    .style("fill", barchart.settings.color)
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
@@ -951,14 +1003,16 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("path")
-                                .attr("class", "meio2")
+                                .attr("class", "meio2 data")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
                     )
-                    .style("fill", barchart.settings.color)
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
@@ -973,14 +1027,16 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("path")
-                                .attr("class", "meio3")
+                                .attr("class", "meio3 data")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
                     )
-                    .style("fill", barchart.settings.color)
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
@@ -994,14 +1050,16 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("path")
-                                .attr("class", "upper")
+                                .attr("class", "upper data")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
                     )
-                    .style("fill", barchart.settings.color)
+                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
+                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
+                        : barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let y = barchart.ybreak4[key](d[key]);

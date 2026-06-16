@@ -190,13 +190,42 @@ class PieChart extends Visualization {
     }
 
     highlight(...args) {
+        const indices = this._normalizeHighlightIndices(args[1], this.keys.length);
+        if (indices.length === 0)
+            return;
 
+        const selector = indices.map(i => `.PieChart[data-index="${i}"] path`).join(",");
+        const highlighted = this.foreground.selectAll(selector)
+            .style("stroke", this.settings.highlightColor)
+            .style("stroke-width", "2");
+
+        if (highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args) {
+        const indices = this._normalizeHighlightIndices(args[1], this.keys.length);
+        if (indices.length === 0)
+            return;
 
+        const selector = indices.map(i => `.PieChart[data-index="${i}"] path`).join(",");
+        const dataSelect = this.foreground.selectAll(selector)
+            .style("stroke", "white")
+            .style("stroke-width", "1");
+
+        super.removeHighlight(dataSelect.node(), dataSelect.datum(), args[1]);
     }
     getHighlightElement(i) {
+        let group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        d3.select(group).attr("class", "groupHighlight");
 
+        this.foreground.selectAll(`.PieChart[data-index="${i}"] path`).each((d, idx, nodes) => {
+            group.appendChild(d3.select(nodes[idx].cloneNode())
+                .style("stroke", this.settings.highlightColor)
+                .style("stroke-width", "2")
+                .node());
+        });
+
+        return group;
     }
 
     filterByDimension(args) {

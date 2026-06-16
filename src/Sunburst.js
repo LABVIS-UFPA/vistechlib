@@ -213,14 +213,35 @@ class Sunburst extends Visualization{
     }
 
     highlight(...args){
+        let highlighted;
+        if(args[0] instanceof SVGElement){
 
+        }else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
+
+            highlighted = this.foreground
+                .selectAll(indices.map(i => 'path[data-index="' + i + '"]').join(","))
+                .style("stroke", this.settings.highlightColor)
+                .style("stroke-width", "2")
+                .each(function(){
+                    this.parentNode.appendChild(this);
+                });
+        }
+        if(highlighted)
+            super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
 
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            let elem = this.foreground.selectAll('path[data-index="'+args[1]+'"]').style("stroke", "black");
+        }else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
+
+            let elem = this.foreground.selectAll(indices.map(i => 'path[data-index="'+i+'"]').join(",")).style("stroke", "black");
             this.background.selectAll(".lineHighlight").remove();
             super.removeHighlight(elem.node(), elem.datum(), args[1]);
         }

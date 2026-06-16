@@ -2294,6 +2294,26 @@
                     if (task.visualization.id === 'bar' && currentBlockChart.redraw) {
                         currentBlockChart.redraw();
                     }
+
+                    const taskQuestion = task.dataset.tasks[task.taskKey];
+                    if (taskQuestion && typeof currentBlockChart.highlight === 'function') {
+                        const regex = /\(([A-Z]{3})\)/g;
+                        let match;
+                        const acronyms = [];
+                        while ((match = regex.exec(taskQuestion)) !== null) {
+                            acronyms.push(match[1]);
+                        }
+                        
+                        if (acronyms.length > 0) {
+                            const indicesToHighlight = acronyms
+                                .map(acronym => task.dataset.labels.indexOf(acronym))
+                                .filter(index => index !== -1);
+                            
+                            if (indicesToHighlight.length > 0) {
+                                currentBlockChart.highlight(null, indicesToHighlight);
+                            }
+                        }
+                    }
                 } catch (err) {
                     console.error('Block task chart error:', err);
                     blockChartArea.innerHTML = '<p style="color:var(--danger-color);padding:1rem;">Erro ao carregar a visualização da tarefa.</p>';

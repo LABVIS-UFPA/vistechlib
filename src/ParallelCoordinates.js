@@ -236,11 +236,13 @@ class ParallelCoordinates extends Visualization{
         let highlighted;
         if(args[0] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            // this.foreground.select
-            // d3.select(args[0])
+        }else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
+
             highlighted = this.foreground
-                .selectAll('path.data[data-index="'+args[1]+'"]')
+                .selectAll(indices.map(i => 'path.data[data-index="'+i+'"]').join(","))
                 .style("stroke", this.settings.highlightColor)
                 .style("stroke-width", "2")
                 .each(function(){
@@ -254,8 +256,12 @@ class ParallelCoordinates extends Visualization{
     removeHighlight(...args){
         if(args[1] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            let dataSelect = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
+        }else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
+
+            let dataSelect = this.foreground.selectAll(indices.map(i => 'path.data[data-index="'+i+'"]').join(","))
                 .style("stroke", this.settings.color)
                 .style("stroke-width", "1");
             // this.overlay.selectAll(".lineHighlight").remove();

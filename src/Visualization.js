@@ -412,6 +412,20 @@ class Visualization {
      */
     getHighlightElement(i){ }
 
+    _normalizeHighlightIndices(indexOrIndices, maxLength){
+        const indices = Array.isArray(indexOrIndices) ? indexOrIndices : [indexOrIndices];
+        const limit = typeof maxLength === "number" ? maxLength : (this.d ? this.d.length : 0);
+        const valid = [];
+
+        for(let idx of indices){
+            if(typeof idx === "number" && idx >= 0 && idx < limit){
+                valid.push(idx);
+            }
+        }
+
+        return [...new Set(valid)];
+    }
+
 
     /**
      * @description add anotation in element

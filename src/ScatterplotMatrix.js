@@ -326,9 +326,8 @@ class ScatterplotMatrix extends Visualization {
 
         let highlighted;
 
-        if (typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
-            // this.foreground.select
-            // d3.select(args[0])
+        const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+        if (indices.length > 0) {
             let strObj = {}, isFirst = {};
             for (let k of this.keys) {
                 strObj[k] = "M ";
@@ -336,7 +335,7 @@ class ScatterplotMatrix extends Visualization {
             }
 
             highlighted = this.foreground
-                .selectAll('circle.data[data-index="' + args[1] + '"]')
+                .selectAll(indices.map(i => 'circle.data[data-index="' + i + '"]').join(","))
                 .style("stroke", this.settings.highlightColor)
                 .each(function () {
                     let circle = d3.select(this);
@@ -352,10 +351,9 @@ class ScatterplotMatrix extends Visualization {
                             + " , " + (parseFloat(circle.attr("cx")) + t.x)
                             + " " + (parseFloat(circle.attr("cy")) + t.y);
                     }
-
-
                 });
 
+            this.background.selectAll("path.lineHighlight").remove();
             this.background
                 .selectAll("path.lineHighlight")
                 .data(_.values(strObj)).enter()
@@ -372,8 +370,9 @@ class ScatterplotMatrix extends Visualization {
     }
 
     removeHighlight(...args) {
-        if (typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length) {
-            let elem = this.foreground.selectAll('circle.data[data-index="' + args[1] + '"]').style("stroke", "none");
+        const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+        if (indices.length > 0) {
+            let elem = this.foreground.selectAll(indices.map(i => 'circle.data[data-index="' + i + '"]').join(",")).style("stroke", "none");
             this.background.selectAll(".lineHighlight").remove();
             super.removeHighlight(elem.node(), elem.datum(), args[1]);
         }

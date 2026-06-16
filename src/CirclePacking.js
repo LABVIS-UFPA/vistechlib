@@ -201,27 +201,37 @@ class CirclePacking extends Visualization{
     }
 
     highlight(...args){
+        const indices = this._normalizeHighlightIndices(args[1], this.d_h?.leaves()?.length || this.d.length);
+        if(indices.length === 0)
+            return;
 
-        console.log(args[0]);
-        console.log(args[1]);
+        const selected = this.foreground.selectAll(indices.map(i => `.data[data-index="${i}"]`).join(","));
+        this.highlightLayer.selectAll('.data-highlight').remove();
 
+        selected.each((d, i, nodes) => {
+            this.highlightLayer.node().appendChild(
+                d3.select(nodes[i].cloneNode())
+                    .attr("class", "data-highlight")
+                    .style("fill", "none")
+                    .style("stroke", this.settings.highlightColor)
+                    .style("stroke-width", "2")
+                    .node()
+            );
+        });
 
-        this.highlightLayer.append("circle")
-            .attr('class','data-highlight')
-              .attr("cx", args[0].x-10)
-              .attr("cy",  args[0].y)
-              .attr("r",  args[0].r)
-              .style("fill", "none")
-              .style("stroke", this.settings.highlightColor);
-
-        //return group;
+        super.highlight(selected.nodes(), args[0], args[1], args[2]);
 
     }
 
 
     removeHighlight(...args){
-        let remove =this.highlightLayer.selectAll('.data-highlight').remove();
+        const indices = this._normalizeHighlightIndices(args[1], this.d_h?.leaves()?.length || this.d.length);
+        if(indices.length === 0)
+            return;
 
+        let remove = this.highlightLayer.selectAll('.data-highlight').remove();
+        let elem = this.foreground.selectAll(indices.map(i => `.data[data-index="${i}"]`).join(","));
+        super.removeHighlight(elem.node(), elem.datum(), args[1]);
         return remove;
 
     }

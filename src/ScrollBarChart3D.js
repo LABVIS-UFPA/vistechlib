@@ -31,6 +31,7 @@ class ScrollBarChart3D extends Visualization {
     this.highlightMaterial = null;
     this.raycaster = new THREE.Raycaster();
     this.pointerNdc = new THREE.Vector2();
+    this.highlightedIndices = new Set();
 
     this.svg.style("display", "none");
 
@@ -222,6 +223,69 @@ class ScrollBarChart3D extends Visualization {
     this.webglContainer.innerHTML = "";
 
     return this;
+  }
+
+  _getHighlightIndices(indexOrIndices) {
+    return this._normalizeHighlightIndices(indexOrIndices, this.d?.length || 0);
+  }
+
+  _getBarMeshByIndex(index) {
+    const barGroup = this.bars.find(
+      (item) => item?.isGroup && item.userData?.index === index,
+    );
+
+    if (!barGroup) return null;
+    return barGroup.children.find((child) => child.userData?.isBarMesh) || null;
+  }
+
+  _isPersistHighlighted(mesh) {
+    const index = mesh?.parent?.userData?.index;
+    return typeof index === "number" && this.highlightedIndices.has(index);
+  }
+
+  highlight(...args) {
+    const indices = this._getHighlightIndices(args[1]);
+    if (indices.length === 0) return;
+
+    const meshes = indices
+      .map((index) => this._getBarMeshByIndex(index))
+      .filter((mesh) => !!mesh);
+
+    meshes.forEach((mesh) => {
+      mesh.material = this.highlightMaterial;
+    });
+
+    indices.forEach((index) => this.highlightedIndices.add(index));
+
+    if (meshes.length > 0)
+      super.highlight(meshes, args[0], args[1], args[2]);
+  }
+
+  removeHighlight(...args) {
+    let indices = this._getHighlightIndices(args[1]);
+    if (indices.length === 0 && this.highlightedIndices.size > 0) {
+      indices = Array.from(this.highlightedIndices);
+    }
+    if (indices.length === 0) return;
+
+    const meshes = indices
+      .map((index) => this._getBarMeshByIndex(index))
+      .filter((mesh) => !!mesh);
+
+    indices.forEach((index) => this.highlightedIndices.delete(index));
+
+    meshes.forEach((mesh) => {
+      if (mesh !== this.hoveredBar) {
+        mesh.material = this.material;
+      }
+    });
+
+    if (meshes.length > 0)
+      super.removeHighlight(meshes[0], meshes[0].parent?.userData?.datum, args[1]);
+  }
+
+  getHighlightElement(i) {
+    return this._getBarMeshByIndex(i) || null;
   }
 
   _calculateOutlierInfo() {
@@ -666,6 +730,11 @@ class ScrollBarChart3D extends Visualization {
       this.chartGroup.add(bar);
       this.bars.push(bar);
 
+      const mesh = bar.children.find((child) => child.userData?.isBarMesh);
+      if (mesh && this.highlightedIndices.has(i)) {
+        mesh.material = this.highlightMaterial;
+      }
+
       let label = this._createTextSprite(d[this.labelKey]);
       label.position.set(
         x,
@@ -722,6 +791,11 @@ class ScrollBarChart3D extends Visualization {
 
       this.chartGroup.add(bar);
       this.bars.push(bar);
+
+      const mesh = bar.children.find((child) => child.userData?.isBarMesh);
+      if (mesh && this.highlightedIndices.has(i)) {
+        mesh.material = this.highlightMaterial;
+      }
 
       let label = this._createTextSprite(d[this.labelKey]);
       label.position.set(
@@ -1245,7 +1319,9 @@ class ScrollBarChart3D extends Visualization {
       if (hovered === this.hoveredBar) return;
 
       if (this.hoveredBar) {
-        this.hoveredBar.material = this.material;
+        if (!this._isPersistHighlighted(this.hoveredBar)) {
+          this.hoveredBar.material = this.material;
+        }
         if (this.hoveredBar.parent?.userData?.hasFold) {
           this._animateBarInspect(this.hoveredBar.parent, false);
         }
@@ -1268,7 +1344,9 @@ class ScrollBarChart3D extends Visualization {
 
     canvas.addEventListener("pointerleave", () => {
       if (this.hoveredBar) {
-        this.hoveredBar.material = this.material;
+        if (!this._isPersistHighlighted(this.hoveredBar)) {
+          this.hoveredBar.material = this.material;
+        }
 
         if (this.hoveredBar.parent?.userData?.hasFold) {
           this._animateBarInspect(this.hoveredBar.parent, false);

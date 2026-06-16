@@ -704,10 +704,12 @@ class ParallelBundling extends Visualization{
 
         if(args[0] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            // this.foreground.select
-            // d3.select(args[0])
-            this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
+        }else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
+
+            this.foreground.selectAll(indices.map(i => 'path.data[data-index="'+i+'"]').join(","))
                 .style("stroke", parallelcoordinates.settings.highlightColor)
                 .style("stroke-width", "2")
                 .each(function(){
@@ -727,8 +729,12 @@ class ParallelBundling extends Visualization{
         let self = this;
         if(args[1] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
-            let elem = this.foreground.selectAll('path.data[data-index="'+args[1]+'"]')
+        }else {
+            const indices = this._normalizeHighlightIndices(args[1], this.d.length);
+            if(indices.length === 0)
+                return;
+
+            let elem = this.foreground.selectAll(indices.map(i => 'path.data[data-index="'+i+'"]').join(","))
                 .style("stroke", this.settings.color)//function(d) {return self.clusterColor(d[self.clusterOn])})
                 .style("stroke-width", 1);
             // this.overlay.selectAll(".lineHighlight").remove();

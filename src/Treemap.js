@@ -225,15 +225,20 @@ class Treemap extends Visualization{
         let dataItens = this.d_h.leaves();
         if(args[0] instanceof SVGElement){
 
-        }else if(typeof args[1] === "number" && args[1] >= 0 && args[1] < dataItens.length){
-            let d = dataItens[args[1]];
             this.highlightLayer.selectAll("rect.data-highlight").remove();
-            highlighted = this.highlightLayer.append("rect")
+        }else {
+            const indices = this._normalizeHighlightIndices(args[1], dataItens.length);
+            if(indices.length === 0)
+                return;
+
+            highlighted = this.highlightLayer.selectAll("rect.data-highlight")
+                .data(indices.map(i => dataItens[i]))
+                .join("rect")
                 .attr("class", "data-highlight")
-                .attr("x", d.x0)
-                .attr("y", d.y0)
-                .attr("width", d.x1 - d.x0)
-                .attr("height", d.y1 - d.y0)
+                .attr("x", d => d.x0)
+                .attr("y", d => d.y0)
+                .attr("width", d => d.x1 - d.x0)
+                .attr("height", d => d.y1 - d.y0)
                 .style("fill", "none")
                 .style("stroke", this.settings.highlightColor);
         }
@@ -241,11 +246,13 @@ class Treemap extends Visualization{
             super.highlight(highlighted.nodes(), args[0], args[1], args[2]);
     }
     removeHighlight(...args){
-        if(typeof args[1] === "number" && args[1] >= 0 && args[1] < this.d.length){
+        let dataItens = this.d_h.leaves();
+        const indices = this._normalizeHighlightIndices(args[1], dataItens.length);
+        if(indices.length > 0){
             this.highlightLayer.selectAll("rect.data-highlight").remove();
             super.removeHighlight(this.foreground
-                    .select('rect.data[data-index="'+args[1]+'"]').node(),
-                this.d[args[1]], args[1]);
+                    .select('rect.data[data-index="'+indices[0]+'"]').node(),
+                this.d[indices[0]], args[1]);
         }
     }
 
