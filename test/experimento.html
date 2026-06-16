@@ -1144,11 +1144,6 @@
                             isZooming = true;
                             zoomDirection = currentDirection;
                             zoomSteps = 0;
-
-                            registerInteraction('zoomStart', {
-                                target: 'canvas',
-                                value: zoomDirection
-                            });
                         }
 
                         zoomSteps += 1;
@@ -1157,7 +1152,7 @@
                         clearTimeout(zoomTimeout);
 
                         zoomTimeout = setTimeout(() => {
-                            registerInteraction('zoomEnd', {
+                            registerInteraction('zoom', {
                                 target: 'canvas',
                                 value: zoomDirection,
                                 steps: zoomSteps
@@ -2201,7 +2196,6 @@
 
                     updateControlValue(inp.value);
 
-                    let sliderStartValue = null;
                     let sliderInteractionActive = false;
 
                     const finishSliderInteraction = e => {
@@ -2209,26 +2203,16 @@
 
                         const sliderEndValue = Number(e.target.value);
 
-                        registerInteraction('sliderEnd', {
+                        registerInteraction('slider', {
                             controlKey: ctrl.key || ctrl.label,
-                            value: sliderEndValue,
-                            startValue: sliderStartValue
+                            value: sliderEndValue
                         });
 
-                        sliderStartValue = null;
                         sliderInteractionActive = false;
                     };
 
-                    inp.addEventListener('pointerdown', e => {
-                        if (sliderInteractionActive) return;
-
-                        sliderStartValue = Number(e.target.value);
+                    inp.addEventListener('pointerdown', () => {
                         sliderInteractionActive = true;
-
-                        registerInteraction('sliderStart', {
-                            controlKey: ctrl.key || ctrl.label,
-                            value: sliderStartValue
-                        });
                     });
 
                     inp.addEventListener('input', e => {
