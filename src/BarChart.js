@@ -313,7 +313,7 @@ class BarChart extends Visualization {
 
         } else {
             const indices = this._normalizeHighlightIndices(args[1], this.d.length);
-            if(indices.length === 0)
+            if (indices.length === 0)
                 return;
 
             indices.forEach(i => this.highlightedIndices.add(i));
@@ -334,7 +334,7 @@ class BarChart extends Visualization {
 
         } else {
             const indices = this._normalizeHighlightIndices(args[1], this.d.length);
-            if(indices.length === 0)
+            if (indices.length === 0)
                 return;
 
             indices.forEach(i => this.highlightedIndices.delete(i));
@@ -380,7 +380,7 @@ class BarChart extends Visualization {
 BarChart.strategies = {
     "default": {
         draw: (barchart) => {
-            
+
             barchart.foreground.selectAll("g.dataGroup").each(function (key) {
                 let g = d3.select(this);
                 g.selectAll(".data")
@@ -626,7 +626,7 @@ BarChart.strategies = {
                     .attr("transform", (d, i) => `translate(${barchart.x(i)},${miny})`)
                     .style("display", (d) => (meta && d[key] > meta.corte ? null : "none"));
 
-                lowerCutNotches.each(function(d, parentIndex) {
+                lowerCutNotches.each(function (d, parentIndex) {
                     d3.select(this).selectAll("polygon")
                         .data(lowerPoints)
                         .join("polygon")
@@ -650,7 +650,7 @@ BarChart.strategies = {
                     .attr("transform", (d, i) => `translate(${barchart.x(i)},${barchart.boxHeightBreak})`)
                     .style("display", (d) => (meta && d[key] > meta.cortefinal ? null : "none"));
 
-                upperCutNotches.each(function(d, parentIndex) {
+                upperCutNotches.each(function (d, parentIndex) {
                     d3.select(this).selectAll("polygon")
                         .data(upperPoints)
                         .join("polygon")
@@ -980,11 +980,11 @@ BarChart.strategies = {
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
-                        let x2 =x+((barchart.innerWidth/2)-x)*(di/z)
-                        let width2 = width * (di/z) 
+                        let x2 = x + ((barchart.innerWidth / 2) - x) * (di / z)
+                        let width2 = width * (di / z)
                         let y = Math.max(barchart.ybreak[key](d[key]), barchart.boxHeightBreak2);
-                        let height = Math.max(Math.min((barchart.boxHeightBreak) - barchart.ybreak[key](d[key]), maxh2), 0);                       
-                        return `M${x2},${y} L${(x2+width2)},${y}                         
+                        let height = Math.max(Math.min((barchart.boxHeightBreak) - barchart.ybreak[key](d[key]), maxh2), 0);
+                        return `M${x2},${y} L${(x2 + width2)},${y}                         
                         L${x + (width)},${y + height} L${x},${y + height} Z`;
                     });
 
@@ -1006,11 +1006,11 @@ BarChart.strategies = {
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
-                        let x2 =x+((barchart.innerWidth/2)-x)*(di/z)
-                        let width2 = width * (di/z)                       
+                        let x2 = x + ((barchart.innerWidth / 2) - x) * (di / z)
+                        let width2 = width * (di / z)
                         let y = Math.max(barchart.ybreak2[key](d[key]), barchart.boxHeightBreak3);
                         let height = Math.max(Math.min((barchart.boxHeightBreak2) - barchart.ybreak2[key](d[key]), maxh3), 0);
-                        return `M${x2},${y} L${(x2+width2)},${y}                         
+                        return `M${x2},${y} L${(x2 + width2)},${y}                         
                         L${x2 + (width2)},${y + height} L${x2},${y + height} Z`;
                     });
 
@@ -1029,15 +1029,14 @@ BarChart.strategies = {
                     )
                     .style("fill", barchart.settings.color)
                     .attr("d", (d, i) => {
-                       let x = barchart.x(i);
+                        let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
-                        let x2 =x+((barchart.innerWidth/2)-x)*(di/z)
-                        let width2 = width * (di/z)  
+                        let x2 = x + ((barchart.innerWidth / 2) - x) * (di / z)
+                        let width2 = width * (di / z)
                         let y = Math.max(barchart.ybreak3[key](d[key]), barchart.boxHeightBreak4);
                         let height = Math.max(Math.min((barchart.boxHeightBreak3) - barchart.ybreak3[key](d[key]), maxh4), 0);
-                        return `M${x},${y} L${(x+width)},${y}                         
+                        return `M${x},${y} L${(x + width)},${y}                         
                         L${x2 + (width2)},${y + height} L${x2},${y + height} Z`;
-                        return `M${x2},${y} L${(x2+width2)},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
                     });
 
                 g.selectAll("path.upper")
@@ -1083,37 +1082,44 @@ BarChart.strategies = {
                     });
 
 
+                // Calcula a posição x do eixo quando está "no fundo"
+                // Fórmula original: x' = x + ((innerWidth/2) - x) * (di/z)
+                // Como para o eixo x = 0, a fórmula simplifica para:
+                let xFundo = (barchart.innerWidth / 2) * (di / z);
+
+                // Axis (Lower e Upper permanecem iguais, ajustamos apenas os "meios")
+
+                // 1. Ida para o fundo
                 g.append("path")
                     .attr("stroke", "black")
                     .attr("class", "y meio1")
-                    .attr("d", (d, i) => {
-                        let x = 0;
+                    .attr("d", () => {
                         let y = barchart.boxHeightBreak;
-                        let heigth = barchart.boxHeightBreak2;
-                        let width = barchart.x.bandwidth();
-                        return `M${x},${y} L${x + (width * barchart.z)},${heigth} Z`;
+                        let height = barchart.boxHeightBreak2;
+                        // Sai do x=0 e vai para x=xFundo
+                        return `M0,${y} L${xFundo},${height}`;
                     });
 
+                // 2. Reta no fundo (paralela ao eixo y original)
                 g.append("path")
                     .attr("stroke", "black")
                     .attr("class", "y meio2")
-                    .attr("d", (d, i) => {
-                        let x = 0;
+                    .attr("d", () => {
                         let y = barchart.boxHeightBreak2;
-                        let heigth = barchart.boxHeightBreak3;
-                        let width = barchart.x.bandwidth();
-                        return `M${x + (width * barchart.z)},${y} L${x + (width * barchart.z)},${heigth} Z`;
+                        let height = barchart.boxHeightBreak3;
+                        // Mantém-se no xFundo
+                        return `M${xFundo},${y} L${xFundo},${height}`;
                     });
 
+                // 3. Volta para a frente
                 g.append("path")
                     .attr("stroke", "black")
                     .attr("class", "y meio3")
-                    .attr("d", (d, i) => {
-                        let x = 0;
+                    .attr("d", () => {
                         let y = barchart.boxHeightBreak3;
-                        let heigth = barchart.boxHeightBreak4;
-                        let width = barchart.x.bandwidth();
-                        return `M${x + (width * barchart.z)},${y} L${x},${heigth} Z`;
+                        let height = barchart.boxHeightBreak4;
+                        // Sai do xFundo e volta para o x=0
+                        return `M${xFundo},${y} L0,${height}`;
                     });
 
                 g.append("g")
@@ -1132,105 +1138,118 @@ BarChart.strategies = {
                     });
 
 
-                //Line rigth
+                // Posição fixa na frente e cálculo da posição no fundo
+                let xFrente = barchart.innerWidth;
+                let xFundoDir = barchart.innerWidth - (barchart.innerWidth / 2) * (di / z);
+
+                // 1. Linha inferior (reta, na frente)
                 g.append("path")
                     .attr("stroke", "black")
-                    .attr("class", "Axisrigth.meio1")
-                    .attr("d", (d, i) => {
-                        let x = barchart.innerWidth;
+                    .attr("class", "Axisright meio1")
+                    .attr("d", () => {
                         let y = barchart.boxHeight;
-                        let heigth = barchart.boxHeightBreak;
-                        return `M${x},${y} L${x},${heigth} Z`;
+                        let height = barchart.boxHeightBreak;
+                        return `M${xFrente},${y} L${xFrente},${height}`;
                     });
 
+                // 2. Ida para o fundo
                 g.append("path")
                     .attr("stroke", "black")
-                    .attr("class", "Axisrigth.meio2")
-                    .attr("d", (d, i) => {
-                        let x = barchart.innerWidth;
-                        let width = barchart.x.bandwidth();
-                        let x2 = barchart.innerWidth - ((width * barchart.z));
+                    .attr("class", "Axisright meio2")
+                    .attr("d", () => {
                         let y = barchart.boxHeightBreak;
-                        let heigth = barchart.boxHeightBreak2;
-                        return `M${x},${y} L${x2},${heigth} Z`;
+                        let height = barchart.boxHeightBreak2;
+                        // Sai de xFrente e vai para xFundoDir
+                        return `M${xFrente},${y} L${xFundoDir},${height}`;
                     });
 
+                // 3. Reta no fundo (paralela ao eixo)
                 g.append("path")
                     .attr("stroke", "black")
-                    .attr("class", "Axis rigth.meio3")
-                    .attr("d", (d, i) => {
-                        let width = barchart.x.bandwidth();
-                        let x = barchart.innerWidth - (width * barchart.z);
+                    .attr("class", "Axisright meio3")
+                    .attr("d", () => {
                         let y = barchart.boxHeightBreak2;
-                        let heigth = barchart.boxHeightBreak3;
-                        return `M${x},${y} L${x},${heigth} Z`;
+                        let height = barchart.boxHeightBreak3;
+                        // Mantém-se no xFundoDir
+                        return `M${xFundoDir},${y} L${xFundoDir},${height}`;
                     });
 
+                // 4. Volta para a frente
                 g.append("path")
                     .attr("stroke", "black")
-                    .attr("class", "Axis rigth.meio4")
-                    .attr("d", (d, i) => {
-                        let width = barchart.x.bandwidth();
-                        let x = barchart.innerWidth - (width * barchart.z);
-                        let x2 = barchart.innerWidth;
+                    .attr("class", "Axisright meio4")
+                    .attr("d", () => {
                         let y = barchart.boxHeightBreak3;
-                        let heigth = barchart.boxHeightBreak4;
-                        return `M${x},${y} L${x2},${heigth} Z`;
+                        let height = barchart.boxHeightBreak4;
+                        // Sai de xFundoDir e volta para xFrente
+                        return `M${xFundoDir},${y} L${xFrente},${height}`;
                     });
 
+                // 5. Linha superior (reta, na frente)
                 g.append("path")
                     .attr("stroke", "black")
-                    .attr("class", "Axisrigth.meio5")
-                    .attr("d", (d, i) => {
-                        let x = barchart.innerWidth;
+                    .attr("class", "Axisright meio5")
+                    .attr("d", () => {
                         let y = barchart.boxHeightBreak4;
-                        let heigth = 0;
-                        return `M${x},${y} L${x},${heigth} Z`;
+                        let height = 0;
+                        return `M${xFrente},${y} L${xFrente},${height}`;
                     });
 
 
                 //textura
-                let xbreak = 0;
+                // Parâmetros de perspectiva (garanta que essas variáveis estejam disponíveis)
+                
+                // Textura 1: Ida para o fundo (Line2)
                 for (let j = 0; j < 4; j++) {
                     g.append("path")
                         .attr("stroke", "black")
                         .attr("stroke-width", (1 - (j * 30.3) / 100))
                         .attr("class", "Line2")
-                        .attr("d", (d, i) => {
-                            x2 = barchart.innerWidth - (xbreak)
-                            y = barchart.boxHeightBreak + j * ((barchart.boxHeightBreak2 - barchart.boxHeightBreak) / 3);
-                            return `M${xbreak},${y} L${x2},${y}`;
+                        .attr("d", () => {
+                            let t = j / 3; // Proporção da interpolação (0 até 1)
+                            let x1 = t * xFundo; // Sai do 0 e vai até xFundo
+                            let x2 = barchart.innerWidth - (t * xFundo); // Sai da ponta direita e vai até xFundoDir
+                            let y = barchart.boxHeightBreak + t * (barchart.boxHeightBreak2 - barchart.boxHeightBreak);
+                            
+                            return `M${x1},${y} L${x2},${y}`;
                         });
-                    xbreak += (barchart.x.bandwidth() * barchart.z) / 3;
                 }
 
-
-                for (j = 1; j < 6; j++) {
+                // Textura 2: Reta no fundo (Line3)
+                for (let j = 1; j < 6; j++) {
                     g.append("path")
                         .attr("stroke", "black")
-                        .attr("stroke-width", (0.10))
+                        .attr("stroke-width", 0.10)
                         .attr("class", "Line3")
-                        .attr("d", (d, i) => {
-                            let x = (barchart.x.bandwidth() * barchart.z);
-                            let x2 = barchart.innerWidth - ((barchart.x.bandwidth() * barchart.z));
-                            let y = barchart.boxHeightBreak2 + j * ((barchart.boxHeightBreak3 - barchart.boxHeightBreak2) / 5);
-                            return `M${x},${y} L${x2},${y} Z`;
-                        })
-
+                        .attr("d", () => {
+                            // As linhas do fundo mantêm os X fixos nos pontos mais distantes
+                            let x1 = xFundo;
+                            let x2 = xFundoDir;
+                            let t = j / 5; // Proporção do Y (0 até 1)
+                            let y = barchart.boxHeightBreak2 + t * (barchart.boxHeightBreak3 - barchart.boxHeightBreak2);
+                            
+                            return `M${x1},${y} L${x2},${y}`;
+                        });
                 }
 
-                let xbreak3 = (barchart.x.bandwidth() * barchart.z);
-                for (j = 0; j < 4; j++) {
+                // Textura 3: Volta para a frente (Line4)
+                for (let j = 0; j < 4; j++) {
                     g.append("path")
                         .attr("stroke", "black")
                         .attr("stroke-width", (0.10 + (j * 27) / 100))
                         .attr("class", "Line4")
-                        .attr("d", (d, i) => {
-                            let x2 = (barchart.innerWidth) - (xbreak3)
-                            let y = barchart.boxHeightBreak3 + j * ((barchart.boxHeightBreak4 - barchart.boxHeightBreak3) / 3);
-                            return `M${xbreak3},${y} L${x2},${y} Z`;
+                        .attr("d", () => {
+                            let t = j / 3; // Proporção da interpolação (0 até 1)
+                            
+                            // Sai do xFundo (quando t=0) e volta para o 0 (quando t=1)
+                            let x1 = xFundo * (1 - t); 
+                            // Sai do xFundoDir (quando t=0) e volta para innerWidth (quando t=1)
+                            let x2 = barchart.innerWidth - (xFundo * (1 - t)); 
+                            
+                            let y = barchart.boxHeightBreak3 + t * (barchart.boxHeightBreak4 - barchart.boxHeightBreak3);
+                            
+                            return `M${x1},${y} L${x2},${y}`;
                         });
-                    xbreak3 = xbreak3 - ((barchart.x.bandwidth() * barchart.z)) / 3
                 }
             });
         }
