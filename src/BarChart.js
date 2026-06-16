@@ -911,15 +911,9 @@ BarChart.strategies = {
                 barchart.breakPoint3 = barchart.settings.breakPoint3;
                 barchart.breakPoint4 = barchart.settings.breakPoint4;
 
-                barchart.breakPoint = 0.3;
-                // barchart.breakPoint2 = 0.92;
-                // barchart.breakPoint3 = 0.91;
-                // barchart.breakPoint4 = 0.91;
+                barchart.breakPoint = 0.4;
+                barchart.breakPoint2 = 0.91;
 
-                // let corte1 = 10;
-                // let corte2 = 100;
-                // let corte3 = 130;
-                // let corte4 = 230;
 
 
                 barchart.boxHeightBreak = barchart.boxHeight * barchart.breakPoint;
@@ -948,7 +942,7 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("rect")
-                                .attr("class", "lower data")
+                                .attr("class", "lower")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
@@ -959,41 +953,39 @@ BarChart.strategies = {
                     .attr("y", (d) => Math.max(barchart.y[key](d[key]), barchart.boxHeightBreak))
                     .attr("width", barchart.x.bandwidth())
                     .attr("height", (d) => Math.min(barchart.boxHeight - barchart.y[key](d[key]), maxh))
-                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
-                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
-                        : barchart.settings.color);
+                    .style("fill", barchart.settings.color);
 
-                barchart.settings.gap = barchart.x(1) - barchart.x.bandwidth() - barchart.x(0);
 
                 let maxh2 = barchart.boxHeightBreak - barchart.boxHeightBreak2;
-                let z = 2;
-                let di = 5;
-                let f = 30;
+
+                // x'=x+(xf-x)*(d/z)               
+                let z = 1; // objeto no fundo
+                let di = 0.2; //distancia observador -->mais pro fundo
+
+                //passo ->> fazer função para calculçar o valor transformado, ajusta todos os path meio depois
+
                 g.selectAll("path.meio1")
                     .data(barchart.d)
                     .join(
                         enter => {
                             let enter_result = enter.append("path")
-                                .attr("class", "meio1 data")
+                                .attr("class", "meio1")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
                     )
-                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
-                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
-                        : barchart.settings.color)
+                    .style("fill", barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
+                        let x2 =x+((barchart.innerWidth/2)-x)*(di/z)
+                        let width2 = width * (di/z) 
                         let y = Math.max(barchart.ybreak[key](d[key]), barchart.boxHeightBreak2);
-                        let height = Math.max(Math.min((barchart.boxHeightBreak) - barchart.ybreak[key](d[key]), maxh2), 0);
-                        // let xp = x/(z/di);
-                        // let xp = x*di/(z+di)*(f/(f+z));
-                        // console.log('normal:',x)                        
-                        // console.log('atual:',x+(barchart.z))                        
-                        return `M${x + (width * barchart.z)},${y} L${x + (width * (1 - barchart.z))},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
+                        let height = Math.max(Math.min((barchart.boxHeightBreak) - barchart.ybreak[key](d[key]), maxh2), 0);                       
+                        return `M${x2},${y} L${(x2+width2)},${y}                         
+                        L${x + (width)},${y + height} L${x},${y + height} Z`;
                     });
 
 
@@ -1003,22 +995,23 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("path")
-                                .attr("class", "meio2 data")
+                                .attr("class", "meio2")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
                     )
-                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
-                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
-                        : barchart.settings.color)
+                    .style("fill", barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
+                        let x2 =x+((barchart.innerWidth/2)-x)*(di/z)
+                        let width2 = width * (di/z)                       
                         let y = Math.max(barchart.ybreak2[key](d[key]), barchart.boxHeightBreak3);
                         let height = Math.max(Math.min((barchart.boxHeightBreak2) - barchart.ybreak2[key](d[key]), maxh3), 0);
-                        return `M${x + (width * barchart.z)},${y} L${x + (width * (1 - barchart.z))},${y} L${x + (width * (1 - barchart.z))},${y + height} L${x + (width * barchart.z)},${y + height} Z`;
+                        return `M${x2},${y} L${(x2+width2)},${y}                         
+                        L${x2 + (width2)},${y + height} L${x2},${y + height} Z`;
                     });
 
                 let maxh4 = barchart.boxHeightBreak3 - barchart.boxHeightBreak4;
@@ -1027,22 +1020,24 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("path")
-                                .attr("class", "meio3 data")
+                                .attr("class", "meio3")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
                     )
-                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
-                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
-                        : barchart.settings.color)
+                    .style("fill", barchart.settings.color)
                     .attr("d", (d, i) => {
-                        let x = barchart.x(i);
+                       let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
+                        let x2 =x+((barchart.innerWidth/2)-x)*(di/z)
+                        let width2 = width * (di/z)  
                         let y = Math.max(barchart.ybreak3[key](d[key]), barchart.boxHeightBreak4);
                         let height = Math.max(Math.min((barchart.boxHeightBreak3) - barchart.ybreak3[key](d[key]), maxh4), 0);
-                        return `M${x},${y} L${x + width},${y} L${x + (width * (1 - barchart.z))},${y + height} L${x + (width * barchart.z)},${y + height} Z`;
+                        return `M${x},${y} L${(x+width)},${y}                         
+                        L${x2 + (width2)},${y + height} L${x2},${y + height} Z`;
+                        return `M${x2},${y} L${(x2+width2)},${y} L${x + (width)},${y + height} L${x},${y + height} Z`;
                     });
 
                 g.selectAll("path.upper")
@@ -1050,16 +1045,14 @@ BarChart.strategies = {
                     .join(
                         enter => {
                             let enter_result = enter.append("path")
-                                .attr("class", "upper data")
+                                .attr("class", "upper")
                                 .style("stroke", "none")
                                 .attr("data-index", (d, i) => i);
                             barchart._bindDataMouseEvents(enter_result);
                             return enter_result;
                         }
                     )
-                    .style("fill", (d, i) => barchart.highlightedIndices.has(i)
-                        ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
-                        : barchart.settings.color)
+                    .style("fill", barchart.settings.color)
                     .attr("d", (d, i) => {
                         let x = barchart.x(i);
                         let y = barchart.ybreak4[key](d[key]);
@@ -1241,7 +1234,7 @@ BarChart.strategies = {
                 }
             });
         }
-    },
+    }
 }
 
 export default BarChart;
