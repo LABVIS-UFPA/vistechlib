@@ -164,6 +164,9 @@
             border: 1px dashed var(--primary-color);
             border-radius: 4px;
             background: #fff;
+            text-align: justify;
+            line-height: 1.6;
+            padding: 15px;
         }
 
         .actions {
@@ -660,8 +663,13 @@
 
         <div id="welcome-screen" class="screen">
             <h1>Estudo sobre Técnicas de Visualização de Dados</h1>
-            <p>Esta é a tela de boas-vindas (placeholder). Aqui ficará a introdução completa do experimento.</p>
-            <div class="placeholder-box">Placeholder: resumo do estudo + instruções iniciais.</div>
+            <!-- <p>Esta é a tela de boas-vindas (placeholder). Aqui ficará a introdução completa do experimento.</p> -->
+            <div class="placeholder-box">Nesta pesquisa, investigamos como as pessoas interpretam gráficos que contêm
+                dados em diferentes ordens de magnitude, focando especialmente em cenários onde a maioria dos dados está
+                em uma escala, enquanto um ou alguns poucos valores se destacam em uma magnitude muito acima dos demais.
+                Nosso objetivo é avaliar novas técnicas de visualização para descobrir quais abordagens otimizam a busca
+                por informações e melhoram a análise de dados diante dessas diferenças extremas, tornando a tomada de
+                decisão mais rápida, precisa e com menor carga cognitiva.</div>
             <div id="ws-status-banner"
                 style="margin-top:1rem;padding:0.75rem 1rem;border-radius:4px;font-weight:600;text-align:center;background:#fff3cd;color:#856404;border:1px solid #ffc107;">
                 ⏳ Aguardando conexão com o servidor…
@@ -977,7 +985,7 @@
             const tcleConfirmation = document.getElementById('tcle-confirmation');
             const acceptTcleButton = document.getElementById('accept-tcle-button');
             const TCLE_VERSION = "2026-06-11-digital-2";
-            const devMode = true;
+            const devMode = false;
             const BAR_CHART_DRAW_STRATEGY = 'scale break perspective'; // Altere 'scale break perspective'
             const BAR_CHART_GAP_SIZE = 45;
             const BAR_CHART_Z = 0.48;
