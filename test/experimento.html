@@ -985,7 +985,7 @@
             const tcleConfirmation = document.getElementById('tcle-confirmation');
             const acceptTcleButton = document.getElementById('accept-tcle-button');
             const TCLE_VERSION = "2026-06-11-digital-2";
-            const devMode = false;
+            const devMode = true;
             const BAR_CHART_DRAW_STRATEGY = 'scale break perspective'; // Altere 'scale break perspective'
             const BAR_CHART_GAP_SIZE = 45;
             const BAR_CHART_Z = 0.48;
@@ -1963,9 +1963,11 @@
                     : 'Ex.: 5.000';
 
                 blockConfidence.innerHTML = [
-                    '<option>Baixa</option>',
+                    '<option>Muito Baixa</option>',
+                    '<option>Baixa</option>',                    
                     '<option selected>Média</option>',
-                    '<option>Alta</option>'
+                    '<option>Alta</option>',
+                    '<option>Muito Alta</option>'
                 ].join('');
             }
 

@@ -10,7 +10,8 @@ import scikit_posthocs as sp
 from scipy.stats import friedmanchisquare, wilcoxon, shapiro
 
 # --- CONFIGURAÇÃO ---
-RESULTS_PATH = '../../results.json'
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+RESULTS_PATH = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..', 'results.json'))
 
 TASK_MAP = {
     'T1': 'T1 (Valor Exato)',
@@ -18,6 +19,17 @@ TASK_MAP = {
     'T3': 'T3 (Diferença Próxima)',
     'T4': 'T4 (Proporção Distante)',
     'T5': 'T5 (Proporção Próxima)'
+}
+
+CONFIDENCE_MAP = {
+    'muito baixa': 0,
+    'baixa': 1,
+    'média': 2,
+    'alta': 3,
+    'muito alta': 4,
+    'extremamente alta': 5,
+    'nenhuma': 0,
+    'nula': 0
 }
 
 # Lista global para armazenar resultados para a análise de poder final
@@ -63,13 +75,22 @@ def load_and_flatten_data(filepath):
             # Ex: err(200/100) = |log(2)| = 0.3; err(50/100) = |log(0.5)| = |-0.3| = 0.3
             log_error = np.abs(np.log10( (answer + epsilon) / (correct + epsilon) ))
             
+            confidence_value = block.get('confidence')
+            confidence_score = np.nan
+            if isinstance(confidence_value, str):
+                confidence_norm = confidence_value.strip().lower()
+                confidence_score = CONFIDENCE_MAP.get(confidence_norm, np.nan)
+            elif isinstance(confidence_value, (int, float)):
+                confidence_score = confidence_value
+
             perf_rows.append({
                 'Participant': current_pid,
                 'Task': task,
                 'Diff': 'Geral', # Sem níveis de dificuldade extras
                 'Visualization': vis,
                 'LogError': log_error,
-                'RT': rt
+                'RT': rt,
+                'Confidence': confidence_score
             })
 
         # --- NASATLX (NASA-TLX) ---
@@ -201,7 +222,7 @@ def run_friedman_test(df, metric_col, group_col='Visualization', block_col='Part
     # 1. Descritiva
     desc_stats = df.groupby(group_col)[metric_col].mean()
     desc_count = df.groupby(group_col)[metric_col].count()
-    is_lower_better = metric_col in ['RT', 'LagTime', 'Replays', 'Workload', 'Rank', 'LogError', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration']
+    is_lower_better = metric_col in ['RT', 'LagTime', 'Replays', 'Workload', 'Rank', 'LogError', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration', 'Confidence']
     sorted_stats = desc_stats.sort_values(ascending=is_lower_better)
     
     print("   Médias (Descritiva):")
@@ -346,6 +367,28 @@ if df_perf is not None and not df_perf.empty:
                          print(f"   * {winner} teve erro menor que {loser} (p={p:.4f})")
         else:
             print(res)
+
+        # --- B. CONFIDENCE ---
+        print(f"\n--- Confidence (Likert 0-5) ---")
+        res_conf = run_friedman_test(subset, 'Confidence')
+        if isinstance(res_conf, dict):
+            print(f"Friedman N={res_conf['N']} | Chi²={res_conf['Statistic']:.2f} | p={res_conf['p-value']:.4f} | Kendall's W={res_conf['KendallW']:.4f}")
+            power_analysis_data.append({
+                'Label': f"{TASK_MAP.get(task, task)} {diff} (Confidence)",
+                'N': res_conf['N'],
+                'k': res_conf['k'],
+                'W': res_conf['KendallW'],
+                'Sig': res_conf['Significant']
+            })
+            if res_conf['Significant']:
+                pairs_conf = run_posthoc_tests(res_conf, 'Confidence')
+                if pairs_conf:
+                    print("\n   Diferenças Reais encontradas (Confidence maior é melhor):")
+                    for g1, g2, p, winner in pairs_conf:
+                        loser = g2 if winner == g1 else g1
+                        print(f"   * {winner} teve confiança maior que {loser} (p={p:.4f})")
+        else:
+            print(res_conf)
 
         # --- B. MÉTICAS DE EFICIÊNCIA (TEMPO / LAG / REPLAYS) ---
         # Define qual métrica usar baseada na tarefa
