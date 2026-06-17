@@ -960,6 +960,11 @@ BarChart.strategies = {
                 let xFundo = (barchart.innerWidth / 2) * (di / z);
                 let xFundoDir = barchart.innerWidth - xFundo;
 
+
+                // Ajuste da largura da barra (largura total (1)- o que e empurrado para tras)
+                let t = di / z;            // O quanto ele andou pro centro (ex: 0.2)
+                let escalaFundo = 1 - t;   // O tamanho que sobrou (ex: 0.8)
+
                 const getFillColor = (i) => barchart.highlightedIndices.has(i)
                     ? d3.interpolateRgb(barchart.settings.color, "#ffffff")(0.25)
                     : barchart.settings.color;
@@ -992,7 +997,7 @@ BarChart.strategies = {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
                         let x2 = x + ((barchart.innerWidth / 2) - x) * (di / z);
-                        let width2 = width * (di / z);
+                        let width2 = width * escalaFundo; 
                         let y = Math.max(barchart.ybreak[key](d[key]), barchart.boxHeightBreak2);
                         let height = Math.max(Math.min(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), maxh2), 0);
                         return `M${x2},${y} L${x2 + width2},${y} L${x + width},${y + height} L${x},${y + height}`;
@@ -1011,7 +1016,7 @@ BarChart.strategies = {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
                         let x2 = x + ((barchart.innerWidth / 2) - x) * (di / z);
-                        let width2 = width * (di / z);
+                        let width2 = width * escalaFundo; 
                         let y = Math.max(barchart.ybreak2[key](d[key]), barchart.boxHeightBreak3);
                         let height = Math.max(Math.min(barchart.boxHeightBreak2 - barchart.ybreak2[key](d[key]), maxh3), 0);
                         return `M${x2},${y} L${x2 + width2},${y} L${x2 + width2},${y + height} L${x2},${y + height}`;
@@ -1030,7 +1035,7 @@ BarChart.strategies = {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
                         let x2 = x + ((barchart.innerWidth / 2) - x) * (di / z);
-                        let width2 = width * (di / z);
+                        let width2 = width * escalaFundo; 
                         let y = Math.max(barchart.ybreak3[key](d[key]), barchart.boxHeightBreak4);
                         let height = Math.max(Math.min(barchart.boxHeightBreak3 - barchart.ybreak3[key](d[key]), maxh4), 0);
                         return `M${x},${y} L${x + width},${y} L${x2 + width2},${y + height} L${x2},${y + height}`;
@@ -1102,8 +1107,8 @@ BarChart.strategies = {
                 g.selectAll("path.Axisright.meio3").data([0]).join("path").attr("stroke", "black").attr("class", "Axisright meio3").attr("d", () => `M${xFundoDir},${barchart.boxHeightBreak2} L${xFundoDir},${barchart.boxHeightBreak3}`);
                 g.selectAll("path.Axisright.meio4").data([0]).join("path").attr("stroke", "black").attr("class", "Axisright meio4").attr("d", () => `M${xFundoDir},${barchart.boxHeightBreak3} L${xFrente},${barchart.boxHeightBreak4}`);
                 g.selectAll("path.Axisright.meio5").data([0]).join("path").attr("stroke", "black").attr("class", "Axisright meio5").attr("d", () => `M${xFrente},${barchart.boxHeightBreak4} L${xFrente},0`);
-                
-                
+
+
                 // --- TEXTURA DA DOBRA ---
                 g.selectAll("path.Line2")
                     .data(d3.range(4))
