@@ -1372,10 +1372,21 @@
                         {
                             label: 'Dados escondidos',
                             min: 0,
-                            max: 0.95,
-                            step: 0.01,
-                            defaultValue: 0.55,
-                            onInput: (c, v) => c.updateScaleBreakHiddenRatio(Number(v)),
+                            max: 100,
+                            step: 0.1,
+                            defaultValue: 73.35,
+                            formatValue: v => {
+                                const logMin = Math.log(0.05);
+                                const logMax = Math.log(1.0);
+                                const hiddenRatio = 1 - Math.exp(logMin + (Number(v) / 100) * (logMax - logMin));
+                                return (hiddenRatio * 100).toFixed(1) + '%';
+                            },
+                            onInput: (c, v) => {
+                                const logMin = Math.log(0.05);
+                                const logMax = Math.log(1.0);
+                                const hiddenRatio = 1 - Math.exp(logMin + (Number(v) / 100) * (logMax - logMin));
+                                c.updateScaleBreakHiddenRatio(hiddenRatio);
+                            },
                         },
                     ]
                 },
