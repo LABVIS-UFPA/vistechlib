@@ -25,11 +25,12 @@
                 drawStrategy: "scale break perspective",
 
                 // --- Novos Controles Dinâmicos ---
-                scaleBreakHiddenRatio: 0.55, // Oculta 55% do vazio (0 a 0.95)
+                scaleBreakHiddenRatio: 0.57, // Ajustado para o novo controle
                 breakPoint: 0.4,             // Posição da dobra na tela (0.4 = 40% da altura de baixo para cima)
                 gapSize: 40,                 // Tamanho/altura da dobra 3D em pixels
+                z: 0.81,                     // Profundidade da perspectiva (ajustado para o novo controle)
                 startZero: true,             // Garante que o eixo y inferior comece no 0
-                color: "#4682B4"             // Cor principal das barras
+                color: "#4682B4",            // Cor principal das barras
             };
 
             // Você não precisa mais passar as variáveis avulsas de "break_inicial" e "breakfinal"
@@ -57,6 +58,68 @@
             barchart.data(base4Data);
             barchart.redraw();
 
+            // --- CONTROLES DOS SLIDERS ---
+            const perspectiveSlider = document.getElementById('perspectiveSlider');
+            const perspectiveValue = document.getElementById('perspectiveValue');
+            const breakPointSlider = document.getElementById('breakPointSlider');
+            const breakPointValue = document.getElementById('breakPointValue');
+            const gapSizeSlider = document.getElementById('gapSizeSlider');
+            const gapSizeValue = document.getElementById('gapSizeValue');
+
+            // Função para calcular e definir os valores de z e hiddenRatio
+            function updatePerspective(sliderValue) {
+                const s_norm = sliderValue / 100;
+
+                // Mapeamento linear para Z (0.01 a 2.0)
+                const z_min = 0.01, z_max = 2.0;
+                const newZ = z_min + s_norm * (z_max - z_min);
+
+                // Mapeamento linear inverso para hiddenRatio (0.95 a 0)
+                const hr_min = 0, hr_max = 0.95;
+                const newHiddenRatio = hr_max - s_norm * (hr_max - hr_min);
+
+                // Atualiza os valores no barchart
+                barchart.settings.z = newZ;
+                barchart.settings.scaleBreakHiddenRatio = newHiddenRatio;
+
+                // Atualiza o texto na tela
+                perspectiveValue.textContent = `Z: ${newZ.toFixed(2)}, Oculto: ${newHiddenRatio.toFixed(2)}`;
+            }
+
+            // Seta os valores iniciais dos sliders a partir da configuração
+            // O slider de perspectiva é o mestre agora.
+            const initialPerspectiveValue = 40; // Valor inicial (0-100) que corresponde à config
+            perspectiveSlider.value = initialPerspectiveValue;
+            
+            // Seta os valores iniciais dos outros sliders
+            breakPointSlider.value = config.breakPoint;
+            breakPointValue.textContent = config.breakPoint;
+            gapSizeSlider.value = config.gapSize;
+            gapSizeValue.textContent = config.gapSize;
+
+            // Chama a função para setar os valores iniciais de perspectiva no gráfico e no texto
+            updatePerspective(perspectiveSlider.value);
+
+            perspectiveSlider.addEventListener('input', (e) => {
+                const value = Number(e.target.value);
+                updatePerspective(value);
+                barchart.drawStrategy.data(barchart); // Recalcula as escalas
+                barchart.redraw();
+            });
+
+            breakPointSlider.addEventListener('input', (e) => {
+                const value = Number(e.target.value);
+                breakPointValue.textContent = value.toFixed(2);
+                barchart.updateScaleBreakPosition(value); // Método já existente que redesenha
+            });
+
+            gapSizeSlider.addEventListener('input', (e) => {
+                const value = Number(e.target.value);
+                gapSizeValue.textContent = value;
+                barchart.settings.gapSize = value;
+                barchart.drawStrategy.data(barchart); // Recalcula as escalas
+                barchart.redraw();
+            });
         });
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -73,6 +136,24 @@
         <p class="p-4">Mitigating outlier problems</p>
 
         <div id="chart" style="height: 600px; width: 90%;"></div>
+
+        <div id="controls" class="p-4 space-y-4">
+            <div>
+                <label for="perspectiveSlider">Controle de Perspectiva (Z / Proporção Oculta):</label>
+                <input type="range" id="perspectiveSlider" min="0" max="100" step="1" value="40">
+                <span id="perspectiveValue" class="font-bold">Z: 0.81, Oculto: 0.57</span>
+            </div>
+            <div>
+                <label for="breakPointSlider">Posição da Quebra:</label>
+                <input type="range" id="breakPointSlider" min="0.05" max="0.9" step="0.01" value="0.4">
+                <span id="breakPointValue" class="font-bold">0.4</span>
+            </div>
+            <div>
+                <label for="gapSizeSlider">Tamanho da Quebra (Gap):</label>
+                <input type="range" id="gapSizeSlider" min="10" max="100" step="1" value="40">
+                <span id="gapSizeValue" class="font-bold">40</span>
+            </div>
+        </div>
 
         <button onclick="downloadSVG()" class="m-4 px-4 py-2 bg-blue-500 text-white rounded">Download SVG</button>
         <button onclick="downloadPNG()" class="m-4 px-4 py-2 bg-green-600 text-white rounded">Download PNG</button>
