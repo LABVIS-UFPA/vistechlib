@@ -997,7 +997,7 @@ BarChart.strategies = {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
                         let x2 = x + ((barchart.innerWidth / 2) - x) * (di / z);
-                        let width2 = width * escalaFundo; 
+                        let width2 = width * escalaFundo;
                         let y = Math.max(barchart.ybreak[key](d[key]), barchart.boxHeightBreak2);
                         let height = Math.max(Math.min(barchart.boxHeightBreak - barchart.ybreak[key](d[key]), maxh2), 0);
                         return `M${x2},${y} L${x2 + width2},${y} L${x + width},${y + height} L${x},${y + height}`;
@@ -1016,7 +1016,7 @@ BarChart.strategies = {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
                         let x2 = x + ((barchart.innerWidth / 2) - x) * (di / z);
-                        let width2 = width * escalaFundo; 
+                        let width2 = width * escalaFundo;
                         let y = Math.max(barchart.ybreak2[key](d[key]), barchart.boxHeightBreak3);
                         let height = Math.max(Math.min(barchart.boxHeightBreak2 - barchart.ybreak2[key](d[key]), maxh3), 0);
                         return `M${x2},${y} L${x2 + width2},${y} L${x2 + width2},${y + height} L${x2},${y + height}`;
@@ -1035,7 +1035,7 @@ BarChart.strategies = {
                         let x = barchart.x(i);
                         let width = barchart.x.bandwidth();
                         let x2 = x + ((barchart.innerWidth / 2) - x) * (di / z);
-                        let width2 = width * escalaFundo; 
+                        let width2 = width * escalaFundo;
                         let y = Math.max(barchart.ybreak3[key](d[key]), barchart.boxHeightBreak4);
                         let height = Math.max(Math.min(barchart.boxHeightBreak3 - barchart.ybreak3[key](d[key]), maxh4), 0);
                         return `M${x},${y} L${x + width},${y} L${x2 + width2},${y + height} L${x2},${y + height}`;
@@ -1060,21 +1060,34 @@ BarChart.strategies = {
                 g.selectAll("g.y.loweraxis, g.y.upperaxis, g.y.meio1, g.y.meio2, g.y.meio3, g.Axisright.meio1, g.Axisright.meio2, g.Axisright.meio3, g.Axisright.meio4, g.Axisright.meio5, g.Line1, g.Line2, g.Line3, g.Line4").remove();
 
                 // --- AXIS & GRID DINÂMICO ---
-                const hiddenRatio = Math.max(0, Math.min(0.95, Number(barchart.settings.scaleBreakHiddenRatio ?? 0.55)));
-                const visibleRatio = Math.max(1 - hiddenRatio, 0.05);
-                const baseTickCount = Math.max(4, Math.floor(barchart.boxHeight / 60));
-                const tickDensityFactor = 1 / visibleRatio;
-                const tickCount = Math.max(4, Math.min(40, Math.ceil(baseTickCount * tickDensityFactor)));
 
-                const allTicks = d3.scaleLinear().domain([meta.lowerStart, meta.maximo]).nice().ticks(tickCount);
+                // 1. Descobrimos o espaço físico (em pixels) de cada metade
+                const lowerVisualHeight = barchart.boxHeight - barchart.boxHeightBreak;
+                const upperVisualHeight = barchart.boxHeightBreak4 - 10; // 10 é a margem do topo (yTop)
 
+                // 2. Definimos a quantidade de ticks (ex: 1 tick a cada 40 pixels de tela)
+                const lowerTickCount = Math.max(3, Math.floor(lowerVisualHeight / 80));
+                const upperTickCount = Math.max(3, Math.floor(upperVisualHeight / 80));
+
+                // 3. Geramos os ticks isoladamente para cada escala baseados nos seus próprios domínios
+                const rawLowerTicks = d3.scaleLinear()
+                    .domain([meta.lowerStart, meta.corte])
+                    .nice()
+                    .ticks(lowerTickCount);
+
+                const rawUpperTicks = d3.scaleLinear()
+                    .domain([meta.cortefinal, meta.maximo])
+                    .nice()
+                    .ticks(upperTickCount);
+
+                // 4. Injetamos os limites exatos da quebra para não ficarem buracos (O corte e cortefinal)
                 const ensureSegmentTicks = (ticks, start, end) => {
                     const filtered = ticks.filter((t) => t >= start && t <= end);
                     return Array.from(new Set(filtered.concat([start, end]))).sort((a, b) => a - b);
                 };
 
-                const lowerTicks = ensureSegmentTicks(allTicks, meta.lowerStart, meta.corte);
-                const upperTicks = ensureSegmentTicks(allTicks, meta.cortefinal, meta.maximo);
+                const lowerTicks = ensureSegmentTicks(rawLowerTicks, meta.lowerStart, meta.corte);
+                const upperTicks = ensureSegmentTicks(rawUpperTicks, meta.cortefinal, meta.maximo);
 
                 const formatTick = (value) => Math.abs(value) >= 1000 ? d3.format(".2s")(value) : d3.format(".0f")(value);
 
@@ -1093,8 +1106,6 @@ BarChart.strategies = {
                     .selectAll(".tick").append("line")
                     .attr("class", "grid-line").attr("stroke", "black")
                     .attr("x1", 0).attr("x2", barchart.innerWidth).attr("y1", 0).attr("y2", 0);
-
-
                 // --- EIXOS LATERAIS DA PERSPECTIVA ---
                 let xFrente = barchart.innerWidth;
 
