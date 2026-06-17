@@ -70,3 +70,85 @@ ae530e43-b855-4a82-95c2-5519e982786e,5,2,T2,worm,base-5-receita-impostos,slider,
 ae530e43-b855-4a82-95c2-5519e982786e,5,2,T2,worm,base-5-receita-impostos,slider,Limiar de Dobra,83.2,,2026-06-16T14:53:12.177Z
 ae530e43-b855-4a82-95c2-5519e982786e,5,3,T2,psb,base-2-ensino-superior,slider,psbDepth,3,,2026-06-16T14:53:45.171Z
 ae530e43-b855-4a82-95c2-5519e982786e,5,4,T2,scroll,base-6-frota-motocicletas,slider,Limiar de Dobra,59.2,,2026-06-16T14:54:21.424Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,1,T3,bar,base-5-receita-impostos,slider,Posição da quebra,0.31,,2026-06-17T16:58:43.102Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,1,T3,bar,base-5-receita-impostos,slider,z,0.2,,2026-06-17T16:58:50.718Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,1,T3,bar,base-5-receita-impostos,slider,z,0.2,,2026-06-17T16:58:58.982Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,1,T3,bar,base-5-receita-impostos,slider,z,0.41,,2026-06-17T16:59:15.252Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,2,T3,worm,base-1-pib,slider,Limiar de Dobra,28.3,,2026-06-17T16:59:59.844Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,2,T3,worm,base-1-pib,zoom,canvas,zoomIn,4,2026-06-17T17:00:02.109Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,2,T3,worm,base-1-pib,zoom,canvas,zoomIn,2,2026-06-17T17:00:02.711Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,3,T3,psb,base-6-frota-motocicletas,slider,psbBreakStartRatio,0.37,,2026-06-17T17:00:54.635Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,3,T3,psb,base-6-frota-motocicletas,slider,psbDepth,21.8,,2026-06-17T17:01:05.870Z
+ad3557c4-0734-4173-adba-5547c78a4127,1,4,T3,scroll,base-2-ensino-superior,slider,Limiar de Dobra,25.3,,2026-06-17T17:01:45.977Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,1,T2,bar,base-2-ensino-superior,slider,z,0.46,,2026-06-17T17:05:11.453Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,1,T2,bar,base-2-ensino-superior,slider,Posição da quebra,0.05,,2026-06-17T17:05:19.156Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,1,T2,bar,base-2-ensino-superior,slider,z,0.63,,2026-06-17T17:05:25.630Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,1,T2,bar,base-2-ensino-superior,slider,Posição da quebra,0.05,,2026-06-17T17:05:31.141Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,1,T2,bar,base-2-ensino-superior,slider,z,0.5,,2026-06-17T17:05:33.669Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,1,T2,bar,base-2-ensino-superior,slider,Posição da quebra,0.13,,2026-06-17T17:05:37.380Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,1,T2,bar,base-2-ensino-superior,slider,z,0.68,,2026-06-17T17:05:41.853Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,2,T2,worm,base-1-pib,slider,Limiar de Dobra,38.6,,2026-06-17T17:06:26.916Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,2,T2,worm,base-1-pib,slider,Limiar de Dobra,100,,2026-06-17T17:06:52.340Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,2,T2,worm,base-1-pib,slider,Limiar de Dobra,100,,2026-06-17T17:06:54.860Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,slider,psbDepth,17.6,,2026-06-17T17:07:35.250Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,slider,psbBreakStartRatio,0.39,,2026-06-17T17:07:38.395Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,slider,psbDepth,20.8,,2026-06-17T17:07:46.978Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,slider,psbDepth,10.4,,2026-06-17T17:08:08.137Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,zoom,canvas,zoomIn,5,2026-06-17T17:08:09.881Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,zoom,canvas,zoomIn,20,2026-06-17T17:08:11.165Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,zoom,canvas,zoomIn,21,2026-06-17T17:08:12.454Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,zoom,canvas,zoomIn,6,2026-06-17T17:08:12.909Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,slider,psbDepth,9,,2026-06-17T17:08:19.569Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,slider,psbDepth,11,,2026-06-17T17:08:24.880Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,3,T2,psb,base-6-frota-motocicletas,slider,psbDepth,50,,2026-06-17T17:08:40.191Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,4,T2,scroll,base-4-populacao-residente,slider,Limiar de Dobra,51.9,,2026-06-17T17:09:33.127Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,4,T2,scroll,base-4-populacao-residente,slider,Limiar de Dobra,20.1,,2026-06-17T17:09:50.693Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,4,T2,scroll,base-4-populacao-residente,slider,Limiar de Dobra,100,,2026-06-17T17:10:03.847Z
+ad3557c4-0734-4173-adba-5547c78a4127,2,4,T2,scroll,base-4-populacao-residente,slider,Limiar de Dobra,55,,2026-06-17T17:10:10.095Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,1,T1,scroll,base-4-populacao-residente,slider,Limiar de Dobra,51.9,,2026-06-17T17:13:00.531Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,1,T1,scroll,base-4-populacao-residente,slider,Limiar de Dobra,38.6,,2026-06-17T17:13:04.041Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,1,T1,scroll,base-4-populacao-residente,slider,Limiar de Dobra,51.9,,2026-06-17T17:13:18.931Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,2,T1,psb,base-5-receita-impostos,slider,psbDepth,48,,2026-06-17T17:13:46.217Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,slider,z,0.29,,2026-06-17T17:15:08.840Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,canvasMouseDown,canvas,296;242,,2026-06-17T17:15:09.635Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,canvasMouseUp,canvas,296;242,,2026-06-17T17:15:09.712Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,canvasMouseDown,canvas,296;242,,2026-06-17T17:15:09.811Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,canvasMouseUp,canvas,296;242,,2026-06-17T17:15:09.896Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,zoom,canvas,zoomIn,5,2026-06-17T17:15:10.824Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,canvasMouseDown,canvas,478;257,,2026-06-17T17:15:11.570Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,canvasMouseUp,canvas,486;312,,2026-06-17T17:15:11.872Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,slider,z,0.29,,2026-06-17T17:15:22.288Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,slider,z,0.29,,2026-06-17T17:15:30.391Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,slider,Posição da quebra,0.29,,2026-06-17T17:15:47.888Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,slider,gapSize,80,,2026-06-17T17:15:50.543Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,slider,Posição da quebra,0.39,,2026-06-17T17:15:53.134Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,3,T1,bar,base-1-pib,slider,z,0.46,,2026-06-17T17:15:58.344Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,4,T1,worm,base-6-frota-motocicletas,slider,Limiar de Dobra,66.3,,2026-06-17T17:16:43.189Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,4,T1,worm,base-6-frota-motocicletas,slider,Limiar de Dobra,68.3,,2026-06-17T17:16:56.013Z
+ad3557c4-0734-4173-adba-5547c78a4127,3,4,T1,worm,base-6-frota-motocicletas,slider,Limiar de Dobra,67.3,,2026-06-17T17:17:04.301Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,1,T4,scroll,base-4-populacao-residente,slider,Limiar de Dobra,0,,2026-06-17T17:19:06.475Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,1,T4,scroll,base-4-populacao-residente,slider,Limiar de Dobra,100,,2026-06-17T17:19:21.290Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,2,T4,psb,base-3-matriculas-fundamental,slider,psbDepth,4.4,,2026-06-17T17:20:41.641Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,2,T4,psb,base-3-matriculas-fundamental,slider,psbBreakStartRatio,0.35,,2026-06-17T17:20:46.896Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,2,T4,psb,base-3-matriculas-fundamental,slider,psbDepth,14.6,,2026-06-17T17:20:49.208Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,2,T4,psb,base-3-matriculas-fundamental,slider,psbDepth,22.2,,2026-06-17T17:20:56.304Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,Posição da quebra,0.42,,2026-06-17T17:23:09.045Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,Posição da quebra,0.59,,2026-06-17T17:23:12.653Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,gapSize,18,,2026-06-17T17:23:15.677Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,z,0.2,,2026-06-17T17:23:20.965Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,Posição da quebra,0.23,,2026-06-17T17:23:23.613Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,z,0.42,,2026-06-17T17:23:33.940Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,Posição da quebra,0.53,,2026-06-17T17:23:36.013Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,gapSize,69,,2026-06-17T17:23:37.965Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,z,0.24,,2026-06-17T17:23:43.812Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,3,T4,bar,base-1-pib,slider,z,0.28,,2026-06-17T17:24:01.796Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,4,T4,worm,base-2-ensino-superior,slider,Limiar de Dobra,15,,2026-06-17T17:25:04.586Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,4,T4,worm,base-2-ensino-superior,slider,Limiar de Dobra,82.7,,2026-06-17T17:25:29.460Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,4,T4,worm,base-2-ensino-superior,slider,Limiar de Dobra,0,,2026-06-17T17:25:39.513Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,4,T4,worm,base-2-ensino-superior,slider,Limiar de Dobra,0,,2026-06-17T17:25:52.146Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,4,T4,worm,base-2-ensino-superior,slider,Limiar de Dobra,80.6,,2026-06-17T17:26:10.234Z
+ad3557c4-0734-4173-adba-5547c78a4127,4,4,T4,worm,base-2-ensino-superior,slider,Limiar de Dobra,72.4,,2026-06-17T17:26:16.874Z
+ad3557c4-0734-4173-adba-5547c78a4127,5,1,T5,bar,base-3-matriculas-fundamental,slider,z,0.74,,2026-06-17T17:28:57.950Z
+ad3557c4-0734-4173-adba-5547c78a4127,5,2,T5,worm,base-1-pib,slider,Limiar de Dobra,45.8,,2026-06-17T17:30:28.996Z
+ad3557c4-0734-4173-adba-5547c78a4127,5,3,T5,psb,base-2-ensino-superior,slider,psbDepth,30.4,,2026-06-17T17:31:20.909Z
+ad3557c4-0734-4173-adba-5547c78a4127,5,4,T5,scroll,base-5-receita-impostos,slider,Limiar de Dobra,26.3,,2026-06-17T17:32:00.522Z
