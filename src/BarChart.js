@@ -53,6 +53,7 @@ class BarChart extends Visualization {
         this.settings.breakPoint2 = 0.96, 5; //"parseFloat(document.getElementById('breakpointInput2').value) ||"
         this.settings.breakPoint3 = 0.88; //"parseFloat(document.getElementById('breakpointInput3').value) ||"
         this.settings.breakPoint4 = 0.95, 5;
+        this.settings.gapSize = 40;
         this.settings.corte = undefined;
         this.settings.cortefinal = undefined;
         this.settings.z = 0.28; //"parseFloat(document.getElementById('inputz').value) ||"
@@ -903,7 +904,7 @@ BarChart.strategies = {
                 const hiddenRatio = Math.max(0, Math.min(0.95, Number(barchart.settings.scaleBreakHiddenRatio ?? 0.55)));
                 const breakPosition = Math.max(0.05, Math.min(0.9, Number(barchart.settings.breakPoint ?? 0.4)));
 
-                barchart.gapSize = barchart.settings.gapSize ?? 40;
+                barchart.gapSize = barchart.settings.gapSize;
 
                 const yTop = 10;
                 const yLowerTop = barchart.boxHeight * breakPosition + barchart.gapSize / 2;
@@ -954,7 +955,7 @@ BarChart.strategies = {
                 let maxh = barchart.boxHeight - miny;
                 let g = d3.select(this);
 
-                let z = 1;
+                let z = barchart.z;
                 let di = 0.2;
                 let xFundo = (barchart.innerWidth / 2) * (di / z);
                 let xFundoDir = barchart.innerWidth - xFundo;
@@ -1092,41 +1093,53 @@ BarChart.strategies = {
                 // --- EIXOS LATERAIS DA PERSPECTIVA ---
                 let xFrente = barchart.innerWidth;
 
-                g.append("path").attr("stroke", "black").attr("class", "y meio1").attr("d", () => `M0,${barchart.boxHeightBreak} L${xFundo},${barchart.boxHeightBreak2}`);
-                g.append("path").attr("stroke", "black").attr("class", "y meio2").attr("d", () => `M${xFundo},${barchart.boxHeightBreak2} L${xFundo},${barchart.boxHeightBreak3}`);
-                g.append("path").attr("stroke", "black").attr("class", "y meio3").attr("d", () => `M${xFundo},${barchart.boxHeightBreak3} L0,${barchart.boxHeightBreak4}`);
+                g.selectAll("path.y.meio1").data([0]).join("path").attr("stroke", "black").attr("class", "y meio1").attr("d", () => `M0,${barchart.boxHeightBreak} L${xFundo},${barchart.boxHeightBreak2}`);
+                g.selectAll("path.y.meio2").data([0]).join("path").attr("stroke", "black").attr("class", "y meio2").attr("d", () => `M${xFundo},${barchart.boxHeightBreak2} L${xFundo},${barchart.boxHeightBreak3}`);
+                g.selectAll("path.y.meio3").data([0]).join("path").attr("stroke", "black").attr("class", "y meio3").attr("d", () => `M${xFundo},${barchart.boxHeightBreak3} L0,${barchart.boxHeightBreak4}`);
 
-                g.append("path").attr("stroke", "black").attr("class", "Axisright meio1").attr("d", () => `M${xFrente},${barchart.boxHeight} L${xFrente},${barchart.boxHeightBreak}`);
-                g.append("path").attr("stroke", "black").attr("class", "Axisright meio2").attr("d", () => `M${xFrente},${barchart.boxHeightBreak} L${xFundoDir},${barchart.boxHeightBreak2}`);
-                g.append("path").attr("stroke", "black").attr("class", "Axisright meio3").attr("d", () => `M${xFundoDir},${barchart.boxHeightBreak2} L${xFundoDir},${barchart.boxHeightBreak3}`);
-                g.append("path").attr("stroke", "black").attr("class", "Axisright meio4").attr("d", () => `M${xFundoDir},${barchart.boxHeightBreak3} L${xFrente},${barchart.boxHeightBreak4}`);
-                g.append("path").attr("stroke", "black").attr("class", "Axisright meio5").attr("d", () => `M${xFrente},${barchart.boxHeightBreak4} L${xFrente},0`);
-
+                g.selectAll("path.Axisright.meio1").data([0]).join("path").attr("stroke", "black").attr("class", "Axisright meio1").attr("d", () => `M${xFrente},${barchart.boxHeight} L${xFrente},${barchart.boxHeightBreak}`);
+                g.selectAll("path.Axisright.meio2").data([0]).join("path").attr("stroke", "black").attr("class", "Axisright meio2").attr("d", () => `M${xFrente},${barchart.boxHeightBreak} L${xFundoDir},${barchart.boxHeightBreak2}`);
+                g.selectAll("path.Axisright.meio3").data([0]).join("path").attr("stroke", "black").attr("class", "Axisright meio3").attr("d", () => `M${xFundoDir},${barchart.boxHeightBreak2} L${xFundoDir},${barchart.boxHeightBreak3}`);
+                g.selectAll("path.Axisright.meio4").data([0]).join("path").attr("stroke", "black").attr("class", "Axisright meio4").attr("d", () => `M${xFundoDir},${barchart.boxHeightBreak3} L${xFrente},${barchart.boxHeightBreak4}`);
+                g.selectAll("path.Axisright.meio5").data([0]).join("path").attr("stroke", "black").attr("class", "Axisright meio5").attr("d", () => `M${xFrente},${barchart.boxHeightBreak4} L${xFrente},0`);
+                
+                
                 // --- TEXTURA DA DOBRA ---
-                for (let j = 0; j < 4; j++) {
-                    g.append("path").attr("stroke", "black").attr("stroke-width", (1 - (j * 30.3) / 100)).attr("class", "Line2")
-                        .attr("d", () => {
-                            let t = j / 3;
-                            let y = barchart.boxHeightBreak + t * (barchart.boxHeightBreak2 - barchart.boxHeightBreak);
-                            return `M${t * xFundo},${y} L${barchart.innerWidth - (t * xFundo)},${y}`;
-                        });
-                }
-                for (let j = 1; j < 6; j++) {
-                    g.append("path").attr("stroke", "black").attr("stroke-width", 0.10).attr("class", "Line3")
-                        .attr("d", () => {
-                            let t = j / 5;
-                            let y = barchart.boxHeightBreak2 + t * (barchart.boxHeightBreak3 - barchart.boxHeightBreak2);
-                            return `M${xFundo},${y} L${xFundoDir},${y}`;
-                        });
-                }
-                for (let j = 0; j < 4; j++) {
-                    g.append("path").attr("stroke", "black").attr("stroke-width", (0.10 + (j * 27) / 100)).attr("class", "Line4")
-                        .attr("d", () => {
-                            let t = j / 3;
-                            let y = barchart.boxHeightBreak3 + t * (barchart.boxHeightBreak4 - barchart.boxHeightBreak3);
-                            return `M${xFundo * (1 - t)},${y} L${barchart.innerWidth - (xFundo * (1 - t))},${y}`;
-                        });
-                }
+                g.selectAll("path.Line2")
+                    .data(d3.range(4))
+                    .join("path")
+                    .attr("class", "Line2")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", j => (1 - (j * 30.3) / 100))
+                    .attr("d", j => {
+                        let t = j / 3;
+                        let y = barchart.boxHeightBreak + t * (barchart.boxHeightBreak2 - barchart.boxHeightBreak);
+                        return `M${t * xFundo},${y} L${barchart.innerWidth - (t * xFundo)},${y}`;
+                    });
+
+                g.selectAll("path.Line3")
+                    .data(d3.range(1, 6))
+                    .join("path")
+                    .attr("class", "Line3")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 0.10)
+                    .attr("d", j => {
+                        let t = j / 5;
+                        let y = barchart.boxHeightBreak2 + t * (barchart.boxHeightBreak3 - barchart.boxHeightBreak2);
+                        return `M${xFundo},${y} L${xFundoDir},${y}`;
+                    });
+
+                g.selectAll("path.Line4")
+                    .data(d3.range(4))
+                    .join("path")
+                    .attr("class", "Line4")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", j => (0.10 + (j * 27) / 100))
+                    .attr("d", j => {
+                        let t = j / 3;
+                        let y = barchart.boxHeightBreak3 + t * (barchart.boxHeightBreak4 - barchart.boxHeightBreak3);
+                        return `M${xFundo * (1 - t)},${y} L${barchart.innerWidth - (xFundo * (1 - t))},${y}`;
+                    });
 
                 barchart._drawCategoryLabels(g);
             });
