@@ -209,10 +209,11 @@
         .domain([0, maxValue > 0 ? maxValue : 1]) // Domínio dinâmico
         .range([0, width]);
 
+      const xLabel = (options && options.xLabel) ? options.xLabel : "Log Error";
       g.append("text")
         .attr("x", width / 2)
         .attr("y", rowHeight * rawData.length + 45)
-        .text("Log Error")
+        .text(xLabel)
         .attr("font-weight", "bold")
         .attr("text-anchor", "middle")
         .attr("font-size", "15pt");
@@ -687,10 +688,11 @@
     }
 
     // --- FUNÇÃO DE FILTRO DE QUALIDADE ---
-    function filterHighErrorParticipants(data, threshold = 4.0) {
-      console.log(`%c INICIANDO FILTRO DE QUALIDADE (Max LogError: ${threshold})`, 'color: orange; font-weight: bold;');
+    function filterHighErrorParticipants(data, threshold = 4.0, t1Threshold = 0.5) {
+      console.log(`%c INICIANDO FILTRO DE QUALIDADE (Max LogError: ${threshold}, T1 threshold: ${t1Threshold})`, 'color: orange; font-weight: bold;');
 
-      // 1. Calcular LogError médio por (Participante + Tarefa)
+      // 1. Calcular erro médio por (Participante + Tarefa)
+      // Para T1 usamos erro binário (0/1), para as outras tarefas usamos logError.
       const stats = {};
 
       data.forEach(d => {
@@ -705,15 +707,20 @@
 
       // 2. Identificar quem falhou no critério
       const blacklist = new Set();
-      
+
       Object.keys(stats).forEach(key => {
         const sumError = stats[key].errors.reduce((a, b) => a + b, 0);
         const avgError = sumError / stats[key].total;
-        
-        if (avgError > threshold) {
+
+        // Extrai o nome da tarefa do key: formato 'T1_participantId'
+        const taskName = key.split('_')[0];
+
+        const limit = (taskName === 'T1') ? t1Threshold : threshold;
+
+        if (avgError > limit) {
           blacklist.add(key);
-          const [taskName, pID] = key.split('_');
-          console.log(`[REMOVIDO] ${pID} da tarefa '${taskName}' (Avg LogError: ${avgError.toFixed(2)})`);
+          const pID = key.split('_')[1] || 'Unknown';
+          console.log(`[REMOVIDO] ${pID} da tarefa '${taskName}' (Avg Error: ${avgError.toFixed(2)} > ${limit})`);
         }
       });
 
@@ -723,7 +730,7 @@
 
         const key = `${d.task}_${d.participantId}`;
         if (blacklist.has(key)) return false;
-        
+
         return true;
       });
 
@@ -744,15 +751,21 @@
 
         // Process trial blocks
         (expData.blocks || []).forEach(block => {
-          const epsilon = 1e-9;
-          const answer = Number(block.answerNumber) || 0;
-          const correctAnswer = Number(block.correctAnswer) || 0;
+          // Para T1 (Valor Exato) a tarefa é binária: acertou/errou.
+          // Neste caso usamos erro binário = 1 - acurácia por tentativa (0 se correto, 1 se incorreto).
           let logError;
-
-          if (correctAnswer === 0) {
-            logError = answer === 0 ? 0 : 10; // Atribui um erro grande
+          if (block.taskKey === 'T1') {
+            logError = block.isCorrect ? 0 : 1;
           } else {
-            logError = Math.abs(Math.log10((answer + epsilon) / (correctAnswer + epsilon)));
+            const epsilon = 1e-9;
+            const answer = Number(block.answerNumber) || 0;
+            const correctAnswer = Number(block.correctAnswer) || 0;
+
+            if (correctAnswer === 0) {
+              logError = answer === 0 ? 0 : 10; // Atribui um erro grande quando correto é zero
+            } else {
+              logError = Math.abs(Math.log10((answer + epsilon) / (correctAnswer + epsilon)));
+            }
           }
 
           allLogs.push({
@@ -864,7 +877,11 @@
         const height = 30 * Math.max(errorData.length, 1) + 80;
 
         svg.attr("width", totalWidthDefault).attr("height", height);
-        renderErrorChart(svg, errorData, 0, totalWidthDefault, { col1Header: "Agrupado", significant: [] });
+        renderErrorChart(svg, errorData, 0, totalWidthDefault, { 
+          col1Header: "Agrupado", 
+          significant: [],
+          xLabel: taskKey === 'T1' ? 'Error rate (1 - accuracy)' : 'Log Error'
+        });
         renderTimeChart(svg, timeData, accWidthDefault, { significant: [] });
       });
 
