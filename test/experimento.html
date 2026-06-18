@@ -1003,26 +1003,63 @@
             const tcleConfirmation = document.getElementById('tcle-confirmation');
             const acceptTcleButton = document.getElementById('accept-tcle-button');
             const TCLE_VERSION = "2026-06-11-digital-2";
-            const devMode = false;
+            const devMode = true;
             const BAR_CHART_DRAW_STRATEGY = 'scale break perspective'; // Altere 'scale break perspective'
             const BAR_CHART_GAP_SIZE = 45;
             const BAR_CHART_Z = 0.48;
+            const LOG_MIN_RATIO = 0.01;
+            const LOG_MAX_RATIO = 1.0;
+            const LOG_MIN = Math.log(LOG_MIN_RATIO);
+            const LOG_MAX = Math.log(LOG_MAX_RATIO);
+
+            function sliderToLogRatio(linearValue) {
+                const scaleFactor = Number(linearValue) / 100;
+                return Math.exp(LOG_MIN + scaleFactor * (LOG_MAX - LOG_MIN));
+            }
+
+            function formatFoldThreshold(linearValue) {
+                return (sliderToLogRatio(linearValue) * 100).toFixed(1) + '%';
+            }
+
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
+            function zToSliderValue(zValue) {
+                const minZ = 0.2;
+                const maxZ = 2;
+                const z = clamp(Number(zValue), minZ, maxZ);
+                const normalized = (z - minZ) / (maxZ - minZ);
+                const visibleRatio = 0.01 + normalized * 0.99;
+                const val = 100 * (Math.log(visibleRatio) - LOG_MIN) / (LOG_MAX - LOG_MIN);
+                return clamp(val, 0, 100);
+            }
+
+            function sliderToPerspectiveValues(sliderValue) {
+                const visibleRatio = sliderToLogRatio(Number(sliderValue));
+                const normalized = (visibleRatio - 0.01) / 0.99;
+                const minZ = 0.2;
+                const maxZ = 2;
+                const z = minZ + normalized * (maxZ - minZ);
+                const hiddenRatio = 0.95 - normalized * 0.9;
+                return { z, hiddenRatio };
+            }
+
             const BAR_CHART_ADDITIONAL_CONTROLS = BAR_CHART_DRAW_STRATEGY === 'scale break perspective' ? [
                 {
                     key: 'z',
                     label: 'Profundidade',
-                    min: 0.2,
-                    max: 2,
-                    step: 0.01,
-                    defaultValue: BAR_CHART_Z,
+                    min: 0,
+                    max: 100,
+                    step: 0.1,
+                    defaultValue: zToSliderValue(BAR_CHART_Z),
                     formatValue: v => {
-                        const { hiddenRatio } = zSliderToPerspectiveValues(Number(v));
-                        return `z:${Number(v).toFixed(2)} / oculto:${(hiddenRatio * 100).toFixed(0)}%`;
+                        const { z, hiddenRatio } = sliderToPerspectiveValues(Number(v));
+                        return `z:${z.toFixed(2)} / oculto:${(hiddenRatio * 100).toFixed(0)}%`;
                     },
                     onInput: (c, v) => {
-                        const nextZ = Number(v);
-                        const { hiddenRatio } = zSliderToPerspectiveValues(nextZ);
-                        c.settings.z = nextZ;
+                        const { z, hiddenRatio } = sliderToPerspectiveValues(Number(v));
+                        c.settings.z = z;
                         c.updateScaleBreakHiddenRatio(hiddenRatio);
                         if (c.drawStrategy?.data) c.drawStrategy.data(c);
                         if (typeof c.redraw === 'function') c.redraw();
@@ -1360,32 +1397,7 @@
                 { label: 'G', valor: 1901553 },
             ];
 
-            const LOG_MIN_RATIO = 0.01;
-            const LOG_MAX_RATIO = 1.0;
-            const LOG_MIN = Math.log(LOG_MIN_RATIO);
-            const LOG_MAX = Math.log(LOG_MAX_RATIO);
 
-            function sliderToLogRatio(linearValue) {
-                const scaleFactor = Number(linearValue) / 100;
-                return Math.exp(LOG_MIN + scaleFactor * (LOG_MAX - LOG_MIN));
-            }
-
-            function formatFoldThreshold(linearValue) {
-                return (sliderToLogRatio(linearValue) * 100).toFixed(1) + '%';
-            }
-
-            function zSliderToPerspectiveValues(zValue) {
-                const minZ = 0.2;
-                const maxZ = 2;
-                const z = clamp(Number(zValue), minZ, maxZ);
-                const normalized = (z - minZ) / (maxZ - minZ);
-                const hiddenRatio = 0.05 + (1 - normalized) * 0.9;
-                return { hiddenRatio: hiddenRatio, z };
-            }
-
-            function clamp(value, min, max) {
-                return Math.max(min, Math.min(max, value));
-            }
 
             const tlxColorScale = d3.scaleDiverging(
                 (scaleValue) => {
@@ -1421,9 +1433,9 @@
                         color: '#457b9d',
                         drawStrategy: BAR_CHART_DRAW_STRATEGY,
                         breakPoint: 0.3,
-                        scaleBreakHiddenRatio: 0.55,
+                        scaleBreakHiddenRatio: 0.81,
                         gapSize: BAR_CHART_GAP_SIZE,
-                        z: 0.28,
+                        z: BAR_CHART_Z,
                         showAxisLabel: false,
                         showCategoryLabels: true,
                         categoryLabels: tutorialData3D.map(d => d.label),
