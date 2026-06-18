@@ -785,6 +785,7 @@
                 <div class="field">
                     <label for="age-range">Faixa Etária</label>
                     <select id="age-range">
+                        <option value="" disabled selected hidden>Selecione...</option>
                         <option>18-24</option>
                         <option>25-34</option>
                         <option>35-44</option>
@@ -796,6 +797,7 @@
                 <div class="field">
                     <label for="sex">Sexo</label>
                     <select id="sex">
+                        <option value="" disabled selected hidden>Selecione...</option>
                         <option>Masculino</option>
                         <option>Feminino</option>
                         <option>Prefiro não informar</option>
@@ -804,12 +806,13 @@
                 <div class="field">
                     <label for="education-level">Nível de Escolaridade</label>
                     <select id="education-level">
+                        <option value="" disabled selected hidden>Selecione...</option>
                         <option>Médio Incompleto</option>
                         <option>Médio Completo</option>
                         <option>Superior Incompleto</option>
                         <option>Superior Completo</option>
                         <option>Mestrado Incompleto</option>
-                        <option>Mestrado Completo</option>                        
+                        <option>Mestrado Completo</option>
                         <option>Doutorado Incompleto</option>
                         <option>Doutorado Completo</option>
                     </select>
@@ -817,14 +820,26 @@
                 <div class="field">
                     <label for="infovis-course">Fez disciplina de InfoVis</label>
                     <select id="infovis-course">
+                        <option value="" disabled selected hidden>Selecione...</option>
                         <option>Sim, completo</option>
                         <option>Sim, em andamento</option>
                         <option>Não</option>
                     </select>
                 </div>
                 <div class="field">
+                    <label for="bar-chart-familiarity">Qual a sua familiaridade com gráficos de barras?</label>
+                    <select id="bar-chart-familiarity">
+                        <option value="" disabled selected hidden>Selecione...</option>
+                        <option>Não sei o que é isso.</option>
+                        <option>Sei o que é mas raramente vejo</option>
+                        <option>Vejo frequentemente e sei interpretar</option>
+                        <option>Uso frequentemente em meus trabalhos</option>
+                    </select>
+                </div>
+                <div class="field">
                     <label for="visual-acuity">Acuidade Visual atual</label>
                     <select id="visual-acuity">
+                        <option value="" disabled selected hidden>Selecione...</option>
                         <option>Boa</option>
                         <option>Corrigida com óculos/lente</option>
                         <option>Ruim</option>
@@ -832,7 +847,8 @@
                 </div>
                 <div class="field">
                     <label for="color-blindness">Daltonismo</label>
-                    <select id="color-blindness">                        
+                    <select id="color-blindness">
+                        <option value="" disabled selected hidden>Selecione...</option>
                         <option>Não</option>
                         <option>Sim</option>
                     </select>
@@ -987,7 +1003,7 @@
             const tcleConfirmation = document.getElementById('tcle-confirmation');
             const acceptTcleButton = document.getElementById('accept-tcle-button');
             const TCLE_VERSION = "2026-06-11-digital-2";
-            const devMode = true;
+            const devMode = false;
             const BAR_CHART_DRAW_STRATEGY = 'scale break perspective'; // Altere 'scale break perspective'
             const BAR_CHART_GAP_SIZE = 45;
             const BAR_CHART_Z = 0.48;
@@ -1961,13 +1977,14 @@
                 const isRatioTask = task && (task.taskKey === 'T4' || task.taskKey === 'T5');
 
                 blockAnswerInput.placeholder = isRatioTask
-                    ? 'Ex.: 2,50'
-                    : 'Ex.: 5.000';
+                    ? 'Digite um número que pode ser fracionário'
+                    : 'Digite um número inteiro';
 
                 blockConfidence.innerHTML = [
+                    '<option value="" disabled selected hidden>Selecione...</option>',
                     '<option>Muito Baixa</option>',
-                    '<option>Baixa</option>',                    
-                    '<option selected>Média</option>',
+                    '<option>Baixa</option>',
+                    '<option>Média</option>',
                     '<option>Alta</option>',
                     '<option>Muito Alta</option>'
                 ].join('');
@@ -2486,6 +2503,21 @@
                     const target = button.getAttribute('data-next');
                     if (!target) return;
                     if (target === 'tutorial-screen') {
+                        if (!devMode) {
+                            const ageRange = document.getElementById('age-range').value;
+                            const sex = document.getElementById('sex').value;
+                            const educationLevel = document.getElementById('education-level').value;
+                            const infovisCourse = document.getElementById('infovis-course').value;
+                            const visualAcuity = document.getElementById('visual-acuity').value;
+                            const colorBlindness = document.getElementById('color-blindness').value;
+                            const barChartFamiliarity = document.getElementById('bar-chart-familiarity').value;
+
+                            if (!ageRange || !sex || !educationLevel || !infovisCourse || !visualAcuity || !colorBlindness || !barChartFamiliarity) {
+                                alert('Por favor, responda a todas as perguntas do questionário demográfico antes de continuar.');
+                                return;
+                            }
+                        }
+
                         tutorialIndex = 0;
                         tutorialOrder = shuffle(VISUALIZATIONS);
 
@@ -2497,7 +2529,8 @@
                             educationLevel: document.getElementById('education-level').value,
                             infovisCourse: document.getElementById('infovis-course').value,
                             visualAcuity: document.getElementById('visual-acuity').value,
-                            colorBlindness: document.getElementById('color-blindness').value
+                            colorBlindness: document.getElementById('color-blindness').value,
+                            barChartFamiliarity: document.getElementById('bar-chart-familiarity').value
                         };
 
                         showTutorialScreen();
@@ -2782,6 +2815,12 @@
                 if (!devMode && answerNumber < 0) {
                     alert('A resposta não pode ser negativa.');
                     blockAnswerInput.focus();
+                    return;
+                }
+
+                if (!devMode && !blockConfidence.value) {
+                    alert('Selecione o nível de confiança na resposta antes de continuar.');
+                    blockConfidence.focus();
                     return;
                 }
 
