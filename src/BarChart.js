@@ -1080,17 +1080,37 @@ BarChart.strategies = {
                     .nice()
                     .ticks(upperTickCount);
 
-                // 4. Injetamos os limites exatos da quebra para não ficarem buracos (O corte e cortefinal)
+                // 4. Injetamos os limites da quebra com Filtro de Proximidade
                 const ensureSegmentTicks = (ticks, start, end) => {
-                    const filtered = ticks.filter((t) => t >= start && t <= end);
-                    return Array.from(new Set(filtered.concat([start, end]))).sort((a, b) => a - b);
+                    const span = end - start;
+
+                    // Define que qualquer tick natural a menos de 15% da borda será deletado
+                    // para dar "respiro" visual aos números de corte.
+                    const margin = span * 0.15;
+
+                    // Filtra os ticks do D3, removendo os que encostam no topo ou na base
+                    const filtered = ticks.filter((t) => {
+                        return t > (start + margin) && t < (end - margin);
+                    });
+
+                    // Junta os ticks filtrados com as nossas duas bordas exatas
+                    const merged = [start, ...filtered, end];
+
+                    // Remove possíveis duplicatas extremas (Set) e ordena
+                    return Array.from(new Set(merged)).sort((a, b) => a - b);
                 };
 
                 const lowerTicks = ensureSegmentTicks(rawLowerTicks, meta.lowerStart, meta.corte);
                 const upperTicks = ensureSegmentTicks(rawUpperTicks, meta.cortefinal, meta.maximo);
 
-                const formatTick = (value) => Math.abs(value) >= 1000 ? d3.format(".2s")(value) : d3.format(".0f")(value);
+                const formatTick = (value) => {
+                    if (Math.abs(value) >= 1000) {
+                        return d3.format(".2s")(value);
+                    }
+                    return d3.format(".0f")(value);
+                };
 
+                
                 // Eixo Superior Dinâmico
                 g.append("g")
                     .attr("class", "y upperaxis")
