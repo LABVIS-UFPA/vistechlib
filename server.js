@@ -3,8 +3,16 @@ import path from "path";
 import { WebSocketServer } from "ws";
 
 const PORT = 3000;
-const RESULTS_FILE = path.join(process.cwd(), "results.json");
-const INTERACTION_LOG_FILE = path.join(process.cwd(), "interaction-log.csv");
+const RESULTS_DIR = path.join(process.cwd(), "results");
+const INTERACTIONS_DIR = path.join(process.cwd(), "log-interactions");
+
+if (!fs.existsSync(RESULTS_DIR)) {
+  fs.mkdirSync(RESULTS_DIR, { recursive: true });
+}
+
+if (!fs.existsSync(INTERACTIONS_DIR)) {
+  fs.mkdirSync(INTERACTIONS_DIR, { recursive: true });
+}
 
 function ensureInteractionCsvHeader() {
   if (fs.existsSync(INTERACTION_LOG_FILE)) return;
@@ -48,7 +56,9 @@ function saveInteractionLog(interactionLog = []) {
       eventValue,
       eventSteps,
       interaction.timestamp,
-    ].map(csvEscape).join(",");
+    ]
+      .map(csvEscape)
+      .join(",");
   });
 
   fs.appendFileSync(INTERACTION_LOG_FILE, rows.join("\n") + "\n", "utf8");
@@ -66,27 +76,17 @@ function csvEscape(value) {
   return text;
 }
 
-function readResults() {
-  if (!fs.existsSync(RESULTS_FILE)) return [];
-
-  try {
-    const raw = fs.readFileSync(RESULTS_FILE, "utf8");
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.error("Erro ao ler results.json:", err);
-    return [];
-  }
-}
-
 function saveExperiment(experimentData) {
-  const results = readResults();
+  const participantId = experimentData.participantId;
 
-  results.push({
+  const resultFile = path.join(RESULTS_DIR, `${participantId}.json`);
+
+  const payload = {
     receivedAt: new Date().toISOString(),
     experimentData,
-  });
+  };
 
-  fs.writeFileSync(RESULTS_FILE, JSON.stringify(results, null, 2), "utf8");
+  fs.writeFileSync(resultFile, JSON.stringify(payload, null, 2), "utf8");
 }
 
 const wss = new WebSocketServer({ port: PORT });
