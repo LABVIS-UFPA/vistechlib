@@ -1004,6 +1004,9 @@
             const acceptTcleButton = document.getElementById('accept-tcle-button');
             const TCLE_VERSION = "2026-06-11-digital-2";
             const devMode = true;
+
+            // --- Variável Between-Subject removida (agora as 6 visões estão no Within-Subject) ---
+            
             const BAR_CHART_DRAW_STRATEGY = 'scale break perspective'; // Altere 'scale break perspective'
             const BAR_CHART_GAP_SIZE = 45;
             const BAR_CHART_Z = 0.48;
@@ -1108,12 +1111,12 @@
             const completeTlxButton = document.getElementById('complete-tlx-button');
 
             let currentBlock = 1;
-            const totalBlocks = 5;
+            const totalBlocks = 3;
             let tcleReachedEnd = false;
             let maxProgressStep = 0;
             const DEFAULT_CONTAINER_MAX_WIDTH = '900px';
             const VISUAL_CONTAINER_MAX_WIDTH = '1500px';
-            const TASKS_PER_BLOCK = 4;
+            const TASKS_PER_BLOCK = 6; // 6 condições within-subject (2 técnicas x 3 configs)
 
             let currentBlockTaskIndex = 0;
             let currentBlockPlan = [];
@@ -1422,135 +1425,129 @@
                 input.style.setProperty('--tlx-track-border-color', rangeColor);
             }
 
-            const VISUALIZATIONS = [
-                {
-                    id: 'bar',
-                    name: 'Quebra de Escala Clássica',
-                    previewImage: 'assets/nasa/quebra-escala-classica.jpeg',
-                    ClassRef: BarChart,
-                    settings: {
-                        size_type: 'fit',
-                        color: '#457b9d',
-                        drawStrategy: BAR_CHART_DRAW_STRATEGY,
-                        breakPoint: 0.3,
-                        scaleBreakHiddenRatio: 0.81,
-                        gapSize: BAR_CHART_GAP_SIZE,
-                        z: BAR_CHART_Z,
-                        showAxisLabel: false,
-                        showCategoryLabels: true,
-                        categoryLabels: tutorialData3D.map(d => d.label),
-                        // categoryLabelRotate: -35,
-                        categoryLabelOffset: 25,
-                        categoryLabelFontSize: 9,
-                        paddingBottom: 35,
-                        paddingLeft: 65,
-                        yAxisFontSize: 20,
-                        categoryLabelFontSize: 20
+            const baseSettingsPSB25D = {
+                ClassRef: BarChart,
+                settings: {
+                    size_type: 'fit',
+                    color: '#457b9d',
+                    drawStrategy: BAR_CHART_DRAW_STRATEGY,
+                    breakPoint: 0.3,
+                    scaleBreakHiddenRatio: 0.81,
+                    gapSize: BAR_CHART_GAP_SIZE,
+                    z: BAR_CHART_Z,
+                    showAxisLabel: false,
+                    showCategoryLabels: true,
+                    categoryLabels: tutorialData3D.map(d => d.label),
+                    categoryLabelOffset: 25,
+                    categoryLabelFontSize: 20,
+                    paddingBottom: 35,
+                    paddingLeft: 65,
+                    yAxisFontSize: 20
+                },
+                data: tutorialData3D.map(d => ({ valor: d.valor })),
+                baseControls: [
+                    {
+                        label: 'Posição da quebra',
+                        min: 0.05,
+                        max: 0.9,
+                        step: 0.01,
+                        defaultValue: 0.3,
+                        onInput: (c, v) => c.updateScaleBreakPosition(Number(v)),
                     },
-                    data: tutorialData3D.map(d => ({ valor: d.valor })),
-                    controls: [
-                        {
-                            label: 'Posição da quebra',
-                            min: 0.05,
-                            max: 0.9,
-                            step: 0.01,
-                            defaultValue: 0.3,
-                            onInput: (c, v) => c.updateScaleBreakPosition(Number(v)),
-                        },
-                        ...BAR_CHART_ADDITIONAL_CONTROLS
-                    ]
+                    ...BAR_CHART_ADDITIONAL_CONTROLS
+                ]
+            };
+
+            const baseSettingsPSB3D = {
+                ClassRef: PerspectiveScaleBreakBarChart,
+                settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', depth: 8, minDepth: 0, maxDepth: 50, outlierRatioThreshold: 3, breakStartRatio: 0.6 },
+                data: tutorialData3D,
+                baseControls: [
+                    {
+                        key: 'psbDepth', label: 'Profundidade', min: 0, max: 50, step: 0.2, defaultValue: 8,
+                        formatValue: v => Number(v).toFixed(1),
+                        onInput: (c, v) => c.updateDepth(Number(v))
+                    },
+                    {
+                        key: 'psbBreakStartRatio', label: 'Posição da quebra', min: 0.2, max: 0.85, step: 0.01, defaultValue: 0.6,
+                        formatValue: v => Number(v).toFixed(2),
+                        onInput: (c, v) => c.updateBreakStartRatio(Number(v))
+                    },
+                    {
+                        key: 'psbFoldVisualHeight', label: 'Tamanho da quebra', min: 0.2, max: 4, step: 0.1, defaultValue: 1.4,
+                        formatValue: v => Number(v).toFixed(1),
+                        onInput: (c, v, helpers) => {
+                            const nextFoldVisualHeight = Number(v);
+                            const maxBarHeight = c.settings?.maxBarHeight ?? 6;
+                            const currentBreakStartRatio = helpers?.getValue('psbBreakStartRatio') ?? c.settings.breakStartRatio;
+                            const currentFoldVisualHeight = c.settings?.foldVisualHeight ?? 1.4;
+                            const currentBreakCenter = currentBreakStartRatio * maxBarHeight + currentFoldVisualHeight / 2;
+                            const nextBreakStartRatio = (currentBreakCenter - nextFoldVisualHeight / 2) / maxBarHeight;
+                            const clampedBreakStartRatio = clamp(nextBreakStartRatio, 0.2, 0.85);
+                            c.updateBreakStartRatio(clampedBreakStartRatio);
+                            c.updateFoldVisualHeight(nextFoldVisualHeight);
+                            if (helpers) { helpers.setValue('psbBreakStartRatio', clampedBreakStartRatio); }
+                        }
+                    }
+                ]
+            };
+
+            const VISUALIZATIONS = [
+                // --- PSB 2.5D ---
+                {
+                    id: 'psb25d_manual',
+                    name: 'PSB 2.5D (Manual)',
+                    previewImage: 'assets/nasa/manual.jpeg',
+                    ClassRef: baseSettingsPSB25D.ClassRef,
+                    settings: { ...baseSettingsPSB25D.settings },
+                    data: baseSettingsPSB25D.data,
+                    controls: baseSettingsPSB25D.baseControls
                 },
                 {
-                    id: 'psb',
-                    name: 'Quebra de Escala Perspectiva',
-                    previewImage: 'assets/nasa/quebra-escala-perspectiva.jpeg',
-                    ClassRef: PerspectiveScaleBreakBarChart,
-                    settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', depth: 8, minDepth: 0, maxDepth: 50, outlierRatioThreshold: 3, breakStartRatio: 0.6 },
-                    data: tutorialData3D,
-                    controls: [
-                        {
-                            key: 'psbDepth',
-                            label: 'Profundidade',
-                            min: 0,
-                            max: 50,
-                            step: 0.2,
-                            defaultValue: 8,
-                            formatValue: v => Number(v).toFixed(1),
-                            onInput: (c, v) => c.updateDepth(Number(v))
-                        },
-                        {
-                            key: 'psbBreakStartRatio',
-                            label: 'Posição da quebra',
-                            min: 0.2,
-                            max: 0.85,
-                            step: 0.01,
-                            defaultValue: 0.6,
-                            formatValue: v => Number(v).toFixed(2),
-                            onInput: (c, v) => c.updateBreakStartRatio(Number(v))
-                        },
-                        {
-                            key: 'psbFoldVisualHeight',
-                            label: 'Tamanho da quebra',
-                            min: 0.2,
-                            max: 4,
-                            step: 0.1,
-                            defaultValue: 1.4,
-                            formatValue: v => Number(v).toFixed(1),
-                            onInput: (c, v, helpers) => {
-                                const nextFoldVisualHeight = Number(v);
-                                const maxBarHeight = c.settings?.maxBarHeight ?? 6;
-                                const currentBreakStartRatio = helpers?.getValue('psbBreakStartRatio') ?? c.settings.breakStartRatio;
-                                const currentFoldVisualHeight = c.settings?.foldVisualHeight ?? 1.4;
-
-                                const currentBreakCenter =
-                                    currentBreakStartRatio * maxBarHeight + currentFoldVisualHeight / 2;
-
-                                const nextBreakStartRatio =
-                                    (currentBreakCenter - nextFoldVisualHeight / 2) / maxBarHeight;
-
-                                const clampedBreakStartRatio = clamp(nextBreakStartRatio, 0.2, 0.85);
-
-                                c.updateBreakStartRatio(clampedBreakStartRatio);
-                                c.updateFoldVisualHeight(nextFoldVisualHeight);
-
-                                if (helpers) {
-                                    helpers.setValue('psbBreakStartRatio', clampedBreakStartRatio);
-                                }
-                            }
-                        }
-                    ]
+                    id: 'psb25d_llm',
+                    name: 'PSB 2.5D (LLM)',
+                    previewImage: 'assets/nasa/llm.jpeg',
+                    ClassRef: baseSettingsPSB25D.ClassRef,
+                    settings: { ...baseSettingsPSB25D.settings },
+                    data: baseSettingsPSB25D.data,
+                    controls: [] // Sem controles
                 },
                 {
-                    id: 'scroll',
-                    name: 'Gráfico de Barras Pergaminho',
-                    previewImage: 'assets/nasa/grafico-barras-pergaminho.jpeg',
-                    ClassRef: ScrollBarChart3D,
-                    settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', maxYLimitRatio: 1.0, zStepDepth: 1.5 },
-                    data: tutorialData3D,
-                    controls: [
-                        {
-                            label: 'Limiar de Dobra', min: 0, max: 100, step: 0.1, defaultValue: 100,
-                            formatValue: v => formatFoldThreshold(v),
-                            onInput: (c, v) => {
-                                c.updateFoldThreshold(sliderToLogRatio(v));
-                            }
-                        }
-                    ]
+                    id: 'psb25d_opt',
+                    name: 'PSB 2.5D (Otimização)',
+                    previewImage: 'assets/nasa/opt.jpeg',
+                    ClassRef: baseSettingsPSB25D.ClassRef,
+                    settings: { ...baseSettingsPSB25D.settings },
+                    data: baseSettingsPSB25D.data,
+                    controls: [] // Sem controles
+                },
+                // --- PSB 3D ---
+                {
+                    id: 'psb3d_manual',
+                    name: 'PSB 3D (Manual)',
+                    previewImage: 'assets/nasa/manual.jpeg',
+                    ClassRef: baseSettingsPSB3D.ClassRef,
+                    settings: { ...baseSettingsPSB3D.settings },
+                    data: baseSettingsPSB3D.data,
+                    controls: baseSettingsPSB3D.baseControls
                 },
                 {
-                    id: 'worm',
-                    name: 'Gráfico de Barras Minhoca',
-                    previewImage: 'assets/nasa/grafico-barras-minhoca.jpeg',
-                    ClassRef: WormBarChart3D,
-                    settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', maxYLimitRatio: 1.0, zStepDepth: 1.5 },
-                    data: tutorialData3D,
-                    controls: [
-                        {
-                            label: 'Limiar de Dobra', min: 0, max: 100, step: 0.1, defaultValue: 100,
-                            formatValue: v => formatFoldThreshold(v),
-                            onInput: (c, v) => c.updateFoldThreshold(sliderToLogRatio(v))
-                        }
-                    ]
+                    id: 'psb3d_llm',
+                    name: 'PSB 3D (LLM)',
+                    previewImage: 'assets/nasa/llm.jpeg',
+                    ClassRef: baseSettingsPSB3D.ClassRef,
+                    settings: { ...baseSettingsPSB3D.settings },
+                    data: baseSettingsPSB3D.data,
+                    controls: [] // Sem controles
+                },
+                {
+                    id: 'psb3d_opt',
+                    name: 'PSB 3D (Otimização)',
+                    previewImage: 'assets/nasa/opt.jpeg',
+                    ClassRef: baseSettingsPSB3D.ClassRef,
+                    settings: { ...baseSettingsPSB3D.settings },
+                    data: baseSettingsPSB3D.data,
+                    controls: [] // Sem controles
                 }
             ];
 
@@ -1846,7 +1843,8 @@
                 }
             };
 
-            blockTaskOrder = shuffle(Object.keys(TASK_DESCRIPTION));
+            const EXPERIMENT_TASKS = ['T1', 'T4', 'T5'];
+            blockTaskOrder = shuffle(EXPERIMENT_TASKS);
 
             experimentData.blockTaskOrder = blockTaskOrder;
 
@@ -1974,7 +1972,7 @@
                 tlxTitle.textContent = 'NASA-TLX do Bloco ' + currentBlock;
 
                 blockContext.innerHTML = [
-                    '<strong>Visualização:</strong> ' + vizName + '<br>',
+                    `<h3 style="margin: 0;">${vizName}</h3>`,
                     '<strong>Base:</strong> ' + datasetName + '<br>',
                     '<strong>Descrição da base:</strong> ' + (task ? task.dataset.description : '') + '<br><br>',
                     '<strong>Contexto:</strong> ' + (task ? task.dataset.context : '') + '<br><br>',
@@ -2066,7 +2064,7 @@
 
                 const tlxRanges = Array.from(tlxForm.querySelectorAll('.tlx-range'));
                 const hasAllRanges =
-                    tlxRanges.length === TLX_DIMENSIONS.length * TASKS_PER_BLOCK;
+                    tlxRanges.length === TLX_DIMENSIONS.length;
                 const allAnswered =
                     hasAllRanges &&
                     tlxRanges.every((input) => input.dataset.answered === 'true');
@@ -2098,105 +2096,106 @@
                     const items = document.createElement('div');
                     items.className = 'tlx-items-grid';
 
-                    currentBlockPlan.forEach((task, visualizationIndex) => {
-                        const key = getTlxResponseKey(currentBlock, dimensionIndex, visualizationIndex);
-                        const savedValue = tlxDrafts.get(key);
-                        const hasValue = Number.isFinite(savedValue);
-                        const inputId = `tlx-${dimension.id}-${visualizationIndex}`;
-                        const tooltipId = `${inputId}-tooltip`;
+                    const visualizationIndex = currentBlockTaskIndex;
+                    const task = currentBlockPlan[visualizationIndex];
 
-                        const item = document.createElement('div');
-                        item.className = 'tlx-item';
+                    const key = getTlxResponseKey(currentBlock, dimensionIndex, visualizationIndex);
+                    const savedValue = tlxDrafts.get(key);
+                    const hasValue = Number.isFinite(savedValue);
+                    const inputId = `tlx-${dimension.id}-${visualizationIndex}`;
+                    const tooltipId = `${inputId}-tooltip`;
 
-                        const visualization = document.createElement('div');
-                        visualization.className = 'tlx-item-visualization';
+                    const item = document.createElement('div');
+                    item.className = 'tlx-item';
 
-                        const image = document.createElement('img');
-                        image.className = 'tlx-visualization-image';
-                        image.src = task.visualization.previewImage;
-                        image.alt = `Exemplo da visualização ${task.visualization.name}`;
+                    const visualization = document.createElement('div');
+                    visualization.className = 'tlx-item-visualization';
 
-                        const visualizationLabel = document.createElement('div');
-                        visualizationLabel.className = 'tlx-item-label';
-                        visualizationLabel.textContent = task.visualization.name;
-                        visualization.append(image, visualizationLabel);
+                    const image = document.createElement('img');
+                    image.className = 'tlx-visualization-image';
+                    image.src = task.visualization.previewImage;
+                    image.alt = `Exemplo da visualização ${task.visualization.name}`;
 
-                        const control = document.createElement('div');
-                        control.className = 'tlx-dimension';
-                        control.dataset.tlxDimension = dimension.id;
+                    const visualizationLabel = document.createElement('div');
+                    visualizationLabel.className = 'tlx-item-label';
+                    visualizationLabel.textContent = task.visualization.name;
+                    visualization.append(image, visualizationLabel);
 
-                        const labelRow = document.createElement('div');
-                        labelRow.className = 'tlx-label-row';
+                    const control = document.createElement('div');
+                    control.className = 'tlx-dimension';
+                    control.dataset.tlxDimension = dimension.id;
 
-                        const trigger = document.createElement('button');
-                        trigger.className = 'tlx-label-trigger';
-                        trigger.type = 'button';
-                        trigger.setAttribute('aria-expanded', 'false');
-                        trigger.setAttribute('aria-describedby', tooltipId);
-                        trigger.innerHTML = `${dimension.label} <span aria-hidden="true">ⓘ</span>`;
+                    const labelRow = document.createElement('div');
+                    labelRow.className = 'tlx-label-row';
 
-                        const tooltip = document.createElement('span');
-                        tooltip.className = 'tlx-tooltip';
-                        tooltip.id = tooltipId;
-                        tooltip.setAttribute('role', 'tooltip');
-                        tooltip.textContent = dimension.description;
+                    const trigger = document.createElement('button');
+                    trigger.className = 'tlx-label-trigger';
+                    trigger.type = 'button';
+                    trigger.setAttribute('aria-expanded', 'false');
+                    trigger.setAttribute('aria-describedby', tooltipId);
+                    trigger.innerHTML = `${dimension.label} <span aria-hidden="true">ⓘ</span>`;
 
-                        const output = document.createElement('output');
-                        output.className = 'tlx-value';
-                        output.setAttribute('for', inputId);
-                        output.textContent = hasValue ? String(savedValue) : 'Não respondido';
-                        labelRow.append(trigger, tooltip, output);
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tlx-tooltip';
+                    tooltip.id = tooltipId;
+                    tooltip.setAttribute('role', 'tooltip');
+                    tooltip.textContent = dimension.description;
 
-                        const input = document.createElement('input');
-                        input.className = 'tlx-range';
-                        input.id = inputId;
-                        input.type = 'range';
-                        input.min = '0';
-                        input.max = '100';
-                        input.step = '5';
-                        input.value = hasValue ? String(savedValue) : '50';
-                        input.dataset.answered = hasValue ? 'true' : 'false';
-                        input.setAttribute('aria-label', `${dimension.label}: ${task.visualization.name}`);
+                    const output = document.createElement('output');
+                    output.className = 'tlx-value';
+                    output.setAttribute('for', inputId);
+                    output.textContent = hasValue ? String(savedValue) : 'Não respondido';
+                    labelRow.append(trigger, tooltip, output);
+
+                    const input = document.createElement('input');
+                    input.className = 'tlx-range';
+                    input.id = inputId;
+                    input.type = 'range';
+                    input.min = '0';
+                    input.max = '100';
+                    input.step = '5';
+                    input.value = hasValue ? String(savedValue) : '50';
+                    input.dataset.answered = hasValue ? 'true' : 'false';
+                    input.setAttribute('aria-label', `${dimension.label}: ${task.visualization.name}`);
+                    updateTlxRangeColor(input, dimension.id);
+
+                    const scaleLabels = document.createElement('div');
+                    scaleLabels.className = 'tlx-scale-labels';
+                    scaleLabels.innerHTML = '<span>Baixo</span><span>Alto</span>';
+
+                    input.addEventListener('input', () => {
+                        input.dataset.answered = 'true';
+                        output.textContent = input.value;
                         updateTlxRangeColor(input, dimension.id);
-
-                        const scaleLabels = document.createElement('div');
-                        scaleLabels.className = 'tlx-scale-labels';
-                        scaleLabels.innerHTML = '<span>Baixo</span><span>Alto</span>';
-
-                        input.addEventListener('input', () => {
-                            input.dataset.answered = 'true';
-                            output.textContent = input.value;
-                            updateTlxRangeColor(input, dimension.id);
-                            tlxDrafts.set(key, Number(input.value));
-                            updateTlxCompletionState();
-                        });
-
-                        trigger.addEventListener('click', (event) => {
-                            event.stopPropagation();
-                            const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
-                            closeTlxTooltips(trigger);
-                            trigger.setAttribute('aria-expanded', String(willOpen));
-                            tooltip.classList.toggle('is-open', willOpen);
-                        });
-
-                        trigger.addEventListener('keydown', (event) => {
-                            if (event.key === 'Escape') {
-                                trigger.setAttribute('aria-expanded', 'false');
-                                tooltip.classList.remove('is-open');
-                            }
-                        });
-
-                        control.append(labelRow, input, scaleLabels);
-                        item.append(visualization, control);
-                        items.appendChild(item);
+                        tlxDrafts.set(key, Number(input.value));
+                        updateTlxCompletionState();
                     });
+
+                    trigger.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+                        closeTlxTooltips(trigger);
+                        trigger.setAttribute('aria-expanded', String(willOpen));
+                        tooltip.classList.toggle('is-open', willOpen);
+                    });
+
+                    trigger.addEventListener('keydown', (event) => {
+                        if (event.key === 'Escape') {
+                            trigger.setAttribute('aria-expanded', 'false');
+                            tooltip.classList.remove('is-open');
+                        }
+                    });
+
+                    control.append(labelRow, input, scaleLabels);
+                    item.append(visualization, control);
+                    items.appendChild(item);
 
                     group.appendChild(items);
                     tlxForm.appendChild(group);
                 });
 
                 completeTlxButton.textContent =
-                    currentBlock === totalBlocks ? 'Ir para o ranking final' : 'Concluir bloco';
+                    currentBlockTaskIndex < TASKS_PER_BLOCK - 1 ? 'Próxima iteração' : (currentBlock === totalBlocks ? 'Ir para o ranking final' : 'Próximo bloco');
                 closeTlxTooltips();
                 updateTlxCompletionState();
                 updateProgress('nasa-tlx-screen');
@@ -2204,7 +2203,7 @@
 
             function getTaskDataForVisualization(task) {
                 const objects = datasetToObjects(task.dataset);
-                if (task.visualization.id === 'bar') {
+                if (task.visualization.ClassRef === BarChart) {
                     return objects.map((d) => ({ valor: d.valor }));
                 }
                 return objects;
@@ -2346,7 +2345,7 @@
                         height: h
                     };
 
-                    if (task.visualization.id === 'bar') {
+                    if (task.visualization.ClassRef === BarChart) {
                         chartSettings.categoryLabels = Array.isArray(task.dataset?.labels)
                             ? task.dataset.labels
                             : [];
@@ -2359,7 +2358,7 @@
 
                     bindChartInteractionLogger(currentBlockChart);
 
-                    if (task.visualization.id === 'bar' && currentBlockChart.redraw) {
+                    if (task.visualization.ClassRef === BarChart && currentBlockChart.redraw) {
                         currentBlockChart.redraw();
                     }
 
@@ -2438,7 +2437,7 @@
                 tutorialControls.innerHTML = '';
 
                 const viz = tutorialOrder[tutorialIndex];
-                tutorialTitle.textContent = `Tutorial — ${viz.name} (${tutorialIndex + 1} de 4)`;
+                tutorialTitle.textContent = `Tutorial — ${viz.name} (${tutorialIndex + 1} de ${tutorialOrder.length})`;
                 tutorialBackBtn.textContent = tutorialIndex === 0 ? 'Back' : 'Visualização anterior';
                 tutorialNextBtn.textContent = tutorialIndex === tutorialOrder.length - 1 ? 'Próxima fase' : 'Próxima visualização';
 
@@ -2454,7 +2453,7 @@
                     currentTutorialChart.data(viz.data);
 
                     // BarChart nao desenha no data(); precisa redraw explicito.
-                    if (viz.id === 'bar' && currentTutorialChart.redraw) {
+                    if (viz.ClassRef === BarChart && currentTutorialChart.redraw) {
                         currentTutorialChart.redraw();
                     }
                 } catch (err) {
@@ -2618,7 +2617,7 @@
                 if (currentBlockPlan.length === 0) {
                     currentBlock = 1;
                     if (blockTaskOrder.length === 0) {
-                        blockTaskOrder = shuffle(Object.keys(TASK_DESCRIPTION));
+                        blockTaskOrder = shuffle(EXPERIMENT_TASKS);
                     }
                     buildBlockPlan();
                     updateTaskInstructionScreen();
@@ -2857,14 +2856,8 @@
                     updateBlockAnswerWords();
                 }
 
-                if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
-                    currentBlockTaskIndex += 1;
-                    updateBlockPlaceholders();
-                    showScreen('block-context-screen');
-                } else {
-                    showScreen('nasa-tlx-screen');
-                    renderTlxScreen();
-                }
+                showScreen('nasa-tlx-screen');
+                renderTlxScreen();
             });
 
             updateBlockAnswerWords();
@@ -2876,14 +2869,20 @@
             completeTlxButton.addEventListener('click', () => {
                 collectBlockNasaTlx();
 
-                if (currentBlock < totalBlocks) {
-                    currentBlock += 1;
-                    buildBlockPlan();
-                    updateTaskInstructionScreen();
+                if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
+                    currentBlockTaskIndex += 1;
                     updateBlockPlaceholders();
-                    showScreen('task-instruction-screen');
+                    showScreen('block-context-screen');
                 } else {
-                    showScreen('final-ranking-screen');
+                    if (currentBlock < totalBlocks) {
+                        currentBlock += 1;
+                        buildBlockPlan();
+                        updateTaskInstructionScreen();
+                        updateBlockPlaceholders();
+                        showScreen('task-instruction-screen');
+                    } else {
+                        showScreen('final-ranking-screen');
+                    }
                 }
             });
 
