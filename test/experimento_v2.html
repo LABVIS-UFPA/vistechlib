@@ -1,0 +1,2981 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experimento de Visualização de Dados</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "d3": "https://esm.sh/d3@6.7.0",
+                "d3-path": "https://esm.sh/d3-path@2.0.0",
+                "three": "https://esm.sh/three@0.124.0",
+                "underscore": "https://esm.sh/underscore@1.9.1",
+                "moment": "https://esm.sh/moment@2.24.0"
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --primary-color: #457b9d;
+            --secondary-color: #a8dadc;
+            --background-color: #f1faee;
+            --text-color: #1d3557;
+            --light-color: #f8f9fa;
+            --danger-color: #e63946;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--light-color);
+            padding: 2rem 3rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .screen {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        p {
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .tcle-content {
+            height: 280px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            background-color: #fff;
+            border-radius: 4px;
+        }
+
+        .tcle-content h3 {
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .tcle-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .tcle-document-links {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .tcle-document-links a {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .consent-confirmation {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            margin-top: 1rem;
+            padding: 0.9rem;
+            border: 1px solid #c7d2dc;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        .consent-confirmation input {
+            margin-top: 0.25rem;
+            flex: 0 0 auto;
+        }
+
+        .consent-confirmation label {
+            line-height: 1.45;
+        }
+
+        button {
+            display: block;
+            margin: 2rem auto 0;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #1d3557;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .placeholder-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px dashed var(--primary-color);
+            border-radius: 4px;
+            background: #fff;
+            text-align: justify;
+            line-height: 1.6;
+            padding: 15px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.25rem;
+        }
+
+        .actions button {
+            margin: 0;
+        }
+
+        .small-note {
+            margin-top: 0.75rem;
+            font-size: 0.92rem;
+            opacity: 0.85;
+            text-align: center;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .final-ranking-instructions {
+            margin: 0.75rem 0 0;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #52606d;
+        }
+
+        .final-ranking-board {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .final-ranking-column {
+            border: 1px solid #d5dfeb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0.85rem;
+        }
+
+        .final-ranking-column h3 {
+            margin: 0 0 0.7rem;
+            font-size: 1rem;
+            text-align: left;
+            color: var(--text-color);
+        }
+
+        .final-ranking-options,
+        .final-ranking-slots {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 0.7rem;
+            min-height: 120px;
+        }
+
+        .final-ranking-options.is-drop-target {
+            outline: 2px dashed var(--secondary-color);
+            outline-offset: 3px;
+            border-radius: 8px;
+        }
+
+        .final-ranking-card {
+            display: grid;
+            grid-template-columns: auto 110px minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.9rem;
+            border: 1px solid #c7d2dc;
+            border-radius: 10px;
+            background: #fff;
+            cursor: grab;
+            box-shadow: 0 3px 8px rgba(29, 53, 87, 0.08);
+        }
+
+        .final-ranking-card:active {
+            cursor: grabbing;
+        }
+
+        .final-ranking-slot {
+            min-height: 96px;
+            border: 2px dashed #9fb3c8;
+            border-radius: 10px;
+            background: #f8fbff;
+            padding: 0.55rem;
+            display: grid;
+            gap: 0.55rem;
+            align-content: start;
+        }
+
+        .final-ranking-slot.is-drop-target {
+            outline: 2px solid var(--secondary-color);
+            outline-offset: 2px;
+        }
+
+        .final-ranking-slot-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #52606d;
+        }
+
+        .final-ranking-slot-empty {
+            font-size: 0.88rem;
+            color: #7a8a99;
+        }
+
+        .final-ranking-position {
+            width: 2.25rem;
+            height: 2.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            color: #fff;
+            background: var(--primary-color);
+            font-weight: 700;
+            flex: 0 0 auto;
+        }
+
+        .final-ranking-preview {
+            width: 110px;
+            height: 74px;
+            object-fit: contain;
+            background: #f8fafc;
+            border: 1px solid #dbe4ee;
+            border-radius: 8px;
+        }
+
+        .final-ranking-copy {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .final-ranking-copy strong {
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+
+        .final-ranking-copy span {
+            font-size: 0.9rem;
+            color: #52606d;
+        }
+
+        .final-ranking-handle {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        @media (max-width: 900px) {
+            .final-ranking-board {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .final-comments-note {
+            margin-top: 0.5rem;
+            font-size: 0.92rem;
+            color: #52606d;
+        }
+
+        .demographic-fields {
+            width: 100%;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
+        .tlx-visualization-header {
+            margin: 0 0 1.5rem;
+            padding: 0.75rem;
+            border-bottom: 2px solid var(--primary-color);
+            text-align: center;
+        }
+
+        .tlx-visualization-header h3,
+        .tlx-visualization-header p {
+            margin: 0.15rem 0;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .tlx-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .tlx-dimension-group {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 1.5rem;
+        }
+
+        .tlx-dimension-group:last-child {
+            border-bottom: none;
+        }
+
+        .tlx-dimension-group-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .tlx-items-grid {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .tlx-item {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: #fafbfc;
+        }
+
+        .tlx-item-visualization {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .tlx-visualization-image {
+            display: block;
+            width: 100%;
+            height: 200px;
+            border: 1px solid #c7d2dc;
+            border-radius: 6px;
+            background: #fff;
+            object-fit: contain;
+        }
+
+        .tlx-item-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        .tlx-dimension {
+            position: relative;
+            padding: 0.85rem 0;
+        }
+
+        .tlx-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .tlx-label-trigger {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            color: var(--text-color);
+            background: transparent;
+            font: inherit;
+            font-weight: 700;
+            text-decoration: underline dotted;
+            text-underline-offset: 0.25rem;
+            cursor: help;
+        }
+
+        .tlx-label-trigger:hover,
+        .tlx-label-trigger:focus-visible {
+            color: var(--primary-color);
+            background: transparent;
+            outline: 2px solid var(--secondary-color);
+            outline-offset: 3px;
+        }
+
+        .tlx-tooltip {
+            position: absolute;
+            z-index: 2;
+            left: 1rem;
+            right: 1rem;
+            top: 2.8rem;
+            display: none;
+            padding: 0.75rem;
+            border-radius: 5px;
+            color: #fff;
+            background: var(--text-color);
+            font-size: 0.9rem;
+            line-height: 1.45;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .tlx-label-trigger:hover+.tlx-tooltip,
+        .tlx-label-trigger:focus+.tlx-tooltip,
+        .tlx-tooltip.is-open {
+            display: block;
+        }
+
+        .tlx-value {
+            min-width: 7.2rem;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .tlx-range {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            appearance: none;
+            -webkit-appearance: none;
+            accent-color: var(--primary-color);
+            --tlx-range-color: var(--primary-color);
+            --tlx-track-border-color: #9da7b2;
+            background: transparent;
+        }
+
+        .tlx-range::-webkit-slider-runnable-track {
+            height: 0.45rem;
+            background-color: #f7f7f7;
+            border: 1px solid var(--tlx-track-border-color);
+            border-radius: 7px;
+        }
+
+        .tlx-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            margin-top: -0.32rem;
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            background: var(--tlx-range-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .tlx-range::-moz-range-track {
+            height: 0.45rem;
+            background-color: #f7f7f7;
+            border: 1px solid var(--tlx-track-border-color);
+            border-radius: 7px;
+        }
+
+        .tlx-range::-moz-range-thumb {
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            background: var(--tlx-range-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+
+        .tlx-range[data-answered="false"] {
+            opacity: 0.55;
+        }
+
+        .tlx-scale-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.25rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .progress-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(69, 123, 157, 0.18);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary-color);
+            transition: width 0.25s ease;
+        }
+
+        .field {
+            margin: 0.75rem 0;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 0.6rem 0.7rem;
+            border: 1px solid #c7d2dc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font: inherit;
+        }
+
+        .field textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .tutorial-topbar {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #c7d2dc;
+            min-height: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tutorial-chart-area {
+            width: 100%;
+            height: 700px;
+            position: relative;
+        }
+
+        .block-task-topbar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding: 0.2rem 0;
+            border-bottom: 1px solid #c7d2dc;
+            min-height: 2rem;
+            margin-bottom: 0.35rem;
+        }
+
+        @media (max-height: 860px) {
+            #block-task-screen .tutorial-chart-area {
+                height: 52vh;
+                min-height: 240px;
+            }
+        }
+
+        @media (max-height: 860px) {
+            #tutorial-screen .tutorial-chart-area {
+                height: 52vh;
+                min-height: 240px;
+            }
+        }
+
+        @media (max-width: 820px) {
+            .container {
+                padding: 1.25rem;
+            }
+
+            .split {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 720px) {
+            .tlx-item {
+                grid-template-columns: 1fr;
+            }
+
+            .tlx-visualization-image {
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div id="flow-indicator" class="progress-track" aria-hidden="true">
+            <div id="flow-progress" class="progress-fill"></div>
+        </div>
+
+        <div id="welcome-screen" class="screen">
+            <h1>Estudo sobre Técnicas de Visualização de Dados</h1>
+            <!-- <p>Esta é a tela de boas-vindas (placeholder). Aqui ficará a introdução completa do experimento.</p> -->
+            <div class="placeholder-box">Nesta pesquisa, investigamos como as pessoas interpretam gráficos que contêm
+                dados em diferentes ordens de magnitude, focando especialmente em cenários onde a maioria dos dados está
+                em uma escala, enquanto um ou alguns poucos valores se destacam em uma magnitude muito acima dos demais.
+                Nosso objetivo é avaliar novas técnicas de visualização para descobrir quais abordagens otimizam a busca
+                por informações e melhoram a análise de dados diante dessas diferenças extremas, tornando a tomada de
+                decisão mais rápida, precisa e com menor carga cognitiva.</div>
+            <div id="ws-status-banner"
+                style="margin-top:1rem;padding:0.75rem 1rem;border-radius:4px;font-weight:600;text-align:center;background:#fff3cd;color:#856404;border:1px solid #ffc107;">
+                ⏳ Aguardando conexão com o servidor…
+            </div>
+            <div class="actions">
+                <button id="welcome-next-btn" data-next="tcle-screen" disabled>Next</button>
+            </div>
+        </div>
+
+        <div id="tcle-screen" class="screen hidden">
+            <h2>Termo de Consentimento Livre e Esclarecido (TCLE)</h2>
+            <div class="tcle-content" id="tcle-scroll" tabindex="0" aria-label="Texto completo do TCLE">
+                <h3>Convite, objetivo e procedimentos</h3>
+                <p>
+                    Convidamos o(a) Sr.(a) para participar da pesquisa
+                    <strong>Avaliação de Técnicas de Visualização da Informação: Um Estudo com Usuários</strong>,
+                    sob a responsabilidade do pesquisador
+                    <strong>Prof. Dr. Carlos Gustavo Resque dos Santos</strong>. A pesquisa pretende avaliar
+                    diferentes técnicas de visualização de dados, considerando aspectos como clareza,
+                    legibilidade, precisão na interpretação e eficácia na representação de informações complexas.
+                </p>
+                <p>
+                    Sua participação é voluntária e se dará por meio de testes de percepção para verificar a
+                    identificação de experiência consciente aos estímulos e, posteriormente, pela realização de
+                    tarefas de análise de dados, nas quais o participante irá interpretar e responder a estímulos
+                    que codificam dados abstratos.
+                </p>
+
+                <h3>Riscos e medidas de proteção</h3>
+                <p>
+                    A pesquisa apresenta riscos mínimos à integridade física ou psicológica dos participantes,
+                    pois todos os procedimentos são não invasivos. Os possíveis desconfortos incluem fadiga visual,
+                    esforço cognitivo e leve tensão devido à concentração necessária para a análise das
+                    visualizações. Para mitigar esses riscos, serão oferecidos intervalos de descanso durante o
+                    experimento, e os participantes poderão ajustar o posicionamento da cadeira e do monitor,
+                    garantindo conforto e reduzindo qualquer desconforto potencial.
+                </p>
+
+                <h3>Benefícios, voluntariedade e desistência</h3>
+                <p>
+                    Se o(a) Sr.(a) aceitar participar, suas respostas poderão contribuir para o aprimoramento de
+                    técnicas de visualização da informação, incluindo melhorias na clareza, legibilidade e
+                    interpretação de gráficos, facilitando a análise de informações complexas e a tomada de decisão.
+                </p>
+                <p>
+                    Mesmo depois de consentir, o(a) Sr.(a) tem o direito e a liberdade de retirar seu consentimento
+                    e interromper sua participação em qualquer fase da pesquisa, antes ou depois da coleta dos
+                    dados, independentemente do motivo e sem qualquer prejuízo.
+                </p>
+
+                <h3>Custos, remuneração, ressarcimento e confidencialidade</h3>
+                <p>
+                    O(a) Sr.(a) não terá nenhuma despesa e também não receberá remuneração referente a esta
+                    pesquisa. Os resultados serão analisados e poderão ser publicados, mas sua identidade não será
+                    divulgada e permanecerá sob sigilo. Além disso, fica assegurado o seu direito ao ressarcimento
+                    de quaisquer despesas diretas decorrentes de sua participação na pesquisa, tais como gastos com
+                    transporte e alimentação, bem como o direito a buscar indenização diante de eventuais danos
+                    comprovadamente decorrentes de sua participação neste estudo.
+                </p>
+
+                <h3>Contatos</h3>
+                <p>
+                    Para outras informações, entre em contato com o pesquisador responsável,
+                    <strong>Prof. Dr. Carlos Gustavo Resque dos Santos</strong>, pelo telefone
+                    <strong>(91) 98205-8491</strong>, pelo e-mail
+                    <a href="mailto:carlosresque@ufpa.br">carlosresque@ufpa.br</a>, ou no endereço:
+                    Rua Augusto Corrêa, 01, Campus Universitário do Guamá, Instituto de Ciências Exatas e Naturais,
+                    Programa de Pós-Graduação em Ciência da Computação, LABVIS, bairro Guamá, CEP 66075-110,
+                    Belém, Pará, Brasil.
+                </p>
+                <p>
+                    O Comitê de Ética em Pesquisa com Seres Humanos do Instituto de Ciências da Saúde da
+                    Universidade Federal do Pará (CEP-ICS/UFPA) pode ser contatado pelo telefone
+                    <strong>(91) 98883-9676</strong>, pelo e-mail
+                    <a href="mailto:cepccs@ufpa.br">cepccs@ufpa.br</a> ou no endereço: Rua Augusto Corrêa, nº 01,
+                    Campus do Guamá, Faculdade de Enfermagem do ICS, sala 13, 2º andar, CEP 66075-110,
+                    Belém, Pará. Horário de atendimento: segunda, terça e quinta-feira, das 08h às 12h e das
+                    13h às 17h; quarta e sexta-feira, das 08h às 12h.
+                </p>
+
+                <h3>Consentimento digital</h3>
+                <p>
+                    Este consentimento será registrado exclusivamente em meio digital. Ao marcar a declaração de
+                    leitura e selecionar <strong>Aceito e continuar</strong>, o participante declara que leu e
+                    compreendeu as informações acima, teve oportunidade de esclarecer suas dúvidas e concorda,
+                    de forma livre e esclarecida, em participar da pesquisa. A versão do TCLE e a data e hora do
+                    aceite serão registradas no navegador utilizado no experimento.
+                </p>
+            </div>
+            <div class="tcle-document-links">
+                <a href="assets/tcle/MODELO_DE_TCLE_AJUSTADO.pdf" target="_blank" rel="noopener">
+                    Abrir TCLE em PDF
+                </a>
+            </div>
+            <div class="consent-confirmation">
+                <input id="tcle-confirmation" type="checkbox" />
+                <label for="tcle-confirmation">
+                    Declaro que li e compreendi o TCLE e concordo voluntariamente em participar da pesquisa.
+                </label>
+            </div>
+            <p class="small-note">
+                Leia o documento até o final e marque a declaração acima para prosseguir.
+            </p>
+            <div class="actions">
+                <button data-prev="welcome-screen">Back</button>
+                <button id="accept-tcle-button" disabled>Aceito e continuar</button>
+            </div>
+        </div>
+
+        <div id="demographic-screen" class="screen hidden">
+            <h2>Questionário Demográfico</h2>
+            <div class="demographic-fields">
+                <div class="field">
+                    <label for="age-range">Faixa Etária</label>
+                    <select id="age-range">
+                        <option value="" disabled selected hidden>Selecione...</option>
+                        <option>18-24</option>
+                        <option>25-34</option>
+                        <option>35-44</option>
+                        <option>45-54</option>
+                        <option>55-64</option>
+                        <option>65+</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="sex">Sexo</label>
+                    <select id="sex">
+                        <option value="" disabled selected hidden>Selecione...</option>
+                        <option>Masculino</option>
+                        <option>Feminino</option>
+                        <option>Prefiro não informar</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="education-level">Nível de Escolaridade</label>
+                    <select id="education-level">
+                        <option value="" disabled selected hidden>Selecione...</option>
+                        <option>Médio Incompleto</option>
+                        <option>Médio Completo</option>
+                        <option>Superior Incompleto</option>
+                        <option>Superior Completo</option>
+                        <option>Mestrado Incompleto</option>
+                        <option>Mestrado Completo</option>
+                        <option>Doutorado Incompleto</option>
+                        <option>Doutorado Completo</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="infovis-course">Fez disciplina de InfoVis</label>
+                    <select id="infovis-course">
+                        <option value="" disabled selected hidden>Selecione...</option>
+                        <option>Sim, completo</option>
+                        <option>Sim, em andamento</option>
+                        <option>Não</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="bar-chart-familiarity">Qual a sua familiaridade com gráficos de barras?</label>
+                    <select id="bar-chart-familiarity">
+                        <option value="" disabled selected hidden>Selecione...</option>
+                        <option>Não sei o que é isso.</option>
+                        <option>Sei o que é mas raramente vejo</option>
+                        <option>Vejo frequentemente e sei interpretar</option>
+                        <option>Uso frequentemente em meus trabalhos</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="visual-acuity">Acuidade Visual atual</label>
+                    <select id="visual-acuity">
+                        <option value="" disabled selected hidden>Selecione...</option>
+                        <option>Boa</option>
+                        <option>Corrigida com óculos/lente</option>
+                        <option>Ruim</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="color-blindness">Daltonismo</label>
+                    <select id="color-blindness">
+                        <option value="" disabled selected hidden>Selecione...</option>
+                        <option>Não</option>
+                        <option>Sim</option>
+                    </select>
+                </div>
+            </div>
+            <div class="actions">
+                <button data-prev="tcle-screen">Back</button>
+                <button data-next="tutorial-screen">Next</button>
+            </div>
+        </div>
+
+        <div id="tutorial-screen" class="screen hidden">
+            <h2 id="tutorial-title">Tutorial — Visualização 1 de 4</h2>
+            <div id="tutorial-controls" class="tutorial-topbar"></div>
+            <div id="tutorial-chart-area" class="tutorial-chart-area"></div>
+            <div class="actions">
+                <button id="tutorial-back-btn">Back</button>
+                <button id="tutorial-next-btn">Próxima visualização</button>
+            </div>
+        </div>
+
+        <div id="task-instruction-screen" class="screen hidden">
+            <h2 id="task-instruction-title">Fase 2 - Instrução da Tarefa</h2>
+            <p id="task-instruction-block-label">Bloco 1 de 5</p>
+            <div class="placeholder-box" id="task-instruction-description"></div>
+            <div class="actions">
+                <button data-prev="tutorial-screen">Back</button>
+                <button id="start-blocks-button">Next</button>
+            </div>
+        </div>
+
+        <div id="block-context-screen" class="screen hidden">
+            <h2 id="block-context-title">Bloco 1 de 5 - Contexto da Tarefa</h2>
+            <p>Leia o contexto e a pergunta antes de iniciar a visualização.</p>
+            <div class="placeholder-box" id="block-context">Placeholder: contexto da tarefa do bloco.</div>
+            <div class="placeholder-box" id="block-question-context">Placeholder: pergunta a ser respondida no bloco.
+            </div>
+            <div class="actions">
+                <button id="block-context-back-button">Back</button>
+                <button id="go-to-block-task-button">Iniciar tarefa</button>
+            </div>
+        </div>
+
+        <div id="block-task-screen" class="screen hidden">
+            <h2 id="block-title">Pergunta do bloco 1 de 5</h2>
+            <div id="block-controls" class="block-task-topbar"></div>
+            <div id="block-chart-area" class="tutorial-chart-area"></div>
+            <div class="actions">
+                <button data-prev="block-context-screen">Back</button>
+                <button id="found-answer-button">Achei a resposta</button>
+            </div>
+        </div>
+
+        <div id="block-answer-screen" class="screen hidden">
+            <h2 id="answer-title">Bloco 1 de 5 - Registro de Resposta</h2>
+            <div class="field">
+                <label for="block-answer">Resposta do participante</label>
+                <input id="block-answer" type="text" inputmode="numeric" autocomplete="off" placeholder="Ex.: 5.000" />
+            </div>
+            <div class="field">
+                <label>Resposta por extenso: <span id="block-answer-words"></span></label>
+            </div>
+            <div class="field">
+                <label for="block-confidence">Confiança na resposta</label>
+                <select id="block-confidence">
+                    <option>Placeholder</option>
+                </select>
+            </div>
+            <div class="actions">
+                <button data-prev="block-task-screen">Back</button>
+                <button id="block-answer-next-button">Next</button>
+            </div>
+        </div>
+
+        <div id="nasa-tlx-screen" class="screen hidden">
+            <h2 id="tlx-title">NASA-TLX do Bloco 1</h2>
+            <div class="tlx-visualization-header">
+                <h3>Avaliação das visualizações</h3>
+                <p>Avalie as quatro visualizações em cada dimensão abaixo.</p>
+            </div>
+            <div id="tlx-form" class="tlx-form"></div>
+            <div class="actions">
+                <button id="back-from-tlx-button">Voltar para a resposta</button>
+                <button id="complete-tlx-button" disabled>Concluir bloco</button>
+            </div>
+        </div>
+
+        <div id="final-ranking-screen" class="screen hidden">
+            <h2>Fase 3 - Ranking de Preferência</h2>
+            <p class="final-ranking-instructions">Arraste as quatro visualizações para ordenar da mais preferida para a
+                menos preferida.</p>
+            <div class="final-ranking-board">
+                <section class="final-ranking-column" aria-label="Visualizações disponíveis">
+                    <h3>Visualizações</h3>
+                    <ul id="final-ranking-options" class="final-ranking-options"></ul>
+                </section>
+                <section class="final-ranking-column" aria-label="Posições do ranking">
+                    <h3>Posições do ranking</h3>
+                    <ol id="final-ranking-slots" class="final-ranking-slots"></ol>
+                </section>
+            </div>
+            <div class="actions">
+                <button data-prev="nasa-tlx-screen">Back</button>
+                <button data-next="final-comments-screen">Next</button>
+            </div>
+        </div>
+
+        <div id="final-comments-screen" class="screen hidden">
+            <h2>Comentários Qualitativos</h2>
+            <div class="field">
+                <label for="ranking-why">Por que preferiu nessa ordem?</label>
+                <textarea id="ranking-why" placeholder="Placeholder"></textarea>
+            </div>
+            <div class="field">
+                <label for="other-comments">Outras observações</label>
+                <textarea id="other-comments" placeholder="Placeholder" required></textarea>
+                <div class="final-comments-note">Este campo é obrigatório para concluir o teste.</div>
+            </div>
+            <div class="actions">
+                <button data-prev="final-ranking-screen">Back</button>
+                <button data-next="thanks-screen">Next</button>
+            </div>
+        </div>
+
+        <div id="thanks-screen" class="screen hidden">
+            <h2>Obrigado por participar</h2>
+            <div class="placeholder-box">Placeholder: tela final com mensagem de agradecimento e futuro download dos
+                resultados.</div>
+            <div class="actions">
+                <button data-prev="final-comments-screen">Back</button>
+                <button disabled>Finalizado</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../node_modules/extenso/dist/extenso.js"></script>
+    <script type="module">
+        import * as d3 from "d3";
+        import PerspectiveScaleBreakBarChart from "../src/PerspectiveScaleBreakBarChart.js";
+        import ScrollBarChart3D from "../src/ScrollBarChart3D.js";
+        import WormBarChart3D from "../src/WormBarChart3D.js";
+        import BarChart from "../src/BarChart.js";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.querySelector('.container');
+            const screens = Array.from(document.querySelectorAll('.screen'));
+            const progressFill = document.getElementById('flow-progress');
+            const taskInstructionTitle = document.getElementById('task-instruction-title');
+            const taskInstructionBlockLabel = document.getElementById('task-instruction-block-label');
+            const taskInstructionDescription = document.getElementById('task-instruction-description');
+            const tcleScroll = document.getElementById('tcle-scroll');
+            const tcleConfirmation = document.getElementById('tcle-confirmation');
+            const acceptTcleButton = document.getElementById('accept-tcle-button');
+            const TCLE_VERSION = "2026-06-11-digital-2";
+            const devMode = true;
+            const BAR_CHART_DRAW_STRATEGY = 'scale break perspective'; // Altere 'scale break perspective'
+            const BAR_CHART_GAP_SIZE = 45;
+            const BAR_CHART_Z = 0.48;
+            const LOG_MIN_RATIO = 0.01;
+            const LOG_MAX_RATIO = 1.0;
+            const LOG_MIN = Math.log(LOG_MIN_RATIO);
+            const LOG_MAX = Math.log(LOG_MAX_RATIO);
+
+            function sliderToLogRatio(linearValue) {
+                const scaleFactor = Number(linearValue) / 100;
+                return Math.exp(LOG_MIN + scaleFactor * (LOG_MAX - LOG_MIN));
+            }
+
+            function formatFoldThreshold(linearValue) {
+                return (sliderToLogRatio(linearValue) * 100).toFixed(1) + '%';
+            }
+
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
+            function zToSliderValue(zValue) {
+                const minZ = 0.2;
+                const maxZ = 2;
+                const z = clamp(Number(zValue), minZ, maxZ);
+                const normalized = (z - minZ) / (maxZ - minZ);
+                const visibleRatio = 0.01 + normalized * 0.99;
+                const val = 100 * (Math.log(visibleRatio) - LOG_MIN) / (LOG_MAX - LOG_MIN);
+                return clamp(val, 0, 100);
+            }
+
+            function sliderToPerspectiveValues(sliderValue) {
+                const visibleRatio = sliderToLogRatio(Number(sliderValue));
+                const normalized = (visibleRatio - 0.01) / 0.99;
+                const minZ = 0.2;
+                const maxZ = 2;
+                const z = minZ + normalized * (maxZ - minZ);
+                const hiddenRatio = 0.95 - normalized * 0.9;
+                return { z, hiddenRatio };
+            }
+
+            const BAR_CHART_ADDITIONAL_CONTROLS = BAR_CHART_DRAW_STRATEGY === 'scale break perspective' ? [
+                {
+                    key: 'z',
+                    label: 'Profundidade',
+                    min: 0,
+                    max: 100,
+                    step: 0.1,
+                    defaultValue: zToSliderValue(BAR_CHART_Z),
+                    formatValue: v => {
+                        const { z, hiddenRatio } = sliderToPerspectiveValues(Number(v));
+                        return `z:${z.toFixed(2)} / oculto:${(hiddenRatio * 100).toFixed(0)}%`;
+                    },
+                    onInput: (c, v) => {
+                        const { z, hiddenRatio } = sliderToPerspectiveValues(Number(v));
+                        c.settings.z = z;
+                        c.updateScaleBreakHiddenRatio(hiddenRatio);
+                        if (c.drawStrategy?.data) c.drawStrategy.data(c);
+                        if (typeof c.redraw === 'function') c.redraw();
+                    }
+                },
+                {
+                    key: 'gapSize',
+                    label: 'Tamanho da quebra',
+                    min: 10,
+                    max: 80,
+                    step: 1,
+                    defaultValue: BAR_CHART_GAP_SIZE,
+                    formatValue: v => `${Number(v)}px`,
+                    onInput: (c, v) => {
+                        c.settings.gapSize = Number(v);
+                        if (c.drawStrategy?.data) c.drawStrategy.data(c);
+                        if (typeof c.redraw === 'function') c.redraw();
+                    }
+                }
+            ] : [];
+
+            const blockTitle = document.getElementById('block-title');
+            const blockContextTitle = document.getElementById('block-context-title');
+            const answerTitle = document.getElementById('answer-title');
+            const tlxTitle = document.getElementById('tlx-title');
+            const blockContext = document.getElementById('block-context');
+            const blockQuestionContext = document.getElementById('block-question-context');
+            const blockControls = document.getElementById('block-controls');
+            const blockChartArea = document.getElementById('block-chart-area');
+            const finalRankingOptions = document.getElementById('final-ranking-options');
+            const finalRankingSlots = document.getElementById('final-ranking-slots');
+            const rankingWhyInput = document.getElementById('ranking-why');
+            const otherCommentsInput = document.getElementById('other-comments');
+            const blockAnswerWords = document.getElementById('block-answer-words');
+            const extenso = window.extenso;
+
+            const startBlocksButton = document.getElementById('start-blocks-button');
+            const blockContextBackButton = document.getElementById('block-context-back-button');
+            const goToBlockTaskButton = document.getElementById('go-to-block-task-button');
+            const foundAnswerButton = document.getElementById('found-answer-button');
+            const blockAnswerNextButton = document.getElementById('block-answer-next-button');
+            const blockAnswerInput = document.getElementById('block-answer');
+            const blockConfidence = document.getElementById('block-confidence');
+            const tlxForm = document.getElementById('tlx-form');
+            const backFromTlxButton = document.getElementById('back-from-tlx-button');
+            const completeTlxButton = document.getElementById('complete-tlx-button');
+
+            let currentBlock = 1;
+            const totalBlocks = 5;
+            let tcleReachedEnd = false;
+            let maxProgressStep = 0;
+            const DEFAULT_CONTAINER_MAX_WIDTH = '900px';
+            const VISUAL_CONTAINER_MAX_WIDTH = '1500px';
+            const TASKS_PER_BLOCK = 4;
+
+            let currentBlockTaskIndex = 0;
+            let currentBlockPlan = [];
+            let currentBlockChart = null;
+            let currentBlockTaskKey = 'T1';
+            let blockTaskOrder = [];
+            const tlxDrafts = new Map();
+            const TLX_DIMENSIONS = [
+                {
+                    id: 'mental-demand',
+                    field: 'mentalDemand',
+                    label: 'Demanda mental',
+                    description: 'Quanto esforço mental e perceptivo foi necessário para interpretar a visualização e responder à tarefa? A atividade foi simples ou complexa?'
+                },
+                {
+                    id: 'temporal-demand',
+                    field: 'temporalDemand',
+                    label: 'Demanda temporal',
+                    description: 'Quanta pressão de tempo você sentiu enquanto analisava a visualização e respondia à tarefa? O ritmo foi tranquilo ou acelerado?'
+                },
+                {
+                    id: 'performance-rating',
+                    field: 'performance',
+                    label: 'Desempenho',
+                    description: 'Quão bem-sucedido(a) você considera que foi ao interpretar a visualização e responder à tarefa? Quão satisfeito(a) ficou com seu desempenho?'
+                },
+                {
+                    id: 'effort',
+                    field: 'effort',
+                    label: 'Esforço',
+                    description: 'Quanto esforço foi necessário para alcançar seu nível de desempenho nesta tarefa?'
+                },
+                {
+                    id: 'frustration',
+                    field: 'frustration',
+                    label: 'Frustração',
+                    description: 'Quanto você se sentiu frustrado(a), estressado(a), irritado(a) ou inseguro(a) durante a tarefa, em oposição a satisfeito(a), relaxado(a) e confiante?'
+                }
+            ];
+
+            let blockTaskStartedAt = null;
+            let currentTaskRecord = null;
+
+            // Json geral
+            const experimentData = {
+                participantId: crypto.randomUUID(),
+                startedAt: new Date().toISOString(),
+                demographics: null,
+                blockTaskOrder: [],
+                tutorialOrder: [],
+                blocks: [],
+                blockNasaTlx: [],
+                finalRanking: {
+                    order: [],
+                    recordedAt: null
+                },
+                finalComments: {
+                    rankingWhy: '',
+                    otherComments: '',
+                    recordedAt: null
+                }
+            };
+
+            const interactionLog = [];
+
+            function createInteractionSummary() {
+                return {
+                    total: 0,
+                    byType: {}
+                };
+            }
+
+            function registerInteraction(eventType, details = {}) {
+                if (!currentTaskRecord) return;
+
+                const interaction = {
+                    timestamp: new Date().toISOString(),
+                    participantId: experimentData.participantId,
+
+                    blockNumber: currentTaskRecord.blockNumber,
+                    taskIndexInBlock: currentTaskRecord.taskIndexInBlock,
+                    taskKey: currentTaskRecord.taskKey,
+                    visualizationId: currentTaskRecord.visualizationId,
+                    datasetId: currentTaskRecord.datasetId,
+
+                    eventType,
+                    details
+                };
+
+                interactionLog.push(interaction);
+
+                currentTaskRecord.interactions.total += 1;
+                currentTaskRecord.interactions.byType[eventType] =
+                    (currentTaskRecord.interactions.byType[eventType] || 0) + 1;
+            }
+
+            function bindChartInteractionLogger(chart) {
+                if (!chart || typeof chart.on !== 'function') return;
+
+                chart.on('datacanvasmousedown.interactionLogger', event => {
+                    registerInteraction('canvasMouseDown', {
+                        target: 'canvas',
+                        innerX: Math.round(event.innerX),
+                        innerY: Math.round(event.innerY)
+                    });
+                });
+
+                chart.on('datacanvasmouseup.interactionLogger', event => {
+                    registerInteraction('canvasMouseUp', {
+                        target: 'canvas',
+                        innerX: Math.round(event.innerX),
+                        innerY: Math.round(event.innerY)
+                    });
+                });
+
+                const chartElement = chart?.parentElement;
+
+                if (chartElement && !chartElement.dataset.interactionWheelLoggerBound) {
+                    chartElement.dataset.interactionWheelLoggerBound = 'true';
+
+                    let zoomTimeout = null;
+                    let isZooming = false;
+                    let zoomDirection = null;
+                    let zoomSteps = 0;
+
+                    chartElement.addEventListener('wheel', event => {
+                        const currentDirection = event.deltaY < 0 ? 'zoomIn' : 'zoomOut';
+
+                        if (!isZooming) {
+                            isZooming = true;
+                            zoomDirection = currentDirection;
+                            zoomSteps = 0;
+                        }
+
+                        zoomSteps += 1;
+                        zoomDirection = currentDirection;
+
+                        clearTimeout(zoomTimeout);
+
+                        zoomTimeout = setTimeout(() => {
+                            registerInteraction('zoom', {
+                                target: 'canvas',
+                                value: zoomDirection,
+                                steps: zoomSteps
+                            });
+
+                            isZooming = false;
+                            zoomDirection = null;
+                            zoomSteps = 0;
+                            zoomTimeout = null;
+                        }, 300);
+                    });
+                }
+            }
+
+            /*
+            * Trecho relacionado a comunicação com server
+            * - Início
+            */
+            let experimentSocket = null;
+            let experimentAlreadySent = false;
+
+            function connectExperimentWebSocket() {
+                const wsUrl = 'ws://localhost:3000';
+
+                experimentSocket = new WebSocket(wsUrl);
+
+                experimentSocket.addEventListener('open', () => {
+                    console.log('WebSocket conectado ao servidor do experimento');
+                    setWsStatus('connected');
+                });
+
+                experimentSocket.addEventListener('close', () => {
+                    console.warn('WebSocket desconectado');
+                    setWsStatus('disconnected');
+                });
+
+                experimentSocket.addEventListener('error', (err) => {
+                    console.error('Erro no WebSocket:', err);
+                    setWsStatus('error');
+                });
+
+                experimentSocket.addEventListener('message', (event) => {
+                    const message = JSON.parse(event.data);
+
+                    if (message.type === 'SAVE_EXPERIMENT_OK') {
+                        console.log('Experimento salvo no servidor');
+                    }
+
+                    if (message.type === 'SAVE_EXPERIMENT_ERROR') {
+                        console.error('Erro ao salvar experimento:', message.message);
+                    }
+                });
+            }
+
+            const wsBanner = document.getElementById('ws-status-banner');
+            const welcomeNextBtn = document.getElementById('welcome-next-btn');
+
+            function applyDevModeBehavior() {
+                const backButtons = document.querySelectorAll(
+                    'button[data-prev], #tutorial-back-btn, #block-context-back-button, #back-from-tlx-button'
+                );
+
+                backButtons.forEach((button) => {
+                    button.classList.toggle('hidden', !devMode);
+                });
+
+                otherCommentsInput.required = !devMode;
+
+                if (devMode) {
+                    welcomeNextBtn.disabled = false;
+                    acceptTcleButton.disabled = false;
+                    completeTlxButton.disabled = false;
+                }
+            }
+
+            function setWsStatus(status) {
+                if (status === 'connected') {
+                    wsBanner.style.background = '#d1e7dd';
+                    wsBanner.style.color = '#0f5132';
+                    wsBanner.style.borderColor = '#badbcc';
+                    wsBanner.textContent = '✅ Conectado ao servidor. Você pode prosseguir.';
+                    welcomeNextBtn.disabled = false;
+                } else if (status === 'disconnected') {
+                    wsBanner.style.background = '#f8d7da';
+                    wsBanner.style.color = '#842029';
+                    wsBanner.style.borderColor = '#f5c2c7';
+                    wsBanner.textContent = '❌ Conexão com o servidor perdida. Recarregue a página.';
+                    welcomeNextBtn.disabled = true;
+                } else if (status === 'error') {
+                    wsBanner.style.background = '#f8d7da';
+                    wsBanner.style.color = '#842029';
+                    wsBanner.style.borderColor = '#f5c2c7';
+                    wsBanner.textContent = '❌ Erro na conexão com o servidor. Verifique se o servidor está rodando.';
+                    welcomeNextBtn.disabled = true;
+                } else {
+                    wsBanner.style.background = '#fff3cd';
+                    wsBanner.style.color = '#856404';
+                    wsBanner.style.borderColor = '#ffc107';
+                    wsBanner.textContent = '⏳ Aguardando conexão com o servidor…';
+                    welcomeNextBtn.disabled = true;
+                }
+
+                if (devMode) {
+                    welcomeNextBtn.disabled = false;
+                }
+            }
+
+            function sendExperimentDataToServer() {
+                if (experimentAlreadySent) return;
+
+                experimentData.finishedAt = new Date().toISOString();
+
+                if (!experimentSocket || experimentSocket.readyState !== WebSocket.OPEN) {
+                    console.error('WebSocket não está conectado. Experimento não enviado.');
+                    return;
+                }
+
+                experimentSocket.send(JSON.stringify({
+                    type: 'SAVE_EXPERIMENT',
+                    experimentData,
+                    interactionLog
+                }));
+
+                experimentAlreadySent = true;
+            }
+
+            /*
+            * Trecho relacionado a comunicação com server
+            * - Fim
+            */
+
+            // --- Tutorial configuration ---
+            const tutorialData3D = [
+                { label: 'A', valor: 40536062 },
+                { label: 'B', valor: 9190033 },
+                { label: 'C', valor: 3887894 },
+                { label: 'D', valor: 2780522 },
+                { label: 'E', valor: 2441092 },
+                { label: 'F', valor: 1977330 },
+                { label: 'G', valor: 1901553 },
+            ];
+
+
+
+            const tlxColorScale = d3.scaleDiverging(
+                (scaleValue) => {
+                    if (scaleValue <= 0.5) {
+                        return d3.interpolateRgb('#2ca25f', '#bdbdbd')(scaleValue * 2);
+                    }
+
+                    return d3.interpolateRgb('#bdbdbd', '#d73027')((scaleValue - 0.5) * 2);
+                }
+            ).domain([0, 50, 100]);
+
+            function updateTlxRangeColor(input, dimensionId) {
+                const currentValue = Number(input.value);
+                const scaleValue = dimensionId === 'performance-rating'
+                    ? 100 - currentValue
+                    : currentValue;
+
+                const rangeColor = tlxColorScale(scaleValue);
+
+                input.style.accentColor = rangeColor;
+                input.style.setProperty('--tlx-range-color', rangeColor);
+                input.style.setProperty('--tlx-track-border-color', rangeColor);
+            }
+
+            const VISUALIZATIONS = [
+                {
+                    id: 'bar',
+                    name: 'Quebra de Escala Clássica',
+                    previewImage: 'assets/nasa/quebra-escala-classica.jpeg',
+                    ClassRef: BarChart,
+                    settings: {
+                        size_type: 'fit',
+                        color: '#457b9d',
+                        drawStrategy: BAR_CHART_DRAW_STRATEGY,
+                        breakPoint: 0.3,
+                        scaleBreakHiddenRatio: 0.81,
+                        gapSize: BAR_CHART_GAP_SIZE,
+                        z: BAR_CHART_Z,
+                        showAxisLabel: false,
+                        showCategoryLabels: true,
+                        categoryLabels: tutorialData3D.map(d => d.label),
+                        // categoryLabelRotate: -35,
+                        categoryLabelOffset: 25,
+                        categoryLabelFontSize: 9,
+                        paddingBottom: 35,
+                        paddingLeft: 65,
+                        yAxisFontSize: 20,
+                        categoryLabelFontSize: 20
+                    },
+                    data: tutorialData3D.map(d => ({ valor: d.valor })),
+                    controls: [
+                        {
+                            label: 'Posição da quebra',
+                            min: 0.05,
+                            max: 0.9,
+                            step: 0.01,
+                            defaultValue: 0.3,
+                            onInput: (c, v) => c.updateScaleBreakPosition(Number(v)),
+                        },
+                        ...BAR_CHART_ADDITIONAL_CONTROLS
+                    ]
+                },
+                {
+                    id: 'psb',
+                    name: 'Quebra de Escala Perspectiva',
+                    previewImage: 'assets/nasa/quebra-escala-perspectiva.jpeg',
+                    ClassRef: PerspectiveScaleBreakBarChart,
+                    settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', depth: 8, minDepth: 0, maxDepth: 50, outlierRatioThreshold: 3, breakStartRatio: 0.6 },
+                    data: tutorialData3D,
+                    controls: [
+                        {
+                            key: 'psbDepth',
+                            label: 'Profundidade',
+                            min: 0,
+                            max: 50,
+                            step: 0.2,
+                            defaultValue: 8,
+                            formatValue: v => Number(v).toFixed(1),
+                            onInput: (c, v) => c.updateDepth(Number(v))
+                        },
+                        {
+                            key: 'psbBreakStartRatio',
+                            label: 'Posição da quebra',
+                            min: 0.2,
+                            max: 0.85,
+                            step: 0.01,
+                            defaultValue: 0.6,
+                            formatValue: v => Number(v).toFixed(2),
+                            onInput: (c, v) => c.updateBreakStartRatio(Number(v))
+                        },
+                        {
+                            key: 'psbFoldVisualHeight',
+                            label: 'Tamanho da quebra',
+                            min: 0.2,
+                            max: 4,
+                            step: 0.1,
+                            defaultValue: 1.4,
+                            formatValue: v => Number(v).toFixed(1),
+                            onInput: (c, v, helpers) => {
+                                const nextFoldVisualHeight = Number(v);
+                                const maxBarHeight = c.settings?.maxBarHeight ?? 6;
+                                const currentBreakStartRatio = helpers?.getValue('psbBreakStartRatio') ?? c.settings.breakStartRatio;
+                                const currentFoldVisualHeight = c.settings?.foldVisualHeight ?? 1.4;
+
+                                const currentBreakCenter =
+                                    currentBreakStartRatio * maxBarHeight + currentFoldVisualHeight / 2;
+
+                                const nextBreakStartRatio =
+                                    (currentBreakCenter - nextFoldVisualHeight / 2) / maxBarHeight;
+
+                                const clampedBreakStartRatio = clamp(nextBreakStartRatio, 0.2, 0.85);
+
+                                c.updateBreakStartRatio(clampedBreakStartRatio);
+                                c.updateFoldVisualHeight(nextFoldVisualHeight);
+
+                                if (helpers) {
+                                    helpers.setValue('psbBreakStartRatio', clampedBreakStartRatio);
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: 'scroll',
+                    name: 'Gráfico de Barras Pergaminho',
+                    previewImage: 'assets/nasa/grafico-barras-pergaminho.jpeg',
+                    ClassRef: ScrollBarChart3D,
+                    settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', maxYLimitRatio: 1.0, zStepDepth: 1.5 },
+                    data: tutorialData3D,
+                    controls: [
+                        {
+                            label: 'Limiar de Dobra', min: 0, max: 100, step: 0.1, defaultValue: 100,
+                            formatValue: v => formatFoldThreshold(v),
+                            onInput: (c, v) => {
+                                c.updateFoldThreshold(sliderToLogRatio(v));
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: 'worm',
+                    name: 'Gráfico de Barras Minhoca',
+                    previewImage: 'assets/nasa/grafico-barras-minhoca.jpeg',
+                    ClassRef: WormBarChart3D,
+                    settings: { size_type: 'fit', valueKey: 'valor', labelKey: 'label', maxYLimitRatio: 1.0, zStepDepth: 1.5 },
+                    data: tutorialData3D,
+                    controls: [
+                        {
+                            label: 'Limiar de Dobra', min: 0, max: 100, step: 0.1, defaultValue: 100,
+                            formatValue: v => formatFoldThreshold(v),
+                            onInput: (c, v) => c.updateFoldThreshold(sliderToLogRatio(v))
+                        }
+                    ]
+                }
+            ];
+
+            const finalRankingById = new Map(VISUALIZATIONS.map(visualization => [visualization.id, visualization]));
+            const finalRankingSlotsState = Array(VISUALIZATIONS.length).fill(null);
+            let draggedFinalRankingId = null;
+            let draggedFromSlotIndex = null;
+
+            function persistFinalRankingOrder() {
+                experimentData.finalRanking.order = finalRankingSlotsState.filter(Boolean);
+            }
+
+            function buildFinalRankingCard(visualizationId, slotIndex = null) {
+                const visualization = finalRankingById.get(visualizationId);
+                if (!visualization) return null;
+
+                const card = document.createElement('div');
+                card.className = 'final-ranking-card';
+                card.draggable = true;
+                card.dataset.visualizationId = visualization.id;
+
+                if (slotIndex !== null) {
+                    card.dataset.slotIndex = String(slotIndex);
+                }
+
+                card.innerHTML = [
+                    '<span class="final-ranking-position">' + (slotIndex === null ? '•' : (slotIndex + 1)) + '</span>',
+                    '<img class="final-ranking-preview" src="' + visualization.previewImage + '" alt="Prévia da visualização ' + visualization.name + '">',
+                    '<div class="final-ranking-copy">',
+                    '<strong>' + visualization.name + '</strong>',
+                    '<span>' + (slotIndex === null ? 'Arraste para uma posição à direita' : 'Visualização atribuída a esta posição') + '</span>',
+                    '</div>',
+                    '<span class="final-ranking-handle" aria-hidden="true">⋮⋮</span>'
+                ].join('');
+
+                return card;
+            }
+
+            function isFinalRankingComplete() {
+                return finalRankingSlotsState.every(Boolean);
+            }
+
+            function renderFinalRankingScreen() {
+                if (!finalRankingOptions || !finalRankingSlots) return;
+
+                finalRankingOptions.innerHTML = '';
+                finalRankingSlots.innerHTML = '';
+
+                const assignedIds = new Set(finalRankingSlotsState.filter(Boolean));
+
+                VISUALIZATIONS.forEach((visualization) => {
+                    if (assignedIds.has(visualization.id)) return;
+
+                    const optionItem = document.createElement('li');
+                    optionItem.dataset.visualizationId = visualization.id;
+                    optionItem.appendChild(buildFinalRankingCard(visualization.id));
+                    finalRankingOptions.appendChild(optionItem);
+                });
+
+                for (let index = 0; index < finalRankingSlotsState.length; index += 1) {
+                    const slotItem = document.createElement('li');
+                    slotItem.className = 'final-ranking-slot';
+                    slotItem.dataset.slotIndex = String(index);
+
+                    const slotLabel = document.createElement('div');
+                    slotLabel.className = 'final-ranking-slot-label';
+                    slotLabel.textContent = (index + 1) + 'º lugar';
+                    slotItem.appendChild(slotLabel);
+
+                    const assignedId = finalRankingSlotsState[index];
+                    if (assignedId) {
+                        const card = buildFinalRankingCard(assignedId, index);
+                        if (card) slotItem.appendChild(card);
+                    } else {
+                        const emptyState = document.createElement('div');
+                        emptyState.className = 'final-ranking-slot-empty';
+                        emptyState.textContent = 'Solte uma visualização aqui';
+                        slotItem.appendChild(emptyState);
+                    }
+
+                    finalRankingSlots.appendChild(slotItem);
+                }
+
+                persistFinalRankingOrder();
+            }
+
+            function clearFinalRankingDragState() {
+                draggedFinalRankingId = null;
+                draggedFromSlotIndex = null;
+
+                if (finalRankingOptions) {
+                    finalRankingOptions.classList.remove('is-drop-target');
+                }
+
+                if (finalRankingSlots) {
+                    finalRankingSlots.querySelectorAll('.is-drop-target').forEach((slot) => {
+                        slot.classList.remove('is-drop-target');
+                    });
+                }
+            }
+
+            function assignDraggedVisualizationToSlot(slotIndex) {
+                if (!draggedFinalRankingId || !Number.isInteger(slotIndex)) return;
+
+                const currentIndex = finalRankingSlotsState.indexOf(draggedFinalRankingId);
+                if (currentIndex >= 0) {
+                    finalRankingSlotsState[currentIndex] = null;
+                }
+
+                if (draggedFromSlotIndex !== null && draggedFromSlotIndex >= 0) {
+                    const targetId = finalRankingSlotsState[slotIndex];
+                    finalRankingSlotsState[draggedFromSlotIndex] = targetId ?? null;
+                }
+
+                finalRankingSlotsState[slotIndex] = draggedFinalRankingId;
+            }
+
+            function collectFinalRanking() {
+                experimentData.finalRanking.order = finalRankingSlotsState.filter(Boolean);
+                experimentData.finalRanking.recordedAt = new Date().toISOString();
+            }
+
+            function collectFinalComments() {
+                if (!devMode && !otherCommentsInput.reportValidity()) {
+                    otherCommentsInput.focus();
+                    return false;
+                }
+
+                experimentData.finalComments = {
+                    rankingWhy: rankingWhyInput.value.trim(),
+                    otherComments: otherCommentsInput.value.trim(),
+                    recordedAt: new Date().toISOString()
+                };
+
+                return true;
+            }
+
+            const DATASET_POOL = [
+                {
+                    "id": "base-1-pib",
+                    "name": "PIB dos Municípios",
+                    "description": "Produto Interno Bruto a preços correntes (Mil Reais) de municípios do estado do Pará.",
+                    "context": "Esta base de dados apresenta o Produto Interno Bruto (PIB) a preços correntes de diversos municípios. O objetivo é analisar a visualização para compreender a distribuição da riqueza gerada.",
+                    "labels": ["BEL", "BAR", "ALT", "MAR", "ABA", "BRA", "CAM", "DEL", "SMG", "IMI", "CDA", "CPO", "BAI", "AFU", "AUC", "MUA", "CUR", "CAR", "SSB", "COL"],
+                    "values": [40536062, 9190033, 3887894, 2780522, 2441092, 1977330, 1901553, 1332437, 1132578, 1021946, 985296, 900134, 799363, 665557, 490157, 464374, 396832, 354702, 309743, 136194],
+                    "tasks": {
+                        "T1": "Determine o valor aproximado do PIB do município de Marituba (MAR).",
+                        "T2": "Determine a diferença aproximada de valor do PIB entre os municípios de Belém (BEL) e Abaetetuba (ABA).",
+                        "T3": "Determine a diferença aproximada de valor do PIB entre os municípios de Igarapé-Miri (IMI) e Conceição do Araguaia (CDA).",
+                        "T4": "Aproximadamente, quantas vezes o PIB de Belém (BEL) é maior em relação ao PIB de Colares (COL)?",
+                        "T5": "Qual é a proporção aproximada entre os valores do PIB de Marituba (MAR) e Igarapé-Miri (IMI)?"
+                    },
+                    "correct_answer": {
+                        "T1": 2780522,
+                        "T2": 38094970,
+                        "T3": 36650,
+                        "T4": 297.63,
+                        "T5": 2.720811
+                    }
+                },
+                {
+                    "id": "base-2-ensino-superior",
+                    "name": "Ensino Superior Completo",
+                    "description": "Número de pessoas com ensino superior completo no ano de 2022.",
+                    "context": "Esta base de dados contabiliza a quantidade de habitantes que possuíam ensino superior completo em 2022 por município. Analise a visualização para extrair os dados demográficos educacionais.",
+                    "labels": ["ABA", "AFU", "ALT", "ANA", "AUC", "BAI", "BAR", "BEL", "BEN", "BRA", "CAM", "CAP", "CPO", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG"],
+                    "values": [10405, 1259, 9988, 55080, 1124, 1640, 8048, 207127, 3003, 6911, 7861, 5238, 2578, 4463, 1098, 1925, 2577, 7278, 1013, 2643],
+                    "tasks": {
+                        "T1": "Determine o número aproximado de pessoas com ensino superior completo em Dom Eliseu (DEL).",
+                        "T2": "Determine a diferença no número de pessoas com ensino superior completo entre Ananindeua (ANA) e Capanema (CAP).",
+                        "T3": "Determine a diferença no número de pessoas com ensino superior completo entre São Miguel do Guamá (SMG) e Muaná (MUA).",
+                        "T4": "Aproximadamente, quantas vezes o número de pessoas com ensino superior completo em Belém (BEL) é maior do que em Afuá (AFU)?",
+                        "T5": "Qual é a proporção aproximada entre o número de pessoas com ensino superior completo em Altamira (ALT) e Benevides (BEN)?"
+                    },
+                    "correct_answer": {
+                        "T1": 1925,
+                        "T2": 49842,
+                        "T3": 1630,
+                        "T4": 164.52,
+                        "T5": 3.326
+                    }
+                },
+                {
+                    "id": "base-3-matriculas-fundamental",
+                    "name": "Matrículas no Ensino Fundamental",
+                    "description": "Quantidade de matrículas registradas no Ensino Fundamental para o ano de 2025.",
+                    "context": "Esta base exibe o volume projetado de matrículas no Ensino Fundamental por município no ano de 2025. Utilize a visualização para identificar os padrões da rede de educação básica.",
+                    "labels": ["ABA", "AFU", "ALT", "AUC", "BAI", "BAR", "BEL", "BRA", "CAR", "CAM", "CPO", "COL", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG", "SSB"],
+                    "values": [24634, 10158, 21152, 8304, 5503, 21920, 145005, 19351, 3708, 23198, 7917, 1841, 6132, 7837, 6076, 11194, 15995, 6422, 9366, 4823],
+                    "tasks": {
+                        "T1": "Determine o número aproximado de matrículas no Ensino Fundamental em Cametá (CAM).",
+                        "T2": "Determine a diferença no número de matrículas entre os municípios de Belém (BEL) e Marituba (MAR).",
+                        "T3": "Determine a diferença no número de matrículas entre os municípios de Augusto Corrêa (AUC) e Dom Eliseu (DEL).",
+                        "T4": "Aproximadamente, quantas vezes o número de matrículas em Belém (BEL) é maior que em Cachoeira do Arari (CAR)?",
+                        "T5": "Qual é a proporção aproximada entre as matrículas de Abaetetuba (ABA) e Afuá (AFU)?"
+                    },
+                    "correct_answer": {
+                        "T1": 23198,
+                        "T2": 129010,
+                        "T3": 2228,
+                        "T4": 39.11,
+                        "T5": 2.425
+                    }
+                },
+                {
+                    "id": "base-4-populacao-residente",
+                    "name": "População Residente",
+                    "description": "Total da população residente nos municípios contabilizada em 2022.",
+                    "context": "Esta base de dados detalha a contagem total de habitantes residentes em diversos municípios no ano de 2022. Observe a visualização para avaliar as discrepâncias populacionais.",
+                    "labels": ["ABA", "AFU", "ALT", "AUC", "BAI", "BAR", "BEL", "BRA", "CAR", "CAM", "CPO", "COL", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG", "SSB"],
+                    "values": [158188, 37765, 126279, 44573, 51641, 126650, 1303403, 123082, 23981, 134184, 56506, 12868, 44617, 33903, 58484, 64831, 111785, 45368, 52894, 25643],
+                    "tasks": {
+                        "T1": "Determine o valor aproximado da população residente de Bragança (BRA).",
+                        "T2": "Determine a diferença populacional entre os municípios de Belém (BEL) e Barcarena (BAR).",
+                        "T3": "Determine a diferença populacional entre os municípios de Abaetetuba (ABA) e Altamira (ALT).",
+                        "T4": "Aproximadamente, quantas vezes a população residente de Belém (BEL) é maior que a de São Sebastião da Boa Vista (SSB)?",
+                        "T5": "Qual é a proporção aproximada entre a população residente de São Miguel do Guamá (SMG) e Colares (COL)?"
+                    },
+                    "correct_answer": {
+                        "T1": 123082,
+                        "T2": 1176753,
+                        "T3": 31909,
+                        "T4": 50.83,
+                        "T5": 4.11
+                    }
+                },
+                {
+                    "id": "base-5-receita-impostos",
+                    "name": "Receita de Impostos e Taxas",
+                    "description": "Valores arrecadados em impostos, taxas e contribuições (em Reais) no ano de 2024.",
+                    "context": "Esta base de dados demonstra o volume financeiro arrecadado pelos municípios através de impostos e taxas em 2024. A análise requer a extração de valores tributários a partir da visualização.",
+                    "labels": ["ABA", "BRE", "ALT", "ANA", "AUC", "TUC", "BAR", "BEL", "BEN", "BRA", "CAM", "CAP", "SAL", "CDA", "CUR", "DEL", "IMI", "MAR", "MUA", "SMG"],
+                    "values": [36437783.61, 40441343.14, 72491969.43, 201474865.79, 11540181.11, 50170347.92, 535155385.44, 1561985767.49, 26396970.93, 39849155.60, 36511936.09, 27585543.21, 24014348.01, 32437791.06, 13307123.96, 20617509.55, 16060110.60, 66844578.57, 12017472.56, 16993260.97],
+                    "tasks": {
+                        "T1": "Determine o valor aproximado arrecadado em impostos por Breves (BRE).",
+                        "T2": "Determine a diferença de arrecadação tributária entre Barcarena (BAR) e Tucuruí (TUC).",
+                        "T3": "Determine a diferença de arrecadação tributária entre Capanema (CAP) e Benevides (BEN).",
+                        "T4": "Aproximadamente, quantas vezes a arrecadação de Belém (BEL) é maior em comparação com a de Augusto Corrêa (AUC)?",
+                        "T5": "Qual é a proporção aproximada entre a arrecadação de Capanema (CAP) e Curralinho (CUR)?"
+                    },
+                    "correct_answer": {
+                        "T1": 40441343.14,
+                        "T2": 484985037.52,
+                        "T3": 1188572.28,
+                        "T4": 135.35,
+                        "T5": 2.073
+                    }
+                },
+                {
+                    "id": "base-6-frota-motocicletas",
+                    "name": "Frota de Motocicletas",
+                    "description": "Tamanho da frota de motocicletas registrada por município no ano de 2025.",
+                    "context": "Esta base reflete a quantidade de motocicletas registradas na frota veicular de cada município projetada para 2025. Consulte o gráfico gerado para analisar a frota local.",
+                    "labels": ["ABA", "BRE", "ALT", "ANA", "AUC", "TUC", "BAR", "BEL", "BEN", "BRA", "CAM", "CAP", "SAL", "CDA", "BAI", "DEL", "IMI", "MAR", "MUA", "SMG"],
+                    "values": [27071, 9139, 43078, 77251, 2945, 21902, 18411, 191736, 10127, 19287, 16965, 18794, 7951, 11301, 2794, 7869, 5579, 17177, 1504, 9766],
+                    "tasks": {
+                        "T1": "Determine o tamanho aproximado da frota de motocicletas em Altamira (ALT).",
+                        "T2": "Determine a diferença no tamanho da frota de motocicletas entre Cametá (CAM) e Muaná (MUA).",
+                        "T3": "Determine a diferença no tamanho da frota de motocicletas entre Salinópolis (SAL) e Baião (BAI).",
+                        "T4": "Aproximadamente, quantas vezes a frota de motocicletas de Belém (BEL) é maior que a de Baião (BAI)?",
+                        "T5": "Qual é a proporção aproximada entre a frota de motocicletas de Breves (BRE) e Baião (BAI)?"
+                    },
+                    "correct_answer": {
+                        "T1": 43078,
+                        "T2": 15461,
+                        "T3": 5157,
+                        "T4": 68.62,
+                        "T5": 3.27
+                    }
+                }
+            ];
+
+            const TASK_DESCRIPTION = {
+                "T1": {
+                    title: "Determinar o valor de um elemento.",
+                    description: "Localize a barra correspondente ao item solicitado e utilize a escala do eixo vertical (Y) para estimar e informar o seu valor numérico aproximado. Fique atento a possíveis dobras ou quebras na visualização para garantir uma leitura correta."
+                },
+                "T2": {
+                    title: "Determinar a diferença entre dois elementos distantes.",
+                    description: "Identifique as duas barras mencionadas, que possuem valores visivelmente discrepantes (uma muito maior que a outra). Estime o valor de cada uma usando o eixo de referência e subtraia o menor valor do maior para encontrar a diferença entre eles."
+                },
+                "T3": {
+                    title: "Determinar a diferença entre dois elementos próximos.",
+                    description: "Identifique as duas barras mencionadas, que possuem tamanhos ou valores muito semelhantes. Estime o valor de cada uma com o maior grau de precisão possível através do eixo e calcule a diferença subtraindo o valor menor do maior."
+                },
+                "T4": {
+                    title: "Determinar a proporção (razão) entre dois elementos distantes.",
+                    description: "Localize as duas barras indicadas, que apresentam tamanhos muito distintos. Estime o valor numérico de ambas e calcule quantas vezes a barra maior contém a barra menor (dividindo o valor maior pelo menor)."
+                },
+                "T5": {
+                    title: "Determinar a proporção (razão) entre dois elementos próximos.",
+                    description: "Localize as duas barras indicadas, que têm tamanhos muito parecidos. Estime o valor de ambas e avalie a proporção entre elas, indicando a razão de tamanho entre a maior e a menor."
+                }
+            };
+
+            blockTaskOrder = shuffle(Object.keys(TASK_DESCRIPTION));
+
+            experimentData.blockTaskOrder = blockTaskOrder;
+
+            function datasetToObjects(dataset) {
+                return dataset.values.map((valor, i) => ({
+                    label: dataset.labels[i],
+                    valor
+                }));
+            }
+
+            function shuffle(arr) {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            }
+
+            let tutorialOrder = shuffle(VISUALIZATIONS);
+            let tutorialIndex = 0;
+            let currentTutorialChart = null;
+
+            const tutorialTitle = document.getElementById('tutorial-title');
+            const tutorialControls = document.getElementById('tutorial-controls');
+            const tutorialChartArea = document.getElementById('tutorial-chart-area');
+            const tutorialBackBtn = document.getElementById('tutorial-back-btn');
+            const tutorialNextBtn = document.getElementById('tutorial-next-btn');
+
+            // --- Progress tracking ---
+            function getProgressStep(screenId) {
+                const fixedStepMap = {
+                    'welcome-screen': 1,
+                    'tcle-screen': 2,
+                    'demographic-screen': 3,
+                    'final-ranking-screen': 78,
+                    'final-comments-screen': 79,
+                    'thanks-screen': 80
+                };
+
+                if (screenId === 'tutorial-screen') {
+                    return 4 + tutorialIndex;
+                }
+
+                if (fixedStepMap[screenId]) {
+                    return fixedStepMap[screenId];
+                }
+
+                const instructionStep = 8 + (currentBlock - 1) * 14;
+                if (screenId === 'task-instruction-screen') return instructionStep;
+
+                const blockBase = instructionStep;
+                if (screenId === 'block-context-screen') return blockBase + currentBlockTaskIndex * 3 + 1;
+                if (screenId === 'block-task-screen') return blockBase + currentBlockTaskIndex * 3 + 2;
+                if (screenId === 'block-answer-screen') return blockBase + currentBlockTaskIndex * 3 + 3;
+                if (screenId === 'nasa-tlx-screen') return blockBase + 13;
+
+                return 1;
+            }
+
+            function updateProgress(screenId) {
+                const totalFlowSteps = 80;
+                const currentStep = getProgressStep(screenId);
+                maxProgressStep = Math.max(maxProgressStep, currentStep);
+                const progress = (maxProgressStep / totalFlowSteps) * 100;
+                progressFill.style.width = progress + '%';
+            }
+
+            function updateContainerWidth(screenId) {
+                const isVisualizationScreen =
+                    screenId === 'tutorial-screen' ||
+                    screenId === 'block-task-screen' ||
+                    screenId === 'nasa-tlx-screen' ||
+                    screenId === 'final-ranking-screen';
+
+                container.style.maxWidth = isVisualizationScreen
+                    ? VISUAL_CONTAINER_MAX_WIDTH
+                    : DEFAULT_CONTAINER_MAX_WIDTH;
+            }
+
+
+            function showScreen(screenId) {
+                if (screenId !== 'block-task-screen' && currentBlockChart) {
+                    destroyBlockChart();
+                }
+                if (screenId === 'final-ranking-screen') {
+                    renderFinalRankingScreen();
+                }
+                screens.forEach(screen => {
+                    screen.classList.toggle('hidden', screen.id !== screenId);
+                });
+                updateContainerWidth(screenId);
+                updateProgress(screenId);
+            }
+
+            function getTaskKeyForBlock(blockNumber) {
+                return blockTaskOrder[Math.max(0, Math.min(blockTaskOrder.length - 1, blockNumber - 1))];
+            }
+
+            function updateTaskInstructionScreen() {
+                // Always derive the instruction task from the current randomized block order.
+                currentBlockTaskKey = getTaskKeyForBlock(currentBlock) || currentBlockTaskKey;
+                const taskMeta = TASK_DESCRIPTION[currentBlockTaskKey];
+                taskInstructionTitle.textContent = taskMeta
+                    ? taskMeta.title
+                    : 'Fase 2 - Instrução da Tarefa';
+                taskInstructionBlockLabel.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks;
+                taskInstructionDescription.innerHTML = [
+                    '<strong>Descrição geral da tarefa:</strong><br>',
+                    taskMeta ? taskMeta.description : ''
+                ].join('');
+            }
+
+            function updateBlockPlaceholders() {
+                const task = currentBlockPlan[currentBlockTaskIndex];
+                const taskLabel = (currentBlockTaskIndex + 1) + ' de ' + TASKS_PER_BLOCK;
+                const vizName = task ? task.visualization.name : 'Visualização';
+                const datasetName = task ? task.dataset.name : 'Base';
+                const taskMeta = task ? TASK_DESCRIPTION[task.taskKey] : null;
+                const taskQuestion = task ? task.dataset.tasks[task.taskKey] : '';
+
+                blockContextTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - ' + (taskMeta ? taskMeta.title : 'Contexto da Tarefa');
+                blockTitle.textContent = taskQuestion || ('Pergunta do bloco ' + currentBlock + ' de ' + totalBlocks + ' (' + taskLabel + ')');
+                answerTitle.textContent = 'Bloco ' + currentBlock + ' de ' + totalBlocks + ' - Registro de Resposta (' + taskLabel + ')';
+                tlxTitle.textContent = 'NASA-TLX do Bloco ' + currentBlock;
+
+                blockContext.innerHTML = [
+                    '<strong>Visualização:</strong> ' + vizName + '<br>',
+                    '<strong>Base:</strong> ' + datasetName + '<br>',
+                    '<strong>Descrição da base:</strong> ' + (task ? task.dataset.description : '') + '<br><br>',
+                    '<strong>Contexto:</strong> ' + (task ? task.dataset.context : '') + '<br><br>',
+                    '<strong>Objetivo da tarefa:</strong> ' + (taskMeta ? taskMeta.description : '')
+                ].join('');
+
+                blockQuestionContext.innerHTML = [
+                    '<strong>Pergunta da tarefa (' + taskLabel + '):</strong><br>',
+                    taskQuestion || ''
+                ].join('');
+
+                const isRatioTask = task && (task.taskKey === 'T4' || task.taskKey === 'T5');
+
+                blockAnswerInput.placeholder = isRatioTask
+                    ? 'Digite um número que pode ser fracionário'
+                    : 'Digite um número inteiro';
+
+                blockConfidence.innerHTML = [
+                    '<option value="" disabled selected hidden>Selecione...</option>',
+                    '<option>Muito Baixa</option>',
+                    '<option>Baixa</option>',
+                    '<option>Média</option>',
+                    '<option>Alta</option>',
+                    '<option>Muito Alta</option>'
+                ].join('');
+            }
+
+            function collectBlockNasaTlx() {
+                const taskKey = getTaskKeyForBlock(currentBlock);
+
+                const existingIndex = experimentData.blockNasaTlx.findIndex(
+                    item => item.blockNumber === currentBlock
+                );
+
+                const visualizations = currentBlockPlan.map((task, visualizationIndex) => {
+                    const result = {
+                        visualizationId: task.visualization.id
+                    };
+
+                    TLX_DIMENSIONS.forEach((dimension, dimensionIndex) => {
+                        const key = getTlxResponseKey(
+                            currentBlock,
+                            dimensionIndex,
+                            visualizationIndex
+                        );
+
+                        result[dimension.field] =
+                            tlxDrafts.get(key) ?? null;
+                    });
+
+                    return result;
+                });
+
+                const record = {
+                    blockNumber: currentBlock,
+                    taskKey,
+                    visualizations,
+                    recordedAt: new Date().toISOString()
+                };
+
+                if (existingIndex >= 0) {
+                    experimentData.blockNasaTlx[existingIndex] = record;
+                } else {
+                    experimentData.blockNasaTlx.push(record);
+                }
+            }
+
+            function buildBlockPlan() {
+                const vizOrder = shuffle(VISUALIZATIONS);
+                const sampledDatasets = shuffle(DATASET_POOL).slice(0, TASKS_PER_BLOCK);
+                currentBlockTaskKey = getTaskKeyForBlock(currentBlock);
+                currentBlockPlan = vizOrder.map((visualization, i) => ({
+                    visualization,
+                    dataset: sampledDatasets[i],
+                    taskKey: currentBlockTaskKey
+                }));
+                currentBlockTaskIndex = 0;
+            }
+
+            function getTlxResponseKey(blockNumber, dimensionIndex, visualizationIndex) {
+                return `${blockNumber}-${dimensionIndex}-${visualizationIndex}`;
+            }
+
+            function updateTlxCompletionState() {
+                if (devMode) {
+                    completeTlxButton.disabled = false;
+                    return;
+                }
+
+                const tlxRanges = Array.from(tlxForm.querySelectorAll('.tlx-range'));
+                const hasAllRanges =
+                    tlxRanges.length === TLX_DIMENSIONS.length * TASKS_PER_BLOCK;
+                const allAnswered =
+                    hasAllRanges &&
+                    tlxRanges.every((input) => input.dataset.answered === 'true');
+                completeTlxButton.disabled = !allAnswered;
+            }
+
+            function closeTlxTooltips(exceptTrigger = null) {
+                tlxForm.querySelectorAll('.tlx-label-trigger').forEach((trigger) => {
+                    if (trigger === exceptTrigger) return;
+                    trigger.setAttribute('aria-expanded', 'false');
+                    const tooltip = trigger.nextElementSibling;
+                    if (tooltip) tooltip.classList.remove('is-open');
+                });
+            }
+
+            function renderTlxScreen() {
+                tlxTitle.textContent = `NASA-TLX do Bloco ${currentBlock}`;
+                tlxForm.innerHTML = '';
+
+                TLX_DIMENSIONS.forEach((dimension, dimensionIndex) => {
+                    const group = document.createElement('section');
+                    group.className = 'tlx-dimension-group';
+
+                    const title = document.createElement('h3');
+                    title.className = 'tlx-dimension-group-title';
+                    title.textContent = dimension.label;
+                    group.appendChild(title);
+
+                    const items = document.createElement('div');
+                    items.className = 'tlx-items-grid';
+
+                    currentBlockPlan.forEach((task, visualizationIndex) => {
+                        const key = getTlxResponseKey(currentBlock, dimensionIndex, visualizationIndex);
+                        const savedValue = tlxDrafts.get(key);
+                        const hasValue = Number.isFinite(savedValue);
+                        const inputId = `tlx-${dimension.id}-${visualizationIndex}`;
+                        const tooltipId = `${inputId}-tooltip`;
+
+                        const item = document.createElement('div');
+                        item.className = 'tlx-item';
+
+                        const visualization = document.createElement('div');
+                        visualization.className = 'tlx-item-visualization';
+
+                        const image = document.createElement('img');
+                        image.className = 'tlx-visualization-image';
+                        image.src = task.visualization.previewImage;
+                        image.alt = `Exemplo da visualização ${task.visualization.name}`;
+
+                        const visualizationLabel = document.createElement('div');
+                        visualizationLabel.className = 'tlx-item-label';
+                        visualizationLabel.textContent = task.visualization.name;
+                        visualization.append(image, visualizationLabel);
+
+                        const control = document.createElement('div');
+                        control.className = 'tlx-dimension';
+                        control.dataset.tlxDimension = dimension.id;
+
+                        const labelRow = document.createElement('div');
+                        labelRow.className = 'tlx-label-row';
+
+                        const trigger = document.createElement('button');
+                        trigger.className = 'tlx-label-trigger';
+                        trigger.type = 'button';
+                        trigger.setAttribute('aria-expanded', 'false');
+                        trigger.setAttribute('aria-describedby', tooltipId);
+                        trigger.innerHTML = `${dimension.label} <span aria-hidden="true">ⓘ</span>`;
+
+                        const tooltip = document.createElement('span');
+                        tooltip.className = 'tlx-tooltip';
+                        tooltip.id = tooltipId;
+                        tooltip.setAttribute('role', 'tooltip');
+                        tooltip.textContent = dimension.description;
+
+                        const output = document.createElement('output');
+                        output.className = 'tlx-value';
+                        output.setAttribute('for', inputId);
+                        output.textContent = hasValue ? String(savedValue) : 'Não respondido';
+                        labelRow.append(trigger, tooltip, output);
+
+                        const input = document.createElement('input');
+                        input.className = 'tlx-range';
+                        input.id = inputId;
+                        input.type = 'range';
+                        input.min = '0';
+                        input.max = '100';
+                        input.step = '5';
+                        input.value = hasValue ? String(savedValue) : '50';
+                        input.dataset.answered = hasValue ? 'true' : 'false';
+                        input.setAttribute('aria-label', `${dimension.label}: ${task.visualization.name}`);
+                        updateTlxRangeColor(input, dimension.id);
+
+                        const scaleLabels = document.createElement('div');
+                        scaleLabels.className = 'tlx-scale-labels';
+                        scaleLabels.innerHTML = '<span>Baixo</span><span>Alto</span>';
+
+                        input.addEventListener('input', () => {
+                            input.dataset.answered = 'true';
+                            output.textContent = input.value;
+                            updateTlxRangeColor(input, dimension.id);
+                            tlxDrafts.set(key, Number(input.value));
+                            updateTlxCompletionState();
+                        });
+
+                        trigger.addEventListener('click', (event) => {
+                            event.stopPropagation();
+                            const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+                            closeTlxTooltips(trigger);
+                            trigger.setAttribute('aria-expanded', String(willOpen));
+                            tooltip.classList.toggle('is-open', willOpen);
+                        });
+
+                        trigger.addEventListener('keydown', (event) => {
+                            if (event.key === 'Escape') {
+                                trigger.setAttribute('aria-expanded', 'false');
+                                tooltip.classList.remove('is-open');
+                            }
+                        });
+
+                        control.append(labelRow, input, scaleLabels);
+                        item.append(visualization, control);
+                        items.appendChild(item);
+                    });
+
+                    group.appendChild(items);
+                    tlxForm.appendChild(group);
+                });
+
+                completeTlxButton.textContent =
+                    currentBlock === totalBlocks ? 'Ir para o ranking final' : 'Concluir bloco';
+                closeTlxTooltips();
+                updateTlxCompletionState();
+                updateProgress('nasa-tlx-screen');
+            }
+
+            function getTaskDataForVisualization(task) {
+                const objects = datasetToObjects(task.dataset);
+                if (task.visualization.id === 'bar') {
+                    return objects.map((d) => ({ valor: d.valor }));
+                }
+                return objects;
+            }
+
+            function destroyBlockChart() {
+                if (currentBlockChart) {
+                    if (currentBlockChart.destroy) currentBlockChart.destroy();
+                    currentBlockChart = null;
+                }
+                blockControls.innerHTML = '';
+                blockChartArea.innerHTML = '';
+            }
+
+            function renderControlBar(viz, controlsContainer, chartGetter) {
+                controlsContainer.innerHTML = '';
+
+                const controlRegistry = {};
+
+                const controlHelpers = {
+                    getValue: key => {
+                        const entry = controlRegistry[key];
+                        return entry ? Number(entry.input.value) : null;
+                    },
+
+                    setValue: (key, rawValue) => {
+                        const entry = controlRegistry[key];
+                        if (!entry) return;
+
+                        const min = Number(entry.input.min);
+                        const max = Number(entry.input.max);
+                        const clampedValue = clamp(Number(rawValue), min, max);
+
+                        entry.input.value = String(clampedValue);
+                        entry.updateLabel(entry.input.value);
+                    }
+                };
+
+                viz.controls.forEach(ctrl => {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.cssText =
+                        'display:flex;align-items:center;gap:0.4rem;';
+
+                    const lbl = document.createElement('label');
+                    lbl.textContent = ctrl.label;
+                    lbl.style.cssText =
+                        'font-size:0.88rem;font-weight:600;white-space:nowrap;';
+
+                    const inp = document.createElement('input');
+                    inp.type = 'range';
+                    inp.min = ctrl.min;
+                    inp.max = ctrl.max;
+                    inp.step = ctrl.step;
+                    inp.value = ctrl.defaultValue;
+                    inp.style.width = '120px';
+
+                    const value = document.createElement('span');
+                    value.style.cssText =
+                        'font-size:0.84rem;font-weight:700;min-width:48px;text-align:left;';
+
+                    const updateControlValue = rawValue => {
+                        value.textContent = ctrl.formatValue
+                            ? ctrl.formatValue(rawValue)
+                            : String(rawValue);
+                    };
+
+                    if (ctrl.key) {
+                        controlRegistry[ctrl.key] = {
+                            input: inp,
+                            updateLabel: updateControlValue
+                        };
+                    }
+
+                    updateControlValue(inp.value);
+
+                    let sliderInteractionActive = false;
+
+                    const finishSliderInteraction = e => {
+                        if (!sliderInteractionActive) return;
+
+                        const sliderEndValue = Number(e.target.value);
+
+                        registerInteraction('slider', {
+                            controlKey: ctrl.key || ctrl.label,
+                            value: sliderEndValue
+                        });
+
+                        sliderInteractionActive = false;
+                    };
+
+                    inp.addEventListener('pointerdown', () => {
+                        sliderInteractionActive = true;
+                    });
+
+                    inp.addEventListener('input', e => {
+                        updateControlValue(e.target.value);
+
+                        const chart = chartGetter();
+
+                        if (chart) {
+                            ctrl.onInput(
+                                chart,
+                                e.target.value,
+                                controlHelpers
+                            );
+                        }
+                    });
+
+                    inp.addEventListener('pointerup', finishSliderInteraction);
+                    inp.addEventListener('change', finishSliderInteraction);
+                    inp.addEventListener('blur', finishSliderInteraction);
+
+                    wrapper.appendChild(lbl);
+                    wrapper.appendChild(inp);
+                    wrapper.appendChild(value);
+
+                    controlsContainer.appendChild(wrapper);
+                });
+            }
+
+            function renderBlockTaskChart() {
+                destroyBlockChart();
+
+                const task = currentBlockPlan[currentBlockTaskIndex];
+                if (!task) return;
+
+                renderControlBar(task.visualization, blockControls, () => currentBlockChart);
+
+                const data = getTaskDataForVisualization(task);
+
+                try {
+                    const rect = blockChartArea.getBoundingClientRect();
+                    const w = rect.width > 0 ? Math.round(rect.width) : 900;
+                    const h = rect.height > 0 ? Math.round(rect.height) : 520;
+
+                    const chartSettings = {
+                        ...task.visualization.settings,
+                        width: w,
+                        height: h
+                    };
+
+                    if (task.visualization.id === 'bar') {
+                        chartSettings.categoryLabels = Array.isArray(task.dataset?.labels)
+                            ? task.dataset.labels
+                            : [];
+                    }
+
+                    currentBlockChart = new task.visualization.ClassRef(blockChartArea, {
+                        ...chartSettings
+                    });
+                    currentBlockChart.data(data);
+
+                    bindChartInteractionLogger(currentBlockChart);
+
+                    if (task.visualization.id === 'bar' && currentBlockChart.redraw) {
+                        currentBlockChart.redraw();
+                    }
+
+                    const taskQuestion = task.dataset.tasks[task.taskKey];
+                    if (taskQuestion && typeof currentBlockChart.highlight === 'function') {
+                        const regex = /\(([A-Z]{3})\)/g;
+                        let match;
+                        const acronyms = [];
+                        while ((match = regex.exec(taskQuestion)) !== null) {
+                            acronyms.push(match[1]);
+                        }
+
+                        if (acronyms.length > 0) {
+                            const indicesToHighlight = acronyms
+                                .map(acronym => task.dataset.labels.indexOf(acronym))
+                                .filter(index => index !== -1);
+
+                            if (indicesToHighlight.length > 0) {
+                                currentBlockChart.highlight(null, indicesToHighlight);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error('Block task chart error:', err);
+                    blockChartArea.innerHTML = '<p style="color:var(--danger-color);padding:1rem;">Erro ao carregar a visualização da tarefa.</p>';
+                }
+            }
+
+            function showBlockTaskScreen() {
+                const alreadyWide = container.style.maxWidth === VISUAL_CONTAINER_MAX_WIDTH;
+                showScreen('block-task-screen');
+
+                blockTaskStartedAt = performance.now();
+
+                const task = currentBlockPlan[currentBlockTaskIndex];
+
+                currentTaskRecord = {
+                    blockNumber: currentBlock,
+                    taskIndexInBlock: currentBlockTaskIndex + 1,
+
+                    taskKey: task.taskKey,
+                    visualizationId: task.visualization.id,
+                    datasetId: task.dataset.id,
+
+                    startedAt: new Date().toISOString(),
+                    endedAt: null,
+
+                    timeOnBlockTaskScreenMs: null,
+                    timeOnBlockTaskScreenSeconds: null,
+
+                    answer: null,
+                    confidence: null,
+
+                    interactions: createInteractionSummary()
+                };
+
+                if (alreadyWide) {
+                    renderBlockTaskChart();
+                } else {
+                    container.addEventListener('transitionend', function onEnd(e) {
+                        if (e.propertyName === 'max-width') {
+                            container.removeEventListener('transitionend', onEnd);
+                            renderBlockTaskChart();
+                        }
+                    });
+                }
+            }
+
+            // --- Tutorial rendering ---
+            function renderTutorial() {
+                if (currentTutorialChart) {
+                    if (currentTutorialChart.destroy) currentTutorialChart.destroy();
+                    currentTutorialChart = null;
+                }
+                tutorialChartArea.innerHTML = '';
+                tutorialControls.innerHTML = '';
+
+                const viz = tutorialOrder[tutorialIndex];
+                tutorialTitle.textContent = `Tutorial — ${viz.name} (${tutorialIndex + 1} de 4)`;
+                tutorialBackBtn.textContent = tutorialIndex === 0 ? 'Back' : 'Visualização anterior';
+                tutorialNextBtn.textContent = tutorialIndex === tutorialOrder.length - 1 ? 'Próxima fase' : 'Próxima visualização';
+
+                renderControlBar(viz, tutorialControls, () => currentTutorialChart);
+
+                try {
+                    const rect = tutorialChartArea.getBoundingClientRect();
+                    const w = rect.width > 0 ? Math.round(rect.width) : 800;
+                    const h = rect.height > 0 ? Math.round(rect.height) : 420;
+
+                    currentTutorialChart = new viz.ClassRef(tutorialChartArea, { ...viz.settings, width: w, height: h });
+
+                    currentTutorialChart.data(viz.data);
+
+                    // BarChart nao desenha no data(); precisa redraw explicito.
+                    if (viz.id === 'bar' && currentTutorialChart.redraw) {
+                        currentTutorialChart.redraw();
+                    }
+                } catch (err) {
+                    console.error('Tutorial chart error:', err);
+                    tutorialChartArea.innerHTML = '<p style="color:var(--danger-color);padding:1rem;">Erro ao carregar a visualização.</p>';
+                }
+            }
+
+            function showTutorialScreen() {
+                const alreadyWide = container.style.maxWidth === VISUAL_CONTAINER_MAX_WIDTH;
+                showScreen('tutorial-screen');
+                if (alreadyWide) {
+                    renderTutorial();
+                } else {
+                    container.addEventListener('transitionend', function onEnd(e) {
+                        if (e.propertyName === 'max-width') {
+                            container.removeEventListener('transitionend', onEnd);
+                            renderTutorial();
+                        }
+                    });
+                }
+            }
+
+            tutorialBackBtn.addEventListener('click', () => {
+                if (tutorialIndex > 0) {
+                    tutorialIndex -= 1;
+                    renderTutorial();
+                } else {
+                    if (currentTutorialChart && currentTutorialChart.destroy) currentTutorialChart.destroy();
+                    currentTutorialChart = null;
+                    tutorialChartArea.innerHTML = '';
+                    showScreen('demographic-screen');
+                }
+            });
+
+            tutorialNextBtn.addEventListener('click', () => {
+                if (tutorialIndex < tutorialOrder.length - 1) {
+                    tutorialIndex += 1;
+                    renderTutorial();
+                    updateProgress('tutorial-screen');
+                } else {
+                    if (currentTutorialChart && currentTutorialChart.destroy) currentTutorialChart.destroy();
+                    currentTutorialChart = null;
+                    tutorialChartArea.innerHTML = '';
+                    showScreen('task-instruction-screen');
+                }
+            });
+
+            document.addEventListener('click', () => closeTlxTooltips());
+
+            window.addEventListener('resize', () => {
+                if (currentTutorialChart && currentTutorialChart.resize) currentTutorialChart.resize();
+            });
+
+            // --- Generic navigation ---
+            document.querySelectorAll('[data-next]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const target = button.getAttribute('data-next');
+                    if (!target) return;
+                    if (target === 'tutorial-screen') {
+                        if (!devMode) {
+                            const ageRange = document.getElementById('age-range').value;
+                            const sex = document.getElementById('sex').value;
+                            const educationLevel = document.getElementById('education-level').value;
+                            const infovisCourse = document.getElementById('infovis-course').value;
+                            const visualAcuity = document.getElementById('visual-acuity').value;
+                            const colorBlindness = document.getElementById('color-blindness').value;
+                            const barChartFamiliarity = document.getElementById('bar-chart-familiarity').value;
+
+                            if (!ageRange || !sex || !educationLevel || !infovisCourse || !visualAcuity || !colorBlindness || !barChartFamiliarity) {
+                                alert('Por favor, responda a todas as perguntas do questionário demográfico antes de continuar.');
+                                return;
+                            }
+                        }
+
+                        tutorialIndex = 0;
+                        tutorialOrder = shuffle(VISUALIZATIONS);
+
+                        experimentData.tutorialOrder = tutorialOrder.map(v => v.id);
+
+                        experimentData.demographics = {
+                            ageRange: document.getElementById('age-range').value,
+                            sex: document.getElementById('sex').value,
+                            educationLevel: document.getElementById('education-level').value,
+                            infovisCourse: document.getElementById('infovis-course').value,
+                            visualAcuity: document.getElementById('visual-acuity').value,
+                            colorBlindness: document.getElementById('color-blindness').value,
+                            barChartFamiliarity: document.getElementById('bar-chart-familiarity').value
+                        };
+
+                        showTutorialScreen();
+                    } else if (target === 'final-comments-screen') {
+                        if (!devMode && !isFinalRankingComplete()) {
+                            alert('Preencha as 4 posições do ranking antes de continuar.');
+                            return;
+                        }
+
+                        collectFinalRanking();
+                        showScreen(target);
+                    } else if (target === 'thanks-screen') {
+                        if (!collectFinalComments()) {
+                            return;
+                        }
+
+                        sendExperimentDataToServer();
+                        showScreen(target);
+                    } else {
+                        showScreen(target);
+                    }
+                });
+            });
+
+            document.querySelectorAll('[data-prev]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const target = button.getAttribute('data-prev');
+                    if (!target) return;
+                    if (target === 'tutorial-screen') {
+                        tutorialIndex = tutorialOrder.length - 1;
+                        showTutorialScreen();
+                    } else if (target === 'nasa-tlx-screen') {
+                        showScreen('nasa-tlx-screen');
+                        renderTlxScreen();
+                    } else if (target === 'block-task-screen') {
+                        showBlockTaskScreen();
+                    } else {
+                        showScreen(target);
+                    }
+                });
+            });
+
+            function updateTcleAcceptanceState() {
+                if (devMode) {
+                    acceptTcleButton.disabled = false;
+                    return;
+                }
+
+                acceptTcleButton.disabled = !(tcleReachedEnd && tcleConfirmation.checked);
+            }
+
+            tcleScroll.addEventListener('scroll', () => {
+                if (tcleScroll.scrollHeight - tcleScroll.scrollTop <= tcleScroll.clientHeight + 5) {
+                    tcleReachedEnd = true;
+                    updateTcleAcceptanceState();
+                }
+            });
+
+            tcleConfirmation.addEventListener('change', updateTcleAcceptanceState);
+
+            acceptTcleButton.addEventListener('click', () => {
+                const consent = {
+                    accepted: true,
+                    acceptedAt: new Date().toISOString(),
+                    version: TCLE_VERSION
+                };
+
+                localStorage.setItem("tcleConsent", JSON.stringify(consent));
+                showScreen('demographic-screen');
+            });
+
+            startBlocksButton.addEventListener('click', () => {
+                if (currentBlockPlan.length === 0) {
+                    currentBlock = 1;
+                    if (blockTaskOrder.length === 0) {
+                        blockTaskOrder = shuffle(Object.keys(TASK_DESCRIPTION));
+                    }
+                    buildBlockPlan();
+                    updateTaskInstructionScreen();
+                    updateBlockPlaceholders();
+                }
+                showScreen('block-context-screen');
+            });
+
+            blockContextBackButton.addEventListener('click', () => {
+                if (currentBlockTaskIndex > 0) {
+                    currentBlockTaskIndex -= 1;
+                    updateBlockPlaceholders();
+                    showScreen('block-answer-screen');
+                    return;
+                }
+                showScreen('task-instruction-screen');
+            });
+
+            goToBlockTaskButton.addEventListener('click', () => {
+                showBlockTaskScreen();
+            });
+
+            foundAnswerButton.addEventListener('click', () => {
+                if (currentTaskRecord && blockTaskStartedAt !== null) {
+                    const elapsedMs = Math.round(performance.now() - blockTaskStartedAt);
+
+                    currentTaskRecord.endedAt = new Date().toISOString();
+                    currentTaskRecord.timeOnBlockTaskScreenMs = elapsedMs;
+                    currentTaskRecord.timeOnBlockTaskScreenSeconds = Number((elapsedMs / 1000).toFixed(2));
+                }
+
+                console.log(experimentData);
+
+                destroyBlockChart();
+                showScreen('block-answer-screen');
+            });
+
+            function getTaskGender(taskKey) {
+                return taskKey === 'T4' || taskKey === 'T5' ? 'f' : 'm';
+            }
+
+            function normalizeAnswer(value, taskKey) {
+                if (!value) return null;
+
+                const rawValue = String(value).trim();
+
+                if (!rawValue) return null;
+
+                if (taskKey === 'T4' || taskKey === 'T5') {
+                    const dotValue = rawValue.replace(',', '.');
+                    const number = Number.parseFloat(dotValue);
+                    return Number.isFinite(number) ? number : null;
+                } else {
+                    if (/,/.test(rawValue) || /\.\d{1,2}\s*$/.test(rawValue)) {
+                        return null;
+                    }
+
+                    const digits = rawValue.replace(/\D/g, '');
+
+                    if (!digits) return null;
+
+                    const number = Number.parseInt(digits, 10);
+
+                    return Number.isFinite(number)
+                        ? number
+                        : null;
+                }
+            }
+
+            function formatBrazilianNumber(value, allowDecimal) {
+                if (allowDecimal) {
+                    let normalized = String(value).replace(/\./g, ',');
+                    normalized = normalized.replace(/[^0-9,]/g, '');
+
+                    const parts = normalized.split(',');
+                    const hasDecimal = parts.length > 1;
+                    if (hasDecimal) {
+                        const integerPart = parts[0];
+                        const decimalPart = parts[1].substring(0, 2);
+                        return { formated: integerPart + ',' + decimalPart, hasDecimal: true };
+                    }
+                    return { formated: normalized, hasDecimal: false };
+                } else {
+                    const digits = String(value).replace(/\D/g, '');
+
+                    if (!digits) {
+                        return { formated: '', hasDecimal: false };
+                    }
+
+                    const number = Number.parseInt(digits, 10);
+                    const formated = number.toLocaleString('pt-BR', {
+                        maximumFractionDigits: 0
+                    });
+
+                    return { formated, hasDecimal: false };
+                }
+            }
+
+            function buildBlockAnswerWords(answerNumber, taskKey) {
+                if (!Number.isFinite(answerNumber) || typeof extenso !== 'function') {
+                    return '';
+                }
+
+                const numStr = (taskKey === 'T4' || taskKey === 'T5')
+                    ? String(answerNumber).replace('.', ',')
+                    : String(answerNumber);
+
+                const written = extenso(numStr, {
+                    number: {
+                        gender: getTaskGender(taskKey)
+                    }
+                });
+
+                if (taskKey === 'T2' || taskKey === 'T3') {
+                    return `${written} de diferença.`;
+                }
+
+                if (taskKey === 'T4' || taskKey === 'T5') {
+                    if (!Number.isInteger(answerNumber)) {
+                        return `${written} maior.`;
+                    } else {
+                        return `${written} vezes maior.`;
+                    }
+                }
+
+                return written;
+            }
+
+            function updateBlockAnswerWords() {
+                if (!blockAnswerWords) {
+                    return;
+                }
+
+                const taskKey = currentBlockPlan[currentBlockTaskIndex]?.taskKey;
+                const answerNumber = normalizeAnswer(blockAnswerInput.value.trim(), taskKey);
+
+                blockAnswerWords.textContent = answerNumber === null
+                    ? ''
+                    : buildBlockAnswerWords(answerNumber, taskKey);
+            }
+
+            function checkAnswer(userAnswer, correctAnswer, taskKey) {
+                const userValue = typeof userAnswer === 'number'
+                    ? userAnswer
+                    : normalizeAnswer(userAnswer, taskKey);
+
+                const correctValue = Number(correctAnswer);
+
+                if (userValue === null || !Number.isFinite(correctValue)) {
+                    return false;
+                }
+
+                const toleranceByTask = {
+                    T1: 0.05,
+                    T2: 0.05,
+                    T3: 0.10,
+                    T4: 0.10,
+                    T5: 0.10
+                };
+
+                const tolerance = toleranceByTask[taskKey] ?? 0.05;
+                const difference = Math.abs(userValue - correctValue);
+                const allowedDifference = Math.abs(correctValue) * tolerance;
+
+                return difference <= allowedDifference;
+            }
+
+            blockAnswerInput.addEventListener('input', () => {
+                const taskKey = currentBlockPlan[currentBlockTaskIndex]?.taskKey;
+                const isDecimalTask = taskKey === 'T4' || taskKey === 'T5';
+                const result = formatBrazilianNumber(blockAnswerInput.value, isDecimalTask);
+                blockAnswerInput.value = result.formated;
+                updateBlockAnswerWords();
+            });
+
+            blockAnswerInput.addEventListener('blur', () => {
+                const taskKey = currentBlockPlan[currentBlockTaskIndex]?.taskKey;
+                const isDecimalTask = taskKey === 'T4' || taskKey === 'T5';
+                const result = formatBrazilianNumber(blockAnswerInput.value, isDecimalTask);
+                blockAnswerInput.value = result.formated;
+                updateBlockAnswerWords();
+            });
+
+            blockAnswerNextButton.addEventListener('click', () => {
+                const answerRaw = blockAnswerInput.value.trim();
+                const task = currentBlockPlan[currentBlockTaskIndex];
+                const taskKey = task ? task.taskKey : 'T1';
+                const answerNumber = normalizeAnswer(answerRaw, taskKey);
+
+                if (!devMode && !answerRaw) {
+                    alert('Informe uma resposta antes de continuar.');
+                    blockAnswerInput.focus();
+                    return;
+                }
+
+                if (!devMode && answerNumber === null) {
+                    if (taskKey === 'T4' || taskKey === 'T5') {
+                        alert('Informe uma resposta numérica válida. Exemplo: 2,5 ou 150,35');
+                    } else {
+                        alert('Informe apenas uma resposta numérica inteira. Exemplo: 1234 ou 5.000');
+                    }
+                    blockAnswerInput.focus();
+                    return;
+                }
+
+                if (!devMode && answerNumber < 0) {
+                    alert('A resposta não pode ser negativa.');
+                    blockAnswerInput.focus();
+                    return;
+                }
+
+                if (!devMode && !blockConfidence.value) {
+                    alert('Selecione o nível de confiança na resposta antes de continuar.');
+                    blockConfidence.focus();
+                    return;
+                }
+
+                if (currentTaskRecord) {
+                    const task = currentBlockPlan[currentBlockTaskIndex];
+                    const correctAnswer = task.dataset.correct_answer[task.taskKey];
+
+                    currentTaskRecord.answer = answerRaw;
+                    currentTaskRecord.answerNumber = answerNumber;
+                    currentTaskRecord.correctAnswer = correctAnswer;
+                    currentTaskRecord.isCorrect = answerNumber === null
+                        ? null
+                        : checkAnswer(answerNumber, correctAnswer, task.taskKey);
+                    currentTaskRecord.confidence = blockConfidence.value;
+                    currentTaskRecord.responseRegisteredAt = new Date().toISOString();
+
+                    experimentData.blocks.push(currentTaskRecord);
+
+                    currentTaskRecord = null;
+                    blockTaskStartedAt = null;
+                    blockAnswerInput.value = '';
+                    updateBlockAnswerWords();
+                }
+
+                if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
+                    currentBlockTaskIndex += 1;
+                    updateBlockPlaceholders();
+                    showScreen('block-context-screen');
+                } else {
+                    showScreen('nasa-tlx-screen');
+                    renderTlxScreen();
+                }
+            });
+
+            updateBlockAnswerWords();
+
+            backFromTlxButton.addEventListener('click', () => {
+                showScreen('block-answer-screen');
+            });
+
+            completeTlxButton.addEventListener('click', () => {
+                collectBlockNasaTlx();
+
+                if (currentBlock < totalBlocks) {
+                    currentBlock += 1;
+                    buildBlockPlan();
+                    updateTaskInstructionScreen();
+                    updateBlockPlaceholders();
+                    showScreen('task-instruction-screen');
+                } else {
+                    showScreen('final-ranking-screen');
+                }
+            });
+
+            if (finalRankingOptions && finalRankingSlots) {
+                const onFinalRankingDragStart = (event) => {
+                    const card = event.target.closest('.final-ranking-card');
+                    if (!card || !event.dataTransfer) return;
+
+                    draggedFinalRankingId = card.dataset.visualizationId || null;
+                    draggedFromSlotIndex = card.dataset.slotIndex !== undefined
+                        ? Number(card.dataset.slotIndex)
+                        : null;
+
+                    if (!draggedFinalRankingId) {
+                        clearFinalRankingDragState();
+                        return;
+                    }
+
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', draggedFinalRankingId);
+                };
+
+                finalRankingOptions.addEventListener('dragstart', onFinalRankingDragStart);
+                finalRankingSlots.addEventListener('dragstart', onFinalRankingDragStart);
+
+                finalRankingOptions.addEventListener('dragover', (event) => {
+                    if (draggedFromSlotIndex === null) return;
+                    event.preventDefault();
+                    finalRankingOptions.classList.add('is-drop-target');
+                });
+
+                finalRankingOptions.addEventListener('dragleave', () => {
+                    finalRankingOptions.classList.remove('is-drop-target');
+                });
+
+                finalRankingOptions.addEventListener('drop', (event) => {
+                    if (draggedFromSlotIndex === null) return;
+
+                    event.preventDefault();
+
+                    if (draggedFromSlotIndex >= 0) {
+                        finalRankingSlotsState[draggedFromSlotIndex] = null;
+                    }
+
+                    renderFinalRankingScreen();
+                    clearFinalRankingDragState();
+                });
+
+                finalRankingSlots.addEventListener('dragover', (event) => {
+                    const slot = event.target.closest('.final-ranking-slot');
+                    if (!slot || !draggedFinalRankingId) return;
+
+                    event.preventDefault();
+
+                    finalRankingSlots.querySelectorAll('.is-drop-target').forEach((item) => {
+                        if (item !== slot) item.classList.remove('is-drop-target');
+                    });
+
+                    slot.classList.add('is-drop-target');
+                });
+
+                finalRankingSlots.addEventListener('drop', (event) => {
+                    const slot = event.target.closest('.final-ranking-slot');
+                    if (!slot || !draggedFinalRankingId) return;
+
+                    event.preventDefault();
+
+                    const slotIndex = Number(slot.dataset.slotIndex);
+                    assignDraggedVisualizationToSlot(slotIndex);
+                    renderFinalRankingScreen();
+                    clearFinalRankingDragState();
+                });
+
+                document.addEventListener('dragend', () => {
+                    clearFinalRankingDragState();
+                });
+            }
+
+            window.addEventListener('resize', () => {
+                if (currentBlockChart && currentBlockChart.resize) currentBlockChart.resize();
+            });
+
+            updateTaskInstructionScreen();
+            updateBlockPlaceholders();
+            applyDevModeBehavior();
+
+            connectExperimentWebSocket();
+
+            showScreen('welcome-screen');
+        });
+    </script>
+
+</body>
+
+</html>
