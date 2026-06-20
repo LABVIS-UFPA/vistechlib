@@ -240,8 +240,7 @@
         }
 
         .final-ranking-card {
-            display: grid;
-            grid-template-columns: auto 110px minmax(0, 1fr) auto;
+            display: flex;
             gap: 1rem;
             align-items: center;
             padding: 0.9rem;
@@ -303,6 +302,7 @@
             background: #f8fafc;
             border: 1px solid #dbe4ee;
             border-radius: 8px;
+            flex-shrink: 0;
         }
 
         .final-ranking-copy {
@@ -310,6 +310,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.2rem;
+            flex: 1;
         }
 
         .final-ranking-copy strong {
@@ -937,8 +938,8 @@
         </div>
 
         <div id="final-ranking-screen" class="screen hidden">
-            <h2>Fase 3 - Ranking de Preferência</h2>
-            <p class="final-ranking-instructions">Arraste as quatro visualizações para ordenar da mais preferida para a
+            <h2 id="final-ranking-title">Fase 3 - Ranking de Preferência</h2>
+            <p id="final-ranking-instructions" class="final-ranking-instructions">Arraste as opções para ordenar da mais preferida para a
                 menos preferida.</p>
             <div class="final-ranking-board">
                 <section class="final-ranking-column" aria-label="Visualizações disponíveis">
@@ -957,7 +958,7 @@
         </div>
 
         <div id="final-comments-screen" class="screen hidden">
-            <h2>Comentários Qualitativos</h2>
+            <h2 id="final-comments-title">Comentários Qualitativos</h2>
             <div class="field">
                 <label for="ranking-why">Por que preferiu nessa ordem?</label>
                 <textarea id="ranking-why" placeholder="Placeholder"></textarea>
@@ -1169,11 +1170,20 @@
                 tutorialOrder: [],
                 blocks: [],
                 blockNasaTlx: [],
-                finalRanking: {
+                finalRankingTechniques: {
                     order: [],
                     recordedAt: null
                 },
-                finalComments: {
+                finalRankingModes: {
+                    order: [],
+                    recordedAt: null
+                },
+                finalCommentsTechniques: {
+                    rankingWhy: '',
+                    otherComments: '',
+                    recordedAt: null
+                },
+                finalCommentsModes: {
                     rankingWhy: '',
                     otherComments: '',
                     recordedAt: null
@@ -1551,17 +1561,47 @@
                 }
             ];
 
-            const finalRankingById = new Map(VISUALIZATIONS.map(visualization => [visualization.id, visualization]));
-            const finalRankingSlotsState = Array(VISUALIZATIONS.length).fill(null);
+            const RANKING_PHASES = [
+                {
+                    id: 'techniques',
+                    title: 'Fase 3 - Ranking de Técnicas de Visualização',
+                    instruction: 'Arraste as opções para ordenar da mais preferida (1º) para a menos preferida (2º).',
+                    options: [
+                        { id: 'psb25d', name: 'PSB 2.5D', previewImage: 'assets/nasa/quebra-escala-classica.jpeg' },
+                        { id: 'psb3d', name: 'PSB 3D', previewImage: 'assets/nasa/quebra-escala-perspectiva.jpeg' }
+                    ]
+                },
+                {
+                    id: 'modes',
+                    title: 'Fase 4 - Ranking de Modos de Interação',
+                    instruction: 'Arraste as opções para ordenar da mais preferida (1º) para a menos preferida (3º).',
+                    options: [
+                        { id: 'manual', name: 'Modo Manual (Sliders)' },
+                        { id: 'llm', name: 'Modo Chat (LLM)' },
+                        { id: 'opt', name: 'Modo Otimização (Auto)' }
+                    ]
+                }
+            ];
+
+            let currentRankingPhaseIndex = 0;
+            let finalRankingSlotsState = Array(RANKING_PHASES[0].options.length).fill(null);
             let draggedFinalRankingId = null;
             let draggedFromSlotIndex = null;
 
             function persistFinalRankingOrder() {
-                experimentData.finalRanking.order = finalRankingSlotsState.filter(Boolean);
+                if (currentRankingPhaseIndex === 0) {
+                    experimentData.finalRankingTechniques.order = finalRankingSlotsState.filter(Boolean);
+                } else {
+                    experimentData.finalRankingModes.order = finalRankingSlotsState.filter(Boolean);
+                }
+            }
+
+            function getCurrentPhaseOptionsById() {
+                return new Map(RANKING_PHASES[currentRankingPhaseIndex].options.map(o => [o.id, o]));
             }
 
             function buildFinalRankingCard(visualizationId, slotIndex = null) {
-                const visualization = finalRankingById.get(visualizationId);
+                const visualization = getCurrentPhaseOptionsById().get(visualizationId);
                 if (!visualization) return null;
 
                 const card = document.createElement('div');
@@ -1573,12 +1613,16 @@
                     card.dataset.slotIndex = String(slotIndex);
                 }
 
+                const imgHtml = visualization.previewImage 
+                    ? '<img class="final-ranking-preview" src="' + visualization.previewImage + '" alt="Prévia da opção ' + visualization.name + '">'
+                    : '';
+
                 card.innerHTML = [
                     '<span class="final-ranking-position">' + (slotIndex === null ? '•' : (slotIndex + 1)) + '</span>',
-                    '<img class="final-ranking-preview" src="' + visualization.previewImage + '" alt="Prévia da visualização ' + visualization.name + '">',
+                    imgHtml,
                     '<div class="final-ranking-copy">',
                     '<strong>' + visualization.name + '</strong>',
-                    '<span>' + (slotIndex === null ? 'Arraste para uma posição à direita' : 'Visualização atribuída a esta posição') + '</span>',
+                    '<span>' + (slotIndex === null ? 'Arraste para uma posição à direita' : 'Opção atribuída a esta posição') + '</span>',
                     '</div>',
                     '<span class="final-ranking-handle" aria-hidden="true">⋮⋮</span>'
                 ].join('');
@@ -1593,12 +1637,16 @@
             function renderFinalRankingScreen() {
                 if (!finalRankingOptions || !finalRankingSlots) return;
 
+                const phase = RANKING_PHASES[currentRankingPhaseIndex];
+                document.getElementById('final-ranking-title').textContent = phase.title;
+                document.getElementById('final-ranking-instructions').textContent = phase.instruction;
+
                 finalRankingOptions.innerHTML = '';
                 finalRankingSlots.innerHTML = '';
 
                 const assignedIds = new Set(finalRankingSlotsState.filter(Boolean));
 
-                VISUALIZATIONS.forEach((visualization) => {
+                phase.options.forEach((visualization) => {
                     if (assignedIds.has(visualization.id)) return;
 
                     const optionItem = document.createElement('li');
@@ -1666,8 +1714,13 @@
             }
 
             function collectFinalRanking() {
-                experimentData.finalRanking.order = finalRankingSlotsState.filter(Boolean);
-                experimentData.finalRanking.recordedAt = new Date().toISOString();
+                if (currentRankingPhaseIndex === 0) {
+                    experimentData.finalRankingTechniques.order = finalRankingSlotsState.filter(Boolean);
+                    experimentData.finalRankingTechniques.recordedAt = new Date().toISOString();
+                } else {
+                    experimentData.finalRankingModes.order = finalRankingSlotsState.filter(Boolean);
+                    experimentData.finalRankingModes.recordedAt = new Date().toISOString();
+                }
             }
 
             function collectFinalComments() {
@@ -1676,11 +1729,17 @@
                     return false;
                 }
 
-                experimentData.finalComments = {
+                const comments = {
                     rankingWhy: rankingWhyInput.value.trim(),
                     otherComments: otherCommentsInput.value.trim(),
                     recordedAt: new Date().toISOString()
                 };
+
+                if (currentRankingPhaseIndex === 0) {
+                    experimentData.finalCommentsTechniques = comments;
+                } else {
+                    experimentData.finalCommentsModes = comments;
+                }
 
                 return true;
             }
@@ -2547,14 +2606,33 @@
                         showTutorialScreen();
                     } else if (target === 'final-comments-screen') {
                         if (!devMode && !isFinalRankingComplete()) {
-                            alert('Preencha as 4 posições do ranking antes de continuar.');
+                            alert('Preencha as posições do ranking antes de continuar.');
                             return;
                         }
 
                         collectFinalRanking();
+                        if (currentRankingPhaseIndex === 0) {
+                            document.getElementById('final-comments-title').textContent = 'Comentários Qualitativos - Técnicas de Visualização';
+                        } else {
+                            document.getElementById('final-comments-title').textContent = 'Comentários Qualitativos - Modos de Interação';
+                        }
                         showScreen(target);
                     } else if (target === 'thanks-screen') {
                         if (!collectFinalComments()) {
+                            return;
+                        }
+
+                        if (currentRankingPhaseIndex === 0) {
+                            currentRankingPhaseIndex = 1;
+                            if (!experimentData.finalRankingModes.order.length) {
+                                finalRankingSlotsState = Array(RANKING_PHASES[1].options.length).fill(null);
+                            } else {
+                                finalRankingSlotsState = [...experimentData.finalRankingModes.order];
+                                while(finalRankingSlotsState.length < RANKING_PHASES[1].options.length) finalRankingSlotsState.push(null);
+                            }
+                            rankingWhyInput.value = experimentData.finalCommentsModes.rankingWhy || '';
+                            otherCommentsInput.value = experimentData.finalCommentsModes.otherComments || '';
+                            showScreen('final-ranking-screen');
                             return;
                         }
 
@@ -2570,6 +2648,20 @@
                 button.addEventListener('click', () => {
                     const target = button.getAttribute('data-prev');
                     if (!target) return;
+                    
+                    if (target === 'nasa-tlx-screen' && currentRankingPhaseIndex === 1) {
+                        currentRankingPhaseIndex = 0;
+                        finalRankingSlotsState = [...experimentData.finalRankingTechniques.order];
+                        while(finalRankingSlotsState.length < RANKING_PHASES[0].options.length) finalRankingSlotsState.push(null);
+                        
+                        rankingWhyInput.value = experimentData.finalCommentsTechniques.rankingWhy;
+                        otherCommentsInput.value = experimentData.finalCommentsTechniques.otherComments;
+                        document.getElementById('final-comments-title').textContent = 'Comentários Qualitativos - Técnicas de Visualização';
+                        
+                        showScreen('final-comments-screen');
+                        return;
+                    }
+                    
                     if (target === 'tutorial-screen') {
                         tutorialIndex = tutorialOrder.length - 1;
                         showTutorialScreen();
