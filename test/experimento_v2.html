@@ -861,7 +861,7 @@
         </div>
 
         <div id="tutorial-screen" class="screen hidden">
-            <h2 id="tutorial-title">Tutorial — Visualização 1 de 4</h2>
+            <h2 id="tutorial-title">Tutorial — Visualização 1 de 2</h2>
             <div id="tutorial-controls" class="tutorial-topbar"></div>
             <div id="tutorial-chart-area" class="tutorial-chart-area"></div>
             <div class="actions">
@@ -1006,7 +1006,7 @@
             const devMode = true;
 
             // --- Variável Between-Subject removida (agora as 6 visões estão no Within-Subject) ---
-            
+
             const BAR_CHART_DRAW_STRATEGY = 'scale break perspective'; // Altere 'scale break perspective'
             const BAR_CHART_GAP_SIZE = 45;
             const BAR_CHART_Z = 0.48;
@@ -1864,7 +1864,7 @@
                 return a;
             }
 
-            let tutorialOrder = shuffle(VISUALIZATIONS);
+            let tutorialOrder = shuffle(VISUALIZATIONS.filter(v => v.id.includes('manual')));
             let tutorialIndex = 0;
             let currentTutorialChart = null;
 
@@ -2530,7 +2530,7 @@
                         }
 
                         tutorialIndex = 0;
-                        tutorialOrder = shuffle(VISUALIZATIONS);
+                        tutorialOrder = shuffle(VISUALIZATIONS).filter(v => v.id.includes('manual'));
 
                         experimentData.tutorialOrder = tutorialOrder.map(v => v.id);
 
