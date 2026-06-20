@@ -783,26 +783,33 @@
 
         // Process NASA-TLX blocks
         (expData.blockNasaTlx || []).forEach(tlxBlock => {
-          const mental = tlxBlock.mentalDemand || 0;
-          const temporal = tlxBlock.temporalDemand || 0;
-          const perf_raw = tlxBlock.performance || 0;
-          const effort = tlxBlock.effort || 0;
-          const frust = tlxBlock.frustration || 0;
-          const perf_inverted = 100 - perf_raw;
-          const workload = (mental + temporal + perf_inverted + effort + frust) / 5.0;
-          allLogs.push({
-            participantId: pID,
-            task: tlxBlock.taskKey,
-            type: 'questionnaire',
-            vis: 'Geral',
-            ratings: {
-              workload: workload,
-              mental: mental,
-              temporal: temporal,
-              performance: perf_inverted,
-              effort: effort,
-              frustration: frust
-            }
+          const visualizations = tlxBlock.visualizations || [{
+            ...tlxBlock,
+            visualizationId: 'Geral'
+          }];
+
+          visualizations.forEach(visTlx => {
+            const mental = visTlx.mentalDemand || 0;
+            const temporal = visTlx.temporalDemand || 0;
+            const perf_raw = visTlx.performance || 0;
+            const effort = visTlx.effort || 0;
+            const frust = visTlx.frustration || 0;
+            const perf_inverted = 100 - perf_raw;
+            const workload = (mental + temporal + perf_inverted + effort + frust) / 5.0;
+            allLogs.push({
+              participantId: pID,
+              task: tlxBlock.taskKey,
+              type: 'questionnaire',
+              vis: visTlx.visualizationId,
+              ratings: {
+                workload: workload,
+                mental: mental,
+                temporal: temporal,
+                performance: perf_inverted,
+                effort: effort,
+                frustration: frust
+              }
+            });
           });
         });
 

@@ -919,8 +919,8 @@
         <div id="nasa-tlx-screen" class="screen hidden">
             <h2 id="tlx-title">NASA-TLX do Bloco 1</h2>
             <div class="tlx-visualization-header">
-                <h3>Avaliação geral do bloco</h3>
-                <p>Avalie sua experiência geral durante este bloco.</p>
+                <h3>Avaliação da condição</h3>
+                <p>Avalie sua experiência na condição que acabou de responder.</p>
             </div>
             <div id="tlx-form" class="tlx-form"></div>
             <div class="actions">
@@ -2053,6 +2053,7 @@
 
             function collectBlockNasaTlx() {
                 const taskKey = getTaskKeyForBlock(currentBlock);
+                const task = currentBlockPlan[currentBlockTaskIndex];
 
                 const existingIndex = experimentData.blockNasaTlx.findIndex(
                     item => item.blockNumber === currentBlock
@@ -2060,13 +2061,15 @@
                 const ratings = Object.fromEntries(
                     TLX_DIMENSIONS.map((dimension, dimensionIndex) => [
                         dimension.field,
-                        tlxDrafts.get(getTlxResponseKey(currentBlock, dimensionIndex)) ?? null
+                        tlxDrafts.get(
+                            getTlxResponseKey(currentBlock, dimensionIndex, currentBlockTaskIndex)
+                        ) ?? null
                     ])
                 );
 
-                const record = {
-                    blockNumber: currentBlock,
-                    taskKey,
+                const evaluation = {
+                    visualizationId: task?.visualization.id ?? 'Unknown',
+                    conditionIndex: currentBlockTaskIndex,
                     mentalDemand: ratings.mentalDemand,
                     temporalDemand: ratings.temporalDemand,
                     performance: ratings.performance,
@@ -2076,9 +2079,22 @@
                 };
 
                 if (existingIndex >= 0) {
-                    experimentData.blockNasaTlx[existingIndex] = record;
+                    const record = experimentData.blockNasaTlx[existingIndex];
+                    const evaluationIndex = record.visualizations.findIndex(
+                        item => item.conditionIndex === currentBlockTaskIndex
+                    );
+
+                    if (evaluationIndex >= 0) {
+                        record.visualizations[evaluationIndex] = evaluation;
+                    } else {
+                        record.visualizations.push(evaluation);
+                    }
                 } else {
-                    experimentData.blockNasaTlx.push(record);
+                    experimentData.blockNasaTlx.push({
+                        blockNumber: currentBlock,
+                        taskKey,
+                        visualizations: [evaluation]
+                    });
                 }
             }
 
@@ -2094,8 +2110,8 @@
                 currentBlockTaskIndex = 0;
             }
 
-            function getTlxResponseKey(blockNumber, dimensionIndex) {
-                return `${blockNumber}-${dimensionIndex}`;
+            function getTlxResponseKey(blockNumber, dimensionIndex, conditionIndex) {
+                return `${blockNumber}-${dimensionIndex}-${conditionIndex}`;
             }
 
             function updateTlxCompletionState() {
@@ -2123,14 +2139,19 @@
             }
 
             function renderTlxScreen() {
-                tlxTitle.textContent = `NASA-TLX do Bloco ${currentBlock}`;
+                tlxTitle.textContent =
+                    `NASA-TLX do Bloco ${currentBlock} - Condição ${currentBlockTaskIndex + 1} de ${TASKS_PER_BLOCK}`;
                 tlxForm.innerHTML = '';
 
                 TLX_DIMENSIONS.forEach((dimension, dimensionIndex) => {
                     const group = document.createElement('section');
                     group.className = 'tlx-dimension-group';
 
-                    const key = getTlxResponseKey(currentBlock, dimensionIndex);
+                    const key = getTlxResponseKey(
+                        currentBlock,
+                        dimensionIndex,
+                        currentBlockTaskIndex
+                    );
                     const savedValue = tlxDrafts.get(key);
                     const hasValue = Number.isFinite(savedValue);
                     const inputId = `tlx-${dimension.id}`;
@@ -2210,8 +2231,12 @@
                     tlxForm.appendChild(group);
                 });
 
-                completeTlxButton.textContent =
-                    currentBlock === totalBlocks ? 'Ir para o ranking final' : 'Próximo bloco';
+                if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
+                    completeTlxButton.textContent = 'Próxima condição';
+                } else {
+                    completeTlxButton.textContent =
+                        currentBlock === totalBlocks ? 'Ir para o ranking final' : 'Próximo bloco';
+                }
                 closeTlxTooltips();
                 updateTlxCompletionState();
                 updateProgress('nasa-tlx-screen');
@@ -2905,14 +2930,8 @@
                     updateBlockAnswerWords();
                 }
 
-                if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
-                    currentBlockTaskIndex += 1;
-                    updateBlockPlaceholders();
-                    showScreen('block-context-screen');
-                } else {
-                    showScreen('nasa-tlx-screen');
-                    renderTlxScreen();
-                }
+                showScreen('nasa-tlx-screen');
+                renderTlxScreen();
             });
 
             updateBlockAnswerWords();
@@ -2924,7 +2943,11 @@
             completeTlxButton.addEventListener('click', () => {
                 collectBlockNasaTlx();
 
-                if (currentBlock < totalBlocks) {
+                if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
+                    currentBlockTaskIndex += 1;
+                    updateBlockPlaceholders();
+                    showScreen('block-context-screen');
+                } else if (currentBlock < totalBlocks) {
                     currentBlock += 1;
                     buildBlockPlan();
                     updateTaskInstructionScreen();
