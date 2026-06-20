@@ -96,33 +96,28 @@ def load_and_flatten_data(filepath):
         # --- NASATLX (NASA-TLX) ---
         for tlx in exp_data.get('blockNasaTlx', []):
             task = tlx.get('taskKey', 'Unknown')
-            for vis_eval in tlx.get('visualizations', []):
-                vis = vis_eval.get('visualizationId', 'Unknown')
-                mental = vis_eval.get('mentalDemand', 0)
-                temporal = vis_eval.get('temporalDemand', 0)
-                perf_raw = vis_eval.get('performance', 0)
-                effort = vis_eval.get('effort', 0)
-                frust = vis_eval.get('frustration', 0)
+            mental = tlx.get('mentalDemand', 0)
+            temporal = tlx.get('temporalDemand', 0)
+            perf_raw = tlx.get('performance', 0)
+            effort = tlx.get('effort', 0)
+            frust = tlx.get('frustration', 0)
 
-                # INVERSÃO: A dimensão 'Performance' é invertida (100=bom -> 0=baixa carga)
-                # para alinhar com as outras dimensões onde "menor é melhor".
-                perf_inverted = 100 - perf_raw
+            # Performance é invertida somente para alinhar a carga agregada.
+            perf_inverted = 100 - perf_raw
+            workload = (mental + temporal + perf_inverted + effort + frust) / 5.0
 
-                # Calcula a carga de trabalho média com a dimensão de performance já invertida.
-                workload = (mental + temporal + perf_inverted + effort + frust) / 5.0
-
-                quest_rows.append({
-                    'Participant': current_pid,
-                    'Task_Full': f"TLX_{task}",
-                    'Task': task,
-                    'Visualization': vis,
-                    'Workload': workload,
-                    'Mental': mental,
-                    'Temporal': temporal,
-                    'Performance': perf_inverted,
-                    'Effort': effort,
-                    'Frustration': frust
-                })
+            quest_rows.append({
+                'Participant': current_pid,
+                'Task_Full': f"TLX_{task}",
+                'Task': task,
+                'Visualization': 'Geral',
+                'Workload': workload,
+                'Mental': mental,
+                'Temporal': temporal,
+                'Performance': perf_inverted,
+                'Effort': effort,
+                'Frustration': frust
+            })
 
         # --- Ranking de Preferência (Fase 3) ---
         final_ranking = exp_data.get('finalRanking')

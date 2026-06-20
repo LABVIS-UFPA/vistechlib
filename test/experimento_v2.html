@@ -376,14 +376,6 @@
             border-bottom: none;
         }
 
-        .tlx-dimension-group-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
         .tlx-items-grid {
             display: grid;
             gap: 1.25rem;
@@ -391,7 +383,7 @@
 
         .tlx-item {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 1fr;
             gap: 1.5rem;
             align-items: start;
             padding: 1rem;
@@ -927,8 +919,8 @@
         <div id="nasa-tlx-screen" class="screen hidden">
             <h2 id="tlx-title">NASA-TLX do Bloco 1</h2>
             <div class="tlx-visualization-header">
-                <h3>Avaliação das visualizações</h3>
-                <p>Avalie as quatro visualizações em cada dimensão abaixo.</p>
+                <h3>Avaliação geral do bloco</h3>
+                <p>Avalie sua experiência geral durante este bloco.</p>
             </div>
             <div id="tlx-form" class="tlx-form"></div>
             <div class="actions">
@@ -2065,30 +2057,21 @@
                 const existingIndex = experimentData.blockNasaTlx.findIndex(
                     item => item.blockNumber === currentBlock
                 );
-
-                const visualizations = currentBlockPlan.map((task, visualizationIndex) => {
-                    const result = {
-                        visualizationId: task.visualization.id
-                    };
-
-                    TLX_DIMENSIONS.forEach((dimension, dimensionIndex) => {
-                        const key = getTlxResponseKey(
-                            currentBlock,
-                            dimensionIndex,
-                            visualizationIndex
-                        );
-
-                        result[dimension.field] =
-                            tlxDrafts.get(key) ?? null;
-                    });
-
-                    return result;
-                });
+                const ratings = Object.fromEntries(
+                    TLX_DIMENSIONS.map((dimension, dimensionIndex) => [
+                        dimension.field,
+                        tlxDrafts.get(getTlxResponseKey(currentBlock, dimensionIndex)) ?? null
+                    ])
+                );
 
                 const record = {
                     blockNumber: currentBlock,
                     taskKey,
-                    visualizations,
+                    mentalDemand: ratings.mentalDemand,
+                    temporalDemand: ratings.temporalDemand,
+                    performance: ratings.performance,
+                    effort: ratings.effort,
+                    frustration: ratings.frustration,
                     recordedAt: new Date().toISOString()
                 };
 
@@ -2111,8 +2094,8 @@
                 currentBlockTaskIndex = 0;
             }
 
-            function getTlxResponseKey(blockNumber, dimensionIndex, visualizationIndex) {
-                return `${blockNumber}-${dimensionIndex}-${visualizationIndex}`;
+            function getTlxResponseKey(blockNumber, dimensionIndex) {
+                return `${blockNumber}-${dimensionIndex}`;
             }
 
             function updateTlxCompletionState() {
@@ -2147,38 +2130,14 @@
                     const group = document.createElement('section');
                     group.className = 'tlx-dimension-group';
 
-                    const title = document.createElement('h3');
-                    title.className = 'tlx-dimension-group-title';
-                    title.textContent = dimension.label;
-                    group.appendChild(title);
-
-                    const items = document.createElement('div');
-                    items.className = 'tlx-items-grid';
-
-                    const visualizationIndex = currentBlockTaskIndex;
-                    const task = currentBlockPlan[visualizationIndex];
-
-                    const key = getTlxResponseKey(currentBlock, dimensionIndex, visualizationIndex);
+                    const key = getTlxResponseKey(currentBlock, dimensionIndex);
                     const savedValue = tlxDrafts.get(key);
                     const hasValue = Number.isFinite(savedValue);
-                    const inputId = `tlx-${dimension.id}-${visualizationIndex}`;
+                    const inputId = `tlx-${dimension.id}`;
                     const tooltipId = `${inputId}-tooltip`;
 
                     const item = document.createElement('div');
                     item.className = 'tlx-item';
-
-                    const visualization = document.createElement('div');
-                    visualization.className = 'tlx-item-visualization';
-
-                    const image = document.createElement('img');
-                    image.className = 'tlx-visualization-image';
-                    image.src = task.visualization.previewImage;
-                    image.alt = `Exemplo da visualização ${task.visualization.name}`;
-
-                    const visualizationLabel = document.createElement('div');
-                    visualizationLabel.className = 'tlx-item-label';
-                    visualizationLabel.textContent = task.visualization.name;
-                    visualization.append(image, visualizationLabel);
 
                     const control = document.createElement('div');
                     control.className = 'tlx-dimension';
@@ -2215,7 +2174,7 @@
                     input.step = '5';
                     input.value = hasValue ? String(savedValue) : '50';
                     input.dataset.answered = hasValue ? 'true' : 'false';
-                    input.setAttribute('aria-label', `${dimension.label}: ${task.visualization.name}`);
+                    input.setAttribute('aria-label', dimension.label);
                     updateTlxRangeColor(input, dimension.id);
 
                     const scaleLabels = document.createElement('div');
@@ -2246,15 +2205,13 @@
                     });
 
                     control.append(labelRow, input, scaleLabels);
-                    item.append(visualization, control);
-                    items.appendChild(item);
-
-                    group.appendChild(items);
+                    item.appendChild(control);
+                    group.appendChild(item);
                     tlxForm.appendChild(group);
                 });
 
                 completeTlxButton.textContent =
-                    currentBlockTaskIndex < TASKS_PER_BLOCK - 1 ? 'Próxima iteração' : (currentBlock === totalBlocks ? 'Ir para o ranking final' : 'Próximo bloco');
+                    currentBlock === totalBlocks ? 'Ir para o ranking final' : 'Próximo bloco';
                 closeTlxTooltips();
                 updateTlxCompletionState();
                 updateProgress('nasa-tlx-screen');
@@ -2948,8 +2905,14 @@
                     updateBlockAnswerWords();
                 }
 
-                showScreen('nasa-tlx-screen');
-                renderTlxScreen();
+                if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
+                    currentBlockTaskIndex += 1;
+                    updateBlockPlaceholders();
+                    showScreen('block-context-screen');
+                } else {
+                    showScreen('nasa-tlx-screen');
+                    renderTlxScreen();
+                }
             });
 
             updateBlockAnswerWords();
@@ -2961,20 +2924,14 @@
             completeTlxButton.addEventListener('click', () => {
                 collectBlockNasaTlx();
 
-                if (currentBlockTaskIndex < TASKS_PER_BLOCK - 1) {
-                    currentBlockTaskIndex += 1;
+                if (currentBlock < totalBlocks) {
+                    currentBlock += 1;
+                    buildBlockPlan();
+                    updateTaskInstructionScreen();
                     updateBlockPlaceholders();
-                    showScreen('block-context-screen');
+                    showScreen('task-instruction-screen');
                 } else {
-                    if (currentBlock < totalBlocks) {
-                        currentBlock += 1;
-                        buildBlockPlan();
-                        updateTaskInstructionScreen();
-                        updateBlockPlaceholders();
-                        showScreen('task-instruction-screen');
-                    } else {
-                        showScreen('final-ranking-screen');
-                    }
+                    showScreen('final-ranking-screen');
                 }
             });
 
