@@ -931,7 +931,8 @@
 
         <div id="final-ranking-screen" class="screen hidden">
             <h2 id="final-ranking-title">Fase 3 - Ranking de Preferência</h2>
-            <p id="final-ranking-instructions" class="final-ranking-instructions">Arraste as opções para ordenar da mais preferida para a
+            <p id="final-ranking-instructions" class="final-ranking-instructions">Arraste as opções para ordenar da mais
+                preferida para a
                 menos preferida.</p>
             <div class="final-ranking-board">
                 <section class="final-ranking-column" aria-label="Visualizações disponíveis">
@@ -1039,6 +1040,103 @@
                 const z = minZ + normalized * (maxZ - minZ);
                 const hiddenRatio = 0.95 - normalized * 0.9;
                 return { z, hiddenRatio };
+            }
+
+            /**
+             * Calcula os parâmetros ótimos para o PSB 2.5D com base na tarefa e nos valores alvo.
+             * @param {Object} chart - Instância do BarChart 2.5D
+             * @param {string} taskType - 'T1', 'T4', ou 'T5'
+             * @param {number[]} targetValues - Array com os valores reais das barras alvo da pergunta
+             * @returns {Object} Objeto com os valores formatados para os sliders
+             */
+            function getOptimalPSB25DSettings(chart, taskType, targetValues) {
+                const isRatioTask = (taskType === 'T4' || taskType === 'T5');
+                const breakPoint = isRatioTask ? 0.2 : 0.1;
+                const gapSize = isRatioTask ? 30 : 18;
+
+                // Separação da lógica de alvos por tarefa
+                let targetVal;
+                if (taskType === 'T4') {
+                    targetVal = Math.min(...targetValues); // T4 (distantes): foca no menor
+                } else if (taskType === 'T5') {
+                    targetVal = Math.max(...targetValues); // T5 (próximos): foca no maior para não cortar nenhum dos dois
+                } else {
+                    targetVal = targetValues[0]; // T1: foca no alvo único
+                }
+
+                const paddedTarget = targetVal * 1.1;
+
+                // Extrair informações do gráfico
+                const maximo = chart.domain[chart.keys_filter[0]][1];
+                const boxHeight = chart.boxHeight;
+                const yTop = 10;
+
+                // Simular a geometria da tela para descobrir as proporções de altura visual
+                const yLowerTop = boxHeight * breakPoint + gapSize / 2;
+                const yUpperBottom = boxHeight * breakPoint - gapSize / 2;
+                const lowerVisualHeight = Math.max(boxHeight - yLowerTop, 1e-6);
+                const upperVisualHeight = Math.max(yUpperBottom - yTop, 1e-6);
+                const totalVisibleHeight = lowerVisualHeight + upperVisualHeight;
+                const lowerRatio = lowerVisualHeight / totalVisibleHeight;
+
+                // Calcular o hiddenRatio necessário
+                let hiddenRatio = 1 - (paddedTarget / (maximo * lowerRatio));
+                hiddenRatio = Math.max(0, Math.min(0.95, hiddenRatio));
+
+                // Reverter a lógica do slider Z (sliderToPerspectiveValues)
+                const normalized = (0.95 - hiddenRatio) / 0.9;
+                const visibleRatio = normalized * 0.99 + 0.01;
+
+                const LOG_MIN = Math.log(0.01);
+                const LOG_MAX = Math.log(1.0);
+
+                let zSliderValue = 100 * (Math.log(visibleRatio) - LOG_MIN) / (LOG_MAX - LOG_MIN);
+
+                return {
+                    'Posição da quebra': Math.max(0.05, Math.min(0.9, breakPoint)),
+                    'gapSize': Math.max(10, Math.min(80, gapSize)),
+                    'z': Math.max(0, Math.min(100, zSliderValue))
+                };
+            }
+
+            /**
+             * Calcula os parâmetros ótimos para o PSB 3D com base na tarefa e nos valores alvo.
+             * @param {Object} chart - Instância do PerspectiveScaleBreakBarChart
+             * @param {string} taskType - 'T1', 'T4', ou 'T5'
+             * @param {number[]} targetValues - Array com os valores reais das barras alvo da pergunta
+             * @returns {Object} Objeto com os valores formatados para os sliders
+             */
+            function getOptimalPSB3DSettings(chart, taskType, targetValues) {
+                const isRatioTask = (taskType === 'T4' || taskType === 'T5');
+                const breakStartRatio = isRatioTask ? 0.80 : 0.85;
+                const foldVisualHeight = isRatioTask ? 0.2 : 0.2;
+
+                // Separação da lógica de alvos por tarefa
+                let targetVal;
+                if (taskType === 'T4') {
+                    targetVal = Math.min(...targetValues); // T4 (distantes): foca no menor
+                } else if (taskType === 'T5') {
+                    targetVal = Math.max(...targetValues); // T5 (próximos): foca no maior para não cortar nenhum dos dois
+                } else {
+                    targetVal = targetValues[0]; // T1: foca no alvo único
+                }
+
+                const paddedTarget = targetVal * 1.1;
+
+                // Extrair informações do gráfico 3D
+                const maxValue = chart.maxValue;
+                const maxBarHeight = chart.settings.maxBarHeight || 6;
+
+                const breakStart = maxBarHeight * breakStartRatio;
+
+                // Aplicar a fórmula algébrica de profundidade
+                let depth = (breakStart * (maxValue / paddedTarget) - maxBarHeight) / 2;
+
+                return {
+                    'psbBreakStartRatio': Math.max(0.2, Math.min(0.85, breakStartRatio)),
+                    'psbFoldVisualHeight': Math.max(0.2, Math.min(4, foldVisualHeight)),
+                    'psbDepth': Math.max(0, Math.min(50, depth))
+                };
             }
 
             const BAR_CHART_ADDITIONAL_CONTROLS = BAR_CHART_DRAW_STRATEGY === 'scale break perspective' ? [
@@ -1575,6 +1673,94 @@
                 }
             ];
 
+
+            const llmOptimizedParameters = {
+                "base-1-pib": {
+                    "T1": {
+                        "psb25d": { "Posição da quebra": 0.20, "gapSize": 30, "z": 85.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.80, "psbFoldVisualHeight": 1.0, "psbDepth": 25.0 }
+                    },
+                    "T4": {
+                        "psb25d": { "Posição da quebra": 0.40, "gapSize": 45, "z": 75.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.60, "psbFoldVisualHeight": 1.5, "psbDepth": 35.0 }
+                    },
+                    "T5": {
+                        "psb25d": { "Posição da quebra": 0.15, "gapSize": 20, "z": 90.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 0.8, "psbDepth": 20.0 }
+                    }
+                },
+                "base-2-ensino-superior": {
+                    "T1": {
+                        "psb25d": { "Posição da quebra": 0.15, "gapSize": 25, "z": 88.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 0.8, "psbDepth": 30.0 }
+                    },
+                    "T4": {
+                        "psb25d": { "Posição da quebra": 0.35, "gapSize": 40, "z": 65.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.65, "psbFoldVisualHeight": 1.8, "psbDepth": 40.0 }
+                    },
+                    "T5": {
+                        "psb25d": { "Posição da quebra": 0.10, "gapSize": 20, "z": 95.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 0.6, "psbDepth": 20.0 }
+                    }
+                },
+                "base-3-matriculas-fundamental": {
+                    "T1": {
+                        "psb25d": { "Posição da quebra": 0.15, "gapSize": 25, "z": 85.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 1.0, "psbDepth": 25.0 }
+                    },
+                    "T4": {
+                        "psb25d": { "Posição da quebra": 0.35, "gapSize": 40, "z": 70.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.65, "psbFoldVisualHeight": 1.6, "psbDepth": 35.0 }
+                    },
+                    "T5": {
+                        "psb25d": { "Posição da quebra": 0.10, "gapSize": 20, "z": 92.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 0.8, "psbDepth": 22.0 }
+                    }
+                },
+                "base-4-populacao-residente": {
+                    "T1": {
+                        "psb25d": { "Posição da quebra": 0.15, "gapSize": 25, "z": 85.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 1.0, "psbDepth": 30.0 }
+                    },
+                    "T4": {
+                        "psb25d": { "Posição da quebra": 0.35, "gapSize": 45, "z": 65.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.65, "psbFoldVisualHeight": 1.5, "psbDepth": 45.0 }
+                    },
+                    "T5": {
+                        "psb25d": { "Posição da quebra": 0.10, "gapSize": 20, "z": 92.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 0.8, "psbDepth": 20.0 }
+                    }
+                },
+                "base-5-receita-impostos": {
+                    "T1": {
+                        "psb25d": { "Posição da quebra": 0.15, "gapSize": 25, "z": 88.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 0.9, "psbDepth": 35.0 }
+                    },
+                    "T4": {
+                        "psb25d": { "Posição da quebra": 0.35, "gapSize": 45, "z": 70.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.65, "psbFoldVisualHeight": 1.6, "psbDepth": 48.0 }
+                    },
+                    "T5": {
+                        "psb25d": { "Posição da quebra": 0.10, "gapSize": 20, "z": 95.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 0.6, "psbDepth": 25.0 }
+                    }
+                },
+                "base-6-frota-motocicletas": {
+                    "T1": {
+                        "psb25d": { "Posição da quebra": 0.20, "gapSize": 30, "z": 85.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.80, "psbFoldVisualHeight": 1.2, "psbDepth": 28.0 }
+                    },
+                    "T4": {
+                        "psb25d": { "Posição da quebra": 0.35, "gapSize": 45, "z": 70.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.65, "psbFoldVisualHeight": 1.6, "psbDepth": 42.0 }
+                    },
+                    "T5": {
+                        "psb25d": { "Posição da quebra": 0.10, "gapSize": 20, "z": 95.0 },
+                        "psb3d": { "psbBreakStartRatio": 0.85, "psbFoldVisualHeight": 0.8, "psbDepth": 25.0 }
+                    }
+                }
+            };
+
             let currentRankingPhaseIndex = 0;
             let finalRankingSlotsState = Array(RANKING_PHASES[0].options.length).fill(null);
             let draggedFinalRankingId = null;
@@ -1605,7 +1791,7 @@
                     card.dataset.slotIndex = String(slotIndex);
                 }
 
-                const imgHtml = visualization.previewImage 
+                const imgHtml = visualization.previewImage
                     ? '<img class="final-ranking-preview" src="' + visualization.previewImage + '" alt="Prévia da opção ' + visualization.name + '">'
                     : '';
 
@@ -2419,6 +2605,63 @@
 
                             if (indicesToHighlight.length > 0) {
                                 currentBlockChart.highlight(null, indicesToHighlight);
+
+                                if (task.visualization.id.includes('_opt')) {
+                                    const datasetObjects = datasetToObjects(task.dataset);
+                                    const targetValues = indicesToHighlight.map(index => datasetObjects[index].valor);
+
+                                    if (targetValues.length > 0) {
+                                        if (task.visualization.id === 'psb25d_opt') {
+                                            const optSettings = getOptimalPSB25DSettings(currentBlockChart, task.taskKey, targetValues);
+                                            currentBlockChart.updateScaleBreakPosition(optSettings['Posição da quebra']);
+                                            currentBlockChart.settings.gapSize = optSettings.gapSize;
+
+                                            const { z, hiddenRatio } = sliderToPerspectiveValues(optSettings.z);
+                                            currentBlockChart.settings.z = z;
+                                            currentBlockChart.updateScaleBreakHiddenRatio(hiddenRatio);
+
+                                            if (currentBlockChart.drawStrategy && currentBlockChart.drawStrategy.data) {
+                                                currentBlockChart.drawStrategy.data(currentBlockChart);
+                                            }
+                                            if (currentBlockChart.redraw) currentBlockChart.redraw();
+                                        } else if (task.visualization.id === 'psb3d_opt') {
+                                            const optSettings = getOptimalPSB3DSettings(currentBlockChart, task.taskKey, targetValues);
+                                            currentBlockChart.updateDepth(optSettings.psbDepth);
+                                            currentBlockChart.updateBreakStartRatio(optSettings.psbBreakStartRatio);
+                                            currentBlockChart.updateFoldVisualHeight(optSettings.psbFoldVisualHeight);
+                                            if (currentBlockChart.redraw) currentBlockChart.redraw();
+                                        }
+                                    }
+                                } else if (task.visualization.id.includes('_llm')) {
+                                    const baseId = task.dataset.id;
+                                    const taskKey = task.taskKey;
+                                    
+                                    if (llmOptimizedParameters[baseId] && llmOptimizedParameters[baseId][taskKey]) {
+                                        const config = llmOptimizedParameters[baseId][taskKey];
+                                        
+                                        if (task.visualization.id === 'psb25d_llm' && config['psb25d']) {
+                                            const params = config['psb25d'];
+                                            currentBlockChart.updateScaleBreakPosition(params['Posição da quebra']);
+                                            currentBlockChart.settings.gapSize = params.gapSize;
+                                            
+                                            const { z, hiddenRatio } = sliderToPerspectiveValues(params.z);
+                                            currentBlockChart.settings.z = z;
+                                            currentBlockChart.updateScaleBreakHiddenRatio(hiddenRatio);
+                                            
+                                            if (currentBlockChart.drawStrategy && currentBlockChart.drawStrategy.data) {
+                                                currentBlockChart.drawStrategy.data(currentBlockChart);
+                                            }
+                                            if (currentBlockChart.redraw) currentBlockChart.redraw();
+                                        } else if (task.visualization.id === 'psb3d_llm' && config['psb3d']) {
+                                            const params = config['psb3d'];
+                                            currentBlockChart.updateDepth(params.psbDepth);
+                                            currentBlockChart.updateBreakStartRatio(params.psbBreakStartRatio);
+                                            currentBlockChart.updateFoldVisualHeight(params.psbFoldVisualHeight);
+                                            
+                                            if (currentBlockChart.redraw) currentBlockChart.redraw();
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -2610,7 +2853,7 @@
                                 finalRankingSlotsState = Array(RANKING_PHASES[1].options.length).fill(null);
                             } else {
                                 finalRankingSlotsState = [...experimentData.finalRankingModes.order];
-                                while(finalRankingSlotsState.length < RANKING_PHASES[1].options.length) finalRankingSlotsState.push(null);
+                                while (finalRankingSlotsState.length < RANKING_PHASES[1].options.length) finalRankingSlotsState.push(null);
                             }
                             rankingWhyInput.value = experimentData.finalCommentsModes.rankingWhy || '';
                             otherCommentsInput.value = experimentData.finalCommentsModes.otherComments || '';
@@ -2630,20 +2873,20 @@
                 button.addEventListener('click', () => {
                     const target = button.getAttribute('data-prev');
                     if (!target) return;
-                    
+
                     if (target === 'nasa-tlx-screen' && currentRankingPhaseIndex === 1) {
                         currentRankingPhaseIndex = 0;
                         finalRankingSlotsState = [...experimentData.finalRankingTechniques.order];
-                        while(finalRankingSlotsState.length < RANKING_PHASES[0].options.length) finalRankingSlotsState.push(null);
-                        
+                        while (finalRankingSlotsState.length < RANKING_PHASES[0].options.length) finalRankingSlotsState.push(null);
+
                         rankingWhyInput.value = experimentData.finalCommentsTechniques.rankingWhy;
                         otherCommentsInput.value = experimentData.finalCommentsTechniques.otherComments;
                         document.getElementById('final-comments-title').textContent = 'Comentários Qualitativos - Técnicas de Visualização';
-                        
+
                         showScreen('final-comments-screen');
                         return;
                     }
-                    
+
                     if (target === 'tutorial-screen') {
                         tutorialIndex = tutorialOrder.length - 1;
                         showTutorialScreen();
