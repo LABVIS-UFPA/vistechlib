@@ -14,21 +14,23 @@ if (!fs.existsSync(INTERACTIONS_DIR)) {
   fs.mkdirSync(INTERACTIONS_DIR, { recursive: true });
 }
 
-function ensureInteractionCsvHeader() {
-  if (fs.existsSync(INTERACTION_LOG_FILE)) return;
+function ensureInteractionCsvHeader(filePath) {
+  if (fs.existsSync(filePath)) return;
 
   const header =
     "participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,eventSteps,timestamp\n";
 
-  fs.writeFileSync(INTERACTION_LOG_FILE, header, "utf8");
+  fs.writeFileSync(filePath, header, "utf8");
 }
 
-function saveInteractionLog(interactionLog = []) {
+function saveInteractionLog(participantId, interactionLog = []) {
   if (!Array.isArray(interactionLog) || interactionLog.length === 0) {
     return;
   }
 
-  ensureInteractionCsvHeader();
+  const interactionFile = path.join(INTERACTIONS_DIR, `${participantId}.csv`);
+
+  ensureInteractionCsvHeader(interactionFile);
 
   const rows = interactionLog.map((interaction) => {
     const eventTarget =
@@ -61,7 +63,7 @@ function saveInteractionLog(interactionLog = []) {
       .join(",");
   });
 
-  fs.appendFileSync(INTERACTION_LOG_FILE, rows.join("\n") + "\n", "utf8");
+  fs.appendFileSync(interactionFile, rows.join("\n") + "\n", "utf8");
 }
 
 function csvEscape(value) {
@@ -101,7 +103,7 @@ wss.on("connection", (ws) => {
       if (payload.type === "SAVE_EXPERIMENT") {
         saveExperiment(payload.experimentData);
 
-        saveInteractionLog(payload.interactionLog);
+        saveInteractionLog(payload.experimentData.participantId, payload.interactionLog);
 
         ws.send(
           JSON.stringify({
@@ -109,7 +111,7 @@ wss.on("connection", (ws) => {
           }),
         );
 
-        console.log("Experimento salvo em results.json");
+        console.log("Experimento salvo em arquivo individual");
       }
     } catch (err) {
       console.error("Erro no WebSocket:", err);
