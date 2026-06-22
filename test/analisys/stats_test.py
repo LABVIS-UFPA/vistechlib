@@ -63,7 +63,12 @@ def load_and_flatten_data(filepath):
         # --- Performance (Blocos de Tarefa) ---
         for block in exp_data.get('blocks', []):
             task = block.get('taskKey', 'Unknown')
-            vis = block.get('visualizationId', 'Unknown')
+            vis_full = block.get('visualizationId', 'Unknown')
+            
+            # Separa Técnica (psb25d, psb3d) e Modo (manual, llm, opt)
+            parts = vis_full.split('_')
+            technique = parts[0] if len(parts) > 0 else 'Unknown'
+            mode = parts[1] if len(parts) > 1 else 'Unknown'
             
             rt = block.get('timeOnBlockTaskScreenSeconds', np.nan)
             
@@ -91,7 +96,9 @@ def load_and_flatten_data(filepath):
                 'Participant': current_pid,
                 'Task': task,
                 'Diff': 'Geral', # Sem níveis de dificuldade extras
-                'Visualization': vis,
+                'Visualization': vis_full,
+                'Technique': technique,
+                'Mode': mode,
                 'LogError': log_error,
                 'RT': rt,
                 'Confidence': confidence_score
@@ -106,6 +113,12 @@ def load_and_flatten_data(filepath):
             }]
 
             for vis_eval in visualizations:
+                vis_full = vis_eval.get('visualizationId', 'Unknown')
+                # Separa Técnica (psb25d, psb3d) e Modo (manual, llm, opt)
+                parts = vis_full.split('_')
+                technique = parts[0] if len(parts) > 0 else 'Unknown'
+                mode = parts[1] if len(parts) > 1 else 'Unknown'
+
                 mental = vis_eval.get('mentalDemand')
                 temporal = vis_eval.get('temporalDemand')
                 perf_raw = vis_eval.get('performance')
@@ -124,7 +137,9 @@ def load_and_flatten_data(filepath):
                     'Participant': current_pid,
                     'Task_Full': f"TLX_{task}",
                     'Task': task,
-                    'Visualization': vis_eval.get('visualizationId', 'Unknown'),
+                    'Visualization': vis_full,
+                    'Technique': technique,
+                    'Mode': mode,
                     'Workload': workload,
                     'Mental': mental,
                     'Temporal': temporal,
@@ -243,7 +258,7 @@ def run_friedman_test(df, metric_col, group_col='Visualization', block_col='Part
     # 1. Descritiva
     desc_stats = df.groupby(group_col)[metric_col].mean()
     desc_count = df.groupby(group_col)[metric_col].count()
-    is_lower_better = metric_col in ['RT', 'LagTime', 'Replays', 'Workload', 'Rank', 'LogError', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration', 'Confidence']
+    is_lower_better = metric_col in ['RT', 'LagTime', 'Replays', 'Workload', 'Rank', 'LogError', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration']
     sorted_stats = desc_stats.sort_values(ascending=is_lower_better)
     
     print("   Médias (Descritiva):")
@@ -254,9 +269,13 @@ def run_friedman_test(df, metric_col, group_col='Visualization', block_col='Part
         else: unit = " pts"
         print("   " + ", ".join([f"{k}={v:.2f}{unit} (n={desc_count[k]})" for k, v in sorted_stats.items()]))
     else:
-        unit = "%"
-        multiplier = 100
-        print("   " + ", ".join([f"{k}={v*multiplier:.1f}{unit} (n={desc_count[k]})" for k, v in sorted_stats.items()]))
+        if metric_col == 'Confidence':
+            unit = " pts"
+            print("   " + ", ".join([f"{k}={v:.2f}{unit} (n={desc_count[k]})" for k, v in sorted_stats.items()]))
+        else: # Assume que outras métricas 'higher is better' são porcentagens
+            unit = "%"
+            multiplier = 100
+            print("   " + ", ".join([f"{k}={v*multiplier:.1f}{unit} (n={desc_count[k]})" for k, v in sorted_stats.items()]))
     # 2. Pivot e Limpeza
     pivot = df.pivot_table(index=block_col, columns=group_col, values=metric_col, aggfunc='mean')
     pivot_clean = pivot.dropna() 
@@ -319,6 +338,59 @@ def run_posthoc_tests(friedman_result, metric_col='Correct'):
             
     return significant_pairs
 
+def run_wilcoxon_test(df, metric_col, group_col='Visualization', block_col='Participant'):
+    """ Executa o teste Wilcoxon Signed-Rank para 2 grupos pareados. """
+    
+    # 1. Descritiva
+    desc_stats = df.groupby(group_col)[metric_col].mean()
+    desc_count = df.groupby(group_col)[metric_col].count()
+    is_lower_better = metric_col in ['RT', 'LagTime', 'Replays', 'Workload', 'Rank', 'LogError', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration']
+    sorted_stats = desc_stats.sort_values(ascending=is_lower_better)
+    
+    print("   Médias (Descritiva):")
+    if metric_col == 'Rank': unit = "º"
+    else: unit = " pts"
+    print("   " + ", ".join([f"{k}={v:.2f}{unit} (n={desc_count[k]})" for k, v in sorted_stats.items()]))
+
+    # 2. Pivot e Limpeza
+    pivot = df.pivot_table(index=block_col, columns=group_col, values=metric_col, aggfunc='mean')
+    pivot_clean = pivot.dropna()
+    
+    if len(pivot_clean.columns) != 2:
+        return f">> ERRO: O teste de Wilcoxon requer exatamente 2 grupos. Encontrados: {len(pivot_clean.columns)}."
+
+    N = len(pivot_clean)
+    if N < 2:
+        return f">> N insuficiente para teste estatístico pareado (N={N})."
+
+    # 3. Wilcoxon Test
+    group1_name, group2_name = pivot_clean.columns
+    group1_data = pivot_clean[group1_name]
+    group2_data = pivot_clean[group2_name]
+    
+    try:
+        stat, p_value = stats.wilcoxon(group1_data, group2_data, correction=True)
+    except ValueError as e:
+        return f">> Erro no teste de Wilcoxon: {e}. Verifique se há variação nos dados."
+
+    # Determina o vencedor
+    mean1 = group1_data.mean()
+    mean2 = group2_data.mean()
+    
+    winner = None
+    if p_value < 0.05:
+        if is_lower_better:
+            winner = group1_name if mean1 < mean2 else group2_name
+        else:
+            winner = group1_name if mean1 > mean2 else group2_name
+        
+    return {
+        'N': N, 'Statistic': stat, 'p-value': p_value,
+        'Significant': p_value < 0.05,
+        'Means': {group1_name: mean1, group2_name: mean2},
+        'Winner': winner
+    }
+
 # ==========================================
 # FUNÇÕES DE ANÁLISE DE PODER
 # ==========================================
@@ -355,190 +427,258 @@ df_perf, df_quest, df_rank_tech, df_rank_mode = load_and_flatten_data(RESULTS_PA
 if df_perf is not None and not df_perf.empty:
     df_perf = filter_high_error_participants(df_perf, threshold=4.0)
 
-if df_perf is not None and not df_perf.empty:
-    
-    combinations = df_perf[['Task', 'Diff']].drop_duplicates().sort_values(by=['Task', 'Diff']).values
-    
-    for task, diff in combinations:
-        print_separator(f"TAREFA: {TASK_MAP.get(task, task)} | DIFICULDADE: {diff}")
-        subset = df_perf[(df_perf['Task'] == task) & (df_perf['Diff'] == diff)]
-        
-        # --- A. LOG ERROR ---
-        print(f"\n--- Log Error ---")
-        res = run_friedman_test(subset, 'LogError')
-        
-        if isinstance(res, dict):
-            print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} | p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
-            
-            # Armazena para Power Analysis
-            power_analysis_data.append({
-                'Label': f"{TASK_MAP.get(task, task)} {diff} (LogError)",
-                'N': res['N'],
-                'k': res['k'],
-                'W': res['KendallW'],
-                'Sig': res['Significant']
-            })
+# ==========================================
+# ANÁLISE POR TAREFA (COMPARANDO AS 6 CONDIÇÕES)
+# Para cada tarefa, analisa o desempenho (Erro, Tempo, Confiança) e a carga
+# de trabalho (NASA-TLX) entre as 6 combinações de Técnica + Modo.
+# ==========================================
+print_separator("ANÁLISE POR TAREFA (COMPARANDO AS 6 CONDIÇÕES)")
 
-            if res['Significant']:
-                pairs = run_posthoc_tests(res, 'LogError')
-                if pairs:
-                    print("\n   Diferenças Reais encontradas (menor erro é melhor):")
-                    for g1, g2, p, winner in pairs:
-                         loser = g2 if winner == g1 else g1
-                         print(f"   * {winner} teve erro menor que {loser} (p={p:.4f})")
-        else:
-            print(res)
+# Pega a lista de todas as tarefas únicas presentes nos dados
+all_tasks = []
+if df_perf is not None:
+    all_tasks.extend(df_perf['Task'].unique())
+if df_quest is not None:
+    all_tasks.extend(df_quest['Task'].unique())
+unique_tasks = sorted(list(set(all_tasks)))
 
-        # --- B. CONFIDENCE ---
-        print(f"\n--- Confidence (Likert 0-5) ---")
-        res_conf = run_friedman_test(subset, 'Confidence')
-        if isinstance(res_conf, dict):
-            print(f"Friedman N={res_conf['N']} | Chi²={res_conf['Statistic']:.2f} | p={res_conf['p-value']:.4f} | Kendall's W={res_conf['KendallW']:.4f}")
-            power_analysis_data.append({
-                'Label': f"{TASK_MAP.get(task, task)} {diff} (Confidence)",
-                'N': res_conf['N'],
-                'k': res_conf['k'],
-                'W': res_conf['KendallW'],
-                'Sig': res_conf['Significant']
-            })
-            if res_conf['Significant']:
-                pairs_conf = run_posthoc_tests(res_conf, 'Confidence')
-                if pairs_conf:
-                    print("\n   Diferenças Reais encontradas (Confidence maior é melhor):")
-                    for g1, g2, p, winner in pairs_conf:
-                        loser = g2 if winner == g1 else g1
-                        print(f"   * {winner} teve confiança maior que {loser} (p={p:.4f})")
-        else:
-            print(res_conf)
+for task in unique_tasks:
+    task_name = TASK_MAP.get(task, task)
+    print_separator(f"RESULTADOS PARA A TAREFA: {task_name}")
 
-        # --- B. MÉTICAS DE EFICIÊNCIA (TEMPO / LAG / REPLAYS) ---
-        # Define qual métrica usar baseada na tarefa
-        metric = 'RT'
-        label = 'Tempo (RT)'
-        suffix = "(Time)"
-        
-        print(f"\n--- {label} ---")
+    # --- 1. ANÁLISE DE PERFORMANCE (Erro, Tempo, Confiança) ---
+    if df_perf is not None and not df_perf.empty:
+        subset_perf = df_perf[df_perf['Task'] == task]
+        if not subset_perf.empty:
+            print("\n--- Métricas de Performance ---")
 
-        # run_normality_test(subset, metric)
-
-
-        # Note: Para Replays, 'menor é melhor', igual ao Tempo. A lógica de ranking funciona.
-        res = run_friedman_test(subset, metric)
-        
-        if isinstance(res, dict):
-            # Formata a string de output dependendo da métrica
-            # Separamos o formato numérico (fmt) da unidade (unit)
-            if metric == 'Replays':
-                fmt = ".1f"
-                unit = ""
-            else:
-                fmt = ".2f"
-                unit = "s"
-            
-            print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} | p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
-            
-            # Ordena médias (Menor é melhor)
-            sorted_means = sorted(res['Means'].items(), key=lambda x: x[1])
-            # Correção: aplicamos a unidade fora da formatação numérica
-            print("Ranking:", ", ".join([f"{k}={v:{fmt}}{unit}" for k,v in sorted_means]))
-
-            # --- Armazena para Power Analysis ---
-            # O cálculo de poder usa o N e o W (Effect Size) calculados aqui.
-            power_analysis_data.append({
-                'Label': f"{TASK_MAP.get(task, task)} {diff} {suffix}",
-                'N': res['N'],
-                'k': res['k'],
-                'W': res['KendallW'],
-                'Sig': res['Significant']
-            })
-            # ------------------------------------
-
-            if res['Significant']:
-                print(">> DIFERENÇA DETECTADA! Rodando Post-hoc...")
-                pairs = run_posthoc_tests(res, metric)
-                if pairs:
-                    print("\n   Diferenças Reais encontradas:")
-                    for g1, g2, p, _ in pairs:
-                         winner = _
-                         loser = g2 if winner == g1 else g1
-                         print(f"   * {winner} foi melhor ({label} menor) que {loser} (p={p:.4f})")
-        else:
-            print(res)
-
-       
-# --- NASATLX ---
-if df_quest is not None and not df_quest.empty:
-    print_separator("NASATLX (SUBJETIVO)")
-
-    # Lista de métricas do TLX para analisar
-    tlx_metrics = ['Workload', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration']
-    
-    # Mapeamento para nomes mais amigáveis no output
-    tlx_metric_names = {
-        'Workload': 'Carga de Trabalho Geral (Média)',
-        'Mental': 'Demanda Mental',
-        'Temporal': 'Demanda Temporal',
-        'Performance': 'Performance (Auto-avaliada)',
-        'Effort': 'Esforço',
-        'Frustration': 'Frustração'
-    }
-
-    tasks_q = df_quest['Task'].unique()
-    
-    for task_q in sorted(tasks_q):
-        print_separator(f"NASATLX - TAREFA: {TASK_MAP.get(task_q, task_q)}")
-        subset_q = df_quest[df_quest['Task'] == task_q]
-        
-        for metric in tlx_metrics:
-            metric_name = tlx_metric_names.get(metric, metric)
-            print(f"\n--- {metric_name} ---")
-            
-            res = run_friedman_test(subset_q, metric)
-            
+            # --- A. LOG ERROR ---
+            print(f"\n--- Log Error ---")
+            res = run_friedman_test(subset_perf, 'LogError')
             if isinstance(res, dict):
-                print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} |  p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
-                
-                power_analysis_data.append({
-                    'Label': f"TLX {task_q} ({metric})",
-                    'N': res['N'],
-                    'k': res['k'],
-                    'W': res['KendallW'],
-                    'Sig': res['Significant']
-                })
-
+                print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} | p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
+                power_analysis_data.append({'Label': f"{task_name} (LogError)", 'N': res['N'], 'k': res['k'], 'W': res['KendallW'], 'Sig': res['Significant']})
                 if res['Significant']:
-                    pairs = run_posthoc_tests(res, metric)
+                    pairs = run_posthoc_tests(res, 'LogError')
                     if pairs:
-                        print(f"\n   Menor '{metric_name}' Confirmada:")
+                        print("\n   Diferenças Reais (menor erro é melhor):")
                         for g1, g2, p, winner in pairs:
                             loser = g2 if winner == g1 else g1
-                            print(f"   * {winner} teve MENOR pontuação que {loser} (p={p:.4f})")
+                            print(f"   * {winner} teve erro menor que {loser} (p={p:.4f})")
             else:
                 print(res)
+
+            # --- B. CONFIDENCE ---
+            print(f"\n--- Confidence (Likert 0-5) ---")
+            res_conf = run_friedman_test(subset_perf, 'Confidence')
+            if isinstance(res_conf, dict):
+                print(f"Friedman N={res_conf['N']} | Chi²={res_conf['Statistic']:.2f} | p={res_conf['p-value']:.4f} | Kendall's W={res_conf['KendallW']:.4f}")
+                power_analysis_data.append({'Label': f"{task_name} (Confidence)", 'N': res_conf['N'], 'k': res_conf['k'], 'W': res['KendallW'], 'Sig': res['Significant']})
+                if res_conf['Significant']:
+                    pairs_conf = run_posthoc_tests(res_conf, 'Confidence')
+                    if pairs_conf:
+                        print("\n   Diferenças Reais (maior confiança é melhor):")
+                        for g1, g2, p, winner in pairs_conf:
+                            loser = g2 if winner == g1 else g1
+                            print(f"   * {winner} teve confiança maior que {loser} (p={p:.4f})")
+            else:
+                print(res_conf)
+
+            # --- C. TEMPO DE RESPOSTA (RT) ---
+            print(f"\n--- Tempo (RT) ---")
+            res_rt = run_friedman_test(subset_perf, 'RT')
+            if isinstance(res_rt, dict):
+                print(f"Friedman N={res_rt['N']} | Chi²={res_rt['Statistic']:.2f} | p={res_rt['p-value']:.4f} | Kendall's W={res_rt['KendallW']:.4f}")
+                power_analysis_data.append({'Label': f"{task_name} (Time)", 'N': res_rt['N'], 'k': res_rt['k'], 'W': res_rt['KendallW'], 'Sig': res_rt['Significant']})
+                if res_rt['Significant']:
+                    pairs_rt = run_posthoc_tests(res_rt, 'RT')
+                    if pairs_rt:
+                        print("\n   Diferenças Reais (menor tempo é melhor):")
+                        for g1, g2, p, winner in pairs_rt:
+                            loser = g2 if winner == g1 else g1
+                            print(f"   * {winner} foi mais rápido que {loser} (p={p:.4f})")
+            else:
+                print(res_rt)
+
+    # --- 2. ANÁLISE SUBJETIVA (NASA-TLX) ---
+    if df_quest is not None and not df_quest.empty:
+        subset_quest = df_quest[df_quest['Task'] == task]
+        if not subset_quest.empty:
+            print("\n--- Métricas Subjetivas (NASA-TLX) ---")
+            
+            tlx_metrics = ['Workload', 'Mental', 'Temporal', 'Performance', 'Effort', 'Frustration']
+            tlx_metric_names = {
+                'Workload': 'Carga de Trabalho Geral (Média)', 'Mental': 'Demanda Mental',
+                'Temporal': 'Demanda Temporal', 'Performance': 'Performance (Auto-avaliada)',
+                'Effort': 'Esforço', 'Frustration': 'Frustração'
+            }
+
+            for metric in tlx_metrics:
+                metric_name = tlx_metric_names.get(metric, metric)
+                print(f"\n--- {metric_name} ---")
+                
+                res_tlx = run_friedman_test(subset_quest, metric)
+                
+                if isinstance(res_tlx, dict):
+                    print(f"Friedman N={res_tlx['N']} | Chi²={res_tlx['Statistic']:.2f} |  p={res_tlx['p-value']:.4f} | Kendall's W={res_tlx['KendallW']:.4f}")
+                    power_analysis_data.append({'Label': f"TLX {task} ({metric})", 'N': res_tlx['N'], 'k': res_tlx['k'], 'W': res_tlx['KendallW'], 'Sig': res_tlx['Significant']})
+                    if res_tlx['Significant']:
+                        pairs_tlx = run_posthoc_tests(res_tlx, metric)
+                        if pairs_tlx:
+                            print(f"\n   Diferenças Reais (menor '{metric_name}' é melhor):")
+                            for g1, g2, p, winner in pairs_tlx:
+                                loser = g2 if winner == g1 else g1
+                                print(f"   * {winner} teve MENOR pontuação que {loser} (p={p:.4f})")
+                else:
+                    print(res_tlx)
+
+# ==========================================
+# ANÁLISE AGREGADA (EFEITOS PRINCIPAIS)
+# Compara os fatores (Condição, Modo, Técnica) de forma geral, combinando os resultados de todas as tarefas.
+# ==========================================
+print_separator("ANÁLISE AGREGADA (EFEITOS PRINCIPAIS)")
+
+if df_perf is not None and not df_perf.empty:
+    # --- ANÁLISE AGREGADA POR CONDIÇÃO (TÉCNICA + MODO) ---
+    print("\n--- ANÁLISE AGREGADA POR CONDIÇÃO (as 6 combinações) ---")
+
+    # --- LogError por Condição (Agregado) ---
+    print("\n--- Log Error (Agregado por Condição) ---")
+    res_cond_log = run_friedman_test(df_perf, 'LogError', group_col='Visualization')
+    if isinstance(res_cond_log, dict):
+        print(f"Friedman N={res_cond_log['N']} | Chi²={res_cond_log['Statistic']:.2f} | p={res_cond_log['p-value']:.4f} | Kendall's W={res_cond_log['KendallW']:.4f}")
+        power_analysis_data.append({'Label': "Agregado (LogError por Condição)", 'N': res_cond_log['N'], 'k': res_cond_log['k'], 'W': res_cond_log['KendallW'], 'Sig': res_cond_log['Significant']})
+        if res_cond_log['Significant']:
+            pairs = run_posthoc_tests(res_cond_log, 'LogError')
+            if pairs:
+                print("\n   Diferenças Reais (menor erro é melhor):")
+                for g1, g2, p, winner in pairs:
+                    loser = g2 if winner == g1 else g1
+                    print(f"   * Condição '{winner}' teve erro menor que '{loser}' (p={p:.4f})")
+    else:
+        print(res_cond_log)
+
+    # --- RT por Condição (Agregado) ---
+    print("\n--- Tempo de Resposta (RT) (Agregado por Condição) ---")
+    res_cond_rt = run_friedman_test(df_perf, 'RT', group_col='Visualization')
+    if isinstance(res_cond_rt, dict):
+        print(f"Friedman N={res_cond_rt['N']} | Chi²={res_cond_rt['Statistic']:.2f} | p={res_cond_rt['p-value']:.4f} | Kendall's W={res_cond_rt['KendallW']:.4f}")
+        power_analysis_data.append({'Label': "Agregado (RT por Condição)", 'N': res_cond_rt['N'], 'k': res_cond_rt['k'], 'W': res_cond_rt['KendallW'], 'Sig': res_cond_rt['Significant']})
+        if res_cond_rt['Significant']:
+            pairs = run_posthoc_tests(res_cond_rt, 'RT')
+            if pairs:
+                print("\n   Diferenças Reais (menor tempo é melhor):")
+                for g1, g2, p, winner in pairs:
+                    loser = g2 if winner == g1 else g1
+                    print(f"   * Condição '{winner}' foi mais rápida que '{loser}' (p={p:.4f})")
+    else:
+        print(res_cond_rt)
+
+    # --- Confidence por Condição (Agregado) ---
+    print("\n--- Confidence (Agregado por Condição) ---")
+    res_cond_conf = run_friedman_test(df_perf, 'Confidence', group_col='Visualization')
+    if isinstance(res_cond_conf, dict):
+        print(f"Friedman N={res_cond_conf['N']} | Chi²={res_cond_conf['Statistic']:.2f} | p={res_cond_conf['p-value']:.4f} | Kendall's W={res_cond_conf['KendallW']:.4f}")
+        power_analysis_data.append({'Label': "Agregado (Confidence por Condição)", 'N': res_cond_conf['N'], 'k': res_cond_conf['k'], 'W': res_cond_conf['KendallW'], 'Sig': res_cond_conf['Significant']})
+        if res_cond_conf['Significant']:
+            pairs = run_posthoc_tests(res_cond_conf, 'Confidence')
+            if pairs:
+                print("\n   Diferenças Reais (maior confiança é melhor):")
+                for g1, g2, p, winner in pairs:
+                    loser = g2 if winner == g1 else g1
+                    print(f"   * Condição '{winner}' teve confiança maior que '{loser}' (p={p:.4f})")
+    else:
+        print(res_cond_conf)
+
+    # --- ANÁLISE POR MODO DE INTERAÇÃO (AGREGADO) ---
+    print("\n--- ANÁLISE POR MODO DE INTERAÇÃO (EFEITO PRINCIPAL) ---")
+    # --- LogError por Modo ---
+    print("\n--- Log Error (por Modo) ---")
+    res_mode_log = run_friedman_test(df_perf, 'LogError', group_col='Mode')
+    if isinstance(res_mode_log, dict):
+        print(f"Friedman N={res_mode_log['N']} | Chi²={res_mode_log['Statistic']:.2f} | p={res_mode_log['p-value']:.4f} | Kendall's W={res_mode_log['KendallW']:.4f}")
+        power_analysis_data.append({'Label': "Agregado (LogError por Modo)", 'N': res_mode_log['N'], 'k': res_mode_log['k'], 'W': res_mode_log['KendallW'], 'Sig': res_mode_log['Significant']})
+        if res_mode_log['Significant']:
+            pairs = run_posthoc_tests(res_mode_log, 'LogError')
+            if pairs:
+                print("\n   Diferenças Reais (menor erro é melhor):")
+                for g1, g2, p, winner in pairs:
+                    loser = g2 if winner == g1 else g1
+                    print(f"   * Modo '{winner}' teve erro menor que '{loser}' (p={p:.4f})")
+    else:
+        print(res_mode_log)
+
+    # --- RT por Modo ---
+    print("\n--- Tempo de Resposta (RT) (por Modo) ---")
+    res_mode_rt = run_friedman_test(df_perf, 'RT', group_col='Mode')
+    if isinstance(res_mode_rt, dict):
+        print(f"Friedman N={res_mode_rt['N']} | Chi²={res_mode_rt['Statistic']:.2f} | p={res_mode_rt['p-value']:.4f} | Kendall's W={res_mode_rt['KendallW']:.4f}")
+        power_analysis_data.append({'Label': "Agregado (RT por Modo)", 'N': res_mode_rt['N'], 'k': res_mode_rt['k'], 'W': res_mode_rt['KendallW'], 'Sig': res_mode_rt['Significant']})
+        if res_mode_rt['Significant']:
+            pairs = run_posthoc_tests(res_mode_rt, 'RT')
+            if pairs:
+                print("\n   Diferenças Reais (menor tempo é melhor):")
+                for g1, g2, p, winner in pairs:
+                    loser = g2 if winner == g1 else g1
+                    print(f"   * Modo '{winner}' foi mais rápido que '{loser}' (p={p:.4f})")
+    else:
+        print(res_mode_rt)
+
+# --- ANÁLISE AGREGADA DO NASA-TLX ---
+if df_quest is not None and not df_quest.empty:
+    # --- Workload por Condição (Agregado) ---
+    print("\n--- Carga de Trabalho (Workload) por Condição (Agregado) ---")
+    res_wl_cond = run_friedman_test(df_quest, 'Workload', group_col='Visualization')
+    if isinstance(res_wl_cond, dict):
+        print(f"Friedman N={res_wl_cond['N']} | Chi²={res_wl_cond['Statistic']:.2f} | p={res_wl_cond['p-value']:.4f} | Kendall's W={res_wl_cond['KendallW']:.4f}")
+        power_analysis_data.append({'Label': "TLX Agregado (Workload por Condição)", 'N': res_wl_cond['N'], 'k': res_wl_cond['k'], 'W': res_wl_cond['KendallW'], 'Sig': res_wl_cond['Significant']})
+        if res_wl_cond['Significant']:
+            pairs = run_posthoc_tests(res_wl_cond, 'Workload')
+            if pairs:
+                print("\n   Diferenças Reais (menor carga é melhor):")
+                for g1, g2, p, winner in pairs:
+                    loser = g2 if winner == g1 else g1
+                    print(f"   * Condição '{winner}' teve menor carga que '{loser}' (p={p:.4f})")
+    else:
+        print(res_wl_cond)
+
+    # --- ANÁLISE AGREGADA DO NASA-TLX POR MODO E TÉCNICA ---
+    print("\n--- ANÁLISE AGREGADA DO NASA-TLX (EFEITOS PRINCIPAIS) ---")
+    # --- Workload por Modo ---
+    print("\n--- Carga de Trabalho (Workload) por Modo ---")
+    res_wl_mode = run_friedman_test(df_quest, 'Workload', group_col='Mode')
+    if isinstance(res_wl_mode, dict):
+        print(f"Friedman N={res_wl_mode['N']} | Chi²={res_wl_mode['Statistic']:.2f} | p={res_wl_mode['p-value']:.4f} | Kendall's W={res_wl_mode['KendallW']:.4f}")
+        power_analysis_data.append({'Label': "TLX Agregado (Workload por Modo)", 'N': res_wl_mode['N'], 'k': res_wl_mode['k'], 'W': res_wl_mode['KendallW'], 'Sig': res_wl_mode['Significant']})
+        if res_wl_mode['Significant']:
+            pairs = run_posthoc_tests(res_wl_mode, 'Workload')
+            if pairs:
+                print("\n   Diferenças Reais (menor carga é melhor):")
+                for g1, g2, p, winner in pairs:
+                    loser = g2 if winner == g1 else g1
+                    print(f"   * Modo '{winner}' teve menor carga que '{loser}' (p={p:.4f})")
+    else:
+        print(res_wl_mode)
+
 
 # --- RANKING ---
 if df_rank_tech is not None and not df_rank_tech.empty:
     print_separator("RANKING DE PREFERÊNCIA (TÉCNICAS)")
     
-    res = run_friedman_test(df_rank_tech, 'Rank')
+    # Com apenas 2 grupos (técnicas), o teste correto é o Wilcoxon Signed-Rank, não o Friedman.
+    res = run_wilcoxon_test(df_rank_tech, 'Rank')
     
     if isinstance(res, dict):
-        print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} |  p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
+        print(f"Wilcoxon Signed-Rank Test N={res['N']} | W-stat={res['Statistic']:.2f} | p={res['p-value']:.4f}")
         
-        power_analysis_data.append({
-            'Label': "Ranking de Técnicas",
-            'N': res['N'],
-            'k': res['k'],
-            'W': res['KendallW'],
-            'Sig': res['Significant']
-        })
+        # A análise de poder para Wilcoxon é diferente e não foi adicionada à lista global.
+        
         if res['Significant']:
-            pairs = run_posthoc_tests(res, 'Rank')
-            if pairs:
-                print("\n   Diferenças Reais encontradas (Menor rank é melhor):")
-                for g1, g2, p, winner in pairs:
-                     loser = g2 if winner == g1 else g1
-                     print(f"   * {winner} foi preferido a {loser} (p={p:.4f})")
+            winner = res['Winner']
+            loser = [g for g in res['Means'] if g != winner][0]
+            print(f"\n   Diferença Significativa Encontrada (Menor rank é melhor):")
+            print(f"   * A técnica '{winner}' foi preferida significativamente em relação a '{loser}' (p={res['p-value']:.4f}).")
+
     else:
         print(res)
 
