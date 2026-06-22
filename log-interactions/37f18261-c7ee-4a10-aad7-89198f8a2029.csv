@@ -1,0 +1,32 @@
+participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,eventSteps,timestamp
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,1,T1,psb25d_opt,base-4-populacao-residente,canvasMouseDown,canvas,466;150,,2026-06-22T18:34:38.315Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,1,T1,psb25d_opt,base-4-populacao-residente,canvasMouseUp,canvas,466;150,,2026-06-22T18:34:38.509Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,1,T1,psb25d_opt,base-4-populacao-residente,canvasMouseDown,canvas,597;59,,2026-06-22T18:34:45.771Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,1,T1,psb25d_opt,base-4-populacao-residente,canvasMouseUp,canvas,600;117,,2026-06-22T18:34:46.216Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,1,T1,psb25d_opt,base-4-populacao-residente,canvasMouseDown,canvas,699;27,,2026-06-22T18:34:48.391Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,1,T1,psb25d_opt,base-4-populacao-residente,canvasMouseUp,canvas,645;49,,2026-06-22T18:34:48.837Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,1,T1,psb25d_opt,base-4-populacao-residente,canvasMouseDown,canvas,698;83,,2026-06-22T18:34:49.319Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,1,T1,psb25d_opt,base-4-populacao-residente,canvasMouseUp,canvas,691;91,,2026-06-22T18:34:49.507Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,z,0,,2026-06-22T18:36:41.820Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,gapSize,80,,2026-06-22T18:36:44.930Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,Posição da quebra,0.7,,2026-06-22T18:36:55.712Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,3,T1,psb3d_manual,base-1-pib,slider,psbBreakStartRatio,0.26,,2026-06-22T18:38:07.955Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,3,T1,psb3d_manual,base-1-pib,slider,psbFoldVisualHeight,0.2,,2026-06-22T18:38:10.598Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,3,T1,psb3d_manual,base-1-pib,slider,psbDepth,29.2,,2026-06-22T18:38:20.509Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,3,T1,psb3d_manual,base-1-pib,slider,psbBreakStartRatio,0.38,,2026-06-22T18:38:23.541Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,3,T1,psb3d_manual,base-1-pib,slider,psbFoldVisualHeight,1,,2026-06-22T18:38:31.648Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,3,T1,psb3d_manual,base-1-pib,slider,psbFoldVisualHeight,1.9,,2026-06-22T18:38:38.907Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,3,T1,psb3d_manual,base-1-pib,slider,psbFoldVisualHeight,0.2,,2026-06-22T18:38:48.403Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,1,3,T1,psb3d_manual,base-1-pib,slider,psbDepth,23.4,,2026-06-22T18:38:53.094Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,1,T4,psb25d_manual,base-3-matriculas-fundamental,slider,Posição da quebra,0.4,,2026-06-22T18:42:52.161Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,1,T4,psb25d_manual,base-3-matriculas-fundamental,slider,z,1.6,,2026-06-22T18:42:54.481Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,1,T4,psb25d_manual,base-3-matriculas-fundamental,slider,gapSize,80,,2026-06-22T18:42:58.953Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,1,T4,psb25d_manual,base-3-matriculas-fundamental,slider,z,100,,2026-06-22T18:43:02.885Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,1,T4,psb25d_manual,base-3-matriculas-fundamental,slider,Posição da quebra,0.45,,2026-06-22T18:43:05.813Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,1,T4,psb25d_manual,base-3-matriculas-fundamental,slider,gapSize,80,,2026-06-22T18:43:08.529Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,1,T4,psb25d_manual,base-3-matriculas-fundamental,slider,Posição da quebra,0.35,,2026-06-22T18:43:17.014Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,1,T4,psb25d_manual,base-3-matriculas-fundamental,slider,z,99,,2026-06-22T18:43:23.961Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,4,T4,psb3d_manual,base-4-populacao-residente,slider,psbBreakStartRatio,0.5,,2026-06-22T18:47:05.466Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,4,T4,psb3d_manual,base-4-populacao-residente,slider,psbDepth,50,,2026-06-22T18:47:15.971Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,5,T4,psb25d_llm,base-2-ensino-superior,canvasMouseDown,canvas,622;643,,2026-06-22T18:48:24.544Z
+37f18261-c7ee-4a10-aad7-89198f8a2029,2,5,T4,psb25d_llm,base-2-ensino-superior,canvasMouseUp,canvas,622;643,,2026-06-22T18:48:24.638Z
