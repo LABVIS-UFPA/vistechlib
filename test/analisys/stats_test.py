@@ -50,7 +50,8 @@ def load_and_flatten_data(filepath):
 
     perf_rows = []
     quest_rows = []
-    rank_rows = []
+    rank_tech_rows = []
+    rank_mode_rows = []
 
     print(f"Processando {len(raw_data)} registros...")
 
@@ -132,22 +133,34 @@ def load_and_flatten_data(filepath):
                     'Frustration': frust
                 })
 
-        # --- Ranking de Preferência (Fase 3) ---
-        final_ranking = exp_data.get('finalRanking')
-        if final_ranking and 'order' in final_ranking:
-            ranking_order = final_ranking['order']
+        # --- Ranking de Preferência (Fase 3 - Técnicas) ---
+        final_ranking_tech = exp_data.get('finalRankingTechniques')
+        if final_ranking_tech and 'order' in final_ranking_tech:
+            ranking_order = final_ranking_tech['order']
             for rank_idx, vis in enumerate(ranking_order):
-                rank_rows.append({
+                rank_tech_rows.append({
                     'Participant': current_pid,
                     'Visualization': vis,
-                    'Rank': rank_idx + 1  # 1 para o 1º lugar, 2 para 2º, etc.
+                    'Rank': rank_idx + 1
+                })
+
+        # --- Ranking de Preferência (Fase 3 - Modos) ---
+        final_ranking_modes = exp_data.get('finalRankingModes')
+        if final_ranking_modes and 'order' in final_ranking_modes:
+            ranking_order = final_ranking_modes['order']
+            for rank_idx, vis in enumerate(ranking_order):
+                rank_mode_rows.append({
+                    'Participant': current_pid,
+                    'Visualization': vis,
+                    'Rank': rank_idx + 1
                 })
 
     df_perf = pd.DataFrame(perf_rows) if perf_rows else pd.DataFrame()
     df_quest = pd.DataFrame(quest_rows) if quest_rows else pd.DataFrame()
-    df_rank = pd.DataFrame(rank_rows) if rank_rows else pd.DataFrame()
-    
-    return df_perf, df_quest, df_rank
+    df_rank_tech = pd.DataFrame(rank_tech_rows) if rank_tech_rows else pd.DataFrame()
+    df_rank_mode = pd.DataFrame(rank_mode_rows) if rank_mode_rows else pd.DataFrame()
+
+    return df_perf, df_quest, df_rank_tech, df_rank_mode
 
 def filter_high_error_participants(df, threshold=2.0):
     """
@@ -336,7 +349,7 @@ def print_separator(title):
 # EXECUÇÃO PRINCIPAL
 # ==========================================
 
-df_perf, df_quest, df_rank = load_and_flatten_data(RESULTS_PATH)
+df_perf, df_quest, df_rank_tech, df_rank_mode = load_and_flatten_data(RESULTS_PATH)
 
 # --- NOVO: APLICA O FILTRO DE ACURÁCIA ---
 if df_perf is not None and not df_perf.empty:
@@ -504,30 +517,53 @@ if df_quest is not None and not df_quest.empty:
                 print(res)
 
 # --- RANKING ---
-if df_rank is not None and not df_rank.empty:
-    print_separator("RANKING DE PREFERÊNCIA (GERAL)")
+if df_rank_tech is not None and not df_rank_tech.empty:
+    print_separator("RANKING DE PREFERÊNCIA (TÉCNICAS)")
     
-    res = run_friedman_test(df_rank, 'Rank')
+    res = run_friedman_test(df_rank_tech, 'Rank')
     
     if isinstance(res, dict):
         print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} |  p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
         
-        # Armazena para Power Analysis
         power_analysis_data.append({
-            'Label': "Ranking de Preferência",
+            'Label': "Ranking de Técnicas",
             'N': res['N'],
             'k': res['k'],
             'W': res['KendallW'],
             'Sig': res['Significant']
         })
-
         if res['Significant']:
             pairs = run_posthoc_tests(res, 'Rank')
             if pairs:
-                print("\n   Preferências Confirmadas (Post-hoc):")
+                print("\n   Diferenças Reais encontradas (Menor rank é melhor):")
                 for g1, g2, p, winner in pairs:
-                    loser = g2 if winner == g1 else g1
-                    print(f"   * {winner} foi preferido significativamente em relação a {loser} (p={p:.4f})")
+                     loser = g2 if winner == g1 else g1
+                     print(f"   * {winner} foi preferido a {loser} (p={p:.4f})")
+    else:
+        print(res)
+
+if df_rank_mode is not None and not df_rank_mode.empty:
+    print_separator("RANKING DE PREFERÊNCIA (MODOS)")
+    
+    res = run_friedman_test(df_rank_mode, 'Rank')
+    
+    if isinstance(res, dict):
+        print(f"Friedman N={res['N']} | Chi²={res['Statistic']:.2f} |  p={res['p-value']:.4f} | Kendall's W={res['KendallW']:.4f}")
+        
+        power_analysis_data.append({
+            'Label': "Ranking de Modos",
+            'N': res['N'],
+            'k': res['k'],
+            'W': res['KendallW'],
+            'Sig': res['Significant']
+        })
+        if res['Significant']:
+            pairs = run_posthoc_tests(res, 'Rank')
+            if pairs:
+                print("\n   Diferenças Reais encontradas (Menor rank é melhor):")
+                for g1, g2, p, winner in pairs:
+                     loser = g2 if winner == g1 else g1
+                     print(f"   * {winner} foi preferido a {loser} (p={p:.4f})")
     else:
         print(res)
 
