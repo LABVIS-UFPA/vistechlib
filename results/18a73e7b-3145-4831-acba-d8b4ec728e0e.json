@@ -1,0 +1,649 @@
+{
+  "receivedAt": "2026-06-22T20:03:08.060Z",
+  "experimentData": {
+    "participantId": "18a73e7b-3145-4831-acba-d8b4ec728e0e",
+    "startedAt": "2026-06-22T19:23:32.396Z",
+    "demographics": {
+      "ageRange": "25-34",
+      "sex": "Masculino",
+      "educationLevel": "Superior Incompleto",
+      "infovisCourse": "Não",
+      "visualAcuity": "Boa",
+      "colorBlindness": "Não",
+      "barChartFamiliarity": "Vejo frequentemente e sei interpretar"
+    },
+    "blockTaskOrder": [
+      "T1",
+      "T4",
+      "T5"
+    ],
+    "tutorialOrder": [
+      "psb25d_manual",
+      "psb3d_manual"
+    ],
+    "blocks": [
+      {
+        "blockNumber": 1,
+        "taskIndexInBlock": 1,
+        "taskKey": "T1",
+        "visualizationId": "psb3d_opt",
+        "datasetId": "base-2-ensino-superior",
+        "startedAt": "2026-06-22T19:31:33.760Z",
+        "endedAt": "2026-06-22T19:32:11.258Z",
+        "timeOnBlockTaskScreenMs": 37498,
+        "timeOnBlockTaskScreenSeconds": 37.5,
+        "answer": "2.000",
+        "confidence": "Muito Alta",
+        "interactions": {
+          "total": 8,
+          "byType": {
+            "zoom": 8
+          }
+        },
+        "answerNumber": 2000,
+        "correctAnswer": 1925,
+        "isCorrect": true,
+        "responseRegisteredAt": "2026-06-22T19:32:35.014Z"
+      },
+      {
+        "blockNumber": 1,
+        "taskIndexInBlock": 2,
+        "taskKey": "T1",
+        "visualizationId": "psb3d_llm",
+        "datasetId": "base-1-pib",
+        "startedAt": "2026-06-22T19:33:36.318Z",
+        "endedAt": "2026-06-22T19:34:04.876Z",
+        "timeOnBlockTaskScreenMs": 28558,
+        "timeOnBlockTaskScreenSeconds": 28.56,
+        "answer": "2.700.000",
+        "confidence": "Alta",
+        "interactions": {
+          "total": 0,
+          "byType": {}
+        },
+        "answerNumber": 2700000,
+        "correctAnswer": 2780522,
+        "isCorrect": true,
+        "responseRegisteredAt": "2026-06-22T19:34:38.689Z"
+      },
+      {
+        "blockNumber": 1,
+        "taskIndexInBlock": 3,
+        "taskKey": "T1",
+        "visualizationId": "psb25d_llm",
+        "datasetId": "base-5-receita-impostos",
+        "startedAt": "2026-06-22T19:35:07.049Z",
+        "endedAt": "2026-06-22T19:35:38.194Z",
+        "timeOnBlockTaskScreenMs": 31149,
+        "timeOnBlockTaskScreenSeconds": 31.15,
+        "answer": "700.000",
+        "confidence": "Muito Baixa",
+        "interactions": {
+          "total": 5,
+          "byType": {
+            "zoom": 5
+          }
+        },
+        "answerNumber": 700000,
+        "correctAnswer": 40441343.14,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:36:05.563Z"
+      },
+      {
+        "blockNumber": 1,
+        "taskIndexInBlock": 4,
+        "taskKey": "T1",
+        "visualizationId": "psb3d_manual",
+        "datasetId": "base-6-frota-motocicletas",
+        "startedAt": "2026-06-22T19:37:06.965Z",
+        "endedAt": "2026-06-22T19:38:06.975Z",
+        "timeOnBlockTaskScreenMs": 60014,
+        "timeOnBlockTaskScreenSeconds": 60.01,
+        "answer": "43.000",
+        "confidence": "Alta",
+        "interactions": {
+          "total": 2,
+          "byType": {
+            "slider": 2
+          }
+        },
+        "answerNumber": 43000,
+        "correctAnswer": 43078,
+        "isCorrect": true,
+        "responseRegisteredAt": "2026-06-22T19:38:16.175Z"
+      },
+      {
+        "blockNumber": 1,
+        "taskIndexInBlock": 5,
+        "taskKey": "T1",
+        "visualizationId": "psb25d_opt",
+        "datasetId": "base-4-populacao-residente",
+        "startedAt": "2026-06-22T19:39:03.027Z",
+        "endedAt": "2026-06-22T19:39:29.353Z",
+        "timeOnBlockTaskScreenMs": 26330,
+        "timeOnBlockTaskScreenSeconds": 26.33,
+        "answer": "130.000",
+        "confidence": "Média",
+        "interactions": {
+          "total": 0,
+          "byType": {}
+        },
+        "answerNumber": 130000,
+        "correctAnswer": 123082,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:39:37.631Z"
+      },
+      {
+        "blockNumber": 1,
+        "taskIndexInBlock": 6,
+        "taskKey": "T1",
+        "visualizationId": "psb25d_manual",
+        "datasetId": "base-3-matriculas-fundamental",
+        "startedAt": "2026-06-22T19:40:27.501Z",
+        "endedAt": "2026-06-22T19:41:27.499Z",
+        "timeOnBlockTaskScreenMs": 60002,
+        "timeOnBlockTaskScreenSeconds": 60,
+        "answer": "22.000",
+        "confidence": "Alta",
+        "interactions": {
+          "total": 9,
+          "byType": {
+            "slider": 9
+          }
+        },
+        "answerNumber": 22000,
+        "correctAnswer": 23198,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:41:36.689Z"
+      },
+      {
+        "blockNumber": 2,
+        "taskIndexInBlock": 1,
+        "taskKey": "T4",
+        "visualizationId": "psb3d_opt",
+        "datasetId": "base-1-pib",
+        "startedAt": "2026-06-22T19:42:49.430Z",
+        "endedAt": "2026-06-22T19:43:48.109Z",
+        "timeOnBlockTaskScreenMs": 58683,
+        "timeOnBlockTaskScreenSeconds": 58.68,
+        "answer": "100",
+        "confidence": "Média",
+        "interactions": {
+          "total": 0,
+          "byType": {}
+        },
+        "answerNumber": 100,
+        "correctAnswer": 297.63,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:44:23.354Z"
+      },
+      {
+        "blockNumber": 2,
+        "taskIndexInBlock": 2,
+        "taskKey": "T4",
+        "visualizationId": "psb25d_llm",
+        "datasetId": "base-2-ensino-superior",
+        "startedAt": "2026-06-22T19:45:00.587Z",
+        "endedAt": "2026-06-22T19:45:21.684Z",
+        "timeOnBlockTaskScreenMs": 21097,
+        "timeOnBlockTaskScreenSeconds": 21.1,
+        "answer": "210",
+        "confidence": "Média",
+        "interactions": {
+          "total": 0,
+          "byType": {}
+        },
+        "answerNumber": 210,
+        "correctAnswer": 164.52,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:45:31.682Z"
+      },
+      {
+        "blockNumber": 2,
+        "taskIndexInBlock": 3,
+        "taskKey": "T4",
+        "visualizationId": "psb25d_opt",
+        "datasetId": "base-5-receita-impostos",
+        "startedAt": "2026-06-22T19:46:02.579Z",
+        "endedAt": "2026-06-22T19:46:35.126Z",
+        "timeOnBlockTaskScreenMs": 32551,
+        "timeOnBlockTaskScreenSeconds": 32.55,
+        "answer": "160",
+        "confidence": "Alta",
+        "interactions": {
+          "total": 0,
+          "byType": {}
+        },
+        "answerNumber": 160,
+        "correctAnswer": 135.35,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:46:40.492Z"
+      },
+      {
+        "blockNumber": 2,
+        "taskIndexInBlock": 4,
+        "taskKey": "T4",
+        "visualizationId": "psb3d_llm",
+        "datasetId": "base-6-frota-motocicletas",
+        "startedAt": "2026-06-22T19:47:17.034Z",
+        "endedAt": "2026-06-22T19:47:46.011Z",
+        "timeOnBlockTaskScreenMs": 28981,
+        "timeOnBlockTaskScreenSeconds": 28.98,
+        "answer": "12",
+        "confidence": "Média",
+        "interactions": {
+          "total": 0,
+          "byType": {}
+        },
+        "answerNumber": 12,
+        "correctAnswer": 68.62,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:48:35.497Z"
+      },
+      {
+        "blockNumber": 2,
+        "taskIndexInBlock": 5,
+        "taskKey": "T4",
+        "visualizationId": "psb3d_manual",
+        "datasetId": "base-3-matriculas-fundamental",
+        "startedAt": "2026-06-22T19:49:08.443Z",
+        "endedAt": "2026-06-22T19:50:02.145Z",
+        "timeOnBlockTaskScreenMs": 53705,
+        "timeOnBlockTaskScreenSeconds": 53.7,
+        "answer": "50",
+        "confidence": "Alta",
+        "interactions": {
+          "total": 6,
+          "byType": {
+            "slider": 6
+          }
+        },
+        "answerNumber": 50,
+        "correctAnswer": 39.11,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:50:21.844Z"
+      },
+      {
+        "blockNumber": 2,
+        "taskIndexInBlock": 6,
+        "taskKey": "T4",
+        "visualizationId": "psb25d_manual",
+        "datasetId": "base-4-populacao-residente",
+        "startedAt": "2026-06-22T19:50:55.180Z",
+        "endedAt": "2026-06-22T19:51:34.721Z",
+        "timeOnBlockTaskScreenMs": 39544,
+        "timeOnBlockTaskScreenSeconds": 39.54,
+        "answer": "90",
+        "confidence": "Alta",
+        "interactions": {
+          "total": 3,
+          "byType": {
+            "slider": 3
+          }
+        },
+        "answerNumber": 90,
+        "correctAnswer": 50.83,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:52:08.849Z"
+      },
+      {
+        "blockNumber": 3,
+        "taskIndexInBlock": 1,
+        "taskKey": "T5",
+        "visualizationId": "psb25d_manual",
+        "datasetId": "base-4-populacao-residente",
+        "startedAt": "2026-06-22T19:52:41.573Z",
+        "endedAt": "2026-06-22T19:53:35.038Z",
+        "timeOnBlockTaskScreenMs": 53468,
+        "timeOnBlockTaskScreenSeconds": 53.47,
+        "answer": "4",
+        "confidence": "Alta",
+        "interactions": {
+          "total": 5,
+          "byType": {
+            "slider": 5
+          }
+        },
+        "answerNumber": 4,
+        "correctAnswer": 4.11,
+        "isCorrect": true,
+        "responseRegisteredAt": "2026-06-22T19:53:42.838Z"
+      },
+      {
+        "blockNumber": 3,
+        "taskIndexInBlock": 2,
+        "taskKey": "T5",
+        "visualizationId": "psb3d_manual",
+        "datasetId": "base-3-matriculas-fundamental",
+        "startedAt": "2026-06-22T19:54:06.067Z",
+        "endedAt": "2026-06-22T19:55:06.073Z",
+        "timeOnBlockTaskScreenMs": 60009,
+        "timeOnBlockTaskScreenSeconds": 60.01,
+        "answer": "4",
+        "confidence": "Baixa",
+        "interactions": {
+          "total": 8,
+          "byType": {
+            "slider": 8
+          }
+        },
+        "answerNumber": 4,
+        "correctAnswer": 2.425,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:55:17.441Z"
+      },
+      {
+        "blockNumber": 3,
+        "taskIndexInBlock": 3,
+        "taskKey": "T5",
+        "visualizationId": "psb25d_opt",
+        "datasetId": "base-6-frota-motocicletas",
+        "startedAt": "2026-06-22T19:55:51.891Z",
+        "endedAt": "2026-06-22T19:56:17.377Z",
+        "timeOnBlockTaskScreenMs": 25486,
+        "timeOnBlockTaskScreenSeconds": 25.49,
+        "answer": "3",
+        "confidence": "Alta",
+        "interactions": {
+          "total": 0,
+          "byType": {}
+        },
+        "answerNumber": 3,
+        "correctAnswer": 3.27,
+        "isCorrect": true,
+        "responseRegisteredAt": "2026-06-22T19:56:23.547Z"
+      },
+      {
+        "blockNumber": 3,
+        "taskIndexInBlock": 4,
+        "taskKey": "T5",
+        "visualizationId": "psb3d_llm",
+        "datasetId": "base-5-receita-impostos",
+        "startedAt": "2026-06-22T19:56:41.438Z",
+        "endedAt": "2026-06-22T19:57:03.900Z",
+        "timeOnBlockTaskScreenMs": 22462,
+        "timeOnBlockTaskScreenSeconds": 22.46,
+        "answer": "3",
+        "confidence": "Baixa",
+        "interactions": {
+          "total": 2,
+          "byType": {
+            "zoom": 2
+          }
+        },
+        "answerNumber": 3,
+        "correctAnswer": 2.073,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:57:12.326Z"
+      },
+      {
+        "blockNumber": 3,
+        "taskIndexInBlock": 5,
+        "taskKey": "T5",
+        "visualizationId": "psb25d_llm",
+        "datasetId": "base-1-pib",
+        "startedAt": "2026-06-22T19:57:49.213Z",
+        "endedAt": "2026-06-22T19:58:09.172Z",
+        "timeOnBlockTaskScreenMs": 19959,
+        "timeOnBlockTaskScreenSeconds": 19.96,
+        "answer": "2,5",
+        "confidence": "Baixa",
+        "interactions": {
+          "total": 0,
+          "byType": {}
+        },
+        "answerNumber": 2.5,
+        "correctAnswer": 2.720811,
+        "isCorrect": true,
+        "responseRegisteredAt": "2026-06-22T19:58:18.378Z"
+      },
+      {
+        "blockNumber": 3,
+        "taskIndexInBlock": 6,
+        "taskKey": "T5",
+        "visualizationId": "psb3d_opt",
+        "datasetId": "base-2-ensino-superior",
+        "startedAt": "2026-06-22T19:58:40.771Z",
+        "endedAt": "2026-06-22T19:58:52.719Z",
+        "timeOnBlockTaskScreenMs": 11948,
+        "timeOnBlockTaskScreenSeconds": 11.95,
+        "answer": "2,2",
+        "confidence": "Alta",
+        "interactions": {
+          "total": 0,
+          "byType": {}
+        },
+        "answerNumber": 2.2,
+        "correctAnswer": 3.326,
+        "isCorrect": false,
+        "responseRegisteredAt": "2026-06-22T19:59:03.683Z"
+      }
+    ],
+    "blockNasaTlx": [
+      {
+        "blockNumber": 1,
+        "taskKey": "T1",
+        "visualizations": [
+          {
+            "visualizationId": "psb3d_opt",
+            "conditionIndex": 0,
+            "mentalDemand": 0,
+            "temporalDemand": 0,
+            "performance": 70,
+            "effort": 10,
+            "frustration": 10,
+            "recordedAt": "2026-06-22T19:33:11.635Z"
+          },
+          {
+            "visualizationId": "psb3d_llm",
+            "conditionIndex": 1,
+            "mentalDemand": 30,
+            "temporalDemand": 30,
+            "performance": 65,
+            "effort": 30,
+            "frustration": 25,
+            "recordedAt": "2026-06-22T19:35:00.141Z"
+          },
+          {
+            "visualizationId": "psb25d_llm",
+            "conditionIndex": 2,
+            "mentalDemand": 70,
+            "temporalDemand": 40,
+            "performance": 0,
+            "effort": 65,
+            "frustration": 65,
+            "recordedAt": "2026-06-22T19:36:58.955Z"
+          },
+          {
+            "visualizationId": "psb3d_manual",
+            "conditionIndex": 3,
+            "mentalDemand": 40,
+            "temporalDemand": 60,
+            "performance": 60,
+            "effort": 25,
+            "frustration": 45,
+            "recordedAt": "2026-06-22T19:38:38.090Z"
+          },
+          {
+            "visualizationId": "psb25d_opt",
+            "conditionIndex": 4,
+            "mentalDemand": 65,
+            "temporalDemand": 35,
+            "performance": 35,
+            "effort": 50,
+            "frustration": 45,
+            "recordedAt": "2026-06-22T19:40:16.075Z"
+          },
+          {
+            "visualizationId": "psb25d_manual",
+            "conditionIndex": 5,
+            "mentalDemand": 60,
+            "temporalDemand": 60,
+            "performance": 70,
+            "effort": 55,
+            "frustration": 40,
+            "recordedAt": "2026-06-22T19:42:00.693Z"
+          }
+        ]
+      },
+      {
+        "blockNumber": 2,
+        "taskKey": "T4",
+        "visualizations": [
+          {
+            "visualizationId": "psb3d_opt",
+            "conditionIndex": 0,
+            "mentalDemand": 70,
+            "temporalDemand": 70,
+            "performance": 5,
+            "effort": 70,
+            "frustration": 80,
+            "recordedAt": "2026-06-22T19:44:54.456Z"
+          },
+          {
+            "visualizationId": "psb25d_llm",
+            "conditionIndex": 1,
+            "mentalDemand": 30,
+            "temporalDemand": 30,
+            "performance": 60,
+            "effort": 40,
+            "frustration": 40,
+            "recordedAt": "2026-06-22T19:45:55.616Z"
+          },
+          {
+            "visualizationId": "psb25d_opt",
+            "conditionIndex": 2,
+            "mentalDemand": 40,
+            "temporalDemand": 40,
+            "performance": 55,
+            "effort": 40,
+            "frustration": 30,
+            "recordedAt": "2026-06-22T19:47:09.516Z"
+          },
+          {
+            "visualizationId": "psb3d_llm",
+            "conditionIndex": 3,
+            "mentalDemand": 60,
+            "temporalDemand": 60,
+            "performance": 40,
+            "effort": 60,
+            "frustration": 60,
+            "recordedAt": "2026-06-22T19:49:04.255Z"
+          },
+          {
+            "visualizationId": "psb3d_manual",
+            "conditionIndex": 4,
+            "mentalDemand": 30,
+            "temporalDemand": 35,
+            "performance": 70,
+            "effort": 25,
+            "frustration": 25,
+            "recordedAt": "2026-06-22T19:50:52.042Z"
+          },
+          {
+            "visualizationId": "psb25d_manual",
+            "conditionIndex": 5,
+            "mentalDemand": 25,
+            "temporalDemand": 25,
+            "performance": 65,
+            "effort": 20,
+            "frustration": 25,
+            "recordedAt": "2026-06-22T19:52:33.430Z"
+          }
+        ]
+      },
+      {
+        "blockNumber": 3,
+        "taskKey": "T5",
+        "visualizations": [
+          {
+            "visualizationId": "psb25d_manual",
+            "conditionIndex": 0,
+            "mentalDemand": 55,
+            "temporalDemand": 55,
+            "performance": 80,
+            "effort": 25,
+            "frustration": 10,
+            "recordedAt": "2026-06-22T19:54:03.258Z"
+          },
+          {
+            "visualizationId": "psb3d_manual",
+            "conditionIndex": 1,
+            "mentalDemand": 65,
+            "temporalDemand": 85,
+            "performance": 10,
+            "effort": 60,
+            "frustration": 60,
+            "recordedAt": "2026-06-22T19:55:40.013Z"
+          },
+          {
+            "visualizationId": "psb25d_opt",
+            "conditionIndex": 2,
+            "mentalDemand": 50,
+            "temporalDemand": 40,
+            "performance": 70,
+            "effort": 40,
+            "frustration": 15,
+            "recordedAt": "2026-06-22T19:56:39.142Z"
+          },
+          {
+            "visualizationId": "psb3d_llm",
+            "conditionIndex": 3,
+            "mentalDemand": 60,
+            "temporalDemand": 35,
+            "performance": 30,
+            "effort": 40,
+            "frustration": 65,
+            "recordedAt": "2026-06-22T19:57:39.568Z"
+          },
+          {
+            "visualizationId": "psb25d_llm",
+            "conditionIndex": 4,
+            "mentalDemand": 65,
+            "temporalDemand": 25,
+            "performance": 20,
+            "effort": 25,
+            "frustration": 80,
+            "recordedAt": "2026-06-22T19:58:38.372Z"
+          },
+          {
+            "visualizationId": "psb3d_opt",
+            "conditionIndex": 5,
+            "mentalDemand": 35,
+            "temporalDemand": 30,
+            "performance": 45,
+            "effort": 15,
+            "frustration": 30,
+            "recordedAt": "2026-06-22T19:59:20.748Z"
+          }
+        ]
+      }
+    ],
+    "finalRankingTechniques": {
+      "order": [
+        "psb25d",
+        "psb3d"
+      ],
+      "recordedAt": "2026-06-22T20:00:12.307Z"
+    },
+    "finalRankingModes": {
+      "order": [
+        "manual",
+        "opt",
+        "llm"
+      ],
+      "recordedAt": "2026-06-22T20:01:46.631Z"
+    },
+    "finalCommentsTechniques": {
+      "rankingWhy": "No geral, o 3D não manual pode ser difícil de determinar os valores, a depender de onde (a que altura) está aplicada a profundidade",
+      "otherComments": "Nada a acrescentar.",
+      "recordedAt": "2026-06-22T20:01:28.389Z"
+    },
+    "finalCommentsModes": {
+      "rankingWhy": "O modo manual é disparado o melhor.",
+      "otherComments": "Infelizmente, o slider tem um limite e não vai até o começo (parte inferior) do gráfico. Precisamos controlar a profundidade para alcançar isso e pode ser mais um passo no esforço de cognição.",
+      "recordedAt": "2026-06-22T20:03:08.060Z"
+    },
+    "finishedAt": "2026-06-22T20:03:08.060Z"
+  }
+}
