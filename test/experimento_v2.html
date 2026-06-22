@@ -2257,14 +2257,14 @@
                 blockContext.innerHTML = [
                     `<h3 style="margin: 0;">${vizName}</h3>`,
                     '<strong>Base:</strong> ' + datasetName + '<br>',
-                    '<strong>Descrição da base:</strong> ' + (task ? task.dataset.description : '') + '<br><br>',
-                    '<strong>Contexto:</strong> ' + (task ? task.dataset.context : '') + '<br><br>',
-                    '<strong>Objetivo da tarefa:</strong> ' + (taskMeta ? taskMeta.description : '')
+                    '<strong>Descrição da base:</strong> ' + (task ? task.dataset.description : '') + '<br><br>'                    
                 ].join('');
 
                 blockQuestionContext.innerHTML = [
-                    '<strong>Pergunta da tarefa (' + taskLabel + '):</strong><br>',
-                    taskQuestion || ''
+                    '<strong>Pergunta da tarefa (' + taskLabel + '):</strong><br>',                    
+                    taskQuestion || '',
+                    '<br><br>',
+                    '<strong>Resposta esperada:</strong><br> Informe um valor numérico aproximado.'
                 ].join('');
 
                 const isRatioTask = task && (task.taskKey === 'T4' || task.taskKey === 'T5');
