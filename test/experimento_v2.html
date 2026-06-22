@@ -418,6 +418,7 @@
         .tlx-dimension {
             position: relative;
             padding: 0.85rem 0;
+            cursor: pointer;
         }
 
         .tlx-label-row {
@@ -2257,11 +2258,11 @@
                 blockContext.innerHTML = [
                     `<h3 style="margin: 0;">${vizName}</h3>`,
                     '<strong>Base:</strong> ' + datasetName + '<br>',
-                    '<strong>Descrição da base:</strong> ' + (task ? task.dataset.description : '') + '<br><br>'                    
+                    '<strong>Descrição da base:</strong> ' + (task ? task.dataset.description : '') + '<br><br>'
                 ].join('');
 
                 blockQuestionContext.innerHTML = [
-                    '<strong>Pergunta da tarefa (' + taskLabel + '):</strong><br>',                    
+                    '<strong>Pergunta da tarefa (' + taskLabel + '):</strong><br>',
                     taskQuestion || '',
                     '<br><br>',
                     '<strong>Resposta esperada:</strong><br> Informe um valor numérico aproximado.'
@@ -2463,6 +2464,27 @@
                             trigger.setAttribute('aria-expanded', 'false');
                             tooltip.classList.remove('is-open');
                         }
+                    });
+
+                    control.addEventListener('click', (event) => {
+                        if (event.target === input || event.target.closest('.tlx-label-trigger') || event.target.closest('.tlx-tooltip')) {
+                            return;
+                        }
+
+                        const rect = input.getBoundingClientRect();
+                        let clickX = event.clientX - rect.left;
+                        clickX = Math.max(0, Math.min(clickX, rect.width));
+
+                        const percent = clickX / rect.width;
+                        const min = Number(input.min) || 0;
+                        const max = Number(input.max) || 100;
+                        const step = Number(input.step) || 1;
+
+                        const rawValue = min + percent * (max - min);
+                        const steppedValue = Math.round(rawValue / step) * step;
+
+                        input.value = String(steppedValue);
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
                     });
 
                     control.append(labelRow, input, scaleLabels);
