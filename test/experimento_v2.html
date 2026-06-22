@@ -644,6 +644,19 @@
                 height: 180px;
             }
         }
+
+        #timeout-clock-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(var(--danger-color) 100%, #e5e7eb 0);
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: background 0.1s linear;
+        }
     </style>
 </head>
 
@@ -978,6 +991,8 @@
         </div>
     </div>
 
+    <div id="timeout-clock-container" class="hidden"></div>
+
     <script src="../node_modules/extenso/dist/extenso.js"></script>
     <script type="module">
         import * as d3 from "d3";
@@ -997,7 +1012,7 @@
             const tcleConfirmation = document.getElementById('tcle-confirmation');
             const acceptTcleButton = document.getElementById('accept-tcle-button');
             const TCLE_VERSION = "2026-06-11-digital-2";
-            const devMode = true;
+            const devMode = false;
 
             // --- Variável Between-Subject removida (agora as 6 visões estão no Within-Subject) ---
 
@@ -1200,6 +1215,28 @@
             const tlxForm = document.getElementById('tlx-form');
             const backFromTlxButton = document.getElementById('back-from-tlx-button');
             const completeTlxButton = document.getElementById('complete-tlx-button');
+            const timeoutClockContainer = document.getElementById('timeout-clock-container');
+
+            let blockTaskTimer = null;
+            let blockTaskTimeLeft = 60;
+            const TIME_LIMIT = 60;
+
+            function getClockColor(percent) {
+                if (percent > 33.333) {
+                    const t = (percent - 33.333) / (100 - 33.333);
+                    return d3.interpolateRgb('#ffc107', '#2ca25f')(t);
+                } else {
+                    const t = percent / 33.333;
+                    return d3.interpolateRgb('#e63946', '#ffc107')(t);
+                }
+            }
+
+            function updateClock(percent) {
+                if (timeoutClockContainer) {
+                    const currentColor = getClockColor(percent);
+                    timeoutClockContainer.style.background = `conic-gradient(${currentColor} ${percent}%, #e5e7eb 0)`;
+                }
+            }
 
             let currentBlock = 1;
             const totalBlocks = 3;
@@ -2164,8 +2201,17 @@
 
 
             function showScreen(screenId) {
-                if (screenId !== 'block-task-screen' && currentBlockChart) {
-                    destroyBlockChart();
+                if (screenId !== 'block-task-screen') {
+                    if (currentBlockChart) {
+                        destroyBlockChart();
+                    }
+                    if (blockTaskTimer) {
+                        clearInterval(blockTaskTimer);
+                        blockTaskTimer = null;
+                    }
+                    if (timeoutClockContainer) {
+                        timeoutClockContainer.classList.add('hidden');
+                    }
                 }
                 if (screenId === 'final-ranking-screen') {
                     renderFinalRankingScreen();
@@ -2286,7 +2332,15 @@
 
             function buildBlockPlan() {
                 const vizOrder = shuffle(VISUALIZATIONS);
-                const sampledDatasets = shuffle(DATASET_POOL).slice(0, TASKS_PER_BLOCK);
+                const sampledDatasets = shuffle(DATASET_POOL).slice(0, TASKS_PER_BLOCK).map(dataset => {
+                    const combined = dataset.labels.map((label, index) => ({ label, value: dataset.values[index] }));
+                    const shuffledCombined = shuffle(combined);
+                    return {
+                        ...dataset,
+                        labels: shuffledCombined.map(item => item.label),
+                        values: shuffledCombined.map(item => item.value)
+                    };
+                });
                 currentBlockTaskKey = getTaskKeyForBlock(currentBlock);
                 currentBlockPlan = vizOrder.map((visualization, i) => ({
                     visualization,
@@ -2635,19 +2689,19 @@
                                 } else if (task.visualization.id.includes('_llm')) {
                                     const baseId = task.dataset.id;
                                     const taskKey = task.taskKey;
-                                    
+
                                     if (llmOptimizedParameters[baseId] && llmOptimizedParameters[baseId][taskKey]) {
                                         const config = llmOptimizedParameters[baseId][taskKey];
-                                        
+
                                         if (task.visualization.id === 'psb25d_llm' && config['psb25d']) {
                                             const params = config['psb25d'];
                                             currentBlockChart.updateScaleBreakPosition(params['Posição da quebra']);
                                             currentBlockChart.settings.gapSize = params.gapSize;
-                                            
+
                                             const { z, hiddenRatio } = sliderToPerspectiveValues(params.z);
                                             currentBlockChart.settings.z = z;
                                             currentBlockChart.updateScaleBreakHiddenRatio(hiddenRatio);
-                                            
+
                                             if (currentBlockChart.drawStrategy && currentBlockChart.drawStrategy.data) {
                                                 currentBlockChart.drawStrategy.data(currentBlockChart);
                                             }
@@ -2657,7 +2711,7 @@
                                             currentBlockChart.updateDepth(params.psbDepth);
                                             currentBlockChart.updateBreakStartRatio(params.psbBreakStartRatio);
                                             currentBlockChart.updateFoldVisualHeight(params.psbFoldVisualHeight);
-                                            
+
                                             if (currentBlockChart.redraw) currentBlockChart.redraw();
                                         }
                                     }
@@ -2676,6 +2730,22 @@
                 showScreen('block-task-screen');
 
                 blockTaskStartedAt = performance.now();
+
+                timeoutClockContainer.classList.remove('hidden');
+                blockTaskTimeLeft = TIME_LIMIT;
+                updateClock(100);
+
+                if (blockTaskTimer) clearInterval(blockTaskTimer);
+                blockTaskTimer = setInterval(() => {
+                    blockTaskTimeLeft -= 0.1;
+                    if (blockTaskTimeLeft <= 0) {
+                        blockTaskTimeLeft = 0;
+                        clearInterval(blockTaskTimer);
+                        blockTaskTimer = null;
+                        foundAnswerButton.click();
+                    }
+                    updateClock((blockTaskTimeLeft / TIME_LIMIT) * 100);
+                }, 100);
 
                 const task = currentBlockPlan[currentBlockTaskIndex];
 
@@ -2958,6 +3028,14 @@
             });
 
             foundAnswerButton.addEventListener('click', () => {
+                if (blockTaskTimer) {
+                    clearInterval(blockTaskTimer);
+                    blockTaskTimer = null;
+                }
+                if (timeoutClockContainer) {
+                    timeoutClockContainer.classList.add('hidden');
+                }
+
                 if (currentTaskRecord && blockTaskStartedAt !== null) {
                     const elapsedMs = Math.round(performance.now() - blockTaskStartedAt);
 
