@@ -67,13 +67,16 @@ def load_and_flatten_data(filepath):
             rt = block.get('timeOnBlockTaskScreenSeconds', np.nan)
             
             # --- Cálculo do Log Error ---
-            answer = block.get('answerNumber', 0)
-            correct = block.get('correctAnswer', 0)
+            answer = block.get('answerNumber')
+            correct = block.get('correctAnswer')
             epsilon = 1e-9 # Pequena constante para evitar log(0) ou divisão por zero
 
-            # A fórmula abs(log10(ratio)) é simétrica para super/subestimação
-            # Ex: err(200/100) = |log(2)| = 0.3; err(50/100) = |log(0.5)| = |-0.3| = 0.3
-            log_error = np.abs(np.log10( (answer + epsilon) / (correct + epsilon) ))
+            if answer is None or correct is None:
+                log_error = np.nan
+            else:
+                # A fórmula abs(log10(ratio)) é simétrica para super/subestimação
+                # Ex: err(200/100) = |log(2)| = 0.3; err(50/100) = |log(0.5)| = |-0.3| = 0.3
+                log_error = np.abs(np.log10( (answer + epsilon) / (correct + epsilon) ))
             
             confidence_value = block.get('confidence')
             confidence_score = np.nan
@@ -102,15 +105,19 @@ def load_and_flatten_data(filepath):
             }]
 
             for vis_eval in visualizations:
-                mental = vis_eval.get('mentalDemand', 0)
-                temporal = vis_eval.get('temporalDemand', 0)
-                perf_raw = vis_eval.get('performance', 0)
-                effort = vis_eval.get('effort', 0)
-                frust = vis_eval.get('frustration', 0)
+                mental = vis_eval.get('mentalDemand')
+                temporal = vis_eval.get('temporalDemand')
+                perf_raw = vis_eval.get('performance')
+                effort = vis_eval.get('effort')
+                frust = vis_eval.get('frustration')
 
-                # Performance é invertida somente para alinhar a carga agregada.
-                perf_inverted = 100 - perf_raw
-                workload = (mental + temporal + perf_inverted + effort + frust) / 5.0
+                if any(x is None for x in [mental, temporal, perf_raw, effort, frust]):
+                    perf_inverted = np.nan
+                    workload = np.nan
+                else:
+                    # Performance é invertida somente para alinhar a carga agregada.
+                    perf_inverted = 100 - perf_raw
+                    workload = (mental + temporal + perf_inverted + effort + frust) / 5.0
 
                 quest_rows.append({
                     'Participant': current_pid,
