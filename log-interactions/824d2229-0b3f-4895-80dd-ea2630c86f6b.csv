@@ -1,0 +1,26 @@
+participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,eventSteps,timestamp
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,1,T5,psb3d_manual,base-5-receita-impostos,slider,psbDepth,50,,2026-06-23T19:56:38.445Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,1,T5,psb3d_manual,base-5-receita-impostos,slider,psbFoldVisualHeight,1.6,,2026-06-23T19:56:41.209Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,1,T5,psb3d_manual,base-5-receita-impostos,slider,psbBreakStartRatio,0.71,,2026-06-23T19:56:43.717Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,2,T5,psb25d_llm,base-4-populacao-residente,zoom,canvas,zoomIn,2,2026-06-23T19:58:07.058Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,2,T5,psb25d_llm,base-4-populacao-residente,zoom,canvas,zoomIn,3,2026-06-23T19:58:14.669Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,6,T5,psb25d_manual,base-2-ensino-superior,slider,Posição da quebra,0.37,,2026-06-23T20:03:05.389Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,6,T5,psb25d_manual,base-2-ensino-superior,slider,z,0,,2026-06-23T20:03:14.054Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,6,T5,psb25d_manual,base-2-ensino-superior,slider,z,0,,2026-06-23T20:03:19.054Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,6,T5,psb25d_manual,base-2-ensino-superior,slider,Posição da quebra,0.05,,2026-06-23T20:03:33.207Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,1,6,T5,psb25d_manual,base-2-ensino-superior,slider,z,36.4,,2026-06-23T20:03:40.279Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,2,1,T1,psb25d_llm,base-3-matriculas-fundamental,zoom,canvas,zoomIn,1,2026-06-23T20:04:39.086Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,2,2,T1,psb3d_opt,base-1-pib,zoom,canvas,zoomIn,2,2026-06-23T20:05:19.782Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,2,2,T1,psb3d_opt,base-1-pib,zoom,canvas,zoomIn,1,2026-06-23T20:05:20.149Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,2,3,T1,psb3d_manual,base-5-receita-impostos,slider,psbDepth,50,,2026-06-23T20:06:34.524Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,2,6,T1,psb25d_manual,base-6-frota-motocicletas,slider,Posição da quebra,0.05,,2026-06-23T20:08:59.693Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,2,6,T1,psb25d_manual,base-6-frota-motocicletas,slider,z,100,,2026-06-23T20:09:05.405Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,2,6,T1,psb25d_manual,base-6-frota-motocicletas,slider,gapSize,20,,2026-06-23T20:09:10.453Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,2,6,T1,psb25d_manual,base-6-frota-motocicletas,slider,Posição da quebra,0.12,,2026-06-23T20:09:12.348Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,3,2,T4,psb3d_manual,base-1-pib,slider,psbDepth,50,,2026-06-23T20:11:07.618Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,3,2,T4,psb3d_manual,base-1-pib,slider,psbBreakStartRatio,0.85,,2026-06-23T20:11:18.073Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,3,2,T4,psb3d_manual,base-1-pib,slider,psbDepth,8.8,,2026-06-23T20:11:22.441Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,3,2,T4,psb3d_manual,base-1-pib,slider,psbFoldVisualHeight,0.2,,2026-06-23T20:11:23.782Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,3,2,T4,psb3d_manual,base-1-pib,slider,psbBreakStartRatio,0.47,,2026-06-23T20:11:26.156Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,3,2,T4,psb3d_manual,base-1-pib,slider,psbDepth,50,,2026-06-23T20:11:33.301Z
+824d2229-0b3f-4895-80dd-ea2630c86f6b,3,4,T4,psb25d_manual,base-6-frota-motocicletas,slider,z,0,,2026-06-23T20:13:42.368Z
