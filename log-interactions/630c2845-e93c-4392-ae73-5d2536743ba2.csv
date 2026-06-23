@@ -1,0 +1,8 @@
+participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,eventSteps,timestamp
+630c2845-e93c-4392-ae73-5d2536743ba2,2,1,T4,psb25d_manual,base-6-frota-motocicletas,slider,Posição da quebra,0.13,,2026-06-23T20:04:05.281Z
+630c2845-e93c-4392-ae73-5d2536743ba2,2,1,T4,psb25d_manual,base-6-frota-motocicletas,slider,z,62.5,,2026-06-23T20:04:10.838Z
+630c2845-e93c-4392-ae73-5d2536743ba2,2,1,T4,psb25d_manual,base-6-frota-motocicletas,slider,gapSize,18,,2026-06-23T20:04:18.687Z
+630c2845-e93c-4392-ae73-5d2536743ba2,2,1,T4,psb25d_manual,base-6-frota-motocicletas,slider,z,61.5,,2026-06-23T20:04:22.209Z
+630c2845-e93c-4392-ae73-5d2536743ba2,2,5,T4,psb3d_manual,base-2-ensino-superior,slider,psbBreakStartRatio,0.31,,2026-06-23T20:10:16.956Z
+630c2845-e93c-4392-ae73-5d2536743ba2,2,5,T4,psb3d_manual,base-2-ensino-superior,slider,psbDepth,25.8,,2026-06-23T20:10:23.045Z
+630c2845-e93c-4392-ae73-5d2536743ba2,2,5,T4,psb3d_manual,base-2-ensino-superior,slider,psbFoldVisualHeight,1.4,,2026-06-23T20:10:25.884Z
