@@ -75,11 +75,16 @@ def load_and_flatten_data(filepath):
             # --- Cálculo do Log Error ---
             answer = block.get('answerNumber')
             correct = block.get('correctAnswer')
+            is_correct = block.get('isCorrect')
             epsilon = 1e-9 # Pequena constante para evitar log(0) ou divisão por zero
 
-            if answer is None or correct is None:
-                log_error = np.nan
-            else:
+            log_error = np.nan
+            if task == 'T1':
+                if is_correct is True:
+                    log_error = 0.0
+                elif is_correct is False:
+                    log_error = 1.0
+            elif answer is not None and correct is not None:
                 # A fórmula abs(log10(ratio)) é simétrica para super/subestimação
                 # Ex: err(200/100) = |log(2)| = 0.3; err(50/100) = |log(0.5)| = |-0.3| = 0.3
                 log_error = np.abs(np.log10( (answer + epsilon) / (correct + epsilon) ))
@@ -177,37 +182,40 @@ def load_and_flatten_data(filepath):
 
     return df_perf, df_quest, df_rank_tech, df_rank_mode
 
-def filter_high_error_participants(df, threshold=2.0):
+def filter_high_error_participants(df, threshold=4.0, t1_threshold=0.5):
     """
     Remove participantes que tiveram LogError médio > threshold 
     em uma tarefa específica (indicando que não entenderam a tarefa ou chutaram).
+    Para a Tarefa T1 (erro binário), um limiar separado (t1_threshold) é usado.
     """
     print(f"\n{'='*20} FILTRO DE QUALIDADE DE DADOS (LOG ERROR) {'='*20}")
     
     # 1. Calcula o LogError médio de cada participante POR TAREFA
     error_summary = df.groupby(['Task', 'Participant'])['LogError'].mean().reset_index()
     
-    # 2. Identifica quem falhou no critério (LogError > threshold)
-    bad_performers = error_summary[error_summary['LogError'] > threshold]
+    # 2. Identifica quem falhou no critério
+    bad_performers_t1 = error_summary[(error_summary['Task'] == 'T1') & (error_summary['LogError'] > t1_threshold)]
+    bad_performers_other = error_summary[(error_summary['Task'] != 'T1') & (error_summary['LogError'] > threshold)]
+    bad_performers = pd.concat([bad_performers_t1, bad_performers_other])
     
     if bad_performers.empty:
         print(">> Nenhum participante removido (Todos abaixo do limiar de erro).")
         return df
 
     # 3. Cria uma lista de pares (Task, Participant) para remover
-    keys_to_remove = set(bad_performers['Task'] + "_" + bad_performers['Participant'])
+    keys_to_remove = set(bad_performers.apply(lambda row: f"{row['Task']}_{row['Participant']}", axis=1))
     
     # Cria coluna temporária no DF original para comparar
-    df['temp_key'] = df['Task'] + "_" + df['Participant']
+    df['temp_key'] = df.apply(lambda row: f"{row['Task']}_{row['Participant']}", axis=1)
     
     # 4. Filtra o DataFrame mantendo apenas quem NÃO está na lista de remoção
     df_clean = df[~df['temp_key'].isin(keys_to_remove)].copy()
     
     # Remove a coluna temporária
-    df_clean.drop(columns=['temp_key'], inplace=True)
+    df_clean.drop(columns=['temp_key'], inplace=True, errors='ignore')
     
     # Relatório de quem saiu
-    print(f">> Critério: Remover participantes com LogError médio > {threshold:.1f} na tarefa.")
+    print(f">> Critério: LogError médio > {threshold:.1f} (outras tarefas) ou > {t1_threshold:.1f} (T1).")
     for _, row in bad_performers.iterrows():
         print(f"   [REMOVIDO] {row['Participant']} da tarefa '{row['Task']}' (Erro médio: {row['LogError']:.2f})")
         
@@ -425,7 +433,7 @@ df_perf, df_quest, df_rank_tech, df_rank_mode = load_and_flatten_data(RESULTS_PA
 
 # --- NOVO: APLICA O FILTRO DE ACURÁCIA ---
 if df_perf is not None and not df_perf.empty:
-    df_perf = filter_high_error_participants(df_perf, threshold=4.0)
+    df_perf = filter_high_error_participants(df_perf, threshold=4.0, t1_threshold=0.5)
 
 # ==========================================
 # ANÁLISE POR TAREFA (COMPARANDO AS 6 CONDIÇÕES)
@@ -473,7 +481,7 @@ for task in unique_tasks:
             res_conf = run_friedman_test(subset_perf, 'Confidence')
             if isinstance(res_conf, dict):
                 print(f"Friedman N={res_conf['N']} | Chi²={res_conf['Statistic']:.2f} | p={res_conf['p-value']:.4f} | Kendall's W={res_conf['KendallW']:.4f}")
-                power_analysis_data.append({'Label': f"{task_name} (Confidence)", 'N': res_conf['N'], 'k': res_conf['k'], 'W': res['KendallW'], 'Sig': res['Significant']})
+                power_analysis_data.append({'Label': f"{task_name} (Confidence)", 'N': res_conf['N'], 'k': res_conf['k'], 'W': res_conf['KendallW'], 'Sig': res_conf['Significant']})
                 if res_conf['Significant']:
                     pairs_conf = run_posthoc_tests(res_conf, 'Confidence')
                     if pairs_conf:

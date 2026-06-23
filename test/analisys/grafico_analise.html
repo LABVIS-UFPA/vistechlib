@@ -40,74 +40,82 @@
 
 <body>
 
+  <h1 id="main-title">Análise de Resultados</h1>
+
   <h2>T1 (Valor Exato)</h2>
   <svg id="chart-t1"></svg>
   <br>
-  <button onclick="downloadSVG('chart-t1')">Download T1 SVG</button>
+  <button onclick="downloadSVG('chart-t1')">Download T1 (Valor Exato) SVG</button>
 
-  <h2>T2 (Diferença Distante)</h2>
+  <!-- <h2>T2 (Diferença Distante)</h2>
   <svg id="chart-t2"></svg>
   <br>
-  <button onclick="downloadSVG('chart-t2')">Download T2 SVG</button>
+  <button onclick="downloadSVG('chart-t2')">Download T2 (Diferença Distante) SVG</button> -->
 
-  <h2>T3 (Diferença Próxima)</h2>
+  <!-- <h2>T3 (Diferença Próxima)</h2>
   <svg id="chart-t3"></svg>
   <br>
-  <button onclick="downloadSVG('chart-t3')">Download T3 SVG</button>
+  <button onclick="downloadSVG('chart-t3')">Download T3 (Diferença Próxima) SVG</button> -->
 
   <h2>T4 (Proporção Distante)</h2>
   <svg id="chart-t4"></svg>
   <br>
-  <button onclick="downloadSVG('chart-t4')">Download T4 SVG</button>
+  <button onclick="downloadSVG('chart-t4')">Download T4 (Proporção Distante) SVG</button>
 
   <h2>T5 (Proporção Próxima)</h2>
   <svg id="chart-t5"></svg>
   <br>
-  <button onclick="downloadSVG('chart-t5')">Download T5 SVG</button>
+  <button onclick="downloadSVG('chart-t5')">Download T5 (Proporção Próxima) SVG</button>
 
   <h2>NASA-TLX (Geral Workload)</h2>
   <svg id="chart-questionnaire-workload"></svg>
   <br>
-  <button onclick="downloadSVG('chart-questionnaire-workload')">Download Workload SVG</button>
+  <button onclick="downloadSVG('chart-questionnaire-workload')">Download NASA-TLX (Geral Workload) SVG</button>
 
   <h2>NASA-TLX (Mental Demand)</h2>
   <svg id="chart-questionnaire-mental"></svg>
   <br>
-  <button onclick="downloadSVG('chart-questionnaire-mental')">Download Mental Demand SVG</button>
+  <button onclick="downloadSVG('chart-questionnaire-mental')">Download NASA-TLX (Mental Demand) SVG</button>
 
   <h2>NASA-TLX (Temporal Demand)</h2>
   <svg id="chart-questionnaire-temporal"></svg>
   <br>
-  <button onclick="downloadSVG('chart-questionnaire-temporal')">Download Temporal Demand SVG</button>
+  <button onclick="downloadSVG('chart-questionnaire-temporal')">Download NASA-TLX (Temporal Demand) SVG</button>
 
   <h2>NASA-TLX (Performance - self-assessed)</h2>
   <svg id="chart-questionnaire-performance"></svg>
   <br>
-  <button onclick="downloadSVG('chart-questionnaire-performance')">Download Performance SVG</button>
+  <button onclick="downloadSVG('chart-questionnaire-performance')">Download NASA-TLX (Performance - self-assessed) SVG</button>
 
   <h2>NASA-TLX (Effort)</h2>
   <svg id="chart-questionnaire-effort"></svg>
   <br>
-  <button onclick="downloadSVG('chart-questionnaire-effort')">Download Effort SVG</button>
+  <button onclick="downloadSVG('chart-questionnaire-effort')">Download NASA-TLX (Effort) SVG</button>
 
   <h2>NASA-TLX (Frustration)</h2>
   <svg id="chart-questionnaire-frustration"></svg>
   <br>
-  <button onclick="downloadSVG('chart-questionnaire-frustration')">Download Frustration SVG</button>
+  <button onclick="downloadSVG('chart-questionnaire-frustration')">Download NASA-TLX (Frustration) SVG</button>
 
-  <h2>Ranking de Preferência</h2>
-  <svg id="chart-ranking"></svg>
+  <h2>Ranking de Preferência (Técnicas)</h2>
+  <svg id="chart-ranking-tech"></svg>
   <br>
-  <button onclick="downloadSVG('chart-ranking')">Download Ranking SVG</button>
+  <button onclick="downloadSVG('chart-ranking-tech')">Download Ranking de Preferência (Técnicas) SVG</button>
+
+  <h2>Ranking de Preferência (Modos)</h2>
+  <svg id="chart-ranking-mode"></svg>
+  <br>
+  <button onclick="downloadSVG('chart-ranking-mode')">Download Ranking de Preferência (Modos) SVG</button>
 
   <script>
     // Mapeamento de cores para as visualizações
     const visualizationColors = {
-      "bar": "#1f77b4",
-      "scroll": "#ff7f0e",
-      "psb": "#2ca02c",
-      "worm": "#d62728"
+      "psb25d_manual": "#1f77b4", "psb25d_llm": "#aec7e8", "psb25d_opt": "#0d47a1",
+      "psb3d_manual": "#ff7f0e", "psb3d_llm": "#ffbb78", "psb3d_opt": "#e65100",
+      "psb25d": "#1f77b4", "psb3d": "#ff7f0e",
+      "manual": "#2ca02c", "llm": "#98df8a", "opt": "#1a5e20"
     };
+    const rankColors = { '1': '#2c7bb6', '2': '#fdae61', '3': '#d7191c', '4': '#abd9e9' };
 
     // Ordem desejada para a dificuldade
     // Removido, pois será gerado dinamicamente a partir dos dados
@@ -143,7 +151,7 @@
     function processData(data, columnName, orderArray) {
       // Agrupar por Difficulty e depois Visualization
       const grouped = d3.group(data, d => d.Difficulty, d => d.Visualization);
-      
+
       console.log(grouped);
       const processed = [];
 
@@ -153,15 +161,15 @@
           const visGroup = grouped.get(diff);
           // Ordenar visualizações alfabeticamente
           const visualizations = Array.from(visGroup.keys()).sort();
-          
+
           visualizations.forEach(vis => {
             const records = visGroup.get(vis);
             let values = records.map(d => d[columnName]);
 
             const stats = calculateBootstrapStats(values);
-            
+
             processed.push({
-              Pergunta: diff, 
+              Pergunta: diff,
               estrategia: vis,
               media: stats.mean,
               IC95_inferior: stats.lower,
@@ -179,7 +187,8 @@
         controlewidth = 340,
         col1Header = "Difficulty",
         posStrategyFactor = 0.7,
-        significant = [] // Adicionado para receber dados de significância
+        significant = [], // Adicionado para receber dados de significância
+        xDomain = null
       } = options || {};
 
       const margin = { top: 30, right: 40, bottom: 40, left: controlewidth };
@@ -206,7 +215,7 @@
       // Escala X (Log Error)
       const maxValue = d3.max(rawData, d => d.IC95_superior);
       const x = d3.scaleLinear()
-        .domain([0, maxValue > 0 ? maxValue : 1]) // Domínio dinâmico
+        .domain(xDomain || [0, maxValue > 0 ? maxValue : 1]) // Domínio dinâmico
         .range([0, width]);
 
       const xLabel = (options && options.xLabel) ? options.xLabel : "Log Error";
@@ -259,55 +268,55 @@
         .append("g")
         .attr("class", "significance-marker-group")
         .attr("transform", (d, i) => {
-            const xPos = x(d.IC95_inferior);
-            const yPos = y(i) + y.bandwidth() / 2; // Position above the CI line
-            return `translate(${xPos}, ${yPos})`;
+          const xPos = x(d.IC95_inferior);
+          const yPos = y(i) + y.bandwidth() / 2; // Position above the CI line
+          return `translate(${xPos}, ${yPos})`;
         })
-        .each(function(d) {
-            const group = d3.select(this);
-            const currentVis = d.estrategia;
-            const currentDiff = d.Pergunta;
+        .each(function (d) {
+          const group = d3.select(this);
+          const currentVis = d.estrategia;
+          const currentDiff = d.Pergunta;
 
-            const wins = significant.filter(s => s.difficulty === currentDiff && s.better === currentVis);
-            
-            if (wins.length > 0) {
-                wins.sort((a, b) => a.worse.localeCompare(b.worse));
+          const wins = significant.filter(s => s.difficulty === currentDiff && s.better === currentVis);
 
-                const markers = wins.map(win => ({
-                    text: win.pValue <= 0.001 ? '**' : '*',
-                    color: visualizationColors[win.worse] || "black"
-                }));
+          if (wins.length > 0) {
+            wins.sort((a, b) => a.worse.localeCompare(b.worse));
 
-                const baseSpacing = 4;  // Minimum space between markers
-                const singleWidth = 8; // Estimated width of '*'
-                const doubleWidth = 14; // Estimated width of '**'
+            const markers = wins.map(win => ({
+              text: win.pValue <= 0.001 ? '**' : '*',
+              color: visualizationColors[win.worse] || "black"
+            }));
 
-                let totalWidth = 0;
-                markers.forEach((marker, i) => {
-                    totalWidth += (marker.text === '**' ? doubleWidth : singleWidth);
-                    if (i < markers.length - 1) {
-                        totalWidth += baseSpacing;
-                    }
-                });
+            const baseSpacing = 4;  // Minimum space between markers
+            const singleWidth = 8; // Estimated width of '*'
+            const doubleWidth = 14; // Estimated width of '**'
 
-                let currentX = -totalWidth / 2;
+            let totalWidth = 0;
+            markers.forEach((marker, i) => {
+              totalWidth += (marker.text === '**' ? doubleWidth : singleWidth);
+              if (i < markers.length - 1) {
+                totalWidth += baseSpacing;
+              }
+            });
 
-                markers.forEach(marker => {
-                    const markerWidth = (marker.text === '**' ? doubleWidth : singleWidth);
-                    const markerXPosition = currentX + (markerWidth / 2);
+            let currentX = -totalWidth / 2;
 
-                    group.append("text")
-                        .attr("x", markerXPosition)
-                        .attr("y", 0)
-                        .attr("text-anchor", "middle")
-                        .style("font-size", "20px")
-                        .style("font-weight", "bold")
-                        .text(marker.text)
-                        .style("fill", marker.color);
-                    
-                    currentX += markerWidth + baseSpacing;
-                });
-            }
+            markers.forEach(marker => {
+              const markerWidth = (marker.text === '**' ? doubleWidth : singleWidth);
+              const markerXPosition = currentX + (markerWidth / 2);
+
+              group.append("text")
+                .attr("x", markerXPosition)
+                .attr("y", 0)
+                .attr("text-anchor", "middle")
+                .style("font-size", "20px")
+                .style("font-weight", "bold")
+                .text(marker.text)
+                .style("fill", marker.color);
+
+              currentX += markerWidth + baseSpacing;
+            });
+          }
         });
 
       // Labels de texto
@@ -342,7 +351,7 @@
         const perguntaData = rawData.filter(d => d.Pergunta === pergunta);
         const firstIndex = indices[0];
         const lastIndex = indices[indices.length - 1];
-        
+
         // Retângulo de fundo alternado
         g.insert("rect", ":first-child")
           .attr("x", -controlewidth)
@@ -397,7 +406,7 @@
 
       // Gera os valores dos ticks para garantir que o último seja o valor máximo
       // .ticks(5) sugere 6 ticks (incluindo 0)
-      const tickValues = x.ticks(5); 
+      const tickValues = x.ticks(5);
       tickValues[tickValues.length - 1] = maxValue; // Garante que o último tick é o valor máximo exato
 
       g.append("text")
@@ -449,56 +458,56 @@
         .append("g")
         .attr("class", "significance-marker-group")
         .attr("transform", (d, i) => {
-            const xPos = x(d.IC95_superior);
-            const yPos = y(i) + y.bandwidth() / 2; // Position above the CI line
-            return `translate(${xPos}, ${yPos})`;
+          const xPos = x(d.IC95_superior);
+          const yPos = y(i) + y.bandwidth() / 2; // Position above the CI line
+          return `translate(${xPos}, ${yPos})`;
         })
-        .each(function(d) {
-            const group = d3.select(this);
-            const currentVis = d.estrategia;
-            const currentDiff = d.Pergunta;
+        .each(function (d) {
+          const group = d3.select(this);
+          const currentVis = d.estrategia;
+          const currentDiff = d.Pergunta;
 
-            const wins = significant.filter(s => s.difficulty === currentDiff && s.better === currentVis);
-            
-            if (wins.length > 0) {
-                // Sort to have a consistent order for markers
-                wins.sort((a, b) => a.worse.localeCompare(b.worse));
+          const wins = significant.filter(s => s.difficulty === currentDiff && s.better === currentVis);
 
-                const markers = wins.map(win => ({
-                    text: win.pValue <= 0.001 ? '**' : '*',
-                    color: visualizationColors[win.worse] || "black"
-                }));
+          if (wins.length > 0) {
+            // Sort to have a consistent order for markers
+            wins.sort((a, b) => a.worse.localeCompare(b.worse));
 
-                const baseSpacing = 4;  // Minimum space between markers
-                const singleWidth = 8; // Estimated width of '*'
-                const doubleWidth = 10; // Estimated width of '**'
+            const markers = wins.map(win => ({
+              text: win.pValue <= 0.001 ? '**' : '*',
+              color: visualizationColors[win.worse] || "black"
+            }));
 
-                let totalWidth = 0;
-                markers.forEach((marker, i) => {
-                    totalWidth += (marker.text === '**' ? doubleWidth : singleWidth);
-                    if (i < markers.length - 1) {
-                        totalWidth += baseSpacing;
-                    }
-                });
+            const baseSpacing = 4;  // Minimum space between markers
+            const singleWidth = 8; // Estimated width of '*'
+            const doubleWidth = 10; // Estimated width of '**'
 
-                let currentX = -totalWidth / 2;
+            let totalWidth = 0;
+            markers.forEach((marker, i) => {
+              totalWidth += (marker.text === '**' ? doubleWidth : singleWidth);
+              if (i < markers.length - 1) {
+                totalWidth += baseSpacing;
+              }
+            });
 
-                markers.forEach(marker => {
-                    const markerWidth = (marker.text === '**' ? doubleWidth : singleWidth);
-                    const markerXPosition = currentX + (markerWidth / 2);
+            let currentX = -totalWidth / 2;
 
-                    group.append("text")
-                        .attr("x", markerXPosition)
-                        .attr("y", 0)
-                        .attr("text-anchor", "middle")
-                        .style("font-size", "20px")
-                        .style("font-weight", "bold")
-                        .text(marker.text)
-                        .style("fill", marker.color);
-                    
-                    currentX += markerWidth + baseSpacing;
-                });
-            }
+            markers.forEach(marker => {
+              const markerWidth = (marker.text === '**' ? doubleWidth : singleWidth);
+              const markerXPosition = currentX + (markerWidth / 2);
+
+              group.append("text")
+                .attr("x", markerXPosition)
+                .attr("y", 0)
+                .attr("text-anchor", "middle")
+                .style("font-size", "20px")
+                .style("font-weight", "bold")
+                .text(marker.text)
+                .style("fill", marker.color);
+
+              currentX += markerWidth + baseSpacing;
+            });
+          }
         });
 
       // Labels de texto
@@ -631,7 +640,7 @@
 
         const firstIndex = indices[0];
         const lastIndex = indices[indices.length - 1];
-        
+
         g.insert("rect", ":first-child")
           .attr("x", -controlewidth)
           .attr("y", y(firstIndex) - 5)
@@ -647,91 +656,48 @@
           .attr("y", yMean + 4) // Y position for the first line of text
           .attr("text-anchor", "start")
           .style("font-weight", "bold")
-          .style("font-size", "15pt")
-          .each(function() {
-            const textElement = d3.select(this);
-            const parts = pergunta.split(' ('); // Split by " ("
-            
-            // Append the first part (e.g., "T1")
-            textElement.append("tspan")
-              .text(parts[0]);
-
-            // // If there's a second part (e.g., "(Valor Exato)"), append it on a new line
-            // if (parts.length > 1) {
-            //   textElement.append("tspan")
-            //     .attr("x", -controlewidth + 5) // Align with the first line's X position
-            //     .attr("dy", "1.2em") // Move down by 1.2 times the font size for a new line
-            //     .text(`(${parts[1]}`); // Add the opening parenthesis back
-            // }
-          });
+          .style("font-size", "15pt").text(pergunta);
       });
     }
 
-
-    function downloadSVG(svgId) {
-      const svgElement = document.getElementById(svgId);
-      if (!svgElement) {
-        console.error("SVG não encontrado");
-        return;
-      }
-      const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(svgElement);
-      const blob = new Blob([svgString], { type: "image/svg+xml" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = svgId + ".svg";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    // --- FUNÇÃO DE FILTRO DE QUALIDADE ---
     function filterHighErrorParticipants(data, threshold = 4.0, t1Threshold = 0.5) {
-      console.log(`%c INICIANDO FILTRO DE QUALIDADE (Max LogError: ${threshold}, T1 threshold: ${t1Threshold})`, 'color: orange; font-weight: bold;');
+      console.log(`%c INICIANDO FILTRO DE QUALIDADE (Max LogError: ${threshold}, T1 Error Rate: ${t1Threshold})`, 'color: orange; font-weight: bold;');
 
-      // 1. Calcular erro médio por (Participante + Tarefa)
-      // Para T1 usamos erro binário (0/1), para as outras tarefas usamos logError.
-      const stats = {};
+      // 1. Group by Task and Participant and calculate mean LogError
+      const trialData = data.filter(d => d.type === 'trial' && !isNaN(d.logError));
+      const errorSummary = d3.rollup(trialData,
+        v => d3.mean(v, d => d.logError),
+        d => d.task,
+        d => d.participantId
+      );
 
-      data.forEach(d => {
-        if (d.type === 'questionnaire') return;
-
-        const key = `${d.task}_${d.participantId}`;
-        if (!stats[key]) stats[key] = { errors: [], total: 0 };
-
-        stats[key].errors.push(d.logError);
-        stats[key].total += 1;
-      });
-
-      // 2. Identificar quem falhou no critério
+      // 2. Identify participants to remove for each task
       const blacklist = new Set();
-
-      Object.keys(stats).forEach(key => {
-        const sumError = stats[key].errors.reduce((a, b) => a + b, 0);
-        const avgError = sumError / stats[key].total;
-
-        // Extrai o nome da tarefa do key: formato 'T1_participantId'
-        const taskName = key.split('_')[0];
-
-        const limit = (taskName === 'T1') ? t1Threshold : threshold;
-
-        if (avgError > limit) {
-          blacklist.add(key);
-          const pID = key.split('_')[1] || 'Unknown';
-          console.log(`[REMOVIDO] ${pID} da tarefa '${taskName}' (Avg Error: ${avgError.toFixed(2)} > ${limit})`);
-        }
+      errorSummary.forEach((participantMap, task) => {
+        participantMap.forEach((avgError, participantId) => {
+          const limit = (task === 'T1') ? t1Threshold : threshold;
+          if (avgError > limit) {
+            const key = `${task}_${participantId}`;
+            blacklist.add(key);
+            console.log(`[REMOVIDO] Participante ${participantId} da tarefa '${task}' (Erro médio: ${avgError.toFixed(2)} > ${limit})`);
+          }
+        });
       });
 
-      // 3. Filtrar o array original
+      if (blacklist.size === 0) {
+        console.log(">> Nenhum participante removido (Todos abaixo do limiar de erro).");
+        return data;
+      }
+
+      // 3. Filter the original data array
       const cleanData = data.filter(d => {
-        if (d.type === 'questionnaire') return true;
-
+        // Keep all non-trial data (questionnaires, rankings)
+        if (d.type !== 'trial') {
+          return true;
+        }
+        // For trial data, check if the participant is on the blacklist for that specific task
         const key = `${d.task}_${d.participantId}`;
-        if (blacklist.has(key)) return false;
-
-        return true;
+        return !blacklist.has(key);
       });
 
       console.log(`Registros Antes: ${data.length} | Depois: ${cleanData.length}`);
@@ -751,42 +717,37 @@
 
         // Process trial blocks
         (expData.blocks || []).forEach(block => {
-          // Para T1 (Valor Exato) a tarefa é binária: acertou/errou.
-          // Neste caso usamos erro binário = 1 - acurácia por tentativa (0 se correto, 1 se incorreto).
-          let logError;
-          if (block.taskKey === 'T1') {
-            logError = block.isCorrect ? 0 : 1;
-          } else {
-            const epsilon = 1e-9;
-            const answer = Number(block.answerNumber) || 0;
-            const correctAnswer = Number(block.correctAnswer) || 0;
+          const epsilon = 1e-9;
+          const answer = Number(block.answerNumber);
+          const correctAnswer = Number(block.correctAnswer);
+          let logError = NaN;
 
-            if (correctAnswer === 0) {
-              logError = answer === 0 ? 0 : 10; // Atribui um erro grande quando correto é zero
-            } else {
+          if (block.taskKey === 'T1') {
+            if (block.isCorrect === true) {
+              logError = 0;
+            } else if (block.isCorrect === false) {
+              logError = 1;
+            }
+          } else {
+            if (!isNaN(answer) && !isNaN(correctAnswer)) {
               logError = Math.abs(Math.log10((answer + epsilon) / (correctAnswer + epsilon)));
+            } else {
+              logError = NaN;
             }
           }
-
           allLogs.push({
             participantId: pID,
             task: block.taskKey,
             type: 'trial',
-            diff: block.datasetId,
             vis: block.visualizationId,
-            correct: block.isCorrect,
-            Reaction_Time_ms: block.timeOnBlockTaskScreenMs,
-            logError: logError,
-            details: {}
+            Reaction_Time_s: block.timeOnBlockTaskScreenSeconds,
+            logError: logError
           });
         });
 
         // Process NASA-TLX blocks
         (expData.blockNasaTlx || []).forEach(tlxBlock => {
-          const visualizations = tlxBlock.visualizations || [{
-            ...tlxBlock,
-            visualizationId: 'Geral'
-          }];
+          const visualizations = tlxBlock.visualizations || [];
 
           visualizations.forEach(visTlx => {
             const mental = visTlx.mentalDemand || 0;
@@ -795,31 +756,50 @@
             const effort = visTlx.effort || 0;
             const frust = visTlx.frustration || 0;
             const perf_inverted = 100 - perf_raw;
-            const workload = (mental + temporal + perf_inverted + effort + frust) / 5.0;
-            allLogs.push({
-              participantId: pID,
-              task: tlxBlock.taskKey,
-              type: 'questionnaire',
-              vis: visTlx.visualizationId,
-              ratings: {
-                workload: workload,
-                mental: mental,
-                temporal: temporal,
-                performance: perf_inverted,
-                effort: effort,
-                frustration: frust
-              }
-            });
+
+            if ([mental, temporal, perf_raw, effort, frust].some(v => v === null || v === undefined)) {
+              // Skip if any value is null
+            } else {
+              const workload = (mental + temporal + perf_inverted + effort + frust) / 5.0;
+              allLogs.push({
+                participantId: pID,
+                task: tlxBlock.taskKey,
+                type: 'questionnaire',
+                vis: visTlx.visualizationId,
+                ratings: {
+                  workload: workload,
+                  mental: mental,
+                  temporal: temporal,
+                  performance: perf_inverted, // Storing the inverted value
+                  effort: effort,
+                  frustration: frust
+                }
+              });
+            }
           });
         });
 
-        // Process Final Ranking
-        const finalRanking = expData.finalRanking;
-        if (finalRanking && finalRanking.order) {
-          finalRanking.order.forEach((vis, rankIndex) => {
+        // Process Final Ranking - Techniques
+        const finalRankingTech = expData.finalRankingTechniques;
+        if (finalRankingTech && finalRankingTech.order) {
+          finalRankingTech.order.forEach((vis, rankIndex) => {
             allLogs.push({
               participantId: pID,
-              task: 'geral', // Ranking é geral, não por tarefa
+              task: 'geral_tech',
+              type: 'ranking',
+              vis: vis,
+              ratings: { rank: rankIndex + 1 }
+            });
+          });
+        }
+
+        // Process Final Ranking - Modes
+        const finalRankingModes = expData.finalRankingModes;
+        if (finalRankingModes && finalRankingModes.order) {
+          finalRankingModes.order.forEach((vis, rankIndex) => {
+            allLogs.push({
+              participantId: pID,
+              task: 'geral_mode',
               type: 'ranking',
               vis: vis,
               ratings: { rank: rankIndex + 1 }
@@ -831,23 +811,166 @@
       return allLogs;
     }
 
+    function renderRankingChart(svg, data, title) {
+      svg.selectAll("*").remove(); // Clear previous content
+
+      const ranks = Object.keys(data[0]).filter(k => k !== 'vis').map(Number).sort((a, b) => a - b);
+      if (ranks.length === 0) return;
+
+      const totalParticipants = d3.sum(Object.values(data[0]).filter(v => typeof v === 'number'));
+
+      const margin = { top: 30, right: 20, bottom: 80, left: 100 };
+      const width = 500;
+      const height = data.length * 20 // Reduced height per bar
+
+      svg.attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+
+      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const y = d3.scaleBand()
+        .domain(data.map(d => d.vis).sort())
+        .range([0, height])
+        .padding(0.2);
+
+      const x = d3.scaleLinear()
+        .domain([0, totalParticipants])
+        .range([0, width]);
+
+      const color = d3.scaleOrdinal()
+        .domain(ranks.map(String))
+        .range(ranks.map(r => rankColors[r]));
+
+      const stack = d3.stack()
+        .keys(ranks.map(String))
+        .order(d3.stackOrderNone)
+        .offset(d3.stackOffsetNone);
+
+      const series = stack(data);
+
+      // Draw bars
+      g.append("g")
+        .selectAll("g")
+        .data(series)
+        .join("g")
+        .attr("fill", d => color(d.key))
+        .selectAll("rect")
+        .data(d => d)
+        .join("rect")
+        .attr("y", d => y(d.data.vis))
+        .attr("x", d => x(d[0]))
+        .attr("width", d => x(d[1]) - x(d[0]))
+        .attr("height", y.bandwidth());
+
+      // Add text labels inside bars
+      g.append("g")
+        .selectAll("g")
+        .data(series)
+        .join("g")
+        .selectAll(".bar-label")
+        .data(d => d)
+        .join("text")
+        .attr("class", "bar-label")
+        .attr("x", d => x(d[0]) + (x(d[1]) - x(d[0])) / 2)
+        .attr("y", d => y(d.data.vis) + y.bandwidth() / 2)
+        .attr("dy", "0.35em")
+        .attr("text-anchor", "middle")
+        .style("fill", "white")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text(d => {
+          const count = d[1] - d[0];
+          return (x(count) > 15) ? count : "";
+        });
+
+      // Y-axis
+      g.append("g")
+        .call(d3.axisLeft(y).tickSize(0))
+        .select(".domain").remove();
+      g.selectAll(".tick text").style("font-size", "15pt").style("font-weight", "bold");
+
+      // X-axis
+      g.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(Math.min(totalParticipants, 10), "d"))
+        .selectAll("text").style("font-size", "12pt");
+      g.append("text").attr("x", width / 2).attr("y", height + 40).attr("text-anchor", "middle").style("font-size", "14pt").text("Número de Votos");
+
+      // Legend - Centered
+      const legend = g.append("g");
+      const legendItem = legend.selectAll(".legend-item")
+        .data(ranks)
+        .join("g")
+        .attr("class", "legend-item")
+        .attr("transform", (d, i) => `translate(${i * 100}, 0)`);
+
+      legendItem.append("rect")
+        .attr("width", 18)
+        .attr("height", 18)
+        .attr("fill", d => color(String(d)));
+
+      legendItem.append("text")
+        .attr("x", 24)
+        .attr("y", 9)
+        .attr("dy", "0.35em")
+        .style("font-size", "14px")
+        .text(d => `${d}º Lugar`);
+
+      const legendWidth = legend.node().getBBox().width;
+      const legendStartX = (width - legendWidth) / 2;
+      // legend.attr("transform", `translate(${legendStartX}, ${height + margin.bottom - 10})`);
+      legend.attr("transform", `translate(${legendStartX}, ${height + 60})`);
+    }
+
+    function downloadSVG(svgId) {
+      const svgElement = document.getElementById(svgId);
+      if (!svgElement) {
+        console.error("SVG não encontrado");
+        return;
+      }
+
+      // Get the h2 title for the filename
+      const titleElement = svgElement.previousElementSibling;
+      let filename = svgId; // fallback
+      if (titleElement && titleElement.tagName === 'H2') {
+        filename = titleElement.textContent.trim()
+          .replace(/\s*\(N=[\d\?]+\)$/, '') // Remove (N=...) from the end
+          .trim()
+          .replace(/[^a-zA-Z0-9\s-]+/g, '') // Remove special chars except space and hyphen
+          .replace(/[\s-]+/g, '_'); // Replace spaces and hyphens with underscore
+      }
+      filename += ".svg";
+
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgElement);
+      const blob = new Blob([svgString], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
     // --- LÓGICA PRINCIPAL ---
     const jsonFilePath = "../../results.json";
 
     d3.json(jsonFilePath).then(rawJsonData => {
-      console.log(`Carregado ${rawJsonData.length} registros de: ${jsonFilePath}`); 
-      // const filteredLogs = allLogs; // Descomente esta linha para desativar o filtro de acurácia
+      console.log(`Carregado ${rawJsonData.length} registros de: ${jsonFilePath}`);
 
       const allLogs = transformData(rawJsonData);
-      const filteredLogs = allLogs //filterHighErrorParticipants(allLogs, 4.0);
+      const filteredLogs = allLogs //filterHighErrorParticipants(allLogs);
 
-      const TASKS = ['T1', 'T2', 'T3', 'T4', 'T5'];
+      const uniqueParticipants = new Set(filteredLogs.map(d => d.participantId));
+      d3.select("#main-title").text(`Análise de Resultados`);
+
+      const uniqueTasks = [...new Set(filteredLogs.filter(d => d.type === 'trial').map(d => d.task))].sort();
+
       const TASK_MAP = {
-        'T1': 'T1 (Valor Exato)',
-        'T2': 'T2 (Diferença Distante)',
-        'T3': 'T3 (Diferença Próxima)',
-        'T4': 'T4 (Proporção Distante)',
-        'T5': 'T5 (Proporção Próxima)'
+        'T1': 'T1 (Valor Exato)', 'T2': 'T2 (Diferença Distante)', 'T3': 'T3 (Diferença Próxima)',
+        'T4': 'T4 (Proporção Distante)', 'T5': 'T5 (Proporção Próxima)'
       };
 
       const plotWidth = 350;
@@ -856,8 +979,13 @@
       const accWidthDefault = accControleWidthDefault + plotWidth + 40;
       const totalWidthDefault = accWidthDefault + timeControleWidth + plotWidth;
 
-      TASKS.forEach(taskKey => {
+      uniqueTasks.forEach(taskKey => {
         const taskTrialData = filteredLogs.filter(d => d.task === taskKey && d.type === 'trial');
+        const participantCountForTask = new Set(taskTrialData.map(d => d.participantId)).size;
+
+        const h2 = d3.select(`#chart-${taskKey.toLowerCase()}`).node().previousElementSibling;
+        d3.select(h2).html(`${TASK_MAP[taskKey] || taskKey} <span style="font-weight: normal; font-size: 14px;">(N=${participantCountForTask})</span>`);
+
         const svg = d3.select(`#chart-${taskKey.toLowerCase()}`);
 
         if (taskTrialData.length === 0) {
@@ -868,31 +996,33 @@
 
         const mappedTaskData = taskTrialData.map(d => {
           return {
-            Difficulty: 'Geral',
+            Difficulty: TASK_MAP[taskKey] || taskKey,
             Visualization: d.vis,
             LogError: d.logError,
-            Time_s: d.Reaction_Time_ms / 1000
+            Time_s: d.Reaction_Time_s
           };
         });
 
-        const difficultyOrder = [...new Set(mappedTaskData.map(d => d.Difficulty))].sort();
+        const difficultyOrder = [TASK_MAP[taskKey] || taskKey];
 
         const errorData = processData(mappedTaskData, 'LogError', difficultyOrder);
         const timeData = processData(mappedTaskData, 'Time_s', difficultyOrder);
         const height = 30 * Math.max(errorData.length, 1) + 80;
 
         svg.attr("width", totalWidthDefault).attr("height", height);
-        renderErrorChart(svg, errorData, 0, totalWidthDefault, { 
-          col1Header: "Agrupado", 
+        renderErrorChart(svg, errorData, 0, totalWidthDefault, {
+          col1Header: "Tarefa",
           significant: [],
-          xLabel: taskKey === 'T1' ? 'Error rate (1 - accuracy)' : 'Log Error'
+          xLabel: taskKey === 'T1' ? 'Error Rate' : 'Log Error',
+          xDomain: taskKey === 'T1' ? [0, 1] : null
         });
         renderTimeChart(svg, timeData, accWidthDefault, { significant: [] });
       });
 
       // --- RENDERIZAÇÃO GRÁFICO QUESTIONNAIRE ---
       const questLogs = filteredLogs.filter(d => d.type === 'questionnaire');
-      
+      const tlxParticipantCount = new Set(questLogs.map(d => d.participantId)).size;
+
       const tlxDimensions = [
         { key: 'workload', title: 'Workload', id: 'workload' },
         { key: 'mental', title: 'Mental Demand', id: 'mental' },
@@ -904,6 +1034,9 @@
 
       tlxDimensions.forEach(dim => {
         const svgQuest = d3.select(`#chart-questionnaire-${dim.id}`);
+        const h2 = svgQuest.node().previousElementSibling;
+        const baseTitle = h2.textContent.split(' (N=')[0];
+        d3.select(h2).html(`${baseTitle} <span style="font-weight: normal; font-size: 14px;">(N=${tlxParticipantCount})</span>`);
 
         if (questLogs.length > 0) {
           const questData = questLogs.map(d => ({
@@ -912,7 +1045,7 @@
             Response: d.ratings[dim.key]
           }));
 
-          const questOrder = TASKS.map(t => TASK_MAP[t]);
+          const questOrder = uniqueTasks.map(t => TASK_MAP[t] || t).sort();
           const processedQuestData = processData(questData, 'Response', questOrder);
 
           const accControleWidthQuest = 380;
@@ -926,40 +1059,61 @@
             chartTitle: `${dim.title} (0-100)`
           });
         } else {
-            svgQuest.attr("width", 400).attr("height", 50);
-            svgQuest.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para questionários.`).style("fill", "red");
+          svgQuest.attr("width", 400).attr("height", 50);
+          svgQuest.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para questionários.`).style("fill", "red");
         }
       });
 
-      // --- RENDERIZAÇÃO GRÁFICO RANKING ---
-      const rankingLogs = filteredLogs.filter(d => d.type === 'ranking');
-      const svgRanking = d3.select("#chart-ranking");
+      // --- RENDERIZAÇÃO GRÁFICO RANKING (TÉCNICAS) ---
+      const rankingTechLogs = filteredLogs.filter(d => d.type === 'ranking' && d.task === 'geral_tech');
+      const svgRankingTech = d3.select("#chart-ranking-tech");
 
-      if (rankingLogs.length > 0) {
-        const rankingData = rankingLogs.map(d => ({
-          Difficulty: 'Preferência Geral',
-          Visualization: d.vis,
-          Response: d.ratings.rank
-        }));
+      if (rankingTechLogs.length > 0) {
+        const h2 = svgRankingTech.node().previousElementSibling;
+        const n = new Set(rankingTechLogs.map(d => d.participantId)).size;
+        d3.select(h2).html(`Ranking de Preferência (Técnicas) <span style="font-weight: normal; font-size: 14px;">(N=${n})</span>`);
 
-        const rankingOrder = ['Preferência Geral'];
-        const processedRankingData = processData(rankingData, 'Response', rankingOrder);
+        const techCounts = d3.rollup(rankingTechLogs, v => v.length, d => d.vis, d => d.ratings.rank);
+        const visNames = Array.from(techCounts.keys());
+        const ranks = [...new Set(rankingTechLogs.map(d => d.ratings.rank))].sort((a, b) => a - b);
 
-        const controleWidthRanking = 380;
-        const totalWidthRanking = controleWidthRanking + plotWidth + 40;
-        const heightRanking = 30 * Math.max(processedRankingData.length, 1) + 80;
-
-        svgRanking.attr("width", totalWidthRanking).attr("height", heightRanking);
-        renderSubjectiveChart(svgRanking, processedRankingData, totalWidthRanking, {
-          controlewidth: controleWidthRanking,
-          col1Header: "Agrupamento",
-          chartTitle: "Ranking de Preferência",
-          domain: [1, 2, 3, 4],
-          scaleType: 'ordinal'
+        const dataForStack = visNames.map(vis => {
+          const entry = { vis: vis };
+          ranks.forEach(rank => {
+            entry[rank] = techCounts.get(vis)?.get(rank) || 0;
+          });
+          return entry;
         });
+        renderRankingChart(svgRankingTech, dataForStack, "");
       } else {
-        svgRanking.attr("width", 400).attr("height", 50);
-        svgRanking.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para ranking.`).style("fill", "red");
+        svgRankingTech.attr("width", 400).attr("height", 50);
+        svgRankingTech.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para ranking de técnicas.`).style("fill", "red");
+      }
+
+      // --- RENDERIZAÇÃO GRÁFICO RANKING (MODOS) ---
+      const rankingModeLogs = filteredLogs.filter(d => d.type === 'ranking' && d.task === 'geral_mode');
+      const svgRankingMode = d3.select("#chart-ranking-mode");
+
+      if (rankingModeLogs.length > 0) {
+        const h2 = svgRankingMode.node().previousElementSibling;
+        const n = new Set(rankingModeLogs.map(d => d.participantId)).size;
+        d3.select(h2).html(`Ranking de Preferência (Modos) <span style="font-weight: normal; font-size: 14px;">(N=${n})</span>`);
+
+        const modeCounts = d3.rollup(rankingModeLogs, v => v.length, d => d.vis, d => d.ratings.rank);
+        const visNames = Array.from(modeCounts.keys());
+        const ranks = [...new Set(rankingModeLogs.map(d => d.ratings.rank))].sort((a, b) => a - b);
+
+        const dataForStack = visNames.map(vis => {
+          const entry = { vis: vis };
+          ranks.forEach(rank => {
+            entry[rank] = modeCounts.get(vis)?.get(rank) || 0;
+          });
+          return entry;
+        });
+        renderRankingChart(svgRankingMode, dataForStack, "");
+      } else {
+        svgRankingMode.attr("width", 400).attr("height", 50);
+        svgRankingMode.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para ranking de modos.`).style("fill", "red");
       }
     }).catch(error => {
       console.error("Erro ao carregar o JSON:", error);
@@ -968,7 +1122,7 @@
         .style("font-weight", "bold")
         .text(`Erro ao carregar: ${jsonFilePath}. Verifique se a pasta 'analysis/results' existe e contém dados.`);
     });
-    
+
   </script>
 </body>
 
