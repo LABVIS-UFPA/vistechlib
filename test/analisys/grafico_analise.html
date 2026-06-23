@@ -67,6 +67,11 @@
   <br>
   <button onclick="downloadSVG('chart-t5')">Download T5 (Proporção Próxima) SVG</button>
 
+  <h2>Confiança na Resposta</h2>
+  <svg id="chart-confidence"></svg>
+  <br>
+  <button onclick="downloadSVG('chart-confidence')">Download Confiança na Resposta SVG</button>
+
   <h2>NASA-TLX (Geral Workload)</h2>
   <svg id="chart-questionnaire-workload"></svg>
   <br>
@@ -709,11 +714,17 @@
       const allLogs = [];
       if (!Array.isArray(rawData)) return allLogs;
 
+      const confidenceMap = {
+        "Muito Baixa": 1, "Baixa": 2, "Média": 3, "Alta": 4, "Muito Alta": 5
+      };
+
       rawData.forEach(session => {
         const expData = session.experimentData;
         if (!expData) return;
 
         const pID = expData.participantId;
+
+
 
         // Process trial blocks
         (expData.blocks || []).forEach(block => {
@@ -721,6 +732,7 @@
           const answer = Number(block.answerNumber);
           const correctAnswer = Number(block.correctAnswer);
           let logError = NaN;
+          const confidenceValue = confidenceMap[block.confidence];
 
           if (block.taskKey === 'T1') {
             if (block.isCorrect === true) {
@@ -741,7 +753,8 @@
             type: 'trial',
             vis: block.visualizationId,
             Reaction_Time_s: block.timeOnBlockTaskScreenSeconds,
-            logError: logError
+            logError: logError,
+            confidence: confidenceValue
           });
         });
 
@@ -1018,6 +1031,39 @@
         });
         renderTimeChart(svg, timeData, accWidthDefault, { significant: [] });
       });
+
+      // --- RENDERIZAÇÃO GRÁFICO DE CONFIANÇA ---
+      const confidenceLogs = filteredLogs.filter(d => d.type === 'trial' && d.confidence !== undefined);
+      const svgConfidence = d3.select("#chart-confidence");
+      const h2Confidence = svgConfidence.node().previousElementSibling;
+      const confidenceParticipantCount = new Set(confidenceLogs.map(d => d.participantId)).size;
+      d3.select(h2Confidence).html(`Confiança na Resposta <span style="font-weight: normal; font-size: 14px;">(N=${confidenceParticipantCount})</span>`);
+
+      if (confidenceLogs.length > 0) {
+        const confidenceData = confidenceLogs.map(d => ({
+          Difficulty: TASK_MAP[d.task] || d.task,
+          Visualization: d.vis,
+          Response: d.confidence
+        }));
+
+        const confidenceOrder = uniqueTasks.map(t => TASK_MAP[t] || t).sort();
+        const processedConfidenceData = processData(confidenceData, 'Response', confidenceOrder);
+
+        const accControleWidthConf = 380;
+        const totalWidthConf = accControleWidthConf + plotWidth + 40;
+        const heightConf = 30 * Math.max(processedConfidenceData.length, 1) + 80;
+
+        svgConfidence.attr("width", totalWidthConf).attr("height", heightConf);
+        renderSubjectiveChart(svgConfidence, processedConfidenceData, totalWidthConf, {
+          controlewidth: accControleWidthConf,
+          col1Header: "Task",
+          chartTitle: "Confiança (1-5)",
+          domain: [1, 5]
+        });
+      } else {
+        svgConfidence.attr("width", 400).attr("height", 50);
+        svgConfidence.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para confiança.`).style("fill", "red");
+      }
 
       // --- RENDERIZAÇÃO GRÁFICO QUESTIONNAIRE ---
       const questLogs = filteredLogs.filter(d => d.type === 'questionnaire');
