@@ -1,0 +1,49 @@
+participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,eventSteps,timestamp
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,1,T1,psb3d_opt,base-2-ensino-superior,zoom,canvas,zoomOut,2,2026-06-22T19:31:45.788Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,1,T1,psb3d_opt,base-2-ensino-superior,zoom,canvas,zoomOut,2,2026-06-22T19:31:46.367Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,1,T1,psb3d_opt,base-2-ensino-superior,zoom,canvas,zoomOut,2,2026-06-22T19:31:46.801Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,1,T1,psb3d_opt,base-2-ensino-superior,zoom,canvas,zoomOut,20,2026-06-22T19:31:48.037Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,1,T1,psb3d_opt,base-2-ensino-superior,zoom,canvas,zoomIn,3,2026-06-22T19:31:48.671Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,1,T1,psb3d_opt,base-2-ensino-superior,zoom,canvas,zoomIn,4,2026-06-22T19:31:49.084Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,1,T1,psb3d_opt,base-2-ensino-superior,zoom,canvas,zoomIn,7,2026-06-22T19:31:49.570Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,1,T1,psb3d_opt,base-2-ensino-superior,zoom,canvas,zoomIn,3,2026-06-22T19:31:50.204Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,3,T1,psb25d_llm,base-5-receita-impostos,zoom,canvas,zoomIn,4,2026-06-22T19:35:10.013Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,3,T1,psb25d_llm,base-5-receita-impostos,zoom,canvas,zoomIn,5,2026-06-22T19:35:11.118Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,3,T1,psb25d_llm,base-5-receita-impostos,zoom,canvas,zoomOut,2,2026-06-22T19:35:11.552Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,3,T1,psb25d_llm,base-5-receita-impostos,zoom,canvas,zoomIn,2,2026-06-22T19:35:12.247Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,3,T1,psb25d_llm,base-5-receita-impostos,zoom,canvas,zoomOut,11,2026-06-22T19:35:20.648Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,4,T1,psb3d_manual,base-6-frota-motocicletas,slider,psbDepth,6,,2026-06-22T19:37:57.139Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,4,T1,psb3d_manual,base-6-frota-motocicletas,slider,psbBreakStartRatio,0.73,,2026-06-22T19:38:06.245Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,6,T1,psb25d_manual,base-3-matriculas-fundamental,slider,Posição da quebra,0.42,,2026-06-22T19:40:36.180Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,6,T1,psb25d_manual,base-3-matriculas-fundamental,slider,z,74.5,,2026-06-22T19:40:39.031Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,6,T1,psb25d_manual,base-3-matriculas-fundamental,slider,gapSize,80,,2026-06-22T19:40:40.898Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,6,T1,psb25d_manual,base-3-matriculas-fundamental,slider,Posição da quebra,0.53,,2026-06-22T19:40:47.699Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,6,T1,psb25d_manual,base-3-matriculas-fundamental,slider,z,75.5,,2026-06-22T19:40:58.168Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,6,T1,psb25d_manual,base-3-matriculas-fundamental,slider,gapSize,80,,2026-06-22T19:41:04.088Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,6,T1,psb25d_manual,base-3-matriculas-fundamental,slider,Posição da quebra,0.52,,2026-06-22T19:41:14.363Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,6,T1,psb25d_manual,base-3-matriculas-fundamental,slider,z,72.6,,2026-06-22T19:41:19.731Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,1,6,T1,psb25d_manual,base-3-matriculas-fundamental,slider,z,70.7,,2026-06-22T19:41:27.499Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,2,5,T4,psb3d_manual,base-3-matriculas-fundamental,slider,psbBreakStartRatio,0.2,,2026-06-22T19:49:35.912Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,2,5,T4,psb3d_manual,base-3-matriculas-fundamental,slider,psbFoldVisualHeight,0.7,,2026-06-22T19:49:38.297Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,2,5,T4,psb3d_manual,base-3-matriculas-fundamental,slider,psbBreakStartRatio,0.2,,2026-06-22T19:49:41.517Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,2,5,T4,psb3d_manual,base-3-matriculas-fundamental,slider,psbDepth,50,,2026-06-22T19:49:47.144Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,2,5,T4,psb3d_manual,base-3-matriculas-fundamental,slider,psbBreakStartRatio,0.45,,2026-06-22T19:49:53.916Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,2,5,T4,psb3d_manual,base-3-matriculas-fundamental,slider,psbBreakStartRatio,0.54,,2026-06-22T19:49:58.860Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,2,6,T4,psb25d_manual,base-4-populacao-residente,slider,z,0,,2026-06-22T19:51:14.746Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,2,6,T4,psb25d_manual,base-4-populacao-residente,slider,gapSize,80,,2026-06-22T19:51:18.696Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,2,6,T4,psb25d_manual,base-4-populacao-residente,slider,Posição da quebra,0.6,,2026-06-22T19:51:30.140Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,1,T5,psb25d_manual,base-4-populacao-residente,slider,Posição da quebra,0.73,,2026-06-22T19:52:55.085Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,1,T5,psb25d_manual,base-4-populacao-residente,slider,z,56.2,,2026-06-22T19:52:59.448Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,1,T5,psb25d_manual,base-4-populacao-residente,slider,gapSize,53,,2026-06-22T19:53:14.224Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,1,T5,psb25d_manual,base-4-populacao-residente,slider,Posição da quebra,0.84,,2026-06-22T19:53:25.100Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,1,T5,psb25d_manual,base-4-populacao-residente,slider,z,29.3,,2026-06-22T19:53:33.990Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,2,T5,psb3d_manual,base-3-matriculas-fundamental,slider,psbDepth,7,,2026-06-22T19:54:34.612Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,2,T5,psb3d_manual,base-3-matriculas-fundamental,slider,psbBreakStartRatio,0.57,,2026-06-22T19:54:40.326Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,2,T5,psb3d_manual,base-3-matriculas-fundamental,slider,psbFoldVisualHeight,4,,2026-06-22T19:54:45.187Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,2,T5,psb3d_manual,base-3-matriculas-fundamental,slider,psbDepth,3.6,,2026-06-22T19:54:50.581Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,2,T5,psb3d_manual,base-3-matriculas-fundamental,slider,psbBreakStartRatio,0.4,,2026-06-22T19:54:53.705Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,2,T5,psb3d_manual,base-3-matriculas-fundamental,slider,psbDepth,33.4,,2026-06-22T19:54:55.628Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,2,T5,psb3d_manual,base-3-matriculas-fundamental,slider,psbBreakStartRatio,0.85,,2026-06-22T19:54:59.076Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,2,T5,psb3d_manual,base-3-matriculas-fundamental,slider,psbDepth,10.8,,2026-06-22T19:55:03.587Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,4,T5,psb3d_llm,base-5-receita-impostos,zoom,canvas,zoomIn,1,2026-06-22T19:56:44.607Z
+18a73e7b-3145-4831-acba-d8b4ec728e0e,3,4,T5,psb3d_llm,base-5-receita-impostos,zoom,canvas,zoomIn,2,2026-06-22T19:56:46.106Z
