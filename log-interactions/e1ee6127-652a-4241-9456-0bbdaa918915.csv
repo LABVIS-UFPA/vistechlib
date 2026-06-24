@@ -1,0 +1,12 @@
+participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,eventSteps,timestamp
+e1ee6127-652a-4241-9456-0bbdaa918915,1,5,T1,psb25d_llm,base-5-receita-impostos,zoom,canvas,zoomIn,9,2026-06-24T13:30:11.009Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,1,T4,psb25d_opt,base-4-populacao-residente,canvasMouseDown,canvas,352;64,,2026-06-24T13:32:01.657Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,1,T4,psb25d_opt,base-4-populacao-residente,canvasMouseUp,canvas,343;230,,2026-06-24T13:32:02.336Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,2,T4,psb3d_llm,base-5-receita-impostos,zoom,canvas,zoomOut,29,2026-06-24T13:33:13.030Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,2,T4,psb3d_llm,base-5-receita-impostos,zoom,canvas,zoomIn,4,2026-06-24T13:33:13.574Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,2,T4,psb3d_llm,base-5-receita-impostos,zoom,canvas,zoomOut,4,2026-06-24T13:33:14.038Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,2,T4,psb3d_llm,base-5-receita-impostos,zoom,canvas,zoomIn,15,2026-06-24T13:33:17.202Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,5,T4,psb25d_llm,base-1-pib,canvasMouseDown,canvas,396;82,,2026-06-24T13:37:07.952Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,5,T4,psb25d_llm,base-1-pib,canvasMouseUp,canvas,403;166,,2026-06-24T13:37:08.518Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,5,T4,psb25d_llm,base-1-pib,canvasMouseDown,canvas,1096;240,,2026-06-24T13:37:09.222Z
+e1ee6127-652a-4241-9456-0bbdaa918915,2,5,T4,psb25d_llm,base-1-pib,canvasMouseUp,canvas,803;252,,2026-06-24T13:37:09.574Z

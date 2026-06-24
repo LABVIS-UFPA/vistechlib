@@ -1,0 +1,150 @@
+participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,eventSteps,timestamp
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,canvasMouseDown,canvas,470;582,,2026-06-24T14:19:41.959Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,canvasMouseUp,canvas,470;582,,2026-06-24T14:19:42.111Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,canvasMouseDown,canvas,470;405,,2026-06-24T14:19:49.992Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,canvasMouseUp,canvas,470;405,,2026-06-24T14:19:50.192Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,canvasMouseDown,canvas,619;33,,2026-06-24T14:19:52.447Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,canvasMouseUp,canvas,614;37,,2026-06-24T14:19:52.559Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,canvasMouseDown,canvas,469;367,,2026-06-24T14:19:54.279Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,canvasMouseUp,canvas,469;367,,2026-06-24T14:19:54.463Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,zoom,canvas,zoomIn,6,2026-06-24T14:19:57.475Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,zoom,canvas,zoomIn,3,2026-06-24T14:19:58.156Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,1,T1,psb25d_opt,base-5-receita-impostos,zoom,canvas,zoomIn,14,2026-06-24T14:20:00.643Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseDown,canvas,243;637,,2026-06-24T14:25:37.311Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseUp,canvas,243;637,,2026-06-24T14:25:37.484Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,Posição da quebra,0.13,,2026-06-24T14:25:40.412Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,Posição da quebra,0.9,,2026-06-24T14:25:44.932Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,Posição da quebra,0.9,,2026-06-24T14:25:47.118Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,z,26.4,,2026-06-24T14:25:48.780Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,z,58.1,,2026-06-24T14:25:55.070Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,gapSize,80,,2026-06-24T14:26:04.236Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseDown,canvas,763;216,,2026-06-24T14:26:04.685Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseUp,canvas,921;176,,2026-06-24T14:26:05.124Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseDown,canvas,767;407,,2026-06-24T14:26:05.383Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseUp,canvas,574;434,,2026-06-24T14:26:05.676Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseDown,canvas,509;437,,2026-06-24T14:26:05.915Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseUp,canvas,346;438,,2026-06-24T14:26:06.676Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,Posição da quebra,0.53,,2026-06-24T14:26:10.678Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,Posição da quebra,0.9,,2026-06-24T14:26:13.292Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,z,42.7,,2026-06-24T14:26:16.804Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseDown,canvas,432;357,,2026-06-24T14:26:18.418Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,canvasMouseUp,canvas,440;408,,2026-06-24T14:26:18.572Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,gapSize,52,,2026-06-24T14:26:22.588Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,gapSize,17,,2026-06-24T14:26:24.099Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,gapSize,10,,2026-06-24T14:26:28.101Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,2,T1,psb25d_manual,base-2-ensino-superior,slider,z,42.7,,2026-06-24T14:26:32.484Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,4,T1,psb3d_llm,base-6-frota-motocicletas,zoom,canvas,zoomIn,3,2026-06-24T14:30:34.569Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,4,T1,psb3d_llm,base-6-frota-motocicletas,zoom,canvas,zoomOut,1,2026-06-24T14:30:46.548Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,4,T1,psb3d_llm,base-6-frota-motocicletas,zoom,canvas,zoomOut,2,2026-06-24T14:30:47.036Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,4,T1,psb3d_llm,base-6-frota-motocicletas,zoom,canvas,zoomOut,2,2026-06-24T14:30:49.767Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,4,T1,psb3d_llm,base-6-frota-motocicletas,zoom,canvas,zoomOut,2,2026-06-24T14:30:50.382Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,4,T1,psb3d_llm,base-6-frota-motocicletas,zoom,canvas,zoomOut,1,2026-06-24T14:31:03.818Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,4,T1,psb3d_llm,base-6-frota-motocicletas,zoom,canvas,zoomOut,1,2026-06-24T14:31:04.525Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,slider,psbBreakStartRatio,0.37,,2026-06-24T14:33:22.128Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,slider,psbBreakStartRatio,0.22,,2026-06-24T14:33:23.466Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,slider,psbDepth,17,,2026-06-24T14:33:25.434Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,slider,psbFoldVisualHeight,0.6,,2026-06-24T14:33:33.836Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,slider,psbDepth,22.8,,2026-06-24T14:33:48.899Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,zoom,canvas,zoomOut,1,2026-06-24T14:33:55.917Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,zoom,canvas,zoomOut,2,2026-06-24T14:33:56.974Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,zoom,canvas,zoomOut,2,2026-06-24T14:34:00.282Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,zoom,canvas,zoomOut,4,2026-06-24T14:34:02.292Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,5,T1,psb3d_manual,base-1-pib,slider,psbFoldVisualHeight,2.1,,2026-06-24T14:34:10.148Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,6,T1,psb25d_llm,base-3-matriculas-fundamental,canvasMouseDown,canvas,337;90,,2026-06-24T14:36:01.799Z
+bddd529f-8322-4671-a012-872ae015bfcc,1,6,T1,psb25d_llm,base-3-matriculas-fundamental,canvasMouseUp,canvas,341;140,,2026-06-24T14:36:01.982Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbBreakStartRatio,0.31,,2026-06-24T14:42:27.000Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbBreakStartRatio,0.22,,2026-06-24T14:42:28.443Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbBreakStartRatio,0.2,,2026-06-24T14:42:42.550Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbFoldVisualHeight,3.2,,2026-06-24T14:42:44.546Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbFoldVisualHeight,4,,2026-06-24T14:42:47.670Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbDepth,19.8,,2026-06-24T14:43:00.303Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbDepth,37.6,,2026-06-24T14:43:03.134Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbDepth,48.8,,2026-06-24T14:43:06.532Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbDepth,50,,2026-06-24T14:43:08.381Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,2,T5,psb3d_manual,base-2-ensino-superior,slider,psbDepth,41.6,,2026-06-24T14:43:18.202Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,3,T5,psb25d_llm,base-3-matriculas-fundamental,canvasMouseDown,canvas,59;336,,2026-06-24T14:44:58.496Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,3,T5,psb25d_llm,base-3-matriculas-fundamental,canvasMouseUp,canvas,379;376,,2026-06-24T14:44:58.831Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,4,T5,psb25d_opt,base-1-pib,canvasMouseDown,canvas,133;168,,2026-06-24T14:47:39.550Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,4,T5,psb25d_opt,base-1-pib,canvasMouseUp,canvas,141;184,,2026-06-24T14:47:39.846Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,Posição da quebra,0.13,,2026-06-24T14:51:46.650Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,Posição da quebra,0.9,,2026-06-24T14:51:49.465Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,z,48.5,,2026-06-24T14:51:50.898Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseDown,canvas,535;267,,2026-06-24T14:51:54.043Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseUp,canvas,533;324,,2026-06-24T14:51:54.627Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseDown,canvas,515;407,,2026-06-24T14:51:54.931Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseUp,canvas,532;322,,2026-06-24T14:51:55.258Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseDown,canvas,103;529,,2026-06-24T14:51:55.627Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseUp,canvas,120;644,,2026-06-24T14:51:55.914Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseDown,canvas,160;437,,2026-06-24T14:51:56.138Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseUp,canvas,218;504,,2026-06-24T14:51:56.274Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseDown,canvas,638;434,,2026-06-24T14:51:56.531Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseUp,canvas,770;458,,2026-06-24T14:51:56.634Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseDown,canvas,167;522,,2026-06-24T14:51:58.666Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseUp,canvas,757;350,,2026-06-24T14:51:59.194Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,zoom,canvas,zoomIn,12,2026-06-24T14:52:01.263Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseDown,canvas,230;450,,2026-06-24T14:52:01.844Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseUp,canvas,207;169,,2026-06-24T14:52:02.122Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseDown,canvas,113;552,,2026-06-24T14:52:02.578Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseUp,canvas,626;279,,2026-06-24T14:52:02.954Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseDown,canvas,1232;401,,2026-06-24T14:52:03.578Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,canvasMouseUp,canvas,978;272,,2026-06-24T14:52:03.890Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,gapSize,54,,2026-06-24T14:52:05.250Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,gapSize,69,,2026-06-24T14:52:05.882Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,gapSize,33,,2026-06-24T14:52:07.087Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,gapSize,15,,2026-06-24T14:52:07.562Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,gapSize,10,,2026-06-24T14:52:09.634Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,z,20.6,,2026-06-24T14:52:10.719Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,z,70.6,,2026-06-24T14:52:12.578Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,Posição da quebra,0.38,,2026-06-24T14:52:18.922Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,Posição da quebra,0.7,,2026-06-24T14:52:20.858Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,Posição da quebra,0.9,,2026-06-24T14:52:21.842Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,z,31.2,,2026-06-24T14:52:26.889Z
+bddd529f-8322-4671-a012-872ae015bfcc,2,6,T5,psb25d_manual,base-5-receita-impostos,slider,z,47.5,,2026-06-24T14:52:29.273Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,2,2026-06-24T14:55:17.909Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,3,2026-06-24T14:55:18.476Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomIn,1,2026-06-24T14:55:25.304Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,1,2026-06-24T14:55:25.758Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,3,2026-06-24T14:55:26.223Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,3,2026-06-24T14:55:26.618Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,3,2026-06-24T14:55:27.389Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,18,2026-06-24T14:55:38.410Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,3,2026-06-24T14:55:56.281Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,1,2026-06-24T14:55:57.205Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomIn,5,2026-06-24T14:55:57.989Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomIn,5,2026-06-24T14:55:58.577Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomIn,4,2026-06-24T14:55:59.288Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,1,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomIn,3,2026-06-24T14:55:59.745Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,2,T4,psb25d_llm,base-5-receita-impostos,canvasMouseDown,canvas,174;56,,2026-06-24T14:57:40.494Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,2,T4,psb25d_llm,base-5-receita-impostos,canvasMouseUp,canvas,180;111,,2026-06-24T14:57:41.038Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,2,T4,psb25d_llm,base-5-receita-impostos,canvasMouseDown,canvas,664;627,,2026-06-24T14:57:49.493Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,2,T4,psb25d_llm,base-5-receita-impostos,canvasMouseUp,canvas,674;478,,2026-06-24T14:57:49.798Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,3,T4,psb3d_llm,base-4-populacao-residente,zoom,canvas,zoomOut,14,2026-06-24T15:01:45.674Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,3,T4,psb3d_llm,base-4-populacao-residente,zoom,canvas,zoomIn,3,2026-06-24T15:01:47.167Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,3,T4,psb3d_llm,base-4-populacao-residente,zoom,canvas,zoomIn,4,2026-06-24T15:01:47.627Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,3,T4,psb3d_llm,base-4-populacao-residente,zoom,canvas,zoomIn,3,2026-06-24T15:01:50.088Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,4,T4,psb3d_manual,base-2-ensino-superior,slider,psbBreakStartRatio,0.85,,2026-06-24T15:03:14.783Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,4,T4,psb3d_manual,base-2-ensino-superior,slider,psbFoldVisualHeight,3.2,,2026-06-24T15:03:19.715Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,4,T4,psb3d_manual,base-2-ensino-superior,slider,psbFoldVisualHeight,4,,2026-06-24T15:03:24.987Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,4,T4,psb3d_manual,base-2-ensino-superior,slider,psbBreakStartRatio,0.2,,2026-06-24T15:03:47.719Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,4,T4,psb3d_manual,base-2-ensino-superior,slider,psbBreakStartRatio,0.2,,2026-06-24T15:03:49.330Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,4,T4,psb3d_manual,base-2-ensino-superior,slider,psbDepth,32.4,,2026-06-24T15:03:52.049Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,4,T4,psb3d_manual,base-2-ensino-superior,slider,psbDepth,46.8,,2026-06-24T15:03:53.606Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,4,T4,psb3d_manual,base-2-ensino-superior,slider,psbDepth,50,,2026-06-24T15:03:56.611Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,Posição da quebra,0.57,,2026-06-24T15:04:52.602Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,Posição da quebra,0.82,,2026-06-24T15:04:53.610Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,Posição da quebra,0.05,,2026-06-24T15:04:55.834Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,z,97.5,,2026-06-24T15:04:57.033Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,canvasMouseDown,canvas,405;45,,2026-06-24T15:04:58.275Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,canvasMouseUp,canvas,357;89,,2026-06-24T15:04:58.642Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,canvasMouseDown,canvas,346;102,,2026-06-24T15:04:58.882Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,canvasMouseUp,canvas,441;42,,2026-06-24T15:04:59.050Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,gapSize,70,,2026-06-24T15:05:02.146Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,gapSize,10,,2026-06-24T15:05:06.738Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,Posição da quebra,0.44,,2026-06-24T15:05:18.570Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,Posição da quebra,0.9,,2026-06-24T15:05:19.993Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,z,64.8,,2026-06-24T15:05:21.156Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,z,42.7,,2026-06-24T15:05:22.356Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,z,2.3,,2026-06-24T15:05:23.002Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,5,T4,psb25d_manual,base-1-pib,slider,z,0,,2026-06-24T15:05:28.122Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,6,T4,psb25d_opt,base-6-frota-motocicletas,canvasMouseDown,canvas,751;187,,2026-06-24T15:06:31.394Z
+bddd529f-8322-4671-a012-872ae015bfcc,3,6,T4,psb25d_opt,base-6-frota-motocicletas,canvasMouseUp,canvas,749;201,,2026-06-24T15:06:31.569Z
