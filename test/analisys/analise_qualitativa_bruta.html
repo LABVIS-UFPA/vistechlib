@@ -1,263 +1,750 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análise Qualitativa - Comentários</title>
+    <title>Análise Temática Qualitativa</title>
     <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --panel-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --primary: #4e79a7;
+            --primary-hover: #3b5c80;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+        }
+
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            max-width: 1000px;
-            margin: 2rem auto;
-            color: #333;
-            background-color: #fafafa;
-            line-height: 1.5;
-        }
-        .controls {
-            background: #fff;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        h2 { border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; margin-top: 0; }
-        input[type="file"] { margin-top: 1rem; }
-
-        /* Estilos dos Blocos Colapsáveis */
-        details {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            color: var(--text-main);
+            background-color: var(--bg-color);
             overflow: hidden;
         }
-        summary {
-            background: #f0f4f8;
-            padding: 1rem 1.5rem;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #2c3e50;
+
+        /* Layout Dividido 50/50 */
+        .panel {
+            flex: 1;
+            height: 100%;
+            overflow-y: auto;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        #left-panel {
+            border-right: 2px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        #right-panel {
+            background-color: var(--panel-bg);
+            box-shadow: -4px 0 15px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Estilos Globais */
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            margin: 1.5rem 0 0.5rem 0;
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
             cursor: pointer;
-            user-select: none;
+            font-weight: 500;
             transition: background 0.2s;
         }
-        summary:hover {
-            background: #e2e8f0;
-        }
-        .content-area {
-            padding: 1.5rem;
+
+        button:hover {
+            background-color: var(--primary-hover);
         }
 
-        /* Layout de cada comentário */
+        input[type="text"] {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* --- LADO ESQUERDO: Leitor de Comentários --- */
+        .controls-left {
+            background: var(--panel-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        details {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        summary {
+            background: #e2e8f0;
+            padding: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
         .comment-card {
             display: flex;
-            gap: 2rem;
-            padding: 1.5rem 0;
-            border-bottom: 1px solid #eaeaea;
-        }
-        .comment-card:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        /* Lado esquerdo: Meta informações */
         .meta-side {
-            flex: 0 0 200px;
+            flex: 0 0 150px;
             background: #f8fafc;
             padding: 1rem;
             border-radius: 6px;
-            border-left: 4px solid #4ea775;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            border-left: 4px solid var(--primary);
         }
-        .meta-side.mode-color {
-            border-left-color: #4e79a7;
+
+        .text-side {
+            flex: 1;
         }
-        .user-index {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #333;
-        }
-        .ranking-list {
-            font-size: 0.9rem;
-            color: #555;
+
+        .text-block p {
+            margin: 0;
             background: #fff;
-            padding: 0.5rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            word-break: break-word;
+            line-height: 1.5;
         }
-        .top-choice {
-            font-weight: bold;
+
+        .text-block h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        ::selection {
+            background: #b3d4fc;
             color: #000;
         }
 
-        /* Lado direito: Textos */
-        .text-side {
-            flex: 1;
+        /* --- LADO DIREITO: Sidebar de QDA --- */
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .btn-danger {
+            background-color: #e53e3e;
+        }
+
+        .btn-danger:hover {
+            background-color: #c53030;
+        }
+
+        /* Gerenciador de Tags */
+        .tag-manager-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag-list-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .tag-badge button {
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            padding: 0 4px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: inherit;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Área de Codificação (Trecho Atual) */
+        .coding-area {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e0;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .coding-area.active {
+            border-color: var(--primary);
+            background: #ebf8ff;
+        }
+
+        #selectedTextDisplay {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.5rem;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+            margin-bottom: 1rem;
+            background: #fff;
+        }
+
+        .available-tags-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .tag-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* Lista de Trechos Salvos */
+        .excerpts-list {
             display: flex;
             flex-direction: column;
             gap: 1rem;
+            margin-top: 1rem;
         }
-        .text-block h4 {
-            margin: 0 0 0.25rem 0;
-            font-size: 0.95rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .text-block p {
-            margin: 0;
-            font-size: 1.05rem;
-            color: #1a202c;
+
+        .excerpt-card {
             background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        .empty-text {
-            color: #a0aec0 !important;
+
+        .excerpt-text {
             font-style: italic;
+            color: #4a5568;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            border-left: 3px solid var(--border-color);
+            padding-left: 0.75rem;
+        }
+
+        .excerpt-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            font-weight: bold;
+        }
+
+        .excerpt-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .btn-small {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            background: #edf2f7;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+
+        .btn-small:hover {
+            background: #e2e8f0;
         }
     </style>
 </head>
+
 <body>
 
-    <div class="controls">
-        <h2>Painel de Análise Qualitativa</h2>
-        <p>Selecione o arquivo JSON do experimento para visualizar os comentários ordenados pela preferência (Top 1) do usuário.</p>
-        <input type="file" id="fileInput" accept=".json" />
+    <div id="left-panel" class="panel">
+        <div class="controls-left">
+            <h2>Dados Originais (Leitura)</h2>
+            <p style="font-size: 0.9rem; margin-top:0;">1. Selecione o JSON. 2. <b>Destaque o texto com o mouse</b> para
+                enviá-lo ao painel de codificação.</p>
+            <input type="file" id="fileInput" accept=".json" />
+        </div>
+
+        <details id="detailsTechniques" open style="display: none;">
+            <summary>Comentários: Técnicas</summary>
+            <div id="techCommentsArea"></div>
+        </details>
+
+        <details id="detailsModes" open style="display: none;">
+            <summary>Comentários: Modos</summary>
+            <div id="modeCommentsArea"></div>
+        </details>
     </div>
 
-    <details id="detailsTechniques" open style="display: none;">
-        <summary>Comentários sobre Técnicas (Tipos de Visualização)</summary>
-        <div class="content-area" id="techCommentsArea"></div>
-    </details>
+    <div id="right-panel" class="panel">
+        <div class="top-actions">
+            <h2 style="margin:0; border:none; padding:0;">Análise Temática</h2>
+            <div>
+                <button id="btnExport" title="Baixar JSON das Tags e Trechos">📥 Exportar Dados</button>
+                <button id="btnClear" class="btn-danger" title="Apagar tudo do LocalStorage">🗑️ Limpar</button>
+            </div>
+        </div>
 
-    <details id="detailsModes" open style="display: none;">
-        <summary>Comentários sobre Modos (Modos de Configuração)</summary>
-        <div class="content-area" id="modeCommentsArea"></div>
-    </details>
+        <h3>Gerenciar Tags</h3>
+        <div class="tag-manager-row">
+            <input type="text" id="newTagInput" placeholder="Ex: Curva de Aprendizado" autocomplete="off" />
+            <button id="btnAddTag">Criar</button>
+        </div>
+        <div class="tag-list-display" id="globalTagsContainer"></div>
+
+        <div class="coding-area" id="codingArea">
+            <h3 style="margin-top: 0;">Trecho Selecionado / Edição</h3>
+            <div id="currentSourceMeta"
+                style="font-size: 0.8rem; color: #718096; margin-bottom: 0.5rem; font-weight:bold;"></div>
+            <textarea id="selectedTextDisplay"
+                placeholder="Selecione um texto no painel esquerdo ou digite aqui..."></textarea>
+
+            <div style="font-weight: 500; margin-bottom: 0.5rem; font-size: 0.9rem;">Aplicar Tags:</div>
+            <div class="available-tags-checkboxes" id="checkboxesContainer">
+                <em style="color:#a0aec0; font-size:0.85rem;">Crie tags acima primeiro.</em>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button id="btnCancelEdit" class="btn-small" style="display:none;">Cancelar Edição</button>
+                <button id="btnSaveExcerpt">💾 Salvar Trecho Codificado</button>
+            </div>
+        </div>
+
+        <h3>Trechos Codificados (<span id="excerptCount">0</span>)</h3>
+        <div class="excerpts-list" id="savedExcerptsContainer"></div>
+    </div>
 
     <script>
-        document.getElementById('fileInput').addEventListener('change', function(e) {
+        // ==========================================
+        // ESTADO GLOBAL (QDA DATA)
+        // ==========================================
+        let qdaData = {
+            tags: [],      // { id, name, color }
+            excerpts: []   // { id, text, sourceUser, tagIds }
+        };
+        let currentEditingExcerptId = null;
+        let currentSelectionSource = "Origem Manual"; // Guarda de qual usuário veio a seleção
+        let globalLoadedData = { techList: [], modeList: [] }; // Para permitir re-renderização e highlights
+
+        // Paleta de cores suaves para as tags
+        const tagColors = ["#fed7d7", "#feebc8", "#fefcbf", "#c6f6d5", "#b2f5ea", "#bee3f8", "#c3dafe", "#e9d8fd", "#fed7e2"];
+
+        // ==========================================
+        // INICIALIZAÇÃO & LOCALSTORAGE
+        // ==========================================
+        function init() {
+            const saved = localStorage.getItem('experiment_qda_data');
+            if (saved) {
+                try {
+                    qdaData = JSON.parse(saved);
+                } catch (e) { console.error("Erro ao ler localStorage", e); }
+            }
+            renderAllQDA();
+        }
+
+        function saveToLocal() {
+            localStorage.setItem('experiment_qda_data', JSON.stringify(qdaData));
+            renderAllQDA();
+            if (typeof reRenderLeftPanel === 'function') reRenderLeftPanel();
+        }
+
+        // ==========================================
+        // GERENCIAMENTO DE TAGS
+        // ==========================================
+        document.getElementById('btnAddTag').addEventListener('click', () => {
+            const input = document.getElementById('newTagInput');
+            const name = input.value.trim();
+            if (!name) return;
+
+            // Verifica duplicidade
+            if (qdaData.tags.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                alert("Esta tag já existe."); return;
+            }
+
+            const newTag = {
+                id: 'tag_' + Date.now(),
+                name: name,
+                color: tagColors[qdaData.tags.length % tagColors.length]
+            };
+
+            qdaData.tags.push(newTag);
+            input.value = '';
+            saveToLocal();
+        });
+
+        function deleteTag(tagId) {
+            if (confirm("Excluir esta tag? Ela será removida de todos os trechos.")) {
+                qdaData.tags = qdaData.tags.filter(t => t.id !== tagId);
+                qdaData.excerpts.forEach(exc => {
+                    exc.tagIds = exc.tagIds.filter(id => id !== tagId);
+                });
+                saveToLocal();
+            }
+        }
+
+        // ==========================================
+        // GERENCIAMENTO DE TRECHOS (EXCERPTS)
+        // ==========================================
+        document.getElementById('btnSaveExcerpt').addEventListener('click', () => {
+            const text = document.getElementById('selectedTextDisplay').value.trim();
+            if (!text) { alert("O trecho não pode estar vazio."); return; }
+
+            // Pega as tags checadas
+            const checkedBoxes = document.querySelectorAll('#checkboxesContainer input[type="checkbox"]:checked');
+            const selectedTagIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+            if (currentEditingExcerptId) {
+                // Modo Edição
+                const exc = qdaData.excerpts.find(e => e.id === currentEditingExcerptId);
+                if (exc) {
+                    exc.text = text;
+                    exc.tagIds = selectedTagIds;
+                }
+                currentEditingExcerptId = null;
+                document.getElementById('btnCancelEdit').style.display = 'none';
+            } else {
+                // Modo Criação
+                const newExcerpt = {
+                    id: 'exc_' + Date.now(),
+                    text: text,
+                    sourceUser: currentSelectionSource,
+                    tagIds: selectedTagIds
+                };
+                qdaData.excerpts.unshift(newExcerpt); // Adiciona no topo
+            }
+
+            // Reseta a área
+            document.getElementById('selectedTextDisplay').value = '';
+            document.getElementById('currentSourceMeta').innerText = '';
+            currentSelectionSource = "Origem Manual";
+            document.getElementById('codingArea').classList.remove('active');
+
+            saveToLocal();
+        });
+
+        document.getElementById('btnCancelEdit').addEventListener('click', () => {
+            currentEditingExcerptId = null;
+            document.getElementById('btnCancelEdit').style.display = 'none';
+            document.getElementById('selectedTextDisplay').value = '';
+            document.getElementById('currentSourceMeta').innerText = '';
+            document.getElementById('codingArea').classList.remove('active');
+            renderAllQDA(); // Recarrega os checkboxes vazios
+        });
+
+        function editExcerpt(excId) {
+            const exc = qdaData.excerpts.find(e => e.id === excId);
+            if (!exc) return;
+
+            currentEditingExcerptId = exc.id;
+            currentSelectionSource = exc.sourceUser;
+
+            document.getElementById('selectedTextDisplay').value = exc.text;
+            document.getElementById('currentSourceMeta').innerText = `Editando trecho de: ${exc.sourceUser}`;
+            document.getElementById('codingArea').classList.add('active');
+            document.getElementById('btnCancelEdit').style.display = 'inline-block';
+
+            // Rola a tela para a área de edição
+            document.getElementById('right-panel').scrollTo({ top: 0, behavior: 'smooth' });
+            renderAllQDA(); // Atualiza para marcar os checkboxes corretos
+        }
+
+        function deleteExcerpt(excId) {
+            if (confirm("Remover este trecho salvo?")) {
+                qdaData.excerpts = qdaData.excerpts.filter(e => e.id !== excId);
+                if (currentEditingExcerptId === excId) {
+                    document.getElementById('btnCancelEdit').click(); // Cancela edição se estiver editando o apagado
+                }
+                saveToLocal();
+            }
+        }
+
+        // ==========================================
+        // RENDERIZAÇÃO DA INTERFACE QDA (DIREITA)
+        // ==========================================
+        function renderAllQDA() {
+            // 1. Renderiza Tags Globais
+            const tagsCont = document.getElementById('globalTagsContainer');
+            tagsCont.innerHTML = '';
+            qdaData.tags.forEach(tag => {
+                const badge = document.createElement('div');
+                badge.className = 'tag-badge';
+                badge.style.backgroundColor = tag.color;
+                badge.innerHTML = `<span>${tag.name}</span> <button onclick="deleteTag('${tag.id}')" title="Excluir tag">×</button>`;
+                tagsCont.appendChild(badge);
+            });
+
+            // 2. Renderiza Checkboxes para a área de Edição
+            const checkCont = document.getElementById('checkboxesContainer');
+            checkCont.innerHTML = qdaData.tags.length === 0 ? '<em style="color:#a0aec0; font-size:0.85rem;">Crie tags acima primeiro.</em>' : '';
+
+            // Se estiver editando, precisamos saber quais tags estão marcadas
+            let activeTags = [];
+            if (currentEditingExcerptId) {
+                const exc = qdaData.excerpts.find(e => e.id === currentEditingExcerptId);
+                if (exc) activeTags = exc.tagIds;
+            }
+
+            qdaData.tags.forEach(tag => {
+                const label = document.createElement('label');
+                label.className = 'tag-checkbox-label';
+                const isChecked = activeTags.includes(tag.id) ? 'checked' : '';
+                label.innerHTML = `<input type="checkbox" value="${tag.id}" ${isChecked}> 
+                                   <span class="tag-badge" style="background-color:${tag.color}; padding: 2px 6px; font-size:0.8rem;">${tag.name}</span>`;
+                checkCont.appendChild(label);
+            });
+
+            // 3. Renderiza Trechos Salvos
+            const excerptsCont = document.getElementById('savedExcerptsContainer');
+            excerptsCont.innerHTML = '';
+            document.getElementById('excerptCount').innerText = qdaData.excerpts.length;
+
+            qdaData.excerpts.forEach(exc => {
+                const card = document.createElement('div');
+                card.className = 'excerpt-card';
+
+                // Mapeia IDs das tags para os objetos de tag para exibir
+                const tagsHtml = exc.tagIds.map(id => {
+                    const t = qdaData.tags.find(tag => tag.id === id);
+                    return t ? `<span class="tag-badge" style="background-color:${t.color}; font-size:0.75rem; padding: 2px 6px;">${t.name}</span>` : '';
+                }).join('');
+
+                card.innerHTML = `
+                    <div class="excerpt-meta">Origem: ${exc.sourceUser}</div>
+                    <div class="excerpt-text">"${exc.text}"</div>
+                    <div class="tag-list-display">${tagsHtml}</div>
+                    <div class="excerpt-actions">
+                        <button class="btn-small" onclick="editExcerpt('${exc.id}')">✏️ Editar</button>
+                        <button class="btn-small" onclick="deleteExcerpt('${exc.id}')">🗑️ Remover</button>
+                    </div>
+                `;
+                excerptsCont.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // EXPORTAR & LIMPAR
+        // ==========================================
+        document.getElementById('btnExport').addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(qdaData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "analise_tematica_icipo.json");
+            document.body.appendChild(downloadAnchorNode); // Requerido pro firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        });
+
+        document.getElementById('btnClear').addEventListener('click', () => {
+            if (confirm("ATENÇÃO: Isso apagará TODOS os trechos e tags do navegador atual. Deseja continuar?")) {
+                localStorage.removeItem('experiment_qda_data');
+                qdaData = { tags: [], excerpts: [] };
+                currentEditingExcerptId = null;
+                document.getElementById('btnCancelEdit').style.display = 'none';
+                document.getElementById('selectedTextDisplay').value = '';
+                document.getElementById('codingArea').classList.remove('active');
+                renderAllQDA();
+                if (typeof reRenderLeftPanel === 'function') reRenderLeftPanel();
+            }
+        });
+
+        // ==========================================
+        // LEITOR ESQUERDO (CAPTURA DE TEXTO)
+        // ==========================================
+        // Escuta seleções de texto feitas dentro do painel esquerdo
+        document.getElementById('left-panel').addEventListener('mouseup', () => {
+            const selection = window.getSelection();
+            const text = selection.toString().trim();
+
+            if (text.length > 0) {
+                // Tenta descobrir de qual usuário veio o texto
+                let userRef = "Origem Desconhecida";
+
+                // Pega o nó onde a seleção começou
+                const node = selection.anchorNode;
+                if (node) {
+                    // Sobe na árvore do DOM procurando o atributo data-user que vamos inserir no gerador
+                    const card = node.parentElement ? node.parentElement.closest('.comment-card') : null;
+                    if (card && card.dataset.user) {
+                        userRef = `Usuário ${card.dataset.user} (${card.dataset.type})`;
+                    }
+                }
+
+                // Não sobrepõe se o usuário estiver ativamente editando outro trecho já salvo
+                if (!currentEditingExcerptId) {
+                    document.getElementById('selectedTextDisplay').value = text;
+                    document.getElementById('currentSourceMeta').innerText = `Selecionado de: ${userRef}`;
+                    currentSelectionSource = userRef;
+
+                    const codingArea = document.getElementById('codingArea');
+                    codingArea.classList.add('active');
+
+                    // Um pequeno destaque visual de que algo foi capturado
+                    setTimeout(() => codingArea.classList.remove('active'), 600);
+                }
+            }
+        });
+
+        // ==========================================
+        // LEITOR ESQUERDO (RENDERIZAÇÃO DO ARQUIVO)
+        // ==========================================
+        document.getElementById('fileInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 try {
                     let data = JSON.parse(event.target.result);
-                    if (!Array.isArray(data)) data = [data]; 
-                    
+                    if (!Array.isArray(data)) data = [data];
                     processAndRenderComments(data);
                 } catch (error) {
-                    alert("Erro ao processar o arquivo JSON. Verifique o formato.");
-                    console.error(error);
+                    alert("Erro ao processar o arquivo JSON.");
                 }
             };
             reader.readAsText(file);
         });
 
         function processAndRenderComments(usersData) {
-            let techList = [];
-            let modeList = [];
-
-            // 1. Extração dos dados
+            let techList = []; let modeList = [];
             usersData.forEach((user, index) => {
                 const exp = user.experimentData;
                 if (!exp) return;
-
-                // Extrai Técnicas
                 if (exp.finalRankingTechniques && exp.finalCommentsTechniques) {
                     techList.push({
-                        userIndex: index,
-                        ranking: exp.finalRankingTechniques.order || [],
-                        why: exp.finalCommentsTechniques.rankingWhy || "",
-                        other: exp.finalCommentsTechniques.otherComments || ""
+                        userIndex: index, typeStr: 'Técnicas', ranking: exp.finalRankingTechniques.order || [],
+                        why: exp.finalCommentsTechniques.rankingWhy || "", other: exp.finalCommentsTechniques.otherComments || ""
                     });
                 }
-
-                // Extrai Modos
                 if (exp.finalRankingModes && exp.finalCommentsModes) {
                     modeList.push({
-                        userIndex: index,
-                        ranking: exp.finalRankingModes.order || [],
-                        why: exp.finalCommentsModes.rankingWhy || "",
-                        other: exp.finalCommentsModes.otherComments || ""
+                        userIndex: index, typeStr: 'Modos', ranking: exp.finalRankingModes.order || [],
+                        why: exp.finalCommentsModes.rankingWhy || "", other: exp.finalCommentsModes.otherComments || ""
                     });
                 }
             });
 
-            // 2. Ordenação (Alfabética com base no primeiro item do ranking)
-            techList.sort((a, b) => {
-                const topA = a.ranking[0] || "";
-                const topB = b.ranking[0] || "";
-                return topA.localeCompare(topB);
-            });
+            techList.sort((a, b) => (a.ranking[0] || "").localeCompare(b.ranking[0] || ""));
+            modeList.sort((a, b) => (a.ranking[0] || "").localeCompare(b.ranking[0] || ""));
 
-            modeList.sort((a, b) => {
-                const topA = a.ranking[0] || "";
-                const topB = b.ranking[0] || "";
-                return topA.localeCompare(topB);
-            });
+            globalLoadedData.techList = techList;
+            globalLoadedData.modeList = modeList;
 
-            // 3. Renderização
-            renderList(techList, 'techCommentsArea', false);
-            renderList(modeList, 'modeCommentsArea', true);
+            reRenderLeftPanel();
 
-            // Mostra os blocos agora que têm conteúdo
             document.getElementById('detailsTechniques').style.display = 'block';
             document.getElementById('detailsModes').style.display = 'block';
         }
 
-        function renderList(listData, containerId, isMode) {
+        function reRenderLeftPanel() {
+            renderList(globalLoadedData.techList, 'techCommentsArea');
+            renderList(globalLoadedData.modeList, 'modeCommentsArea');
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function applyHighlights(text, excerpts) {
+            if (!text) return '<em>Sem resposta</em>';
+            if (excerpts.length === 0) return text;
+
+            let result = text;
+            const sortedExcerpts = [...excerpts].sort((a, b) => b.text.length - a.text.length);
+
+            sortedExcerpts.forEach((exc, i) => {
+                if (!exc.text) return;
+                const token = `\x01${i}\x02`;
+                const regex = new RegExp("(" + escapeRegExp(exc.text) + ")", "g");
+                result = result.replace(regex, token + "$1" + "\x03");
+            });
+
+            result = result.replace(/\x01\d+\x02/g, "<mark style='background-color: #fef08a; padding: 0 2px; border-radius: 2px; color: #1a202c;'>")
+                .replace(/\x03/g, "</mark>");
+
+            return result;
+        }
+
+        function renderList(listData, containerId) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
-
-            if (listData.length === 0) {
-                container.innerHTML = '<p class="empty-text">Nenhum dado encontrado para esta seção.</p>';
-                return;
-            }
+            if (listData.length === 0) return;
 
             listData.forEach(item => {
-                // Formata o ranking com setas (A > B > C)
-                const formattedRanking = item.ranking.map((r, i) => {
-                    return i === 0 ? `<span class="top-choice">${r} (1º)</span>` : r;
-                }).join(' <br>➔ ');
-
-                // Cria o Card
+                const formattedRanking = item.ranking.map((r, i) => i === 0 ? `<b>${r} (1º)</b>` : r).join(' ➔ ');
                 const card = document.createElement('div');
                 card.className = 'comment-card';
+                // Usamos atributos data-* para o JS achar a origem quando o mouse seleciona o texto
+                card.dataset.user = item.userIndex;
+                card.dataset.type = item.typeStr;
 
-                // Tratamento de textos vazios
-                const whyText = item.why.trim() !== "" ? item.why : '<span class="empty-text">Sem resposta.</span>';
-                const otherText = item.other.trim() !== "" ? item.other : '<span class="empty-text">Sem resposta.</span>';
+                const sourceUser = `Usuário ${item.userIndex} (${item.typeStr})`;
+                const userExcerpts = qdaData.excerpts.filter(e => e.sourceUser === sourceUser);
 
-                // Cor da borda baseada na seção
-                const metaClass = isMode ? 'meta-side mode-color' : 'meta-side';
+                const whyHtml = applyHighlights(item.why, userExcerpts);
+                const otherHtml = applyHighlights(item.other, userExcerpts);
 
                 card.innerHTML = `
-                    <div class="${metaClass}">
-                        <div class="user-index">Usuário ${item.userIndex}</div>
-                        <div class="ranking-list">
-                            <strong>Ranking:</strong><br>
-                            ${formattedRanking}
-                        </div>
+                    <div class="meta-side">
+                        <div style="font-weight:bold;font-size:1.1rem;">Usuário ${item.userIndex}</div>
+                        <div style="font-size:0.85rem; margin-top:0.5rem; color:#555;">${formattedRanking}</div>
                     </div>
                     <div class="text-side">
-                        <div class="text-block">
-                            <h4>Por que essa ordem? (rankingWhy)</h4>
-                            <p>${whyText}</p>
-                        </div>
-                        <div class="text-block">
-                            <h4>Outros Comentários (otherComments)</h4>
-                            <p>${otherText}</p>
-                        </div>
+                        <div class="text-block"><h4>Por que essa ordem?</h4><p>${whyHtml}</p></div>
+                        <div class="text-block" style="margin-top:1rem;"><h4>Outros Comentários</h4><p>${otherHtml}</p></div>
                     </div>
                 `;
-
                 container.appendChild(card);
             });
         }
+
+        // Boot
+        init();
     </script>
 </body>
+
 </html>
