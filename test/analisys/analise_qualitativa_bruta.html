@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Qualitativa - Comentários</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1000px;
+            margin: 2rem auto;
+            color: #333;
+            background-color: #fafafa;
+            line-height: 1.5;
+        }
+        .controls {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        h2 { border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; margin-top: 0; }
+        input[type="file"] { margin-top: 1rem; }
+
+        /* Estilos dos Blocos Colapsáveis */
+        details {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        summary {
+            background: #f0f4f8;
+            padding: 1rem 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        summary:hover {
+            background: #e2e8f0;
+        }
+        .content-area {
+            padding: 1.5rem;
+        }
+
+        /* Layout de cada comentário */
+        .comment-card {
+            display: flex;
+            gap: 2rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .comment-card:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        /* Lado esquerdo: Meta informações */
+        .meta-side {
+            flex: 0 0 200px;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #4ea775;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .meta-side.mode-color {
+            border-left-color: #4e79a7;
+        }
+        .user-index {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        .ranking-list {
+            font-size: 0.9rem;
+            color: #555;
+            background: #fff;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            word-break: break-word;
+        }
+        .top-choice {
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* Lado direito: Textos */
+        .text-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .text-block h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.95rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .text-block p {
+            margin: 0;
+            font-size: 1.05rem;
+            color: #1a202c;
+            background: #fff;
+        }
+        .empty-text {
+            color: #a0aec0 !important;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <h2>Painel de Análise Qualitativa</h2>
+        <p>Selecione o arquivo JSON do experimento para visualizar os comentários ordenados pela preferência (Top 1) do usuário.</p>
+        <input type="file" id="fileInput" accept=".json" />
+    </div>
+
+    <details id="detailsTechniques" open style="display: none;">
+        <summary>Comentários sobre Técnicas (Tipos de Visualização)</summary>
+        <div class="content-area" id="techCommentsArea"></div>
+    </details>
+
+    <details id="detailsModes" open style="display: none;">
+        <summary>Comentários sobre Modos (Modos de Configuração)</summary>
+        <div class="content-area" id="modeCommentsArea"></div>
+    </details>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    let data = JSON.parse(event.target.result);
+                    if (!Array.isArray(data)) data = [data]; 
+                    
+                    processAndRenderComments(data);
+                } catch (error) {
+                    alert("Erro ao processar o arquivo JSON. Verifique o formato.");
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function processAndRenderComments(usersData) {
+            let techList = [];
+            let modeList = [];
+
+            // 1. Extração dos dados
+            usersData.forEach((user, index) => {
+                const exp = user.experimentData;
+                if (!exp) return;
+
+                // Extrai Técnicas
+                if (exp.finalRankingTechniques && exp.finalCommentsTechniques) {
+                    techList.push({
+                        userIndex: index,
+                        ranking: exp.finalRankingTechniques.order || [],
+                        why: exp.finalCommentsTechniques.rankingWhy || "",
+                        other: exp.finalCommentsTechniques.otherComments || ""
+                    });
+                }
+
+                // Extrai Modos
+                if (exp.finalRankingModes && exp.finalCommentsModes) {
+                    modeList.push({
+                        userIndex: index,
+                        ranking: exp.finalRankingModes.order || [],
+                        why: exp.finalCommentsModes.rankingWhy || "",
+                        other: exp.finalCommentsModes.otherComments || ""
+                    });
+                }
+            });
+
+            // 2. Ordenação (Alfabética com base no primeiro item do ranking)
+            techList.sort((a, b) => {
+                const topA = a.ranking[0] || "";
+                const topB = b.ranking[0] || "";
+                return topA.localeCompare(topB);
+            });
+
+            modeList.sort((a, b) => {
+                const topA = a.ranking[0] || "";
+                const topB = b.ranking[0] || "";
+                return topA.localeCompare(topB);
+            });
+
+            // 3. Renderização
+            renderList(techList, 'techCommentsArea', false);
+            renderList(modeList, 'modeCommentsArea', true);
+
+            // Mostra os blocos agora que têm conteúdo
+            document.getElementById('detailsTechniques').style.display = 'block';
+            document.getElementById('detailsModes').style.display = 'block';
+        }
+
+        function renderList(listData, containerId, isMode) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (listData.length === 0) {
+                container.innerHTML = '<p class="empty-text">Nenhum dado encontrado para esta seção.</p>';
+                return;
+            }
+
+            listData.forEach(item => {
+                // Formata o ranking com setas (A > B > C)
+                const formattedRanking = item.ranking.map((r, i) => {
+                    return i === 0 ? `<span class="top-choice">${r} (1º)</span>` : r;
+                }).join(' <br>➔ ');
+
+                // Cria o Card
+                const card = document.createElement('div');
+                card.className = 'comment-card';
+
+                // Tratamento de textos vazios
+                const whyText = item.why.trim() !== "" ? item.why : '<span class="empty-text">Sem resposta.</span>';
+                const otherText = item.other.trim() !== "" ? item.other : '<span class="empty-text">Sem resposta.</span>';
+
+                // Cor da borda baseada na seção
+                const metaClass = isMode ? 'meta-side mode-color' : 'meta-side';
+
+                card.innerHTML = `
+                    <div class="${metaClass}">
+                        <div class="user-index">Usuário ${item.userIndex}</div>
+                        <div class="ranking-list">
+                            <strong>Ranking:</strong><br>
+                            ${formattedRanking}
+                        </div>
+                    </div>
+                    <div class="text-side">
+                        <div class="text-block">
+                            <h4>Por que essa ordem? (rankingWhy)</h4>
+                            <p>${whyText}</p>
+                        </div>
+                        <div class="text-block">
+                            <h4>Outros Comentários (otherComments)</h4>
+                            <p>${otherText}</p>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
