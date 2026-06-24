@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise do Experimento - Beeswarm com Outliers</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 2rem auto;
+            color: #333;
+            background-color: #fafafa;
+        }
+        .controls {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .plot-container {
+            background: #fff;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative; /* Essencial para ancorar os outliers absolute */
+        }
+        h2 { border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; }
+        h3 { color: #555; margin-top: 0; font-size: 1.1rem; }
+        input[type="file"] { margin-top: 1rem; }
+        
+        /* Estilos para a caixa de outliers */
+        .outliers-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px dashed #ccc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        .outliers-label {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+        .outlier-dot {
+            width: 14px;
+            height: 14px;
+            cursor: help;
+            border: 1px solid rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        .outlier-dot:hover {
+            transform: scale(1.3);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
+</head>
+<body>
+
+    <div class="controls">
+        <h2>Painel de Resultados do Experimento</h2>
+        <p>Selecione o arquivo JSON contendo o array com os dados dos participantes.</p>
+        <input type="file" id="fileInput" accept=".json" />
+    </div>
+
+    <div id="plotsArea"></div>
+
+    <script>
+        // Escalas fixas para garantir consistência entre os gráficos e o HTML dos outliers
+        const colorDomain = ["manual", "opt", "llm"];
+        const colorRange = ["#4e79a7", "#f28e2c", "#e15759"]; // Azul, Laranja, Vermelho
+        const symbolDomain = ["psb25d", "psb3d"];
+        const symbolRange = ["circle", "square"];
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    let data = JSON.parse(event.target.result);
+                    if (!Array.isArray(data)) data = [data]; 
+                    renderPlots(data);
+                } catch (error) {
+                    alert("Erro ao processar o arquivo JSON. Verifique o formato.");
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function renderPlots(usersData) {
+            const container = document.getElementById('plotsArea');
+            container.innerHTML = ''; 
+
+            let flatData = [];
+
+            // 1. Extração dos dados
+            usersData.forEach((user, userIndex) => {
+                if (user.experimentData && user.experimentData.blocks) {
+                    user.experimentData.blocks.forEach(block => {
+                        const parts = block.visualizationId.split('_');
+                        const type = parts[0] || "Desconhecido";
+                        const mode = parts[1] || "Desconhecido";
+
+                        flatData.push({
+                            userIndex: userIndex,
+                            task: block.taskKey,
+                            dataset: block.datasetId,
+                            visType: type,
+                            visMode: mode,
+                            answer: block.answerNumber,
+                            correctAnswer: block.correctAnswer
+                        });
+                    });
+                }
+            });
+
+            // 2. Agrupamento
+            const groupedData = d3.group(flatData, d => d.task, d => d.dataset);
+
+            // 3. Processamento IQR e Renderização
+            groupedData.forEach((datasets, task) => {
+                datasets.forEach((dataPoints, dataset) => {
+                    
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'plot-container';
+                    
+                    const title = document.createElement('h3');
+                    title.textContent = `Tarefa: ${task} | Base de Dados: ${dataset}`;
+                    wrapper.appendChild(title);
+
+                    const targetValue = dataPoints[0].correctAnswer;
+
+                    // --- DETECÇÃO DE OUTLIERS (IQR) ---
+                    // Ordena as respostas
+                    dataPoints.sort((a, b) => d3.ascending(a.answer, b.answer));
+                    const answers = dataPoints.map(d => d.answer);
+                    
+                    // Calcula Q1, Q3 e Limites
+                    const q1 = d3.quantile(answers, 0.25);
+                    const q3 = d3.quantile(answers, 0.75);
+                    const iqr = q3 - q1;
+                    const lowerBound = q1 - 1.5 * iqr;
+                    const upperBound = q3 + 1.5 * iqr;
+
+                    // Separa os dados
+                    const normalData = dataPoints.filter(d => d.answer >= lowerBound && d.answer <= upperBound);
+                    const outlierData = dataPoints.filter(d => d.answer < lowerBound || d.answer > upperBound);
+
+                    // Construção do Beeswarm com dados normais
+                    const plot = Plot.plot({
+                        width: 850,
+                        height: 250,
+                        marginLeft: 40,
+                        marginRight: 40,
+                        x: { 
+                            label: "Valor da Resposta (Bruto) →",
+                            grid: true
+                        },
+                        color: { 
+                            legend: true,
+                            label: "Modo de Configuração",
+                            domain: colorDomain,
+                            range: colorRange
+                        },
+                        symbol: { 
+                            legend: true,
+                            label: "Tipo de Visualização",
+                            domain: symbolDomain,
+                            range: symbolRange
+                        },
+                        marks: [
+                            Plot.ruleX([targetValue], { 
+                                stroke: "red", 
+                                strokeWidth: 2, 
+                                strokeDasharray: "4,4",
+                                title: d => `Gabarito: ${targetValue}` 
+                            }),
+                            Plot.dot(normalData, Plot.dodgeY({
+                                x: "answer",
+                                fill: "visMode",
+                                symbol: "visType",
+                                r: 6,
+                                title: d => `Usuário (Index): ${d.userIndex}\nResp: ${d.answer}\nCorreto: ${d.correctAnswer}\nTipo: ${d.visType}\nModo: ${d.visMode}`
+                            }))
+                        ]
+                    });
+
+                    wrapper.appendChild(plot);
+
+                    // --- RENDERIZAÇÃO DOS OUTLIERS (HTML Overlay) ---
+                    if (outlierData.length > 0) {
+                        const outDiv = document.createElement('div');
+                        outDiv.className = 'outliers-box';
+                        
+                        const outLabel = document.createElement('span');
+                        outLabel.className = 'outliers-label';
+                        outLabel.textContent = `Outliers (${outlierData.length}):`;
+                        outDiv.appendChild(outLabel);
+                        
+                        outlierData.forEach(d => {
+                            // Mapeia a cor
+                            const colorIdx = colorDomain.indexOf(d.visMode);
+                            const color = colorIdx >= 0 ? colorRange[colorIdx] : "#000";
+                            
+                            // Mapeia o formato (circle para psb25d, square para psb3d)
+                            const isCircle = d.visType === "psb25d"; 
+                            
+                            const dot = document.createElement('div');
+                            dot.className = 'outlier-dot';
+                            dot.style.backgroundColor = color;
+                            dot.style.borderRadius = isCircle ? "50%" : "0%";
+                            
+                            // Tooltip detalhado indicando que é outlier
+                            dot.title = `⚠️ OUTLIER\nUsuário (Index): ${d.userIndex}\nResp: ${d.answer}\nCorreto: ${d.correctAnswer}\nTipo: ${d.visType}\nModo: ${d.visMode}`;
+                            
+                            outDiv.appendChild(dot);
+                        });
+                        
+                        wrapper.appendChild(outDiv);
+                    }
+
+                    container.appendChild(wrapper);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
