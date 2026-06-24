@@ -1,0 +1,53 @@
+participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,eventSteps,timestamp
+261f753e-7e18-4d84-b182-98fea0cf2219,1,4,T5,psb25d_opt,base-2-ensino-superior,canvasMouseDown,canvas,939;391,,2026-06-24T13:35:33.555Z
+261f753e-7e18-4d84-b182-98fea0cf2219,1,4,T5,psb25d_opt,base-2-ensino-superior,canvasMouseUp,canvas,939;391,,2026-06-24T13:35:33.643Z
+261f753e-7e18-4d84-b182-98fea0cf2219,1,5,T5,psb25d_llm,base-3-matriculas-fundamental,canvasMouseDown,canvas,781;194,,2026-06-24T13:37:04.183Z
+261f753e-7e18-4d84-b182-98fea0cf2219,1,5,T5,psb25d_llm,base-3-matriculas-fundamental,canvasMouseUp,canvas,781;194,,2026-06-24T13:37:04.534Z
+261f753e-7e18-4d84-b182-98fea0cf2219,1,5,T5,psb25d_llm,base-3-matriculas-fundamental,canvasMouseDown,canvas,520;255,,2026-06-24T13:37:05.263Z
+261f753e-7e18-4d84-b182-98fea0cf2219,1,5,T5,psb25d_llm,base-3-matriculas-fundamental,canvasMouseUp,canvas,520;255,,2026-06-24T13:37:05.327Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,2,T4,psb3d_manual,base-2-ensino-superior,slider,psbDepth,50,,2026-06-24T13:42:36.726Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,2,T4,psb3d_manual,base-2-ensino-superior,slider,psbDepth,17.4,,2026-06-24T13:42:43.727Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,2,T4,psb3d_manual,base-2-ensino-superior,slider,psbBreakStartRatio,0.85,,2026-06-24T13:42:49.782Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,2,T4,psb3d_manual,base-2-ensino-superior,slider,psbFoldVisualHeight,4,,2026-06-24T13:42:53.959Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,2,T4,psb3d_manual,base-2-ensino-superior,slider,psbDepth,0,,2026-06-24T13:43:06.561Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,2,T4,psb3d_manual,base-2-ensino-superior,slider,psbDepth,0,,2026-06-24T13:43:18.592Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,2,T4,psb3d_manual,base-2-ensino-superior,slider,psbBreakStartRatio,0.85,,2026-06-24T13:43:21.896Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,2,T4,psb3d_manual,base-2-ensino-superior,slider,psbDepth,0,,2026-06-24T13:43:29.904Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,3,T4,psb25d_llm,base-6-frota-motocicletas,canvasMouseDown,canvas,446;119,,2026-06-24T13:44:46.300Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,3,T4,psb25d_llm,base-6-frota-motocicletas,canvasMouseUp,canvas,446;119,,2026-06-24T13:44:46.380Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,3,T4,psb25d_llm,base-6-frota-motocicletas,canvasMouseDown,canvas,1;6,,2026-06-24T13:44:54.981Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,3,T4,psb25d_llm,base-6-frota-motocicletas,canvasMouseUp,canvas,1;6,,2026-06-24T13:44:55.037Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,3,T4,psb25d_llm,base-6-frota-motocicletas,canvasMouseDown,canvas,0;617,,2026-06-24T13:45:09.166Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,3,T4,psb25d_llm,base-6-frota-motocicletas,canvasMouseUp,canvas,0;617,,2026-06-24T13:45:09.301Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,3,T4,psb25d_llm,base-6-frota-motocicletas,canvasMouseDown,canvas,39;627,,2026-06-24T13:45:10.094Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,3,T4,psb25d_llm,base-6-frota-motocicletas,canvasMouseUp,canvas,39;627,,2026-06-24T13:45:10.141Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,4,T4,psb25d_manual,base-4-populacao-residente,slider,Posição da quebra,0.9,,2026-06-24T13:46:48.218Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,4,T4,psb25d_manual,base-4-populacao-residente,slider,Posição da quebra,0.31,,2026-06-24T13:47:12.573Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,4,T4,psb25d_manual,base-4-populacao-residente,slider,z,99,,2026-06-24T13:47:22.268Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,4,T4,psb25d_manual,base-4-populacao-residente,slider,gapSize,10,,2026-06-24T13:47:24.683Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,6,T4,psb25d_opt,base-3-matriculas-fundamental,canvasMouseDown,canvas,339;530,,2026-06-24T13:49:29.226Z
+261f753e-7e18-4d84-b182-98fea0cf2219,2,6,T4,psb25d_opt,base-3-matriculas-fundamental,canvasMouseUp,canvas,339;530,,2026-06-24T13:49:29.353Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,3,T1,psb25d_opt,base-2-ensino-superior,canvasMouseDown,canvas,688;558,,2026-06-24T13:52:52.451Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,3,T1,psb25d_opt,base-2-ensino-superior,canvasMouseUp,canvas,693;529,,2026-06-24T13:52:53.083Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,3,T1,psb25d_opt,base-2-ensino-superior,canvasMouseDown,canvas,555;12,,2026-06-24T13:52:53.547Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,3,T1,psb25d_opt,base-2-ensino-superior,canvasMouseUp,canvas,594;126,,2026-06-24T13:52:53.874Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,3,T1,psb25d_opt,base-2-ensino-superior,canvasMouseDown,canvas,707;72,,2026-06-24T13:52:54.635Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,3,T1,psb25d_opt,base-2-ensino-superior,canvasMouseUp,canvas,707;72,,2026-06-24T13:52:54.715Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,3,T1,psb25d_opt,base-2-ensino-superior,canvasMouseDown,canvas,707;72,,2026-06-24T13:52:54.795Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,3,T1,psb25d_opt,base-2-ensino-superior,canvasMouseUp,canvas,707;72,,2026-06-24T13:52:54.867Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,slider,gapSize,80,,2026-06-24T13:55:33.714Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,slider,gapSize,48,,2026-06-24T13:55:35.858Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,slider,z,79.9,,2026-06-24T13:55:36.811Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,slider,z,53.4,,2026-06-24T13:55:43.650Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,slider,Posição da quebra,0.82,,2026-06-24T13:55:44.850Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,slider,Posição da quebra,0.05,,2026-06-24T13:56:05.434Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,slider,z,0,,2026-06-24T13:56:09.027Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,canvasMouseDown,canvas,464;102,,2026-06-24T13:56:09.764Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,canvasMouseUp,canvas,459;179,,2026-06-24T13:56:10.484Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,slider,gapSize,60,,2026-06-24T13:56:17.050Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,5,T1,psb25d_manual,base-6-frota-motocicletas,slider,z,93.4,,2026-06-24T13:56:25.468Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,6,T1,psb25d_llm,base-1-pib,canvasMouseDown,canvas,162;141,,2026-06-24T13:56:58.902Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,6,T1,psb25d_llm,base-1-pib,canvasMouseUp,canvas,162;141,,2026-06-24T13:56:58.998Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,6,T1,psb25d_llm,base-1-pib,canvasMouseDown,canvas,132;135,,2026-06-24T13:56:59.333Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,6,T1,psb25d_llm,base-1-pib,canvasMouseDown,canvas,374;145,,2026-06-24T13:57:00.758Z
+261f753e-7e18-4d84-b182-98fea0cf2219,3,6,T1,psb25d_llm,base-1-pib,canvasMouseUp,canvas,374;143,,2026-06-24T13:57:00.838Z
