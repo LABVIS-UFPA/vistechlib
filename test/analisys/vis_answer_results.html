@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análise do Experimento - Beeswarm com Outliers</title>
+    <title>Análise do Experimento - Beeswarm</title>
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -25,24 +25,24 @@
             margin-bottom: 2rem;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            position: relative; /* Essencial para ancorar os outliers absolute */
+            position: relative;
         }
         h2 { border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; }
         h3 { color: #555; margin-top: 0; font-size: 1.1rem; }
         input[type="file"] { margin-top: 1rem; }
         
-        /* Estilos para a caixa de outliers */
-        .outliers-box {
+        /* Controles Individuais no Canto Superior Direito */
+        .top-right-controls {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border: 1px dashed #ccc;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 6px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             z-index: 10;
         }
@@ -50,7 +50,6 @@
             font-size: 0.85rem;
             color: #666;
             font-weight: bold;
-            margin-right: 4px;
         }
         .outlier-dot {
             width: 14px;
@@ -61,6 +60,21 @@
         }
         .outlier-dot:hover {
             transform: scale(1.3);
+        }
+        .toggle-btn-small {
+            background: #eee;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .toggle-btn-small:hover {
+            background: #ddd;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -77,12 +91,19 @@
     <div id="plotsArea"></div>
 
     <script>
-        // Escalas fixas para garantir consistência entre os gráficos e o HTML dos outliers
+        // Estado global para armazenar os dados carregados e o estado de toggle de cada gráfico
+        let currentUsersData = null;
+        
+        // Objeto para rastrear se os outliers estão misturados no gráfico (true) ou separados (false)
+        // Chave: "Tarefa_BaseDeDados"
+        let mergedStates = {}; 
+
         const colorDomain = ["manual", "opt", "llm"];
         const colorRange = ["#4e79a7", "#f28e2c", "#e15759"]; // Azul, Laranja, Vermelho
         const symbolDomain = ["psb25d", "psb3d"];
         const symbolRange = ["circle", "square"];
 
+        // Evento de upload de arquivo
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -92,7 +113,10 @@
                 try {
                     let data = JSON.parse(event.target.result);
                     if (!Array.isArray(data)) data = [data]; 
-                    renderPlots(data);
+                    
+                    currentUsersData = data;
+                    mergedStates = {}; // Reseta os estados ao carregar um novo arquivo
+                    renderPlots(currentUsersData);
                 } catch (error) {
                     alert("Erro ao processar o arquivo JSON. Verifique o formato.");
                     console.error(error);
@@ -107,7 +131,6 @@
 
             let flatData = [];
 
-            // 1. Extração dos dados
             usersData.forEach((user, userIndex) => {
                 if (user.experimentData && user.experimentData.blocks) {
                     user.experimentData.blocks.forEach(block => {
@@ -128,13 +151,18 @@
                 }
             });
 
-            // 2. Agrupamento
             const groupedData = d3.group(flatData, d => d.task, d => d.dataset);
 
-            // 3. Processamento IQR e Renderização
             groupedData.forEach((datasets, task) => {
                 datasets.forEach((dataPoints, dataset) => {
                     
+                    const stateKey = `${task}_${dataset}`;
+                    // Inicializa o estado como false (outliers separados na caixa) se não existir
+                    if (mergedStates[stateKey] === undefined) {
+                        mergedStates[stateKey] = false; 
+                    }
+                    const isMerged = mergedStates[stateKey];
+
                     const wrapper = document.createElement('div');
                     wrapper.className = 'plot-container';
                     
@@ -144,23 +172,23 @@
 
                     const targetValue = dataPoints[0].correctAnswer;
 
-                    // --- DETECÇÃO DE OUTLIERS (IQR) ---
-                    // Ordena as respostas
+                    // --- DETECÇÃO DE OUTLIERS SEMPRE OCORRE ---
                     dataPoints.sort((a, b) => d3.ascending(a.answer, b.answer));
                     const answers = dataPoints.map(d => d.answer);
                     
-                    // Calcula Q1, Q3 e Limites
                     const q1 = d3.quantile(answers, 0.25);
                     const q3 = d3.quantile(answers, 0.75);
                     const iqr = q3 - q1;
                     const lowerBound = q1 - 1.5 * iqr;
                     const upperBound = q3 + 1.5 * iqr;
 
-                    // Separa os dados
-                    const normalData = dataPoints.filter(d => d.answer >= lowerBound && d.answer <= upperBound);
-                    const outlierData = dataPoints.filter(d => d.answer < lowerBound || d.answer > upperBound);
+                    const actualNormalData = dataPoints.filter(d => d.answer >= lowerBound && d.answer <= upperBound);
+                    const actualOutlierData = dataPoints.filter(d => d.answer < lowerBound || d.answer > upperBound);
 
-                    // Construção do Beeswarm com dados normais
+                    // Decide quais dados vão para o gráfico baseado no estado
+                    const plotData = isMerged ? dataPoints : actualNormalData;
+
+                    // Construção do Beeswarm
                     const plot = Plot.plot({
                         width: 850,
                         height: 250,
@@ -189,7 +217,7 @@
                                 strokeDasharray: "4,4",
                                 title: d => `Gabarito: ${targetValue}` 
                             }),
-                            Plot.dot(normalData, Plot.dodgeY({
+                            Plot.dot(plotData, Plot.dodgeY({
                                 x: "answer",
                                 fill: "visMode",
                                 symbol: "visType",
@@ -201,36 +229,51 @@
 
                     wrapper.appendChild(plot);
 
-                    // --- RENDERIZAÇÃO DOS OUTLIERS (HTML Overlay) ---
-                    if (outlierData.length > 0) {
-                        const outDiv = document.createElement('div');
-                        outDiv.className = 'outliers-box';
+                    // Renderiza a caixa de controle de outliers SE houver outliers detectados
+                    if (actualOutlierData.length > 0) {
+                        const controlsDiv = document.createElement('div');
+                        controlsDiv.className = 'top-right-controls';
                         
                         const outLabel = document.createElement('span');
                         outLabel.className = 'outliers-label';
-                        outLabel.textContent = `Outliers (${outlierData.length}):`;
-                        outDiv.appendChild(outLabel);
                         
-                        outlierData.forEach(d => {
-                            // Mapeia a cor
-                            const colorIdx = colorDomain.indexOf(d.visMode);
-                            const color = colorIdx >= 0 ? colorRange[colorIdx] : "#000";
+                        if (!isMerged) {
+                            outLabel.textContent = `Outliers (${actualOutlierData.length}):`;
+                            controlsDiv.appendChild(outLabel);
                             
-                            // Mapeia o formato (circle para psb25d, square para psb3d)
-                            const isCircle = d.visType === "psb25d"; 
-                            
-                            const dot = document.createElement('div');
-                            dot.className = 'outlier-dot';
-                            dot.style.backgroundColor = color;
-                            dot.style.borderRadius = isCircle ? "50%" : "0%";
-                            
-                            // Tooltip detalhado indicando que é outlier
-                            dot.title = `⚠️ OUTLIER\nUsuário (Index): ${d.userIndex}\nResp: ${d.answer}\nCorreto: ${d.correctAnswer}\nTipo: ${d.visType}\nModo: ${d.visMode}`;
-                            
-                            outDiv.appendChild(dot);
+                            // Renderiza os pontos na caixa apenas se estiverem separados
+                            actualOutlierData.forEach(d => {
+                                const colorIdx = colorDomain.indexOf(d.visMode);
+                                const color = colorIdx >= 0 ? colorRange[colorIdx] : "#000";
+                                const isCircle = d.visType === "psb25d"; 
+                                
+                                const dot = document.createElement('div');
+                                dot.className = 'outlier-dot';
+                                dot.style.backgroundColor = color;
+                                dot.style.borderRadius = isCircle ? "50%" : "0%";
+                                dot.title = `⚠️ OUTLIER\nUsuário (Index): ${d.userIndex}\nResp: ${d.answer}\nCorreto: ${d.correctAnswer}\nTipo: ${d.visType}\nModo: ${d.visMode}`;
+                                
+                                controlsDiv.appendChild(dot);
+                            });
+                        } else {
+                            outLabel.textContent = `Outliers plotados`;
+                            controlsDiv.appendChild(outLabel);
+                        }
+
+                        // Botão Toggle Individual
+                        const btn = document.createElement('button');
+                        btn.className = 'toggle-btn-small';
+                        // Se estão separados (!isMerged), o botão mostra ⬇️ para juntar. Se estão juntos (isMerged), mostra ⬆️ para separar.
+                        btn.textContent = isMerged ? "⬆️" : "⬇️";
+                        btn.title = isMerged ? "Remover outliers do gráfico" : "Colocar outliers de volta no gráfico";
+                        
+                        btn.addEventListener('click', () => {
+                            mergedStates[stateKey] = !isMerged;
+                            renderPlots(currentUsersData); // Re-renderiza tudo para aplicar o novo estado
                         });
-                        
-                        wrapper.appendChild(outDiv);
+
+                        controlsDiv.appendChild(btn);
+                        wrapper.appendChild(controlsDiv);
                     }
 
                     container.appendChild(wrapper);
