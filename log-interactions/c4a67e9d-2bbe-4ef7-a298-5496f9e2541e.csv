@@ -1,0 +1,24 @@
+participantId,blockNumber,taskIndexInBlock,taskKey,visualizationId,datasetId,eventType,eventTarget,eventValue,eventSteps,timestamp
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,1,T5,psb25d_manual,base-3-matriculas-fundamental,canvasMouseDown,canvas,453;474,,2026-06-24T14:56:04.550Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,1,T5,psb25d_manual,base-3-matriculas-fundamental,canvasMouseUp,canvas,453;474,,2026-06-24T14:56:04.646Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,1,T5,psb25d_manual,base-3-matriculas-fundamental,canvasMouseDown,canvas,459;420,,2026-06-24T14:56:04.998Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,1,T5,psb25d_manual,base-3-matriculas-fundamental,canvasMouseUp,canvas,466;433,,2026-06-24T14:56:05.357Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,1,T5,psb25d_manual,base-3-matriculas-fundamental,slider,z,36.9,,2026-06-24T14:56:12.558Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,1,T5,psb25d_manual,base-3-matriculas-fundamental,slider,Posição da quebra,0.32,,2026-06-24T14:56:33.693Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,1,T5,psb25d_manual,base-3-matriculas-fundamental,slider,z,70.6,,2026-06-24T14:56:46.502Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,1,T5,psb25d_manual,base-3-matriculas-fundamental,slider,gapSize,80,,2026-06-24T14:56:49.358Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,1,T5,psb25d_manual,base-3-matriculas-fundamental,slider,z,66.7,,2026-06-24T14:56:54.405Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,4,T5,psb25d_opt,base-2-ensino-superior,canvasMouseUp,canvas,246;640,,2026-06-24T15:02:46.700Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,4,T5,psb25d_opt,base-2-ensino-superior,canvasMouseDown,canvas,357;558,,2026-06-24T15:02:46.932Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,1,4,T5,psb25d_opt,base-2-ensino-superior,canvasMouseUp,canvas,357;558,,2026-06-24T15:02:46.995Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,2,1,T1,psb3d_manual,base-4-populacao-residente,zoom,canvas,zoomOut,1,2026-06-24T15:06:10.804Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,2,1,T1,psb3d_manual,base-4-populacao-residente,zoom,canvas,zoomOut,1,2026-06-24T15:06:11.187Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,2,2,T1,psb25d_opt,base-1-pib,canvasMouseDown,canvas,190;124,,2026-06-24T15:07:00.682Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,2,2,T1,psb25d_opt,base-1-pib,canvasMouseUp,canvas,188;157,,2026-06-24T15:07:01.017Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,3,1,T4,psb25d_manual,base-2-ensino-superior,zoom,canvas,zoomOut,1,2026-06-24T15:11:01.810Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,3,1,T4,psb25d_manual,base-2-ensino-superior,zoom,canvas,zoomIn,1,2026-06-24T15:11:02.242Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,3,2,T4,psb3d_opt,base-3-matriculas-fundamental,zoom,canvas,zoomOut,2,2026-06-24T15:12:08.456Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,3,3,T4,psb3d_manual,base-5-receita-impostos,zoom,canvas,zoomOut,2,2026-06-24T15:13:25.353Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,3,6,T4,psb3d_llm,base-4-populacao-residente,zoom,canvas,zoomOut,5,2026-06-24T15:16:30.014Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,3,6,T4,psb3d_llm,base-4-populacao-residente,zoom,canvas,zoomOut,2,2026-06-24T15:16:30.512Z
+c4a67e9d-2bbe-4ef7-a298-5496f9e2541e,3,6,T4,psb3d_llm,base-4-populacao-residente,zoom,canvas,zoomIn,1,2026-06-24T15:16:30.914Z
