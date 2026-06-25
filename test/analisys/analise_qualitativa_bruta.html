@@ -369,6 +369,7 @@
         };
         let currentEditingExcerptId = null;
         let currentSelectionSource = "Origem Manual"; // Guarda de qual usuário veio a seleção
+        let currentSelectionType = ""; // Guarda Tipo
         let globalLoadedData = { techList: [], modeList: [] }; // Para permitir re-renderização e highlights
 
         // Paleta de cores suaves para as tags
@@ -453,6 +454,7 @@
                     id: 'exc_' + Date.now(),
                     text: text,
                     sourceUser: currentSelectionSource,
+                    datasetType: currentSelectionType,
                     tagIds: selectedTagIds
                 };
                 qdaData.excerpts.unshift(newExcerpt); // Adiciona no topo
@@ -462,6 +464,7 @@
             document.getElementById('selectedTextDisplay').value = '';
             document.getElementById('currentSourceMeta').innerText = '';
             currentSelectionSource = "Origem Manual";
+            currentSelectionType = "";
             document.getElementById('codingArea').classList.remove('active');
 
             saveToLocal();
@@ -603,6 +606,7 @@
             if (text.length > 0) {
                 // Tenta descobrir de qual usuário veio o texto
                 let userRef = "Origem Desconhecida";
+                let datasetType = "";
 
                 // Pega o nó onde a seleção começou
                 const node = selection.anchorNode;
@@ -610,7 +614,8 @@
                     // Sobe na árvore do DOM procurando o atributo data-user que vamos inserir no gerador
                     const card = node.parentElement ? node.parentElement.closest('.comment-card') : null;
                     if (card && card.dataset.user) {
-                        userRef = `Usuário ${card.dataset.user} (${card.dataset.type})`;
+                        userRef = card.dataset.user;
+                        datasetType = card.dataset.type;
                     }
                 }
 
@@ -619,6 +624,7 @@
                     document.getElementById('selectedTextDisplay').value = text;
                     document.getElementById('currentSourceMeta').innerText = `Selecionado de: ${userRef}`;
                     currentSelectionSource = userRef;
+                    currentSelectionType = datasetType;
 
                     const codingArea = document.getElementById('codingArea');
                     codingArea.classList.add('active');
@@ -654,16 +660,28 @@
             usersData.forEach((user, index) => {
                 const exp = user.experimentData;
                 if (!exp) return;
+
+                const participantId = exp.participantId;
+
                 if (exp.finalRankingTechniques && exp.finalCommentsTechniques) {
                     techList.push({
-                        userIndex: index, typeStr: 'Técnicas', ranking: exp.finalRankingTechniques.order || [],
-                        why: exp.finalCommentsTechniques.rankingWhy || "", other: exp.finalCommentsTechniques.otherComments || ""
+                        participantId,
+                        userIndex: index,
+                        typeStr: 'Técnicas',
+                        ranking: exp.finalRankingTechniques.order || [],
+                        why: exp.finalCommentsTechniques.rankingWhy || "",
+                        other: exp.finalCommentsTechniques.otherComments || ""
                     });
                 }
+
                 if (exp.finalRankingModes && exp.finalCommentsModes) {
                     modeList.push({
-                        userIndex: index, typeStr: 'Modos', ranking: exp.finalRankingModes.order || [],
-                        why: exp.finalCommentsModes.rankingWhy || "", other: exp.finalCommentsModes.otherComments || ""
+                        participantId,
+                        userIndex: index,
+                        typeStr: 'Modos',
+                        ranking: exp.finalRankingModes.order || [],
+                        why: exp.finalCommentsModes.rankingWhy || "",
+                        other: exp.finalCommentsModes.otherComments || ""
                     });
                 }
             });
@@ -719,11 +737,12 @@
                 const card = document.createElement('div');
                 card.className = 'comment-card';
                 // Usamos atributos data-* para o JS achar a origem quando o mouse seleciona o texto
-                card.dataset.user = item.userIndex;
+                card.dataset.user = item.participantId;
                 card.dataset.type = item.typeStr;
 
-                const sourceUser = `Usuário ${item.userIndex} (${item.typeStr})`;
-                const userExcerpts = qdaData.excerpts.filter(e => e.sourceUser === sourceUser);
+                const userExcerpts = qdaData.excerpts.filter(
+                    e => e.sourceUser === item.participantId
+                );
 
                 const whyHtml = applyHighlights(item.why, userExcerpts);
                 const otherHtml = applyHighlights(item.other, userExcerpts);

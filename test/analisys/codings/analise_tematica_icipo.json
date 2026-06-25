@@ -1,0 +1,838 @@
+{
+  "tags": [
+    {
+      "id": "tag_1782409189512",
+      "name": "Sem configuração manual",
+      "color": "#fed7d7"
+    },
+    {
+      "id": "tag_1782409420607",
+      "name": "Mais agradável",
+      "color": "#feebc8"
+    },
+    {
+      "id": "tag_1782409451400",
+      "name": "Distração",
+      "color": "#fefcbf"
+    },
+    {
+      "id": "tag_1782409530140",
+      "name": "Dificulta visualização",
+      "color": "#c6f6d5"
+    },
+    {
+      "id": "tag_1782409727406",
+      "name": "psb25d",
+      "color": "#b2f5ea"
+    },
+    {
+      "id": "tag_1782409752895",
+      "name": "psb3d",
+      "color": "#bee3f8"
+    },
+    {
+      "id": "tag_1782410338214",
+      "name": "Imprecisão",
+      "color": "#c3dafe"
+    },
+    {
+      "id": "tag_1782410420529",
+      "name": "Configuração manual",
+      "color": "#e9d8fd"
+    },
+    {
+      "id": "tag_1782410532373",
+      "name": "Melhor percepção",
+      "color": "#fed7e2"
+    },
+    {
+      "id": "tag_1782411072535",
+      "name": "Mais precisão",
+      "color": "#fed7d7"
+    },
+    {
+      "id": "tag_1782411133709",
+      "name": "Eixo y",
+      "color": "#feebc8"
+    },
+    {
+      "id": "tag_1782411554932",
+      "name": "Eixo x",
+      "color": "#fefcbf"
+    },
+    {
+      "id": "tag_1782411590686",
+      "name": "Desordenação",
+      "color": "#c6f6d5"
+    },
+    {
+      "id": "tag_1782411777840",
+      "name": "Eixo z",
+      "color": "#b2f5ea"
+    },
+    {
+      "id": "tag_1782412122994",
+      "name": "Zoom",
+      "color": "#bee3f8"
+    },
+    {
+      "id": "tag_1782413241498",
+      "name": "LLM",
+      "color": "#c3dafe"
+    },
+    {
+      "id": "tag_1782413246147",
+      "name": "Opt",
+      "color": "#e9d8fd"
+    },
+    {
+      "id": "tag_1782413250875",
+      "name": "Manual",
+      "color": "#fed7e2"
+    },
+    {
+      "id": "tag_1782413474455",
+      "name": "Mais liberdade",
+      "color": "#fed7d7"
+    },
+    {
+      "id": "tag_1782413660256",
+      "name": "Mais facilidade",
+      "color": "#feebc8"
+    },
+    {
+      "id": "tag_1782414724240",
+      "name": "Mais tempo",
+      "color": "#fefcbf"
+    }
+  ],
+  "excerpts": [
+    {
+      "id": "exc_1782414800554",
+      "text": "Achei a visualização mais fácil",
+      "sourceUser": "Usuário 28 (Modos)",
+      "tagIds": [
+        "tag_1782413246147",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782414777010",
+      "text": "LLM ajustava no local errado",
+      "sourceUser": "Usuário 25 (Modos)",
+      "tagIds": [
+        "tag_1782410338214",
+        "tag_1782413241498"
+      ]
+    },
+    {
+      "id": "exc_1782414732520",
+      "text": "Na última eu perdia muito tempo.",
+      "sourceUser": "Usuário 18 (Modos)",
+      "tagIds": [
+        "tag_1782413250875",
+        "tag_1782414724240"
+      ]
+    },
+    {
+      "id": "exc_1782414684342",
+      "text": "Apenas aderência ao formato",
+      "sourceUser": "Usuário 13 (Modos)",
+      "tagIds": [
+        "tag_1782409420607",
+        "tag_1782413246147"
+      ]
+    },
+    {
+      "id": "exc_1782414642868",
+      "text": "Não senti necessidade da escolha por IA, na verdade nem senti diferença dela para o automático",
+      "sourceUser": "Usuário 12 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413241498"
+      ]
+    },
+    {
+      "id": "exc_1782414611219",
+      "text": "ótima para aqueles que estão sentindo alguma dificuldade de ler um dado ou precisam de uma melhor visualização",
+      "sourceUser": "Usuário 12 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875",
+        "tag_1782413474455"
+      ]
+    },
+    {
+      "id": "exc_1782414591034",
+      "text": "Acredito que a visualização plotada de forma automática não deixou a desejar e foi agradável de visualizar",
+      "sourceUser": "Usuário 12 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413246147",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782414530511",
+      "text": "posso observar do modo mais confortável pra mim, principalmente pelo fato de poder deixar o escopo do gráfico mais legível",
+      "sourceUser": "Usuário 32 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875",
+        "tag_1782413474455",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782414464173",
+      "text": "a personalização manual foi mais confortável pois me deu liberdade para investigar melhor as informações dos gráficos.",
+      "sourceUser": "Usuário 30 (Modos)",
+      "tagIds": [
+        "tag_1782413250875",
+        "tag_1782413474455",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782414436075",
+      "text": "O modo manual me permitiu um controle bem mais satisfatório da escala que eu gostaria de ver",
+      "sourceUser": "Usuário 29 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875",
+        "tag_1782413474455"
+      ]
+    },
+    {
+      "id": "exc_1782414402354",
+      "text": "A atribuição dos gráficos gerados pela sugestão da LLM ficaram por último pois não apresentaram um ganho de facilidade de interação em relação aos demais modos de interação",
+      "sourceUser": "Usuário 27 (Modos)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782410338214",
+        "tag_1782413241498"
+      ]
+    },
+    {
+      "id": "exc_1782414368848",
+      "text": "uma visualização onde a LLM deixou impossivel entender os dados",
+      "sourceUser": "Usuário 26 (Modos)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782410338214",
+        "tag_1782413241498"
+      ]
+    },
+    {
+      "id": "exc_1782414335823",
+      "text": "possibilidade de manipular o gráfico muito boa e poder colocalo da várias formas ajudava a conseguir informações mais detalhadas e precisas",
+      "sourceUser": "Usuário 26 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782411072535",
+        "tag_1782413250875"
+      ]
+    },
+    {
+      "id": "exc_1782414296108",
+      "text": "Quando eu conseguia mexer no gráfico, conseguia entender melhor os valores",
+      "sourceUser": "Usuário 24 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782414268308",
+      "text": "ajusta parâmetros manualmente usando os controles ajuda na vizualização",
+      "sourceUser": "Usuário 23 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782414220978",
+      "text": "modo manual me ajudou mais a encontrar os valores",
+      "sourceUser": "Usuário 22 (Modos)",
+      "tagIds": [
+        "tag_1782411072535",
+        "tag_1782413250875",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782414154926",
+      "text": "A alteração manual permitiu escolher melhor as posições dos gráficos",
+      "sourceUser": "Usuário 21 (Modos)",
+      "tagIds": [
+        "tag_1782413250875",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782413993624",
+      "text": "o manual parecia mais plausivel",
+      "sourceUser": "Usuário 20 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875"
+      ]
+    },
+    {
+      "id": "exc_1782413977207",
+      "text": "llm errou muito",
+      "sourceUser": "Usuário 20 (Modos)",
+      "tagIds": [
+        "tag_1782410338214",
+        "tag_1782413241498"
+      ]
+    },
+    {
+      "id": "exc_1782413948677",
+      "text": "ao meu ver é o mais interessante, já que eu controlo.",
+      "sourceUser": "Usuário 19 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875",
+        "tag_1782413474455"
+      ]
+    },
+    {
+      "id": "exc_1782413913684",
+      "text": "O de LLM me deu uma boa ideia na maioria das vezes",
+      "sourceUser": "Usuário 19 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413241498"
+      ]
+    },
+    {
+      "id": "exc_1782413865522",
+      "text": "foram as que mais acertei os valores aproximados",
+      "sourceUser": "Usuário 16 (Modos)",
+      "tagIds": [
+        "tag_1782411072535",
+        "tag_1782413250875"
+      ]
+    },
+    {
+      "id": "exc_1782413832889",
+      "text": "Poder modificar o gráfico ajudou a interpretar os dados.",
+      "sourceUser": "Usuário 14 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875",
+        "tag_1782413474455",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782413811576",
+      "text": "Coloquei em primeiro lugar a que mais achei divertida: mexer com os slides.",
+      "sourceUser": "Usuário 11 (Modos)",
+      "tagIds": [
+        "tag_1782409420607",
+        "tag_1782413250875"
+      ]
+    },
+    {
+      "id": "exc_1782413778502",
+      "text": "por mais facilidade de escolha",
+      "sourceUser": "Usuário 10 (Modos)",
+      "tagIds": [
+        "tag_1782413250875",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782413767661",
+      "text": "o modo manual torna mais facil a visualização",
+      "sourceUser": "Usuário 9 (Modos)",
+      "tagIds": [
+        "tag_1782413250875",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782413757045",
+      "text": "A capacidade de movimentar os gráficos melhorou a compreensão dos números nos gráficos.",
+      "sourceUser": "Usuário 8 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875"
+      ]
+    },
+    {
+      "id": "exc_1782413708419",
+      "text": "LLM ou com o automático, isso nem sempre é garantido",
+      "sourceUser": "Usuário 7 (Modos)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782413241498",
+        "tag_1782413246147"
+      ]
+    },
+    {
+      "id": "exc_1782413669144",
+      "text": "A possibilidade de ajustar manualmente o gráfico permite que a informação que procuramos seja facilmente encontrada",
+      "sourceUser": "Usuário 7 (Modos)",
+      "tagIds": [
+        "tag_1782413250875",
+        "tag_1782413660256"
+      ]
+    },
+    {
+      "id": "exc_1782413563388",
+      "text": "s sladers me trouxeram uma dinâmica diferente podendo eu ter várias formas de visualizar o gráfico.",
+      "sourceUser": "Usuário 4 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782411072535",
+        "tag_1782413250875"
+      ]
+    },
+    {
+      "id": "exc_1782413480727",
+      "text": "O manual permite com que eu tenha mais liberdade de interação.",
+      "sourceUser": "Usuário 1 (Modos)",
+      "tagIds": [
+        "tag_1782413250875",
+        "tag_1782413474455"
+      ]
+    },
+    {
+      "id": "exc_1782413401979",
+      "text": "O modo manual permite os ajustes necessários para melhor visualização dos gráficos",
+      "sourceUser": "Usuário 0 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413250875"
+      ]
+    },
+    {
+      "id": "exc_1782413330703",
+      "text": "fiquei satisfeito com a configuração, particulamente acho que a IA facilitou melhor",
+      "sourceUser": "Usuário 2 (Modos)",
+      "tagIds": [
+        "tag_1782410532373",
+        "tag_1782413241498"
+      ]
+    },
+    {
+      "id": "exc_1782412978093",
+      "text": "O zoom que é possível dar no gráfico, auxilia bastante na leitura",
+      "sourceUser": "Usuário 32 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782410532373",
+        "tag_1782412122994"
+      ]
+    },
+    {
+      "id": "exc_1782412930907",
+      "text": "Necessidade de mais graduação nos gráficos para permitir melhor determinação das proporções entre as quantidades",
+      "sourceUser": "Usuário 31 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410338214",
+        "tag_1782411133709"
+      ]
+    },
+    {
+      "id": "exc_1782412876769",
+      "text": "talvez fosse necessário adicionar um controle de escala do eixo y",
+      "sourceUser": "Usuário 27 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782411133709"
+      ]
+    },
+    {
+      "id": "exc_1782412825439",
+      "text": "visualização 3D permitiu a capacidade de maior exploração dos aspectos gráficos, facilitando a compreensão e comparação das informações",
+      "sourceUser": "Usuário 27 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782410532373",
+        "tag_1782411072535"
+      ]
+    },
+    {
+      "id": "exc_1782412778749",
+      "text": "a manipiulação ajudava a visualizar os dados",
+      "sourceUser": "Usuário 26 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782411072535"
+      ]
+    },
+    {
+      "id": "exc_1782412732483",
+      "text": "as movimentações conseguia visualizar melhor os gráficos quando os valores possuiam uma longa distância entre os valores",
+      "sourceUser": "Usuário 24 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410532373"
+      ]
+    },
+    {
+      "id": "exc_1782412604726",
+      "text": "quando possui os ajustes no grafico melhora a analise e a etimativa de números",
+      "sourceUser": "Usuário 23 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782411072535"
+      ]
+    },
+    {
+      "id": "exc_1782412584069",
+      "text": "permite a melhor analise e estimativa dos valores",
+      "sourceUser": "Usuário 23 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782410532373"
+      ]
+    },
+    {
+      "id": "exc_1782412552643",
+      "text": "Consigo ter uma noção mais detalhada do valor no grafico 3d",
+      "sourceUser": "Usuário 22 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782411072535"
+      ]
+    },
+    {
+      "id": "exc_1782412499929",
+      "text": "A visualização 2.5 é complexa e de difícil entendimento",
+      "sourceUser": "Usuário 21 (Técnicas)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782409727406",
+        "tag_1782410338214"
+      ]
+    },
+    {
+      "id": "exc_1782412135378",
+      "text": "gráficos que estavam com proporções (tamanhos) grandes na vertical, ao diminuir o zoom para tentar exengar os valores, devido ao tamanho, os componentes da tela iam ficando muito pequenos",
+      "sourceUser": "Usuário 15 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410338214",
+        "tag_1782412122994"
+      ]
+    },
+    {
+      "id": "exc_1782412084767",
+      "text": "2.5D em alguns momentos dificultava a visualição, principalmente em quebras muito pequenas",
+      "sourceUser": "Usuário 20 (Técnicas)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782409727406"
+      ]
+    },
+    {
+      "id": "exc_1782412025068",
+      "text": "a opção de dar altura e profundidade para o gráfico através dos ajustes manuais permite com que eu possa visualizar melhor valores com proporções menores",
+      "sourceUser": "Usuário 15 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782410532373",
+        "tag_1782411777840"
+      ]
+    },
+    {
+      "id": "exc_1782411985379",
+      "text": "Mais intuitivo e fácil de visualizar valores grandes",
+      "sourceUser": "Usuário 13 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782410532373",
+        "tag_1782411072535"
+      ]
+    },
+    {
+      "id": "exc_1782411954305",
+      "text": "Achei mais divertido mexer nos gráficos 3D",
+      "sourceUser": "Usuário 11 (Técnicas)",
+      "tagIds": [
+        "tag_1782409420607",
+        "tag_1782409752895",
+        "tag_1782410420529"
+      ]
+    },
+    {
+      "id": "exc_1782411924623",
+      "text": "pouca visualização das colunas nos cantos e a falta de autonomia do visualizador na hora da rotação",
+      "sourceUser": "Usuário 10 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410338214",
+        "tag_1782410420529"
+      ]
+    },
+    {
+      "id": "exc_1782411890470",
+      "text": "mais fácil a visualizações das colunas",
+      "sourceUser": "Usuário 10 (Técnicas)",
+      "tagIds": [
+        "tag_1782409420607",
+        "tag_1782409752895",
+        "tag_1782410420529"
+      ]
+    },
+    {
+      "id": "exc_1782411794097",
+      "text": "é melhor por poder manipular a quebra e até onde ela vai",
+      "sourceUser": "Usuário 9 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782411072535",
+        "tag_1782411777840"
+      ]
+    },
+    {
+      "id": "exc_1782411730382",
+      "text": "é mais facil de visualizar por ser possivel manipular os valores do eixo y",
+      "sourceUser": "Usuário 9 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782410532373",
+        "tag_1782411133709"
+      ]
+    },
+    {
+      "id": "exc_1782411683347",
+      "text": "movimentar o gráfico me proporcional melhor visualização da quantidade de valores presentes na barra.",
+      "sourceUser": "Usuário 8 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782410532373",
+        "tag_1782411072535"
+      ]
+    },
+    {
+      "id": "exc_1782411606943",
+      "text": "Um fator que foi de certa forma frustante foi o fato das cidades não estarem ordenadas de uma forma compreensível",
+      "sourceUser": "Usuário 7 (Técnicas)",
+      "tagIds": [
+        "tag_1782411554932",
+        "tag_1782411590686"
+      ]
+    },
+    {
+      "id": "exc_1782411521361",
+      "text": "A possibilidade de interagir com o gráfico permite que a estimação dos valores seja mais aproximada",
+      "sourceUser": "Usuário 7 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410532373",
+        "tag_1782411072535"
+      ]
+    },
+    {
+      "id": "exc_1782411473382",
+      "text": "a pronfundidade da 2.5d não faz sentido",
+      "sourceUser": "Usuário 6 (Técnicas)",
+      "tagIds": [
+        "tag_1782409727406",
+        "tag_1782410338214"
+      ]
+    },
+    {
+      "id": "exc_1782411447829",
+      "text": "2.5d é muito confusa",
+      "sourceUser": "Usuário 6 (Técnicas)",
+      "tagIds": [
+        "tag_1782409727406",
+        "tag_1782410338214"
+      ]
+    },
+    {
+      "id": "exc_1782411423211",
+      "text": "3d me permite manipulações melhores",
+      "sourceUser": "Usuário 6 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782411072535"
+      ]
+    },
+    {
+      "id": "exc_1782411218300",
+      "text": "ver o gráficos em forma diferentes",
+      "sourceUser": "Usuário 4 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782410532373"
+      ]
+    },
+    {
+      "id": "exc_1782411156775",
+      "text": "alores do eixo y que as vezes não eram subvididos o suficiente para permitir uma inferencia mais precisa dos valores do eixo",
+      "sourceUser": "Usuário 2 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410338214",
+        "tag_1782411133709"
+      ]
+    },
+    {
+      "id": "exc_1782411097354",
+      "text": "A capacidade de girar o grafico 3 permitiu uma visualização mais precisa dos valores",
+      "sourceUser": "Usuário 2 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782411072535"
+      ]
+    },
+    {
+      "id": "exc_1782410623735",
+      "text": "A visualização 3d em manual permite o ajuste necessário para melhor observação dos gráficos.",
+      "sourceUser": "Usuário 0 (Técnicas)",
+      "tagIds": [
+        "tag_1782409752895",
+        "tag_1782410420529",
+        "tag_1782410532373"
+      ]
+    },
+    {
+      "id": "exc_1782410587806",
+      "text": "A técnica 3D é confusa demais em alguns casos.",
+      "sourceUser": "Usuário 30 (Técnicas)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782409752895",
+        "tag_1782410338214"
+      ]
+    },
+    {
+      "id": "exc_1782410545733",
+      "text": "A técnica 2.5D manual me deu mais liberdade para a customização e visualização dos gráficos",
+      "sourceUser": "Usuário 30 (Técnicas)",
+      "tagIds": [
+        "tag_1782409420607",
+        "tag_1782409727406",
+        "tag_1782410420529",
+        "tag_1782410532373"
+      ]
+    },
+    {
+      "id": "exc_1782410475843",
+      "text": "O 2.5d foi mais confortável de visualizar",
+      "sourceUser": "Usuário 29 (Técnicas)",
+      "tagIds": [
+        "tag_1782409420607",
+        "tag_1782409727406"
+      ]
+    },
+    {
+      "id": "exc_1782410452513",
+      "text": "A movimentação do 3d não foi satisfatoria para visualizar dados com estimativas muito grandes",
+      "sourceUser": "Usuário 29 (Técnicas)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782409752895",
+        "tag_1782410420529"
+      ]
+    },
+    {
+      "id": "exc_1782410353678",
+      "text": "A maneira a qual os dados 3D podem ser manipulados não é muito precisa.",
+      "sourceUser": "Usuário 28 (Técnicas)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782410338214"
+      ]
+    },
+    {
+      "id": "exc_1782410304773",
+      "text": "O 3D parece confuso",
+      "sourceUser": "Usuário 25 (Técnicas)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782409752895"
+      ]
+    },
+    {
+      "id": "exc_1782409627641",
+      "text": "a profundidade do gráfico 3d acredito que confunde a leitura de alguns dados",
+      "sourceUser": "Usuário 17 (Técnicas)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782409752895"
+      ]
+    },
+    {
+      "id": "exc_1782409580367",
+      "text": "Algumas visualizações 2D sem controle manual ficaram difíceis de interpretar",
+      "sourceUser": "Usuário 16 (Técnicas)",
+      "tagIds": [
+        "tag_1782409189512",
+        "tag_1782409727406"
+      ]
+    },
+    {
+      "id": "exc_1782409549301",
+      "text": "a quebra no gráfico acaba por dificultar a visualização e interpretação dos dados.",
+      "sourceUser": "Usuário 14 (Técnicas)",
+      "tagIds": [
+        "tag_1782409530140",
+        "tag_1782409752895"
+      ]
+    },
+    {
+      "id": "exc_1782409455176",
+      "text": "A visualização em 3D me incomodava um pouco na hora de visualizar o gráfico, na minha opinião me distrai.",
+      "sourceUser": "Usuário 12 (Técnicas)",
+      "tagIds": [
+        "tag_1782409451400",
+        "tag_1782409752895"
+      ]
+    },
+    {
+      "id": "exc_1782409426375",
+      "text": "A visão em 2.5 é mais agradável e menos caótica para mim.",
+      "sourceUser": "Usuário 12 (Técnicas)",
+      "tagIds": [
+        "tag_1782409420607",
+        "tag_1782409727406"
+      ]
+    },
+    {
+      "id": "exc_1782409236811",
+      "text": "3D não manual pode ser difícil de determinar os valores",
+      "sourceUser": "Usuário 3 (Técnicas)",
+      "tagIds": [
+        "tag_1782409189512",
+        "tag_1782409752895"
+      ]
+    },
+    {
+      "id": "exc_1782409194384",
+      "text": "Não alocar parametros de organização na visualização do gráfico é terrivel.",
+      "sourceUser": "Usuário 1 (Técnicas)",
+      "tagIds": [
+        "tag_1782409189512",
+        "tag_1782409727406"
+      ]
+    }
+  ]
+}
