@@ -454,6 +454,23 @@
             }
         }
 
+        function editTag(tagId) {
+            const tag = qdaData.tags.find(t => t.id === tagId);
+            if (!tag) return;
+            const newName = prompt("Edite o nome da tag:", tag.name);
+            if (newName !== null) {
+                const trimmedName = newName.trim();
+                if (trimmedName && trimmedName !== tag.name) {
+                    if (qdaData.tags.some(t => t.id !== tagId && t.name.toLowerCase() === trimmedName.toLowerCase())) {
+                        alert("Já existe outra tag com este nome.");
+                        return;
+                    }
+                    tag.name = trimmedName;
+                    saveToLocal();
+                }
+            }
+        }
+
         // ==========================================
         // GERENCIAMENTO DE TRECHOS (EXCERPTS)
         // ==========================================
@@ -492,6 +509,9 @@
             currentSelectionSource = "Origem Manual";
             currentSelectionType = "";
             document.getElementById('codingArea').classList.remove('active');
+            
+            // Desmarca os checkboxes
+            checkedBoxes.forEach(cb => cb.checked = false);
 
             saveToLocal();
         });
@@ -543,7 +563,7 @@
                 const badge = document.createElement('div');
                 badge.className = 'tag-badge';
                 badge.style.backgroundColor = tag.color;
-                badge.innerHTML = `<span>${tag.name}</span> <button onclick="deleteTag('${tag.id}')" title="Excluir tag">×</button>`;
+                badge.innerHTML = `<span ondblclick="editTag('${tag.id}')" title="Duplo clique para editar" style="cursor: pointer;">${tag.name}</span> <button onclick="deleteTag('${tag.id}')" title="Excluir tag">×</button>`;
                 tagsCont.appendChild(badge);
             });
 
