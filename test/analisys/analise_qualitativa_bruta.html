@@ -325,6 +325,8 @@
         <div class="top-actions">
             <h2 style="margin:0; border:none; padding:0;">Análise Temática</h2>
             <div>
+                <button id="btnImport" title="Importar JSON com Tags e Trechos" onclick="document.getElementById('importDataInput').click()">📤 Importar Dados</button>
+                <input type="file" id="importDataInput" accept=".json" style="display: none;" />
                 <button id="btnExport" title="Baixar JSON das Tags e Trechos">📥 Exportar Dados</button>
                 <button id="btnClear" class="btn-danger" title="Apagar tudo do LocalStorage">🗑️ Limpar</button>
             </div>
@@ -641,6 +643,36 @@
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
         });
+
+        document.getElementById('importDataInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data && Array.isArray(data.tags) && Array.isArray(data.excerpts)) {
+                        if (confirm("Importar estes dados irá sobrescrever sua análise atual. Tem certeza?")) {
+                            qdaData = data;
+                            currentEditingExcerptId = null;
+                            document.getElementById('btnCancelEdit').style.display = 'none';
+                            document.getElementById('selectedTextDisplay').value = '';
+                            document.getElementById('codingArea').classList.remove('active');
+                            saveToLocal();
+                            alert("Dados importados com sucesso!");
+                        }
+                    } else {
+                        alert("Formato de arquivo inválido. É esperado um JSON de exportação contendo tags e excerpts.");
+                    }
+                } catch (error) {
+                    alert("Erro ao processar o arquivo JSON de importação.");
+                }
+                e.target.value = ''; // Reset input to allow re-importing the same file
+            };
+            reader.readAsText(file);
+        });
+
 
         document.getElementById('btnClear').addEventListener('click', () => {
             if (confirm("ATENÇÃO: Isso apagará TODOS os trechos e tags do navegador atual. Deseja continuar?")) {

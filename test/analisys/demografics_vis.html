@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demographics Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --panel-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --primary: #4e79a7;
+            --primary-hover: #3b5c80;
+            --text-main: #2d3748;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 1.5rem;
+            background: var(--panel-bg);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            align-items: center;
+        }
+
+        .controls>div {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+
+        select,
+        input[type="number"] {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            background: #fff;
+        }
+
+        select {
+            min-width: 200px;
+        }
+
+        input[type="number"] {
+            width: 80px;
+        }
+
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 100%;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background 0.2s;
+            height: 36px;
+            align-self: flex-end;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .chart-container {
+            background: var(--panel-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 500px;
+        }
+
+        svg {
+            max-width: 100%;
+            overflow: visible;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 13px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visualização Demográfica</h1>
+
+    <div class="controls">
+        <div class="controls-row">
+            <div>
+                <label for="attributeSelect">Atributo Demográfico:</label>
+                <select id="attributeSelect">
+                    <option value="" disabled selected>Carregando dados...</option>
+                </select>
+            </div>
+            <div>
+                <label for="chartTypeSelect">Tipo de Gráfico:</label>
+                <select id="chartTypeSelect">
+                    <option value="bar">Gráfico de Barras (Horizontal)</option>
+                    <option value="column">Gráfico de Colunas (Vertical)</option>
+                    <option value="donut">Gráfico Donut</option>
+                </select>
+            </div>
+            <div>
+                <label for="chartWidth">Largura (px):</label>
+                <input type="number" id="chartWidth" value="700" step="50">
+            </div>
+            <div>
+                <label for="chartHeight">Altura (px):</label>
+                <input type="number" id="chartHeight" value="450" step="50">
+            </div>
+            <div>
+                <label for="axisFontSize">Fonte Eixos (px):</label>
+                <input type="number" id="axisFontSize" value="12" step="1">
+            </div>
+            <div>
+                <label for="valueFontSize">Fonte Valores (px):</label>
+                <input type="number" id="valueFontSize" value="12" step="1">
+            </div>
+            <div>
+                <label for="titleFontSize">Fonte Título (px):</label>
+                <input type="number" id="titleFontSize" value="16" step="1">
+            </div>
+            <div style="flex-direction: row; align-items: flex-end;">
+                <button onclick="downloadSVG()">💾 Baixar SVG</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container" id="chart"></div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        let globalData = [];
+        let attributes = [];
+
+        // Mapeamento para nomes mais amigáveis
+        const attrLabels = {
+            "ageRange": "Faixa Etária",
+            "sex": "Sexo",
+            "educationLevel": "Nível de Escolaridade",
+            "infovisCourse": "Curso de InfoVis",
+            "visualAcuity": "Acuidade Visual",
+            "colorBlindness": "Daltonismo",
+            "barChartFamiliarity": "Familiaridade com Gráficos de Barras"
+        };
+
+        d3.json('/results.json').then(data => {
+            // Filtrar para pegar somente quem tem demografia
+            globalData = data.filter(d => d.experimentData && d.experimentData.demographics)
+                .map(d => d.experimentData.demographics);
+
+            if (globalData.length > 0) {
+                attributes = Object.keys(globalData[0]);
+                const attributeSelect = d3.select("#attributeSelect");
+
+                attributeSelect.html(""); // Limpa o carregando
+
+                attributeSelect.selectAll("option")
+                    .data(attributes)
+                    .enter()
+                    .append("option")
+                    .attr("value", d => d)
+                    .text(d => attrLabels[d] || d);
+
+                // Event listeners
+                d3.select("#attributeSelect").on("change", updateChart);
+                d3.select("#chartTypeSelect").on("change", updateChart);
+                d3.selectAll("input[type=number]").on("change", updateChart);
+                d3.selectAll("input[type=number]").on("input", updateChart);
+
+                // Renderização inicial
+                updateChart();
+            } else {
+                d3.select("#chart").html("<p>Nenhum dado demográfico encontrado no JSON.</p>");
+            }
+        }).catch(error => {
+            console.error("Erro ao carregar os dados:", error);
+            d3.select("#chart").html("<p style='color:#e53e3e; font-weight:bold;'>Erro ao carregar /results.json. Verifique se o arquivo está na raiz do servidor HTTP.</p>");
+        });
+
+        function updateChart() {
+            const attribute = d3.select("#attributeSelect").property("value");
+            const chartType = d3.select("#chartTypeSelect").property("value");
+
+            if (!attribute) return;
+
+            // Agrega os dados
+            const counts = d3.rollup(globalData, v => v.length, d => d[attribute]);
+            let chartData = Array.from(counts, ([key, value]) => ({ key: key || "Não Informado", value }));
+            chartData.sort((a, b) => b.value - a.value); // Ordenar decrescente
+
+            d3.select("#chart").html(""); // Limpa o gráfico anterior
+
+            const width = parseInt(d3.select("#chartWidth").property("value")) || 700;
+            const height = parseInt(d3.select("#chartHeight").property("value")) || 450;
+            const axisFontSize = d3.select("#axisFontSize").property("value") + "px";
+            const valueFontSize = d3.select("#valueFontSize").property("value") + "px";
+            const titleFontSize = d3.select("#titleFontSize").property("value") + "px";
+
+            const svg = d3.select("#chart")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            const tooltip = d3.select("#tooltip");
+
+            // Título do Gráfico
+            const titleText = attrLabels[attribute] || attribute;
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", 25)
+                .attr("text-anchor", "middle")
+                .attr("font-size", titleFontSize)
+                .attr("font-weight", "bold")
+                .attr("fill", "#2d3748")
+                .text(titleText);
+
+            if (chartType === "bar") {
+                const margin = { top: 50, right: 40, bottom: 40, left: 200 };
+                const innerWidth = width - margin.left - margin.right;
+                const innerHeight = height - margin.top - margin.bottom;
+
+                const x = d3.scaleLinear()
+                    .domain([0, d3.max(chartData, d => d.value)])
+                    .range([0, innerWidth]);
+
+                const y = d3.scaleBand()
+                    .domain(chartData.map(d => d.key))
+                    .range([0, innerHeight])
+                    .padding(0.2);
+
+                const g = svg.append("g")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                // Eixos
+                g.append("g")
+                    .call(d3.axisLeft(y).tickSizeOuter(0))
+                    .selectAll("text")
+                    .style("font-size", axisFontSize);
+
+                g.append("g")
+                    .attr("transform", `translate(0,${innerHeight})`)
+                    .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("d")))
+                    .selectAll("text")
+                    .style("font-size", axisFontSize);
+
+                // Barras
+                g.selectAll(".bar")
+                    .data(chartData)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("y", d => y(d.key))
+                    .attr("x", 0)
+                    .attr("height", y.bandwidth())
+                    .attr("width", d => x(d.value))
+                    .attr("fill", "#4e79a7")
+                    .style("cursor", "pointer")
+                    .on("mouseover", (event, d) => {
+                        d3.select(event.currentTarget).attr("fill", "#3b5c80");
+                        tooltip.style("opacity", 1)
+                            .html(`<b>${d.key}</b>: ${d.value}`)
+                            .style("left", (event.pageX + 15) + "px")
+                            .style("top", (event.pageY - 25) + "px");
+                    })
+                    .on("mouseout", (event) => {
+                        d3.select(event.currentTarget).attr("fill", "#4e79a7");
+                        tooltip.style("opacity", 0);
+                    });
+
+                // Textos
+                g.selectAll(".label")
+                    .data(chartData)
+                    .enter().append("text")
+                    .attr("y", d => y(d.key) + y.bandwidth() / 2 + 4)
+                    .attr("x", d => x(d.value) + 5)
+                    .text(d => d.value)
+                    .attr("font-size", valueFontSize)
+                    .attr("font-weight", "500")
+                    .attr("fill", "#2d3748");
+
+            } else if (chartType === "column") {
+                const margin = { top: 50, right: 20, bottom: 120, left: 60 };
+                const innerWidth = width - margin.left - margin.right;
+                const innerHeight = height - margin.top - margin.bottom;
+
+                const x = d3.scaleBand()
+                    .domain(chartData.map(d => d.key))
+                    .range([0, innerWidth])
+                    .padding(0.2);
+
+                const y = d3.scaleLinear()
+                    .domain([0, d3.max(chartData, d => d.value)])
+                    .range([innerHeight, 0]);
+
+                const g = svg.append("g")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                // Eixo X inclinado
+                g.append("g")
+                    .attr("transform", `translate(0,${innerHeight})`)
+                    .call(d3.axisBottom(x))
+                    .selectAll("text")
+                    .attr("transform", "rotate(-35)")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .style("font-size", axisFontSize);
+
+                // Eixo Y
+                g.append("g")
+                    .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format("d")))
+                    .selectAll("text")
+                    .style("font-size", axisFontSize);
+
+                // Colunas
+                g.selectAll(".bar")
+                    .data(chartData)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", d => x(d.key))
+                    .attr("y", d => y(d.value))
+                    .attr("width", x.bandwidth())
+                    .attr("height", d => innerHeight - y(d.value))
+                    .attr("fill", "#4e79a7")
+                    .style("cursor", "pointer")
+                    .on("mouseover", (event, d) => {
+                        d3.select(event.currentTarget).attr("fill", "#3b5c80");
+                        tooltip.style("opacity", 1)
+                            .html(`<b>${d.key}</b>: ${d.value}`)
+                            .style("left", (event.pageX + 15) + "px")
+                            .style("top", (event.pageY - 25) + "px");
+                    })
+                    .on("mouseout", (event) => {
+                        d3.select(event.currentTarget).attr("fill", "#4e79a7");
+                        tooltip.style("opacity", 0);
+                    });
+
+                // Textos
+                g.selectAll(".label")
+                    .data(chartData)
+                    .enter().append("text")
+                    .attr("x", d => x(d.key) + x.bandwidth() / 2)
+                    .attr("y", d => y(d.value) - 8)
+                    .text(d => d.value)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", valueFontSize)
+                    .attr("font-weight", "500")
+                    .attr("fill", "#2d3748");
+
+            } else if (chartType === "donut") {
+                const radius = Math.min(width, height) / 2 - 40;
+
+                // Adjust translation to account for title
+                const g = svg.append("g")
+                    .attr("transform", `translate(${width / 2 - 100},${height / 2 + 15})`);
+
+                const color = d3.scaleOrdinal(d3.schemeTableau10)
+                    .domain(chartData.map(d => d.key));
+
+                const pie = d3.pie()
+                    .value(d => d.value)
+                    .sort(null);
+
+                const arc = d3.arc()
+                    .innerRadius(radius * 0.5)
+                    .outerRadius(radius);
+
+                const arcHover = d3.arc()
+                    .innerRadius(radius * 0.5)
+                    .outerRadius(radius + 15);
+
+                const arcs = g.selectAll(".arc")
+                    .data(pie(chartData))
+                    .enter().append("g")
+                    .attr("class", "arc");
+
+                arcs.append("path")
+                    .attr("d", arc)
+                    .attr("fill", d => color(d.data.key))
+                    .attr("stroke", "white")
+                    .style("stroke-width", "2px")
+                    .style("cursor", "pointer")
+                    .style("transition", "d 0.2s ease")
+                    .on("mouseover", function (event, d) {
+                        d3.select(this)
+                            .transition()
+                            .duration(200)
+                            .attr("d", arcHover);
+                        tooltip.style("opacity", 1)
+                            .html(`<b>${d.data.key}</b>: ${d.data.value}`)
+                            .style("left", (event.pageX + 15) + "px")
+                            .style("top", (event.pageY - 25) + "px");
+                    })
+                    .on("mouseout", function (event, d) {
+                        d3.select(this)
+                            .transition()
+                            .duration(200)
+                            .attr("d", arc);
+                        tooltip.style("opacity", 0);
+                    });
+
+                // Valores dentro das fatias
+                const labelArc = d3.arc()
+                    .innerRadius(radius * 0.75)
+                    .outerRadius(radius * 0.75);
+
+                arcs.append("text")
+                    .attr("transform", d => `translate(${labelArc.centroid(d)})`)
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", valueFontSize)
+                    .attr("font-weight", "bold")
+                    .attr("fill", "#fff")
+                    .attr("pointer-events", "none") // para não interferir no hover do path
+                    .text(d => d.data.value);
+
+                // Legenda
+                const legend = svg.append("g")
+                    .attr("transform", `translate(${width - 250}, ${(height / 2 + 15) - (chartData.length * 25) / 2})`);
+
+                chartData.forEach((d, i) => {
+                    const legRow = legend.append("g")
+                        .attr("transform", `translate(0, ${i * 25})`);
+
+                    legRow.append("rect")
+                        .attr("width", 14)
+                        .attr("height", 14)
+                        .attr("rx", 3) // borda arredondada
+                        .attr("fill", color(d.key));
+
+                    legRow.append("text")
+                        .attr("x", 24)
+                        .attr("y", 12)
+                        .text(`${d.key} (${d.value})`)
+                        .attr("font-size", axisFontSize)
+                        .attr("fill", "#2d3748")
+                        .attr("alignment-baseline", "middle");
+                });
+            }
+        }
+
+        function downloadSVG() {
+            const svgNode = document.querySelector("#chart svg");
+            if (!svgNode) {
+                alert("Nenhum gráfico para baixar.");
+                return;
+            }
+
+            if (!svgNode.getAttribute("xmlns")) {
+                svgNode.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            }
+
+            const serializer = new XMLSerializer();
+            let svgString = serializer.serializeToString(svgNode);
+
+            const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+
+            const attribute = document.getElementById("attributeSelect").value || "grafico";
+            const chartType = document.getElementById("chartTypeSelect").value || "demografico";
+            
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${attribute}_${chartType}.svg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>

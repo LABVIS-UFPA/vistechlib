@@ -114,6 +114,18 @@
       "tagIds": [
         "tag_1782413246147",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "d105672d-49a5-477a-af0a-478002c5afbe",
+          "index": 28,
+          "type": "Modos",
+          "ranking": [
+            "opt",
+            "llm",
+            "manual"
+          ]
+        }
       ]
     },
     {
@@ -123,6 +135,18 @@
       "tagIds": [
         "tag_1782410338214",
         "tag_1782413241498"
+      ],
+      "matches": [
+        {
+          "id": "c4bcd132-fe52-4b3d-9844-7cd9e812ef29",
+          "index": 25,
+          "type": "Modos",
+          "ranking": [
+            "opt",
+            "manual",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -132,6 +156,18 @@
       "tagIds": [
         "tag_1782413250875",
         "tag_1782414724240"
+      ],
+      "matches": [
+        {
+          "id": "a6e1cabe-ce58-41b8-9ee5-f250c3aab950",
+          "index": 18,
+          "type": "Modos",
+          "ranking": [
+            "opt",
+            "llm",
+            "manual"
+          ]
+        }
       ]
     },
     {
@@ -141,6 +177,18 @@
       "tagIds": [
         "tag_1782409420607",
         "tag_1782413246147"
+      ],
+      "matches": [
+        {
+          "id": "7599f200-85dc-46fd-a907-eea95b9c7745",
+          "index": 13,
+          "type": "Modos",
+          "ranking": [
+            "opt",
+            "llm",
+            "manual"
+          ]
+        }
       ]
     },
     {
@@ -150,6 +198,18 @@
       "tagIds": [
         "tag_1782410532373",
         "tag_1782413241498"
+      ],
+      "matches": [
+        {
+          "id": "630c2845-e93c-4392-ae73-5d2536743ba2",
+          "index": 12,
+          "type": "Modos",
+          "ranking": [
+            "opt",
+            "manual",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -160,6 +220,18 @@
         "tag_1782410532373",
         "tag_1782413250875",
         "tag_1782413474455"
+      ],
+      "matches": [
+        {
+          "id": "630c2845-e93c-4392-ae73-5d2536743ba2",
+          "index": 12,
+          "type": "Modos",
+          "ranking": [
+            "opt",
+            "manual",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -170,6 +242,18 @@
         "tag_1782410532373",
         "tag_1782413246147",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "630c2845-e93c-4392-ae73-5d2536743ba2",
+          "index": 12,
+          "type": "Modos",
+          "ranking": [
+            "opt",
+            "manual",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -181,6 +265,18 @@
         "tag_1782413250875",
         "tag_1782413474455",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "fa78fc81-63d8-452c-8a9e-339451da0cce",
+          "index": 32,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -191,6 +287,18 @@
         "tag_1782413250875",
         "tag_1782413474455",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "e3817d4c-14cd-4084-a8ea-68c2b8140e8c",
+          "index": 30,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -201,6 +309,18 @@
         "tag_1782410532373",
         "tag_1782413250875",
         "tag_1782413474455"
+      ],
+      "matches": [
+        {
+          "id": "e1ee6127-652a-4241-9456-0bbdaa918915",
+          "index": 29,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -211,6 +331,18 @@
         "tag_1782409530140",
         "tag_1782410338214",
         "tag_1782413241498"
+      ],
+      "matches": [
+        {
+          "id": "cdf7b010-dac7-418f-9fcb-d7b3822328dc",
+          "index": 27,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -221,6 +353,18 @@
         "tag_1782409530140",
         "tag_1782410338214",
         "tag_1782413241498"
+      ],
+      "matches": [
+        {
+          "id": "cbbff2ef-8c34-44aa-ae65-b972289ff1da",
+          "index": 26,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -231,6 +375,18 @@
         "tag_1782410532373",
         "tag_1782411072535",
         "tag_1782413250875"
+      ],
+      "matches": [
+        {
+          "id": "cbbff2ef-8c34-44aa-ae65-b972289ff1da",
+          "index": 26,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -241,6 +397,18 @@
         "tag_1782410532373",
         "tag_1782413250875",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e",
+          "index": 24,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -251,6 +419,18 @@
         "tag_1782410532373",
         "tag_1782413250875",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "c3e8c7bd-5de9-4c43-851b-b32375f4802e",
+          "index": 23,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -261,6 +441,18 @@
         "tag_1782411072535",
         "tag_1782413250875",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "bddd529f-8322-4671-a012-872ae015bfcc",
+          "index": 22,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -270,6 +462,18 @@
       "tagIds": [
         "tag_1782413250875",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "bc2d0820-b64c-4d1d-8548-4674a45a0991",
+          "index": 21,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -279,6 +483,18 @@
       "tagIds": [
         "tag_1782410532373",
         "tag_1782413250875"
+      ],
+      "matches": [
+        {
+          "id": "b79f7405-a912-48a5-a7d9-cc117a6743b2",
+          "index": 20,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -288,6 +504,18 @@
       "tagIds": [
         "tag_1782410338214",
         "tag_1782413241498"
+      ],
+      "matches": [
+        {
+          "id": "b79f7405-a912-48a5-a7d9-cc117a6743b2",
+          "index": 20,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -298,6 +526,18 @@
         "tag_1782410532373",
         "tag_1782413250875",
         "tag_1782413474455"
+      ],
+      "matches": [
+        {
+          "id": "b21afff4-41df-484c-9ca0-7fdaa86add85",
+          "index": 19,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -307,6 +547,18 @@
       "tagIds": [
         "tag_1782410532373",
         "tag_1782413241498"
+      ],
+      "matches": [
+        {
+          "id": "b21afff4-41df-484c-9ca0-7fdaa86add85",
+          "index": 19,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -316,6 +568,18 @@
       "tagIds": [
         "tag_1782411072535",
         "tag_1782413250875"
+      ],
+      "matches": [
+        {
+          "id": "944cb3e3-3896-426d-ab78-90f14bd3b891",
+          "index": 16,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -327,6 +591,18 @@
         "tag_1782413250875",
         "tag_1782413474455",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "824d2229-0b3f-4895-80dd-ea2630c86f6b",
+          "index": 14,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -336,6 +612,18 @@
       "tagIds": [
         "tag_1782409420607",
         "tag_1782413250875"
+      ],
+      "matches": [
+        {
+          "id": "52f66258-3e00-4ccd-9350-c759a7adbd57",
+          "index": 11,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -345,6 +633,18 @@
       "tagIds": [
         "tag_1782413250875",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "4fff3da6-9ccb-4c5f-95f8-f55d2392c5e9",
+          "index": 10,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -354,6 +654,18 @@
       "tagIds": [
         "tag_1782413250875",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "456fcff0-f55d-4d54-94b3-b942cfa8f2b1",
+          "index": 9,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -363,6 +675,18 @@
       "tagIds": [
         "tag_1782410532373",
         "tag_1782413250875"
+      ],
+      "matches": [
+        {
+          "id": "419c1ee0-dee1-4e13-8621-1c65129be04f",
+          "index": 8,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -373,6 +697,18 @@
         "tag_1782409530140",
         "tag_1782413241498",
         "tag_1782413246147"
+      ],
+      "matches": [
+        {
+          "id": "3ba50609-dd9f-4f5c-883b-4f5975144a2a",
+          "index": 7,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -382,6 +718,18 @@
       "tagIds": [
         "tag_1782413250875",
         "tag_1782413660256"
+      ],
+      "matches": [
+        {
+          "id": "3ba50609-dd9f-4f5c-883b-4f5975144a2a",
+          "index": 7,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -392,6 +740,18 @@
         "tag_1782410532373",
         "tag_1782411072535",
         "tag_1782413250875"
+      ],
+      "matches": [
+        {
+          "id": "1e1eece5-b5a8-4c64-86e9-b93ebc8cf5d5",
+          "index": 4,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "llm",
+            "opt"
+          ]
+        }
       ]
     },
     {
@@ -401,6 +761,18 @@
       "tagIds": [
         "tag_1782413250875",
         "tag_1782413474455"
+      ],
+      "matches": [
+        {
+          "id": "0f9082d4-7ef3-419c-823d-d019a939c14c",
+          "index": 1,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -410,6 +782,18 @@
       "tagIds": [
         "tag_1782410532373",
         "tag_1782413250875"
+      ],
+      "matches": [
+        {
+          "id": "0da5cbab-ef20-4021-a1f8-3c7aceb84534",
+          "index": 0,
+          "type": "Modos",
+          "ranking": [
+            "manual",
+            "opt",
+            "llm"
+          ]
+        }
       ]
     },
     {
@@ -419,6 +803,18 @@
       "tagIds": [
         "tag_1782410532373",
         "tag_1782413241498"
+      ],
+      "matches": [
+        {
+          "id": "1222e3ae-9ba2-4e96-b2ab-3d763a50789c",
+          "index": 2,
+          "type": "Modos",
+          "ranking": [
+            "llm",
+            "opt",
+            "manual"
+          ]
+        }
       ]
     },
     {
@@ -430,6 +826,17 @@
         "tag_1782410420529",
         "tag_1782410532373",
         "tag_1782412122994"
+      ],
+      "matches": [
+        {
+          "id": "fa78fc81-63d8-452c-8a9e-339451da0cce",
+          "index": 32,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -440,6 +847,17 @@
         "tag_1782409752895",
         "tag_1782410338214",
         "tag_1782411133709"
+      ],
+      "matches": [
+        {
+          "id": "e501754d-440f-4fc9-ad26-e44adcf6859c",
+          "index": 31,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -450,6 +868,17 @@
         "tag_1782409752895",
         "tag_1782410420529",
         "tag_1782411133709"
+      ],
+      "matches": [
+        {
+          "id": "cdf7b010-dac7-418f-9fcb-d7b3822328dc",
+          "index": 27,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -461,6 +890,17 @@
         "tag_1782410420529",
         "tag_1782410532373",
         "tag_1782411072535"
+      ],
+      "matches": [
+        {
+          "id": "cdf7b010-dac7-418f-9fcb-d7b3822328dc",
+          "index": 27,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -471,6 +911,17 @@
         "tag_1782409752895",
         "tag_1782410420529",
         "tag_1782411072535"
+      ],
+      "matches": [
+        {
+          "id": "cbbff2ef-8c34-44aa-ae65-b972289ff1da",
+          "index": 26,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -480,6 +931,17 @@
       "tagIds": [
         "tag_1782409752895",
         "tag_1782410532373"
+      ],
+      "matches": [
+        {
+          "id": "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e",
+          "index": 24,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -490,6 +952,17 @@
         "tag_1782409752895",
         "tag_1782410420529",
         "tag_1782411072535"
+      ],
+      "matches": [
+        {
+          "id": "c3e8c7bd-5de9-4c43-851b-b32375f4802e",
+          "index": 23,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -500,6 +973,17 @@
         "tag_1782409752895",
         "tag_1782410420529",
         "tag_1782410532373"
+      ],
+      "matches": [
+        {
+          "id": "c3e8c7bd-5de9-4c43-851b-b32375f4802e",
+          "index": 23,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -510,6 +994,17 @@
         "tag_1782409752895",
         "tag_1782410420529",
         "tag_1782411072535"
+      ],
+      "matches": [
+        {
+          "id": "bddd529f-8322-4671-a012-872ae015bfcc",
+          "index": 22,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -520,6 +1015,17 @@
         "tag_1782409530140",
         "tag_1782409727406",
         "tag_1782410338214"
+      ],
+      "matches": [
+        {
+          "id": "bc2d0820-b64c-4d1d-8548-4674a45a0991",
+          "index": 21,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -530,6 +1036,17 @@
         "tag_1782409752895",
         "tag_1782410338214",
         "tag_1782412122994"
+      ],
+      "matches": [
+        {
+          "id": "932ffa2b-de7b-4680-a047-4d913318a64f",
+          "index": 15,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -539,6 +1056,17 @@
       "tagIds": [
         "tag_1782409530140",
         "tag_1782409727406"
+      ],
+      "matches": [
+        {
+          "id": "b79f7405-a912-48a5-a7d9-cc117a6743b2",
+          "index": 20,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -550,6 +1078,17 @@
         "tag_1782410420529",
         "tag_1782410532373",
         "tag_1782411777840"
+      ],
+      "matches": [
+        {
+          "id": "932ffa2b-de7b-4680-a047-4d913318a64f",
+          "index": 15,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -561,6 +1100,17 @@
         "tag_1782410420529",
         "tag_1782410532373",
         "tag_1782411072535"
+      ],
+      "matches": [
+        {
+          "id": "7599f200-85dc-46fd-a907-eea95b9c7745",
+          "index": 13,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -571,6 +1121,17 @@
         "tag_1782409420607",
         "tag_1782409752895",
         "tag_1782410420529"
+      ],
+      "matches": [
+        {
+          "id": "52f66258-3e00-4ccd-9350-c759a7adbd57",
+          "index": 11,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -581,6 +1142,17 @@
         "tag_1782409752895",
         "tag_1782410338214",
         "tag_1782410420529"
+      ],
+      "matches": [
+        {
+          "id": "4fff3da6-9ccb-4c5f-95f8-f55d2392c5e9",
+          "index": 10,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -591,6 +1163,17 @@
         "tag_1782409420607",
         "tag_1782409752895",
         "tag_1782410420529"
+      ],
+      "matches": [
+        {
+          "id": "4fff3da6-9ccb-4c5f-95f8-f55d2392c5e9",
+          "index": 10,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -602,6 +1185,17 @@
         "tag_1782410420529",
         "tag_1782411072535",
         "tag_1782411777840"
+      ],
+      "matches": [
+        {
+          "id": "456fcff0-f55d-4d54-94b3-b942cfa8f2b1",
+          "index": 9,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -613,6 +1207,17 @@
         "tag_1782410420529",
         "tag_1782410532373",
         "tag_1782411133709"
+      ],
+      "matches": [
+        {
+          "id": "456fcff0-f55d-4d54-94b3-b942cfa8f2b1",
+          "index": 9,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -624,6 +1229,17 @@
         "tag_1782410420529",
         "tag_1782410532373",
         "tag_1782411072535"
+      ],
+      "matches": [
+        {
+          "id": "419c1ee0-dee1-4e13-8621-1c65129be04f",
+          "index": 8,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -633,6 +1249,17 @@
       "tagIds": [
         "tag_1782411554932",
         "tag_1782411590686"
+      ],
+      "matches": [
+        {
+          "id": "3ba50609-dd9f-4f5c-883b-4f5975144a2a",
+          "index": 7,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -643,6 +1270,17 @@
         "tag_1782409752895",
         "tag_1782410532373",
         "tag_1782411072535"
+      ],
+      "matches": [
+        {
+          "id": "3ba50609-dd9f-4f5c-883b-4f5975144a2a",
+          "index": 7,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -652,6 +1290,17 @@
       "tagIds": [
         "tag_1782409727406",
         "tag_1782410338214"
+      ],
+      "matches": [
+        {
+          "id": "37f18261-c7ee-4a10-aad7-89198f8a2029",
+          "index": 6,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -661,6 +1310,17 @@
       "tagIds": [
         "tag_1782409727406",
         "tag_1782410338214"
+      ],
+      "matches": [
+        {
+          "id": "37f18261-c7ee-4a10-aad7-89198f8a2029",
+          "index": 6,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -671,6 +1331,17 @@
         "tag_1782409752895",
         "tag_1782410420529",
         "tag_1782411072535"
+      ],
+      "matches": [
+        {
+          "id": "37f18261-c7ee-4a10-aad7-89198f8a2029",
+          "index": 6,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -681,6 +1352,17 @@
         "tag_1782409752895",
         "tag_1782410420529",
         "tag_1782410532373"
+      ],
+      "matches": [
+        {
+          "id": "1e1eece5-b5a8-4c64-86e9-b93ebc8cf5d5",
+          "index": 4,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -691,6 +1373,17 @@
         "tag_1782409752895",
         "tag_1782410338214",
         "tag_1782411133709"
+      ],
+      "matches": [
+        {
+          "id": "1222e3ae-9ba2-4e96-b2ab-3d763a50789c",
+          "index": 2,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -701,6 +1394,17 @@
         "tag_1782409752895",
         "tag_1782410420529",
         "tag_1782411072535"
+      ],
+      "matches": [
+        {
+          "id": "1222e3ae-9ba2-4e96-b2ab-3d763a50789c",
+          "index": 2,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -711,6 +1415,17 @@
         "tag_1782409752895",
         "tag_1782410420529",
         "tag_1782410532373"
+      ],
+      "matches": [
+        {
+          "id": "0da5cbab-ef20-4021-a1f8-3c7aceb84534",
+          "index": 0,
+          "type": "Técnicas",
+          "ranking": [
+            "psb3d",
+            "psb25d"
+          ]
+        }
       ]
     },
     {
@@ -721,6 +1436,17 @@
         "tag_1782409530140",
         "tag_1782409752895",
         "tag_1782410338214"
+      ],
+      "matches": [
+        {
+          "id": "e3817d4c-14cd-4084-a8ea-68c2b8140e8c",
+          "index": 30,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -732,6 +1458,17 @@
         "tag_1782409727406",
         "tag_1782410420529",
         "tag_1782410532373"
+      ],
+      "matches": [
+        {
+          "id": "e3817d4c-14cd-4084-a8ea-68c2b8140e8c",
+          "index": 30,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -741,6 +1478,17 @@
       "tagIds": [
         "tag_1782409420607",
         "tag_1782409727406"
+      ],
+      "matches": [
+        {
+          "id": "e1ee6127-652a-4241-9456-0bbdaa918915",
+          "index": 29,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -751,6 +1499,17 @@
         "tag_1782409530140",
         "tag_1782409752895",
         "tag_1782410420529"
+      ],
+      "matches": [
+        {
+          "id": "e1ee6127-652a-4241-9456-0bbdaa918915",
+          "index": 29,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -760,6 +1519,17 @@
       "tagIds": [
         "tag_1782409530140",
         "tag_1782410338214"
+      ],
+      "matches": [
+        {
+          "id": "d105672d-49a5-477a-af0a-478002c5afbe",
+          "index": 28,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -769,6 +1539,17 @@
       "tagIds": [
         "tag_1782409530140",
         "tag_1782409752895"
+      ],
+      "matches": [
+        {
+          "id": "c4bcd132-fe52-4b3d-9844-7cd9e812ef29",
+          "index": 25,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -778,6 +1559,17 @@
       "tagIds": [
         "tag_1782409530140",
         "tag_1782409752895"
+      ],
+      "matches": [
+        {
+          "id": "9a28cbc5-bcee-49bf-b30e-912cef49ff7e",
+          "index": 17,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -787,6 +1579,17 @@
       "tagIds": [
         "tag_1782409189512",
         "tag_1782409727406"
+      ],
+      "matches": [
+        {
+          "id": "944cb3e3-3896-426d-ab78-90f14bd3b891",
+          "index": 16,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -796,6 +1599,17 @@
       "tagIds": [
         "tag_1782409530140",
         "tag_1782409752895"
+      ],
+      "matches": [
+        {
+          "id": "824d2229-0b3f-4895-80dd-ea2630c86f6b",
+          "index": 14,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -805,6 +1619,17 @@
       "tagIds": [
         "tag_1782409451400",
         "tag_1782409752895"
+      ],
+      "matches": [
+        {
+          "id": "630c2845-e93c-4392-ae73-5d2536743ba2",
+          "index": 12,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -814,6 +1639,17 @@
       "tagIds": [
         "tag_1782409420607",
         "tag_1782409727406"
+      ],
+      "matches": [
+        {
+          "id": "630c2845-e93c-4392-ae73-5d2536743ba2",
+          "index": 12,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -823,6 +1659,17 @@
       "tagIds": [
         "tag_1782409189512",
         "tag_1782409752895"
+      ],
+      "matches": [
+        {
+          "id": "18a73e7b-3145-4831-acba-d8b4ec728e0e",
+          "index": 3,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     },
     {
@@ -832,6 +1679,17 @@
       "tagIds": [
         "tag_1782409189512",
         "tag_1782409727406"
+      ],
+      "matches": [
+        {
+          "id": "0f9082d4-7ef3-419c-823d-d019a939c14c",
+          "index": 1,
+          "type": "Técnicas",
+          "ranking": [
+            "psb25d",
+            "psb3d"
+          ]
+        }
       ]
     }
   ]
