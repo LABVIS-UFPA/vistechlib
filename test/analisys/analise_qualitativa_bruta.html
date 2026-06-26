@@ -397,6 +397,32 @@
         // ==========================================
         // GERENCIAMENTO DE TAGS
         // ==========================================
+        function applyTagFilter() {
+            const input = document.getElementById('newTagInput');
+            if (!input) return;
+            const filter = input.value.toLowerCase();
+            
+            const globalTags = document.querySelectorAll('#globalTagsContainer > .tag-badge');
+            globalTags.forEach(badge => {
+                const span = badge.querySelector('span');
+                if (span) {
+                    const name = span.textContent.toLowerCase();
+                    badge.style.display = name.includes(filter) ? '' : 'none';
+                }
+            });
+
+            const checkboxes = document.querySelectorAll('#checkboxesContainer .tag-checkbox-label');
+            checkboxes.forEach(label => {
+                const span = label.querySelector('span');
+                if (span) {
+                    const name = span.textContent.toLowerCase();
+                    label.style.display = name.includes(filter) ? '' : 'none';
+                }
+            });
+        }
+
+        document.getElementById('newTagInput').addEventListener('input', applyTagFilter);
+
         document.getElementById('btnAddTag').addEventListener('click', () => {
             const input = document.getElementById('newTagInput');
             const name = input.value.trim();
@@ -521,16 +547,21 @@
                 tagsCont.appendChild(badge);
             });
 
-            // 2. Renderiza Checkboxes para a área de Edição
-            const checkCont = document.getElementById('checkboxesContainer');
-            checkCont.innerHTML = qdaData.tags.length === 0 ? '<em style="color:#a0aec0; font-size:0.85rem;">Crie tags acima primeiro.</em>' : '';
-
             // Se estiver editando, precisamos saber quais tags estão marcadas
+            // Caso não esteja editando, mantemos as seleções atuais feitas pelo usuário
             let activeTags = [];
             if (currentEditingExcerptId) {
                 const exc = qdaData.excerpts.find(e => e.id === currentEditingExcerptId);
                 if (exc) activeTags = exc.tagIds;
+            } else {
+                const checkedBoxes = document.querySelectorAll('#checkboxesContainer input[type="checkbox"]:checked');
+                activeTags = Array.from(checkedBoxes).map(cb => cb.value);
             }
+
+            // 2. Renderiza Checkboxes para a área de Edição
+            const checkCont = document.getElementById('checkboxesContainer');
+            checkCont.innerHTML = qdaData.tags.length === 0 ? '<em style="color:#a0aec0; font-size:0.85rem;">Crie tags acima primeiro.</em>' : '';
+
 
             qdaData.tags.forEach(tag => {
                 const label = document.createElement('label');
@@ -556,8 +587,14 @@
                     return t ? `<span class="tag-badge" style="background-color:${t.color}; font-size:0.75rem; padding: 2px 6px;">${t.name}</span>` : '';
                 }).join('');
 
+                let matchesHtml = `Origem: ${exc.sourceUser}`;
+                if (exc.matches && exc.matches.length > 0) {
+                    const matchTags = exc.matches.map(m => `<span data-userid="${m.id}" title="${m.id}">Usuário ${m.index}</span>`).join(', ');
+                    matchesHtml = `Matches (${exc.matches.length}): ${matchTags}`;
+                }
+
                 card.innerHTML = `
-                    <div class="excerpt-meta">Origem: ${exc.sourceUser}</div>
+                    <div class="excerpt-meta">${matchesHtml}</div>
                     <div class="excerpt-text">"${exc.text}"</div>
                     <div class="tag-list-display">${tagsHtml}</div>
                     <div class="excerpt-actions">
@@ -567,6 +604,9 @@
                 `;
                 excerptsCont.appendChild(card);
             });
+
+            // Aplica filtro de tags caso haja algo digitado
+            if (typeof applyTagFilter === 'function') applyTagFilter();
         }
 
         // ==========================================
@@ -604,6 +644,14 @@
             const text = selection.toString().trim();
 
             if (text.length > 0) {
+                // Garante que a seleção inteira está contida dentro de um parágrafo de comentário
+                const range = selection.getRangeAt(0);
+                const container = range.commonAncestorContainer;
+                const el = container.nodeType === 3 ? container.parentNode : container;
+                if (!el.closest('.text-block p')) {
+                    return; // Ignora se a seleção vazar para fora ou ocorrer em outro lugar
+                }
+
                 // Tenta descobrir de qual usuário veio o texto
                 let userRef = "Origem Desconhecida";
                 let datasetType = "";
@@ -699,27 +747,51 @@
         }
 
         function reRenderLeftPanel() {
+            qdaData.excerpts.forEach(exc => { exc.matches = []; });
+
             renderList(globalLoadedData.techList, 'techCommentsArea');
             renderList(globalLoadedData.modeList, 'modeCommentsArea');
+
+            // Persiste os matches encontrados
+            localStorage.setItem('experiment_qda_data', JSON.stringify(qdaData));
+            // Atualiza sidebar com a nova contagem de matches
+            renderAllQDA();
         }
 
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
-        function applyHighlights(text, excerpts) {
+        function applyHighlights(text, excerpts, currentItem) {
             if (!text) return '<em>Sem resposta</em>';
             if (excerpts.length === 0) return text;
 
-            let result = text;
+            // Normaliza espaços no texto do usuário para evitar mismatch (HTML exibe como espaço simples)
+            let result = text.replace(/\s+/g, ' ');
             const sortedExcerpts = [...excerpts].sort((a, b) => b.text.length - a.text.length);
 
             sortedExcerpts.forEach((exc, i) => {
                 if (!exc.text) return;
                 const token = `\x01${i}\x02`;
-                const regex = new RegExp("(" + escapeRegExp(exc.text) + ")", "g");
-                result = result.replace(regex, token + "$1" + "\x03");
+
+                // Também normalizamos o texto do excerpt pelo mesmo motivo
+                const normalizedExcText = exc.text.replace(/\s+/g, ' ');
+                const regex = new RegExp("(" + escapeRegExp(normalizedExcText) + ")", "g");
+                let matchFound = false;
+                result = result.replace(regex, (match, p1) => {
+                    matchFound = true;
+                    return token + p1 + "\x03";
+                });
+
+                if (matchFound && currentItem) {
+                    if (!exc.matches) exc.matches = [];
+                    const alreadyExists = exc.matches.find(m => m.id === currentItem.participantId);
+                    if (!alreadyExists) {
+                        exc.matches.push({ id: currentItem.participantId, index: currentItem.userIndex, type: currentItem.typeStr, ranking: currentItem.ranking });
+                    }
+                }
             });
+
 
             result = result.replace(/\x01\d+\x02/g, "<mark style='background-color: #fef08a; padding: 0 2px; border-radius: 2px; color: #1a202c;'>")
                 .replace(/\x03/g, "</mark>");
@@ -732,6 +804,9 @@
             container.innerHTML = '';
             if (listData.length === 0) return;
 
+            console.log(qdaData);
+            console.log(listData)
+
             listData.forEach(item => {
                 const formattedRanking = item.ranking.map((r, i) => i === 0 ? `<b>${r} (1º)</b>` : r).join(' ➔ ');
                 const card = document.createElement('div');
@@ -740,12 +815,12 @@
                 card.dataset.user = item.participantId;
                 card.dataset.type = item.typeStr;
 
-                const userExcerpts = qdaData.excerpts.filter(
-                    e => e.sourceUser === item.participantId
-                );
+                // const userExcerpts = qdaData.excerpts.filter(
+                //     e => e.sourceUser === item.participantId
+                // );
 
-                const whyHtml = applyHighlights(item.why, userExcerpts);
-                const otherHtml = applyHighlights(item.other, userExcerpts);
+                const whyHtml = applyHighlights(item.why, qdaData.excerpts, item);
+                const otherHtml = applyHighlights(item.other, qdaData.excerpts, item);
 
                 card.innerHTML = `
                     <div class="meta-side">
