@@ -317,12 +317,12 @@ def run_posthoc_tests(friedman_result, metric_col='Correct'):
     data_melted = pivot.melt(ignore_index=False, var_name='Visualization', value_name='Value').reset_index()
     
     try:
-        posthoc = sp.posthoc_conover(data_melted, val_col='Value', group_col='Visualization', p_adjust='bonferroni')
+        posthoc = sp.posthoc_conover(data_melted, val_col='Value', group_col='Visualization', p_adjust='holm')
     except Exception as e:
         print(f"   Erro no Post-hoc: {e}")
         return []
 
-    print("\n   [POST-HOC] Conover's Test (p-values ajustados por Bonferroni)")
+    print("\n   [POST-HOC] Conover's Test (p-values ajustados por Holm-Bonferroni)")
     print(posthoc.round(4))
     
     significant_pairs = []
