@@ -189,18 +189,18 @@
 
     function renderErrorChart(svg, rawData, offsetX, bgWidth, options) {
       const {
-        controlewidth = 340,
-        col1Header = "Difficulty",
-        posStrategyFactor = 0.7,
+        controlewidth = 400,
+        col1Header = "Difficulty", // Pode ser ajustado para "Task" ou outro
+        posStrategyFactor = 0.80, // Ajuste este valor para mover "Visualization"
         significant = [], // Adicionado para receber dados de significância
         xDomain = null
       } = options || {};
 
       const margin = { top: 30, right: 40, bottom: 40, left: controlewidth };
-      const width = 350;
+      const width = 320;
       const rowHeight = 30;
 
-      const posstrategy = -controlewidth * posStrategyFactor;
+      const posstrategy = -controlewidth * posStrategyFactor; 
 
       const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -213,9 +213,9 @@
         .attr("stroke", "black")
         .attr("stroke-width", 2);
 
-      g.append("text").attr("x", -controlewidth).attr("y", -15).text(col1Header).attr("font-weight", "bold").style("font-size", "15pt");
+      g.append("text").attr("x", -controlewidth).attr("y", -15).text(col1Header).attr("font-weight", "bold").style("font-size", "15pt"); // Posição da coluna "Task"
       g.append("text").attr("x", posstrategy).attr("y", -15).text("Visualization").attr("font-weight", "bold").style("font-size", "15pt");
-      g.append("text").attr("x", -10).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end");
+      g.append("text").attr("x", 0).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end");
 
       // Escala X (Log Error)
       const maxValue = d3.max(rawData, d => d.IC95_superior);
@@ -329,7 +329,7 @@
         .data(rawData)
         .enter()
         .append("text")
-        .attr("x", posstrategy)
+        .attr("x", posstrategy) // Posição da coluna "Visualization"
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
         .style("font-size", "15pt")
@@ -339,7 +339,7 @@
         .data(rawData)
         .enter()
         .append("text")
-        .attr("x", -10)
+        .attr("x", 0) // Posição da coluna "Estimate (95% CI)"
         .attr("text-anchor", "end")
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
@@ -368,7 +368,7 @@
 
         const yMean = d3.mean(indices, i => y(i) + y.bandwidth() / 2);
 
-        g.append("text")
+        g.append("text") // Posição do texto da coluna "Task"
           .attr("x", -controlewidth + 5)
           .attr("y", yMean + 4)
           .attr("text-anchor", "start")
@@ -400,7 +400,7 @@
         .attr("stroke", "black")
         .attr("stroke-width", 2);
 
-      g.append("text").attr("x", -10).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end");
+      g.append("text").attr("x", 0).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end");
 
       const maxValue = d3.max(rawData, d => d.IC95_superior);
 
@@ -520,7 +520,7 @@
         .data(rawData)
         .enter()
         .append("text")
-        .attr("x", -10)
+        .attr("x", 0) // Posição da coluna "Estimate (95% CI)"
         .attr("text-anchor", "end")
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
@@ -531,7 +531,7 @@
     function renderSubjectiveChart(svg, rawData, bgWidth, options) {
       const {
         controlewidth = 340,
-        col1Header = "Task",
+        col1Header = "Task", // Pode ser ajustado para "Task" ou outro
         posStrategyFactor = 0.81,
         chartTitle = "NASA-TLX Workload (0-100)",
         domain = [0, 100],
@@ -542,7 +542,7 @@
       const width = 350;
       const rowHeight = 30;
 
-      const posstrategy = -controlewidth * posStrategyFactor;
+      const posstrategy = -controlewidth * posStrategyFactor; // Ajuste este valor para mover "Visualization"
 
       const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -550,7 +550,7 @@
       g.append("line").attr("x1", -controlewidth).attr("x2", 0).attr("y1", -5).attr("y2", -5).attr("stroke", "black").attr("stroke-width", 2);
       g.append("text").attr("x", -controlewidth).attr("y", -15).text(col1Header).attr("font-weight", "bold").style("font-size", "15pt");
       g.append("text").attr("x", posstrategy).attr("y", -15).text("Visualization").attr("font-weight", "bold").style("font-size", "15pt");
-      g.append("text").attr("x", -10).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end");
+      g.append("text").attr("x", 0).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end"); // Posição da coluna "Estimate (95% CI)"
 
       // Escala X
       let x;
@@ -619,7 +619,7 @@
         .data(rawData)
         .enter()
         .append("text")
-        .attr("x", posstrategy)
+        .attr("x", posstrategy) // Posição da coluna "Visualization"
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
         .style("font-size", "15pt")
@@ -648,7 +648,7 @@
 
         g.insert("rect", ":first-child")
           .attr("x", -controlewidth)
-          .attr("y", y(firstIndex) - 5)
+          .attr("y", y(firstIndex) - 5) // Posição do retângulo de fundo da coluna "Task"
           .attr("width", bgWidth)
           .attr("height", (y(lastIndex) + y.bandwidth()) - y(firstIndex) + 10)
           .attr("fill", idx % 2 === 0 ? "#f0f0f0" : "white")
@@ -656,7 +656,7 @@
 
         const yMean = d3.mean(indices, i => y(i) + y.bandwidth() / 2);
 
-        g.append("text")
+        g.append("text") // Posição do texto da coluna "Task"
           .attr("x", -controlewidth + 5) // X position for the start of the text
           .attr("y", yMean + 4) // Y position for the first line of text
           .attr("text-anchor", "start")
@@ -1009,14 +1009,14 @@
 
         const mappedTaskData = taskTrialData.map(d => {
           return {
-            Difficulty: TASK_MAP[taskKey] || taskKey,
+            Difficulty: taskKey,
             Visualization: d.vis,
             LogError: d.logError,
             Time_s: d.Reaction_Time_s
           };
         });
 
-        const difficultyOrder = [TASK_MAP[taskKey] || taskKey];
+        const difficultyOrder = [taskKey];
 
         const errorData = processData(mappedTaskData, 'LogError', difficultyOrder);
         const timeData = processData(mappedTaskData, 'Time_s', difficultyOrder);
@@ -1041,12 +1041,12 @@
 
       if (confidenceLogs.length > 0) {
         const confidenceData = confidenceLogs.map(d => ({
-          Difficulty: TASK_MAP[d.task] || d.task,
+          Difficulty: d.task,
           Visualization: d.vis,
           Response: d.confidence
         }));
 
-        const confidenceOrder = uniqueTasks.map(t => TASK_MAP[t] || t).sort();
+        const confidenceOrder = uniqueTasks.sort();
         const processedConfidenceData = processData(confidenceData, 'Response', confidenceOrder);
 
         const accControleWidthConf = 380;
@@ -1086,12 +1086,12 @@
 
         if (questLogs.length > 0) {
           const questData = questLogs.map(d => ({
-            Difficulty: TASK_MAP[d.task] || d.task,
+            Difficulty: d.task,
             Visualization: d.vis,
             Response: d.ratings[dim.key]
           }));
 
-          const questOrder = uniqueTasks.map(t => TASK_MAP[t] || t).sort();
+          const questOrder = uniqueTasks.sort();
           const processedQuestData = processData(questData, 'Response', questOrder);
 
           const accControleWidthQuest = 380;
