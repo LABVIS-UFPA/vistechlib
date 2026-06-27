@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Temas (Visualização em Rede)</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --panel-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --primary: #4e79a7;
+            --primary-hover: #3b5c80;
+            --text-main: #1a202c;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* Topo */
+        .top-bar {
+            background: var(--panel-bg);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2d3748;
+        }
+
+        input[type="file"],
+        button,
+        input[type="text"] {
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Área de Trabalho Dividida */
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            position: relative;
+        }
+
+        #leftPanel {
+            border-right: 2px solid var(--border-color);
+        }
+
+        .panel-title {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            color: #4a5568;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem;
+            border-radius: 4px;
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 5;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* SVG Containers */
+        svg {
+            width: 100%;
+            height: 100%;
+            background: var(--panel-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Controles do Lado Direito */
+        .theme-creator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .theme-creator input {
+            width: 250px;
+        }
+
+        .saved-themes-container {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .theme-tag {
+            display: inline-block;
+            background: #ebf8ff;
+            color: #2b6cb0;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid #bee3f8;
+            margin: 4px;
+            cursor: help;
+        }
+
+        .left-controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 5;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .right-controls {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 5;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Estilos D3 */
+        .node-left {
+            cursor: pointer;
+            stroke: #fff;
+            stroke-width: 1.5px;
+            transition: stroke-width 0.1s;
+        }
+
+        .node-left:hover {
+            stroke: #2d3748;
+            stroke-width: 3px;
+        }
+
+        .node-left.selected {
+            stroke: #e53e3e !important;
+            stroke-width: 4px !important;
+        }
+
+        .node-left.highlight-related {
+            stroke: #2b6cb0;
+            stroke-width: 5px;
+        }
+
+        .link-left {
+            stroke: #cbd5e0;
+            stroke-opacity: 0.6;
+        }
+
+        .node-right {
+            cursor: pointer;
+        }
+
+        .node-right circle {
+            fill: #fbd38d;
+            stroke: #dd6b20;
+            stroke-width: 0px;
+            transition: stroke-width 0.1s;
+        }
+
+        .node-right.is-group circle {
+            fill: #9ae6b4;
+            stroke: #38a169;
+        }
+
+        .node-right.is-theme circle {
+            fill: #b794f4;
+            stroke: #805ad5;
+        }
+
+        .node-right.selected circle {
+            stroke-width: 3px;
+        }
+
+        .node-right text {
+            font-family: sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            pointer-events: none;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
+        }
+
+        .link-right {
+            stroke: #a0aec0;
+            stroke-width: 2px;
+        }
+
+        /* Drawer CSS */
+        .drawer-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            display: none;
+        }
+        .drawer-overlay.open {
+            display: block;
+        }
+        .drawer {
+            position: fixed;
+            top: 0; right: -700px;
+            width: 700px; height: 100vh;
+            background: #fff;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .drawer.open {
+            right: 0;
+        }
+        .drawer-header {
+            padding: 1rem;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .drawer-content {
+            padding: 1rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .themes-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .themes-table th, .themes-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .themes-table tr.theme-row {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .themes-table tr.theme-row:hover {
+            background: #edf2f7;
+        }
+        .themes-table tr.theme-row.active {
+            background: #e6fffa;
+            border-left: 4px solid #319795;
+        }
+        .excerpts-row {
+            display: none;
+            background: #fafafa;
+        }
+        .excerpts-row.open {
+            display: table-row;
+        }
+        .excerpt-item {
+            padding: 0.5rem;
+            border-left: 2px solid #cbd5e0;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .inline-input {
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            width: 100%;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <h1>Geração de Temas (Síntese)</h1>
+        <div>
+            <button id="btnOpenDrawer" style="margin-right:1rem;">📂 Gerenciar Temas</button>
+            <input type="file" id="fileInput" accept=".json" />
+            <button id="btnExport" style="margin-left:1rem; display:none;">📥 Exportar Temas Finais</button>
+        </div>
+    </div>
+
+    <!-- Drawer HTML -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer" id="themeDrawer">
+        <div class="drawer-header">
+            <h2 style="margin: 0; font-size: 1.25rem; color: #2d3748;">Temas Oficiais</h2>
+            <div>
+                <button id="btnNewTheme" style="margin-right: 0.5rem;" title="Novo Tema">+</button>
+                <button id="btnCloseDrawer">X</button>
+            </div>
+        </div>
+        <div class="drawer-content">
+            <table class="themes-table" id="themesTable">
+                <thead>
+                    <tr>
+                        <th style="width: 30px;"></th>
+                        <th>Nome do Tema</th>
+                        <th>Trechos</th>
+                        <th>Coders</th>
+                        <th>Participantes</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="themesTableBody">
+                    <!-- JS vai popular -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="workspace">
+        <div id="leftPanel" class="panel">
+            <h2 class="panel-title">1. Trechos Conectados por Categorias em Comum</h2>
+            <div class="left-controls" id="leftControls" style="display: none;">
+                <button class="icon-btn" id="btnToggleForce" title="Pausar/Ativar Força">⏸️</button>
+                <button class="icon-btn" id="btnResetPositions" title="Reiniciar Posições Aleatoriamente">🔄️</button>
+            </div>
+            <svg id="svgLeft"></svg>
+        </div>
+
+        <div id="rightPanel" class="panel">
+            <div class="right-controls" id="rightControls" style="display: none;">
+                <button class="icon-btn" id="btnToggleForceRight" title="Pausar/Ativar Força">⏸️</button>
+                <button class="icon-btn" id="btnResetPositionsRight" title="Reiniciar Posições Aleatoriamente">🔄️</button>
+            </div>
+            <svg id="svgRight"></svg>
+        </div>
+    </div>
+
+    <script>
+        let qdaData = null;
+        let leftNodes = [];
+        let leftLinks = [];
+        let selectedClusterIds = new Set();
+        let finalThemes = [];
+        let editingThemeId = null;
+        let isForceActiveLeft = true;
+        let isForceActiveRight = true;
+        let selectedRightNodes = new Map();
+        let rightNodesMap = {};
+
+        let simulationLeft, simulationRight;
+
+        // ==========================================
+        // LEITURA DO ARQUIVO
+        // ==========================================
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    qdaData = JSON.parse(event.target.result);
+                    if (!qdaData.treeHierarchy) {
+                        alert("Aviso: O JSON carregado não possui a hierarquia (treeHierarchy). Conexões baseadas em categorias não funcionarão.");
+                    }
+                    localStorage.setItem('gerador_temas_codebook', JSON.stringify(qdaData));
+                    localStorage.removeItem('gerador_temas_positions');
+                    processLeftGraphData();
+                    createNewTheme();
+                } catch (error) {
+                    alert("Erro ao ler o arquivo JSON."); console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // ==========================================
+        // LADO ESQUERDO: PROCESSAMENTO E D3
+        // ==========================================
+
+        // Função auxiliar para achar todos os Grupos/Categorias pai de uma tag específica
+        function getCategoriesForTag(tagId) {
+            let categories = new Set();
+            let th = qdaData.treeHierarchy || {};
+            let currentId = tagId;
+
+            while (currentId) {
+                const node = th[currentId];
+                if (!node) break;
+                if (node.type === 'group') {
+                    categories.add(node.id);
+                }
+                currentId = node.parentId;
+            }
+            return Array.from(categories);
+        }
+
+        function processLeftGraphData() {
+            leftNodes = [];
+            leftLinks = [];
+
+            // 1. Cria nós baseados nos Clusters (trechos de texto)
+            qdaData.blocks.forEach(block => {
+                block.excerptClusters.forEach(cluster => {
+
+                    // Descobre a quais Categorias Maiores este trecho pertence
+                    let clusterCategories = new Set();
+                    cluster.allTagIds.forEach(tId => {
+                        getCategoriesForTag(tId).forEach(catId => clusterCategories.add(catId));
+                    });
+
+                    leftNodes.push({
+                        id: cluster.clusterId,
+                        text: cluster.longestText,
+                        tags: cluster.allTagIds,
+                        categories: Array.from(clusterCategories),
+                        coders: [...new Set(cluster.codings.map(c => c.coder))].join(', '),
+                        participants: `Usuário ${cluster.userIndex || block.userIndex || '?'} (${cluster.userId || block.userId || '?'}) (${cluster.type || block.type || '?'})` + ((cluster.ranking || block.ranking) && (cluster.ranking || block.ranking).length > 0 ? ` [Rank: ${(cluster.ranking || block.ranking).join(', ')}]` : ""),
+                        userId: cluster.userId || block.userId,
+                        radius: 8 // Tamanho agora é FIXO e padrão para todos
+                    });
+                });
+            });
+
+            // 2. Cria links APENAS cruzando Categorias em comum
+            for (let i = 0; i < leftNodes.length; i++) {
+                for (let j = i + 1; j < leftNodes.length; j++) {
+                    const nodeA = leftNodes[i];
+                    const nodeB = leftNodes[j];
+
+                    // Garante que eles têm pelo menos 1 categoria e o mesmo tamanho de array
+                    if (nodeA.categories.length > 0 && nodeA.categories.length === nodeB.categories.length) {
+
+                        // Verifica se TODAS as categorias de A estão presentes em B
+                        const hasExactSameCategories = nodeA.categories.every(c => nodeB.categories.includes(c));
+
+                        if (hasExactSameCategories) {
+                            leftLinks.push({
+                                source: nodeA.id,
+                                target: nodeB.id,
+                                weight: 1 // Peso fixo, pois a correspondência é binária (idêntica)
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Algoritmo Union-Find para descobrir as "Ilhas" (Componentes Conexos)
+            let parent = {};
+            leftNodes.forEach(n => parent[n.id] = n.id);
+            function find(i) {
+                if (parent[i] === i) return i;
+                return parent[i] = find(parent[i]);
+            }
+            function union(i, j) {
+                let rootI = find(i);
+                let rootJ = find(j);
+                if (rootI !== rootJ) parent[rootI] = rootJ;
+            }
+
+            // Une os nós que têm links reais
+            leftLinks.forEach(l => union(l.source, l.target));
+
+            // Conta o tamanho de cada Ilha e agrupa pelos "Nós Raiz" (Centro de Massa virtual)
+            let compSize = {};
+            leftNodes.forEach(n => {
+                let root = find(n.id);
+                compSize[root] = (compSize[root] || 0) + 1;
+            });
+
+            let rootsBySize = {};
+            for (let root in compSize) {
+                let size = compSize[root];
+                if (!rootsBySize[size]) rootsBySize[size] = [];
+                rootsBySize[size].push(root);
+            }
+
+            // Cria as Ligações Fantasmas entre ilhas do MESMO TAMANHO
+            for (let size in rootsBySize) {
+                let roots = rootsBySize[size];
+                if (roots.length > 1) {
+                    for (let i = 0; i < roots.length; i++) {
+                        for (let j = i + 1; j < roots.length; j++) {
+                            leftLinks.push({
+                                source: roots[i],
+                                target: roots[j],
+                                weight: 1,
+                                isInvisible: true // A mágica acontece aqui
+                            });
+                        }
+                    }
+                }
+            }
+
+            const savedPositions = localStorage.getItem('gerador_temas_positions');
+            if (savedPositions) {
+                try {
+                    const posMap = JSON.parse(savedPositions).reduce((acc, p) => {
+                        acc[p.id] = p;
+                        return acc;
+                    }, {});
+
+                    leftNodes.forEach(n => {
+                        if (posMap[n.id]) {
+                            n.x = posMap[n.id].x;
+                            n.y = posMap[n.id].y;
+                            n.fx = posMap[n.id].fx;
+                            n.fy = posMap[n.id].fy;
+                        }
+                    });
+                } catch (e) { }
+            }
+
+            document.getElementById('leftControls').style.display = 'flex';
+            renderLeftGraph();
+        }
+
+        function renderLeftGraph() {
+            const svg = d3.select("#svgLeft");
+            svg.selectAll("*").remove();
+
+            const width = svg.node().getBoundingClientRect().width;
+            const height = svg.node().getBoundingClientRect().height;
+
+            const g = svg.append("g");
+
+            // Zoom/Pan
+            svg.call(d3.zoom().on("zoom", (event) => g.attr("transform", event.transform)));
+
+            // Forças
+            simulationLeft = d3.forceSimulation(leftNodes)
+                .force("link", d3.forceLink(leftLinks)
+                    .id(d => d.id)
+                    .distance(d => d.isInvisible ? 200 : 100 / (d.weight || 1)) // Fantasmas ficam mais longos
+                    .strength(d => d.isInvisible ? 0.05 : 1) // Fantasmas têm força de atração bem fraca
+                )
+                .force("charge", d3.forceManyBody().strength(-20).distanceMax(150)) // Só repele até 150px
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collide", d3.forceCollide().radius(12));
+
+            const hasPositions = leftNodes.length > 0 && leftNodes[0].x !== undefined;
+            if (hasPositions) {
+                simulationLeft.alpha(0); // Evita espalhar os nós caso posições já tenham sido carregadas
+                document.getElementById('btnToggleForce').innerText = '▶️';
+                isForceActiveLeft = false;
+            } else {
+                document.getElementById('btnToggleForce').innerText = '⏸️';
+                isForceActiveLeft = true;
+            }
+
+            // Desenha Links (antes filtra os invisíveis)
+            const visibleLinks = leftLinks.filter(l => !l.isInvisible);
+            const link = g.append("g")
+                .selectAll("line")
+                .data(visibleLinks)
+                .enter().append("line")
+                .attr("class", "link-left")
+                .attr("stroke-width", d => Math.min(d.weight * 2, 8)); // Espessura pelo peso
+
+            // Desenha Nós
+            const node = g.append("g")
+                .selectAll("circle")
+                .data(leftNodes)
+                .enter().append("circle")
+                .attr("class", "node-left")
+                .attr("r", d => d.radius)
+                .attr("fill", "#4e79a7")
+                .attr("id", d => `node-${d.id}`)
+                .call(d3.drag()
+                    .on("start", dragstartedLeft)
+                    .on("drag", draggedLeft)
+                    .on("end", dragendedLeft))
+                .on("click", toggleNodeSelection);
+
+            // Tooltip via <title>
+            node.append("title")
+                .text(d => `Trecho: "${d.text}"\n\nCodificadores: ${d.coders}\nQtd Categorias: ${d.categories.length}\nOrigem: ${d.participants}`);
+
+            simulationLeft.on("tick", updateLeftDOM);
+            simulationLeft.on("end", saveLeftPositions);
+        }
+
+        function updateLeftDOM() {
+            d3.select("#svgLeft").selectAll(".link-left")
+                .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+            d3.select("#svgLeft").selectAll(".node-left")
+                .attr("cx", d => d.x).attr("cy", d => d.y);
+        }
+
+        function saveLeftPositions() {
+            if (!leftNodes || leftNodes.length === 0) return;
+            const positions = leftNodes.map(n => ({ id: n.id, x: n.x, y: n.y, fx: n.fx, fy: n.fy }));
+            localStorage.setItem('gerador_temas_positions', JSON.stringify(positions));
+        }
+
+        // Seleção de Nós
+        function toggleNodeSelection(event, d) {
+            if (selectedClusterIds.has(d.id)) {
+                selectedClusterIds.delete(d.id);
+                d3.select(this).classed("selected", false);
+            } else {
+                selectedClusterIds.add(d.id);
+                d3.select(this).classed("selected", true);
+            }
+            updateRightGraph();
+            autoSaveCurrentTheme();
+        }
+
+        function dragstartedLeft(event, d) {
+            if (!event.active && isForceActiveLeft) simulationLeft.alphaTarget(0.3).restart();
+            d.fx = d.x; d.fy = d.y;
+        }
+        function draggedLeft(event, d) {
+            d.fx = event.x; d.fy = event.y;
+            if (!isForceActiveLeft) {
+                d.x = event.x; d.y = event.y;
+                updateLeftDOM();
+            }
+        }
+        function dragendedLeft(event, d) {
+            if (!event.active && isForceActiveLeft) simulationLeft.alphaTarget(0);
+            d.fx = null; d.fy = null;
+            saveLeftPositions();
+        }
+
+        // ==========================================
+        // LADO DIREITO: PROCESSAMENTO E D3
+        // ==========================================
+        function updateRightGraph() {
+            document.getElementById('rightControls').style.display = 'flex';
+
+            let tagsInSelection = new Set();
+            leftNodes.forEach(n => {
+                if (selectedClusterIds.has(n.id)) {
+                    n.tags.forEach(t => tagsInSelection.add(t));
+                }
+            });
+
+            const oldNodesMap = rightNodesMap || {};
+            let newRightNodesMap = {};
+            let rightLinks = [];
+
+            const th = qdaData.treeHierarchy || {};
+
+            tagsInSelection.forEach(tagId => {
+                let currentId = tagId;
+                while (currentId) {
+                    const nodeData = th[currentId];
+                    if (!nodeData) break;
+                    if (!newRightNodesMap[currentId]) {
+                        newRightNodesMap[currentId] = {
+                            id: currentId,
+                            name: nodeData.data.name || nodeData.data.normalized || "Tag",
+                            isGroup: nodeData.type === 'group',
+                            isRoot: !nodeData.parentId
+                        };
+                    }
+                    if (nodeData.parentId) {
+                        if (!rightLinks.find(l => l.source === nodeData.parentId && l.target === currentId)) {
+                            rightLinks.push({ source: nodeData.parentId, target: currentId });
+                        }
+                    }
+                    currentId = nodeData.parentId;
+                }
+            });
+
+            const themeNodeId = "THEME_ROOT";
+            let themeName = "";
+            if (editingThemeId) {
+                const existingTheme = finalThemes.find(t => t.id === editingThemeId);
+                if (existingTheme) themeName = existingTheme.name;
+            } else {
+                const inputVal = document.getElementById('newThemeName').value.trim();
+                themeName = inputVal ? inputVal : "[Novo Tema]";
+            }
+
+            newRightNodesMap[themeNodeId] = {
+                id: themeNodeId,
+                name: themeName,
+                isTheme: true,
+                isRoot: false
+            };
+
+            Object.values(newRightNodesMap).forEach(n => {
+                if (n.isRoot && n.id !== themeNodeId) {
+                    rightLinks.push({ source: themeNodeId, target: n.id });
+                }
+            });
+
+            for (let id in newRightNodesMap) {
+                if (oldNodesMap[id]) {
+                    newRightNodesMap[id].x = oldNodesMap[id].x;
+                    newRightNodesMap[id].y = oldNodesMap[id].y;
+                    newRightNodesMap[id].vx = oldNodesMap[id].vx;
+                    newRightNodesMap[id].vy = oldNodesMap[id].vy;
+                    newRightNodesMap[id].fx = oldNodesMap[id].fx;
+                    newRightNodesMap[id].fy = oldNodesMap[id].fy;
+                }
+            }
+            
+            rightNodesMap = newRightNodesMap;
+            const rightNodesArray = Object.values(rightNodesMap);
+            renderRightGraph(rightNodesArray, rightLinks);
+            reapplyRightSelectionHighlight();
+        }
+
+        function renderRightGraph(nodesData, linksData) {
+            const svg = d3.select("#svgRight");
+            svg.selectAll("*").remove();
+
+            const width = svg.node().getBoundingClientRect().width;
+            const height = svg.node().getBoundingClientRect().height;
+
+            const g = svg.append("g");
+            svg.call(d3.zoom().on("zoom", (event) => g.attr("transform", event.transform)));
+
+            // FORÇAS CALIBRADAS: Repulsão severamente reduzida (-30) para as sub-árvores não fugirem da tela
+            simulationRight = d3.forceSimulation(nodesData)
+                .force("link", d3.forceLink(linksData).id(d => d.id).distance(60))
+                .force("charge", d3.forceManyBody().strength(-30).distanceMax(150))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collide", d3.forceCollide().radius(25));
+
+            const link = g.append("g")
+                .selectAll("line")
+                .data(linksData)
+                .enter().append("line")
+                .attr("class", "link-right");
+
+            if (!isForceActiveRight) {
+                document.getElementById('btnToggleForceRight').innerText = '▶️';
+                simulationRight.alpha(0);
+            } else {
+                document.getElementById('btnToggleForceRight').innerText = '⏸️';
+            }
+
+            const node = g.append("g")
+                .selectAll("g")
+                .data(nodesData)
+                .enter().append("g")
+                .attr("class", d => {
+                    let c = d.isTheme ? "node-right is-theme" : (d.isGroup ? "node-right is-group" : "node-right");
+                    if (selectedRightNodes.has(d.id)) c += " selected";
+                    return c;
+                })
+                .call(d3.drag()
+                    .on("start", dragstartedRight)
+                    .on("drag", draggedRight)
+                    .on("end", dragendedRight))
+                .on("click", handleRightNodeClick);
+
+            // Bolinha do nó
+            node.append("circle").attr("r", d => d.isTheme ? 14 : 8);
+
+            // Texto (Rótulo do Código/Categoria)
+            node.append("text")
+                .attr("dx", d => d.isTheme ? 18 : 12)
+                .attr("dy", 4)
+                .style("font-weight", d => (d.isRoot || d.isTheme) ? "bold" : "normal")
+                .text(d => d.name);
+
+            simulationRight.on("tick", updateRightDOM);
+        }
+
+        function updateRightDOM() {
+            d3.select("#svgRight").selectAll(".link-right")
+                .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+            d3.select("#svgRight").selectAll(".node-right")
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+        }
+
+        function dragstartedRight(event, d) {
+            if (!event.active && isForceActiveRight) simulationRight.alphaTarget(0.3).restart();
+            d.fx = d.x; d.fy = d.y;
+        }
+        function draggedRight(event, d) { 
+            d.fx = event.x; d.fy = event.y;
+            if (!isForceActiveRight) {
+                d.x = event.x; d.y = event.y;
+                updateRightDOM();
+            }
+        }
+        function dragendedRight(event, d) {
+            if (!event.active && isForceActiveRight) simulationRight.alphaTarget(0);
+            d.fx = null; d.fy = null;
+            autoSaveCurrentTheme();
+        }
+
+        function handleRightNodeClick(event, d) {
+            if (event.defaultPrevented) return;
+
+            if (event.shiftKey) {
+                if (selectedRightNodes.has(d.id)) {
+                    selectedRightNodes.delete(d.id);
+                } else {
+                    selectedRightNodes.set(d.id, d);
+                }
+            } else {
+                if (selectedRightNodes.has(d.id) && selectedRightNodes.size === 1) {
+                    selectedRightNodes.clear();
+                } else {
+                    selectedRightNodes.clear();
+                    selectedRightNodes.set(d.id, d);
+                }
+            }
+            reapplyRightSelectionHighlight();
+        }
+
+        function reapplyRightSelectionHighlight() {
+            for (let id of selectedRightNodes.keys()) {
+                if (!rightNodesMap[id]) {
+                    selectedRightNodes.delete(id);
+                }
+            }
+
+            d3.select("#svgRight").selectAll(".node-right")
+                .classed("selected", n => selectedRightNodes.has(n.id));
+
+            if (selectedRightNodes.size === 0) {
+                d3.select("#svgLeft").selectAll(".node-left").classed("highlight-related", false);
+            } else {
+                d3.select("#svgLeft").selectAll(".node-left").classed("highlight-related", n => {
+                    let containsAll = true;
+                    for (let [id, rightNode] of selectedRightNodes.entries()) {
+                        let containsThis = false;
+                        if (rightNode.isTheme) {
+                            containsThis = selectedClusterIds.has(n.id);
+                        } else if (rightNode.isGroup) {
+                            containsThis = n.categories.includes(id);
+                        } else {
+                            containsThis = n.tags.includes(id);
+                        }
+                        if (!containsThis) {
+                            containsAll = false;
+                            break;
+                        }
+                    }
+                    return containsAll;
+                });
+            }
+        }
+
+        // ==========================================
+        // CRIAÇÃO E EXPORTAÇÃO DE TEMAS MAIORES
+        // ==========================================
+
+        function renameTheme(themeId, newName) {
+            const theme = finalThemes.find(t => t.id === themeId);
+            if (theme) {
+                theme.name = newName || "[Novo Tema]";
+                saveThemesToLocalStorage();
+                if (editingThemeId === themeId) {
+                    d3.select(".node-right.is-theme text").text(theme.name);
+                }
+            }
+        }
+
+        function createNewTheme() {
+            if (editingThemeId) {
+                const current = finalThemes.find(t => t.id === editingThemeId);
+                if (current && current.clusterIds.length === 0 && current.name === "[Novo Tema]") {
+                    return;
+                }
+            }
+            
+            const newThemeId = 'theme_' + Date.now();
+            editingThemeId = newThemeId;
+            const newTheme = {
+                id: newThemeId,
+                name: "[Novo Tema]",
+                clusterIds: [],
+                rightGraphState: { positions: [], isForceActive: true },
+                excerpts: []
+            };
+            finalThemes.unshift(newTheme); 
+            
+            d3.selectAll('.node-left').classed('selected', false);
+            selectedClusterIds.clear();
+            rightNodesMap = {};
+            selectedRightNodes.clear();
+            isForceActiveRight = true;
+            updateRightGraph();
+            
+            saveThemesToLocalStorage();
+            renderSavedThemes();
+        }
+
+        function autoSaveCurrentTheme() {
+            if (!editingThemeId) return;
+            const themeIndex = finalThemes.findIndex(t => t.id === editingThemeId);
+            if (themeIndex === -1) return;
+            
+            const themePositions = Object.values(rightNodesMap).map(n => ({
+                id: n.id, x: n.x, y: n.y, fx: n.fx, fy: n.fy
+            }));
+            
+            finalThemes[themeIndex].clusterIds = Array.from(selectedClusterIds);
+            finalThemes[themeIndex].rightGraphState = {
+                positions: themePositions,
+                isForceActive: isForceActiveRight
+            };
+            finalThemes[themeIndex].excerpts = Array.from(selectedClusterIds).map(id => {
+                const node = leftNodes.find(n => n.id === id);
+                return node ? { text: node.text, coders: node.coders, participants: node.participants, userId: node.userId } : { text: "Trecho não encontrado", coders: "", participants: "", userId: null };
+            });
+            
+            saveThemesToLocalStorage();
+        }
+
+        function editTheme(themeId) {
+            if (editingThemeId && editingThemeId !== themeId) {
+                const current = finalThemes.find(t => t.id === editingThemeId);
+                if (current && current.clusterIds.length === 0 && current.name === "[Novo Tema]") {
+                    finalThemes = finalThemes.filter(t => t.id !== editingThemeId);
+                } else {
+                    autoSaveCurrentTheme();
+                }
+            }
+
+            const theme = finalThemes.find(t => t.id === themeId);
+            if (!theme) return;
+
+            editingThemeId = theme.id;
+            
+            selectedClusterIds.clear();
+            theme.clusterIds.forEach(id => selectedClusterIds.add(id));
+
+            rightNodesMap = {};
+            selectedRightNodes.clear();
+            if (theme.rightGraphState) {
+                isForceActiveRight = theme.rightGraphState.isForceActive;
+                theme.rightGraphState.positions.forEach(p => {
+                    rightNodesMap[p.id] = { x: p.x, y: p.y, fx: p.fx, fy: p.fy, vx: 0, vy: 0 };
+                });
+            } else {
+                isForceActiveRight = true;
+            }
+
+            d3.selectAll('.node-left').classed('selected', function (d) {
+                return selectedClusterIds.has(d.id);
+            });
+
+            updateRightGraph();
+            renderSavedThemes();
+        }
+
+        function deleteTheme(themeId) {
+            if (confirm("Deseja realmente excluir este tema?")) {
+                finalThemes = finalThemes.filter(t => t.id !== themeId);
+                if (editingThemeId === themeId) {
+                    editingThemeId = null;
+                    createNewTheme();
+                }
+                saveThemesToLocalStorage();
+                renderSavedThemes();
+            }
+        }
+
+        function renderSavedThemes() {
+            const tbody = document.getElementById('themesTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            finalThemes = finalThemes.filter(t => {
+                if (t.id !== editingThemeId && t.clusterIds.length === 0 && t.name === "[Novo Tema]") return false;
+                return true;
+            });
+            saveThemesToLocalStorage();
+
+            finalThemes.forEach(theme => {
+                const tr = document.createElement('tr');
+                tr.className = 'theme-row' + (editingThemeId === theme.id ? ' active' : '');
+                
+                const allCoders = new Set();
+                const allParticipants = new Set();
+                
+                let excerptRowsHtml = '';
+                
+                (theme.excerpts || []).forEach((exc) => {
+                    if (exc.coders) exc.coders.split(', ').forEach(c => allCoders.add(c));
+                    if (exc.userId) allParticipants.add(exc.userId);
+                    else if (exc.participants) allParticipants.add(exc.participants);
+                    
+                    excerptRowsHtml += `
+                        <div class="excerpt-item">
+                            ${exc.text} 
+                            <div style="margin-top: 4px; font-size: 0.75rem; color: #718096;">Coders: ${exc.coders || '-'} | Origem: ${exc.participants || '-'}</div>
+                        </div>
+                    `;
+                });
+
+                // Seta de expansão
+                const tdArrow = document.createElement('td');
+                tdArrow.innerHTML = '▶';
+                tdArrow.style.color = '#a0aec0';
+                tdArrow.onclick = (e) => {
+                    e.stopPropagation();
+                    const excRow = document.getElementById('excerpts_' + theme.id);
+                    if (excRow.classList.contains('open')) {
+                        excRow.classList.remove('open');
+                        tdArrow.innerHTML = '▶';
+                    } else {
+                        excRow.classList.add('open');
+                        tdArrow.innerHTML = '▼';
+                    }
+                };
+
+                // Nome do tema (editável)
+                const tdName = document.createElement('td');
+                const inputName = document.createElement('input');
+                inputName.className = 'inline-input';
+                inputName.value = theme.name;
+                inputName.onclick = (e) => e.stopPropagation();
+                inputName.onchange = (e) => renameTheme(theme.id, e.target.value);
+                tdName.appendChild(inputName);
+
+                // Estatísticas
+                const tdExc = document.createElement('td'); tdExc.innerText = theme.clusterIds.length;
+                const tdCoders = document.createElement('td'); tdCoders.innerText = allCoders.size;
+                const tdParticipants = document.createElement('td'); tdParticipants.innerText = allParticipants.size;
+                
+                // Ações
+                const tdActions = document.createElement('td');
+                const delBtn = document.createElement('button');
+                delBtn.innerText = '🗑️';
+                delBtn.title = 'Excluir Tema';
+                delBtn.style.border = 'none';
+                delBtn.style.background = 'transparent';
+                delBtn.style.cursor = 'pointer';
+                delBtn.onclick = (e) => { e.stopPropagation(); deleteTheme(theme.id); };
+                tdActions.appendChild(delBtn);
+
+                tr.appendChild(tdArrow);
+                tr.appendChild(tdName);
+                tr.appendChild(tdExc);
+                tr.appendChild(tdCoders);
+                tr.appendChild(tdParticipants);
+                tr.appendChild(tdActions);
+
+                tr.onclick = () => {
+                    if (editingThemeId !== theme.id) {
+                        editTheme(theme.id);
+                    }
+                };
+                
+                tbody.appendChild(tr);
+
+                // Linha expansível com trechos brutos
+                const trExc = document.createElement('tr');
+                trExc.className = 'excerpts-row';
+                trExc.id = 'excerpts_' + theme.id;
+                const tdFull = document.createElement('td');
+                tdFull.colSpan = 6;
+                tdFull.innerHTML = excerptRowsHtml || '<em style="color:#a0aec0;font-size:0.85rem;">Nenhum trecho associado.</em>';
+                trExc.appendChild(tdFull);
+                tbody.appendChild(trExc);
+            });
+            
+            if (finalThemes.length > 0) {
+                document.getElementById('btnExport').style.display = 'inline-block';
+            } else {
+                document.getElementById('btnExport').style.display = 'none';
+            }
+        }
+
+        document.getElementById('btnExport').addEventListener('click', () => {
+            if (finalThemes.length === 0) return;
+
+            const graphData = {
+                nodes: leftNodes.map(n => ({
+                    id: n.id, text: n.text, tags: n.tags, categories: n.categories,
+                    coders: n.coders, radius: n.radius,
+                    x: n.x, y: n.y, fx: n.fx, fy: n.fy
+                })),
+                links: leftLinks.map(l => ({
+                    source: l.source.id || l.source,
+                    target: l.target.id || l.target,
+                    weight: l.weight
+                }))
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                themes: finalThemes,
+                leftGraph: graphData
+            }, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "temas_reflexivos_finais.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        });
+
+        document.getElementById('btnToggleForce').addEventListener('click', (e) => {
+            if (!simulationLeft) return;
+            isForceActiveLeft = !isForceActiveLeft;
+            if (isForceActiveLeft) {
+                e.target.innerText = '⏸️';
+                simulationLeft.alpha(0.3).restart();
+            } else {
+                e.target.innerText = '▶️';
+                simulationLeft.alpha(0);
+                saveLeftPositions();
+            }
+        });
+
+        document.getElementById('btnResetPositions').addEventListener('click', () => {
+            if (!simulationLeft || leftNodes.length === 0) return;
+            leftNodes.forEach(n => {
+                n.x = undefined;
+                n.y = undefined;
+                n.vx = undefined;
+                n.vy = undefined;
+                n.fx = null;
+                n.fy = null;
+            });
+            localStorage.removeItem('gerador_temas_positions');
+            isForceActiveLeft = true;
+            document.getElementById('btnToggleForce').innerText = '⏸️';
+            renderLeftGraph(); 
+        });
+
+        document.getElementById('btnToggleForceRight').addEventListener('click', (e) => {
+            if (!simulationRight) return;
+            isForceActiveRight = !isForceActiveRight;
+            if (isForceActiveRight) {
+                e.target.innerText = '⏸️';
+                simulationRight.alpha(0.3).restart();
+            } else {
+                e.target.innerText = '▶️';
+                simulationRight.alpha(0);
+                autoSaveCurrentTheme();
+            }
+        });
+
+        document.getElementById('btnResetPositionsRight').addEventListener('click', () => {
+            if (!simulationRight) return;
+            // Apenas re-renderiza o gráfico direito, o D3 joga posições aleatórias por não ter localStorage
+            updateRightGraph(); 
+        });
+
+        function saveThemesToLocalStorage() {
+            localStorage.setItem('gerador_temas_finais', JSON.stringify(finalThemes));
+        }
+
+        document.getElementById('btnOpenDrawer').addEventListener('click', () => {
+            document.getElementById('themeDrawer').classList.add('open');
+            document.getElementById('drawerOverlay').classList.add('open');
+            renderSavedThemes(); // Renderiza sempre que abre
+        });
+
+        document.getElementById('btnCloseDrawer').addEventListener('click', () => {
+            document.getElementById('themeDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('open');
+        });
+
+        document.getElementById('drawerOverlay').addEventListener('click', () => {
+            document.getElementById('themeDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('open');
+        });
+
+        document.getElementById('btnNewTheme').addEventListener('click', () => {
+            createNewTheme();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedThemes = localStorage.getItem('gerador_temas_finais');
+            if (savedThemes) {
+                try {
+                    finalThemes = JSON.parse(savedThemes);
+                } catch (e) {
+                    console.error("Erro ao carregar temas do localStorage:", e);
+                }
+            }
+
+            const savedCodebook = localStorage.getItem('gerador_temas_codebook');
+            if (savedCodebook) {
+                try {
+                    qdaData = JSON.parse(savedCodebook);
+                    processLeftGraphData();
+                    
+                    if (finalThemes.length > 0) {
+                        editTheme(finalThemes[0].id);
+                    } else {
+                        createNewTheme();
+                    }
+                } catch (e) {
+                    console.error("Erro ao carregar codebook:", e);
+                }
+            }
+        });
+
+    </script>
+</body>
+
+</html>

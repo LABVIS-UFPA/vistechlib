@@ -1,0 +1,24 @@
+{
+  "themes": [
+    {
+      "id": "theme_1782580583266",
+      "name": "A configuração manual com PSB 3D foi melhor",
+      "clusterIds": [
+        "cluster_1782527006315_188",
+        "cluster_1782527006314_169",
+        "cluster_1782527006315_675",
+        "cluster_1782527006315_381",
+        "cluster_1782527006315_854",
+        "cluster_1782527006315_663"
+      ],
+      "excerpts": [
+        "A possibilidade de interagir com o gráfico permite que a estimação dos valores seja mais aproximada, pois caso queiramos saber de um valor de uma cidade específica, é só ajustar o eixo y.",
+        "A visualização 3D era mais compreensivel e a manipiulação ajudava a visualizar os dados",
+        "Mais intuitivo e fácil de visualizar valores grandes",
+        "A capacidade de movimentar o gráfico me proporcional melhor visualização da quantidade de valores presentes na barra.",
+        "Consigo ter uma noção mais detalhada do valor no grafico 3d",
+        "A visualização no gráfico 3D permite a melhor visualização dos dados e permite a melhor analise e estimativa dos valores"
+      ]
+    }
+  ]
+}

@@ -169,6 +169,8 @@
             </div>
             <div style="flex-direction: row; align-items: flex-end;">
                 <button onclick="downloadSVG()">💾 Baixar SVG</button>
+                <button onclick="downloadCSV()">📄 Baixar CSV</button>
+                <button onclick="downloadJSON()">📋 Baixar JSON</button>
             </div>
         </div>
     </div>
@@ -508,6 +510,45 @@
             const link = document.createElement("a");
             link.href = url;
             link.download = `${attribute}_${chartType}.svg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadCSV() {
+            if (!globalData || globalData.length === 0) {
+                alert("Nenhum dado demográfico disponível para baixar.");
+                return;
+            }
+            const csvString = d3.csvFormat(globalData);
+            const blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "dados_demograficos.csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadJSON() {
+            const attribute = d3.select("#attributeSelect").property("value");
+            if (!attribute || !globalData || globalData.length === 0) {
+                alert("Nenhum dado disponível para baixar.");
+                return;
+            }
+            const counts = d3.rollup(globalData, v => v.length, d => d[attribute]);
+            let chartData = Array.from(counts, ([key, value]) => ({ key: key || "Não Informado", value }));
+            chartData.sort((a, b) => b.value - a.value);
+
+            const jsonString = JSON.stringify(chartData, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `consolidado_${attribute}.json`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

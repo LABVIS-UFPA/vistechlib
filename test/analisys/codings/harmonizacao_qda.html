@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curadoria e Harmonização Temática (Dendrograma)</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --panel-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --primary: #4e79a7;
+            --primary-hover: #3b5c80;
+            --text-main: #1a202c;
+            --text-muted: #718096;
+            --success: #48bb78;
+            --warning: #ecc94b;
+            --danger: #f56565;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        .container {
+            margin: 0 auto;
+        }
+
+        .header-card {
+            background: var(--panel-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 0;
+            color: #2d3748;
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* --- PAINEL DE MÉTRICAS --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--panel-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- DENDROGRAMA (ÁRVORE DE TAGS) --- */
+        .panel {
+            background: var(--panel-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            background: #f7fafc;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .toolbar select {
+            padding: 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        #treeRoot {
+            min-height: 300px;
+            padding: 1rem;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+        }
+
+        #treeRoot.drag-over {
+            background: #ebf8ff;
+            border-color: var(--primary);
+        }
+
+        ul.tree-list {
+            list-style-type: none;
+            padding-left: 1.5rem;
+            margin: 0.5rem 0;
+        }
+
+        #treeRoot>ul.tree-list {
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .tree-node {
+            margin: 0.3rem 0;
+            padding: 0.4rem;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tree-node:active {
+            cursor: grabbing;
+        }
+
+        .tree-node.drag-over {
+            border-color: var(--primary);
+            background: #ebf8ff;
+        }
+
+        .tag-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            color: #1a202c;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .coder-badge {
+            background: #e2e8f0;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #4a5568;
+        }
+
+        /* Grupos (Detalhes) */
+        details.group-node>summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            font-weight: bold;
+            background: #edf2f7;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        details.group-node>summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.group-node>summary::before {
+            content: '📁';
+            font-size: 1.1rem;
+        }
+
+        details[open].group-node>summary::before {
+            content: '📂';
+        }
+
+        details.group-node>summary.drag-over {
+            border-color: var(--primary);
+            background: #ebf8ff;
+        }
+
+        /* --- REVISÃO DE TRECHOS --- */
+        .cluster-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #fff;
+        }
+
+        .cluster-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .cluster-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: #2d3748;
+            flex: 1;
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .cluster-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-left: 1rem;
+        }
+
+        .codings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+
+        .coder-box {
+            border-left: 2px solid #cbd5e0;
+            padding-left: 0.75rem;
+        }
+
+        .coder-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .status-full {
+            background: var(--success);
+        }
+
+        .status-partial {
+            background: var(--warning);
+            color: #744210;
+        }
+
+        .status-none {
+            background: var(--danger);
+        }
+
+        .status-single {
+            background: var(--text-muted);
+        }
+
+        .cluster-tag-item {
+            margin-bottom: 4px;
+            padding: 4px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            transition: all 0.2s;
+            cursor: grab;
+        }
+
+        .cluster-tag-item:active {
+            cursor: grabbing;
+        }
+
+        .cluster-tag-item.drag-over {
+            border-color: var(--primary);
+            background: #ebf8ff;
+        }
+
+        /* --- SPLIT VIEW DETALHES --- */
+        .split-view {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .split-view {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .details-panel {
+            background: var(--panel-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            max-height: 700px;
+            overflow-y: auto;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .details-panel h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .details-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .details-section h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.95rem;
+            color: #4a5568;
+        }
+
+        .selected-node {
+            background: #ebf8ff !important;
+            border-color: var(--primary) !important;
+        }
+
+        .excerpt-list-item {
+            font-size: 0.85rem;
+            border-left: 3px solid var(--primary);
+            padding-left: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: #f8fafc;
+            padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+            border-radius: 0 4px 4px 0;
+            color: #2d3748;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 0.4rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header-card">
+            <div>
+                <h1>Painel de Curadoria QDA (Dendrograma)</h1>
+                <p style="margin: 0; color: #718096;">Arraste tags umas sobre as outras para criar grupos. A
+                    concordância é recalculada automaticamente.</p>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                    <div><span style="font-size:0.8rem;color:#718096;font-weight:bold;">1. NOVO COMPILADO:</span> <input type="file" id="fileInput" accept=".json" /></div>
+                    <div><span style="font-size:0.8rem;color:#718096;font-weight:bold;">2. RESTAURAR CODEBOOK:</span> <input type="file" id="codebookInput" accept=".json" /></div>
+                </div>
+                <button id="btnExport" style="height: 100%;">💾 Exportar Codebook</button>
+            </div>
+        </div>
+
+        <div id="appArea" style="display: none;">
+
+            <h2>Métricas de Concordância Temática (IRR)</h2>
+            <div class="metrics-grid">
+                <div class="metric-card" style="border: 2px solid var(--primary); background: #ebf8ff;">
+                    <div class="metric-value" id="valKappa" style="color: #2b6cb0;">-</div>
+                    <div class="metric-label" id="lblKappa">Kappa de Fleiss</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="valTotalClusters">-</div>
+                    <div class="metric-label">Total de Trechos (Clusters)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="valFullSync" style="color: var(--success);">-</div>
+                    <div class="metric-label">Concordância Total</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="valPartialSync" style="color: var(--warning);">-</div>
+                    <div class="metric-label">Concordância Parcial</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="valNoSync" style="color: var(--danger);">-</div>
+                    <div class="metric-label">Divergência Total</div>
+                </div>
+            </div>
+
+            <div class="split-view">
+                <div class="left-panels" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="panel" style="margin-bottom: 0;">
+                        <div class="toolbar">
+                            <h2 style="margin:0; border:none; padding:0;">1. Codebook Hierárquico (Arraste e Solte)</h2>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <div>
+                                    <input type="text" id="treeFilter" placeholder="Filtrar tags/temas..."
+                                        oninput="filterTree()"
+                                        style="padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                                </div>
+                                <div>
+                                    <label for="sortMode">Ordenar por: </label>
+                                    <select id="sortMode">
+                                        <option value="occurrence">Primeira Ocorrência (Agrupa por Contexto)</option>
+                                        <option value="alpha">Ordem Alfabética</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="treeRoot" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                            ondrop="handleDropOnRoot(event)">
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-bottom: 0;">
+                        <div class="toolbar">
+                            <h2 style="margin:0; border:none; padding:0;">2. Revisão de Trechos e Concordância</h2>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <div>
+                                    <input type="text" id="clusterFilter" placeholder="Filtrar trechos/tags..."
+                                        oninput="filterClusters()"
+                                        style="padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                                </div>
+                                <div>
+                                    <label
+                                        style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-size:0.9rem;">
+                                        <input type="checkbox" id="hideFullAgreement"
+                                            onchange="updateAllThemesAndMetrics()">
+                                        Ocultar concordância total
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="clustersContainer"></div>
+                    </div>
+                </div>
+
+                <div class="details-panel" id="detailsPanel">
+                    <h3 style="color:#718096; text-align:center; border:none; margin-top:2rem;">Selecione uma tag ou
+                        tema para ver os detalhes</h3>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let qdaData = null;
+        let treeNodes = {}; // Dicionário de nós: id -> { type, data, parentId }
+        let draggedNodeId = null;
+        let selectedNodeId = null;
+
+        // ==========================================
+        // INIT E ESTRUTURAÇÃO DA ÁRVORE
+        // ==========================================
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    qdaData = JSON.parse(event.target.result);
+                    initTreeData();
+                    document.getElementById('appArea').style.display = 'block';
+                    renderApp();
+                } catch (error) {
+                    alert("Erro ao processar o arquivo compilado."); console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        document.getElementById('codebookInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    qdaData = JSON.parse(event.target.result);
+                    if (qdaData.treeHierarchy) {
+                        treeNodes = qdaData.treeHierarchy;
+                    } else {
+                        initTreeData();
+                    }
+                    document.getElementById('appArea').style.display = 'block';
+                    renderApp();
+                } catch (error) {
+                    alert("Erro ao processar o arquivo de codebook."); console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        document.getElementById('sortMode').addEventListener('change', renderTree);
+
+        function initTreeData() {
+            treeNodes = {};
+
+            // 1. Calcula a ordem da "Primeira Ocorrência"
+            let occurrenceMap = {};
+            let orderCounter = 0;
+            qdaData.blocks.forEach(b => {
+                b.excerptClusters.forEach(c => {
+                    c.codings.forEach(coding => {
+                        coding.tagIds.forEach(id => {
+                            if (occurrenceMap[id] === undefined) occurrenceMap[id] = orderCounter++;
+                        });
+                    });
+                });
+            });
+
+            // 2. Transforma tags em nós da árvore (inicialmente sem grupos)
+            qdaData.tags.forEach(t => {
+                treeNodes[t.id] = {
+                    id: t.id,
+                    type: 'tag',
+                    data: t,
+                    parentId: null, // Todas começam na raiz
+                    orderIndex: occurrenceMap[t.id] !== undefined ? occurrenceMap[t.id] : 999999
+                };
+            });
+        }
+
+        function renderApp() {
+            renderTree();
+            updateAllThemesAndMetrics();
+            renderDetailsPanel();
+            saveState();
+        }
+
+        function saveState() {
+            if (!qdaData) return;
+            const state = {
+                qdaData: qdaData,
+                treeNodes: treeNodes
+            };
+            localStorage.setItem('harmonizacaoQDA_state', JSON.stringify(state));
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedState = localStorage.getItem('harmonizacaoQDA_state');
+            if (savedState) {
+                try {
+                    const state = JSON.parse(savedState);
+                    qdaData = state.qdaData;
+                    treeNodes = state.treeNodes;
+                    document.getElementById('appArea').style.display = 'block';
+                    renderApp();
+                } catch (e) {
+                    console.error("Erro ao carregar state do localStorage:", e);
+                }
+            }
+        });
+
+        // ==========================================
+        // RENDERIZAÇÃO DO DENDROGRAMA
+        // ==========================================
+        function renderTree() {
+            const rootContainer = document.getElementById('treeRoot');
+            rootContainer.innerHTML = '';
+
+            const sortMode = document.getElementById('sortMode').value;
+            const rootNodes = Object.values(treeNodes).filter(n => n.parentId === null);
+
+            const ul = document.createElement('ul');
+            ul.className = 'tree-list';
+
+            sortNodes(rootNodes, sortMode).forEach(node => {
+                ul.appendChild(createNodeDOM(node, sortMode));
+            });
+
+            rootContainer.appendChild(ul);
+            if (typeof filterTree === 'function') filterTree();
+        }
+
+        function sortNodes(nodes, sortMode) {
+            return nodes.sort((a, b) => {
+                if (a.type === 'group' && b.type === 'tag') return -1; // Grupos primeiro
+                if (a.type === 'tag' && b.type === 'group') return 1;
+
+                if (sortMode === 'occurrence') {
+                    const idxA = a.type === 'tag' ? a.orderIndex : 0;
+                    const idxB = b.type === 'tag' ? b.orderIndex : 0;
+                    return idxA - idxB;
+                } else {
+                    const nameA = a.type === 'group' ? a.data.name : a.data.normalized;
+                    const nameB = b.type === 'group' ? b.data.name : b.data.normalized;
+                    return nameA.localeCompare(nameB);
+                }
+            });
+        }
+
+        function createNodeDOM(node, sortMode) {
+            const li = document.createElement('li');
+
+            if (node.type === 'tag') {
+                const tag = node.data;
+                const codersHtml = tag.coders.map(c => `<span class="coder-badge">${c}</span>`).join('');
+
+                const div = document.createElement('div');
+                div.className = 'tree-node';
+                div.draggable = true;
+                div.innerHTML = `<span class="tag-badge" style="background-color: ${tag.color || '#e2e8f0'}">${tag.name}</span> <span>${codersHtml}</span>`;
+
+                div.onclick = (e) => { e.stopPropagation(); selectNode(node.id); };
+                if (selectedNodeId === node.id) div.classList.add('selected-node');
+
+                // Eventos Drag & Drop da TAG
+                div.ondragstart = (e) => handleDragStart(e, node.id);
+                div.ondragover = handleDragOver;
+                div.ondragleave = handleDragLeave;
+                div.ondrop = (e) => handleDropOnNode(e, node.id);
+
+                li.appendChild(div);
+
+            } else if (node.type === 'group') {
+                const details = document.createElement('details');
+                details.className = 'group-node';
+                details.open = true; // Grupos começam abertos
+
+                const summary = document.createElement('summary');
+                summary.draggable = true;
+                // Duplo clique para renomear
+                summary.innerHTML = `<span>${node.data.name}</span> <small style="color:#a0aec0; font-weight:normal; margin-left:10px;">(Duplo clique para renomear)</small>`;
+                summary.ondblclick = () => renameGroup(node.id);
+                summary.onclick = (e) => { selectNode(node.id); };
+                if (selectedNodeId === node.id) summary.classList.add('selected-node');
+
+                // Eventos Drag & Drop do GRUPO
+                summary.ondragstart = (e) => handleDragStart(e, node.id);
+                summary.ondragover = handleDragOver;
+                summary.ondragleave = handleDragLeave;
+                summary.ondrop = (e) => handleDropOnNode(e, node.id);
+
+                details.appendChild(summary);
+
+                // Filhos do Grupo
+                const children = Object.values(treeNodes).filter(n => n.parentId === node.id);
+                if (children.length > 0) {
+                    const ul = document.createElement('ul');
+                    ul.className = 'tree-list';
+                    sortNodes(children, sortMode).forEach(child => {
+                        ul.appendChild(createNodeDOM(child, sortMode));
+                    });
+                    details.appendChild(ul);
+                }
+
+                li.appendChild(details);
+            }
+
+            return li;
+        }
+
+        function selectNode(id) {
+            selectedNodeId = id;
+            renderTree(); // Re-renderiza para aplicar a classe 'selected-node'
+            renderDetailsPanel();
+        }
+
+        function renderDetailsPanel() {
+            const panel = document.getElementById('detailsPanel');
+            if (!selectedNodeId || !treeNodes[selectedNodeId]) {
+                panel.innerHTML = `<h3 style="color:#718096; text-align:center; border:none; margin-top:2rem;">Selecione uma tag ou tema para ver os detalhes</h3>`;
+                return;
+            }
+
+            const node = treeNodes[selectedNodeId];
+            const isGroup = node.type === 'group';
+            const name = isGroup ? node.data.name : node.data.name;
+
+            let deleteBtn = '';
+            if (isGroup) {
+                deleteBtn = `<button style="background:var(--danger); width:100%; margin-bottom:1rem;" onclick="deleteGroup('${node.id}')">🗑️ Excluir Tema (Desagrupar tags)</button>`;
+            }
+
+            // Busca os trechos
+            const excerpts = getNodeExcerpts(node.id);
+            let excerptsHtml = `<div class="details-section">
+                <h4>Trechos Associados (${excerpts.length})</h4>
+                <div style="max-height: 350px; overflow-y: auto;">
+                    ${excerpts.map(ex => `<div class="excerpt-list-item">"${ex}"</div>`).join('') || '<div style="color:var(--text-muted); font-size:0.9rem;">Nenhum trecho associado.</div>'}
+                </div>
+            </div>`;
+
+            // Usa select para a busca (um select simples permite digitar a primeira letra e em HTML5 às vezes já filtra)
+            // Se for muito grande, o input list (datalist) pode ser melhor, mas vamos usar select para garantir o map (value -> id).
+            const selectOptions = Object.values(treeNodes)
+                .filter(n => n.id !== selectedNodeId && !isDescendant(selectedNodeId, n.id))
+                .sort((a, b) => (a.type === 'group' ? a.data.name : a.data.name).localeCompare(b.type === 'group' ? b.data.name : b.data.name))
+                .map(n => `<label class="target-node-option" style="display: block; padding: 0.4rem; cursor: pointer; border-bottom: 1px solid #edf2f7; font-size: 0.9rem;">
+                              <input type="radio" name="targetNodeRadio" value="${n.id}"> <span class="lbl-text">${n.type === 'group' ? '📁 Tema' : '🏷️ Tag'} - ${n.type === 'group' ? n.data.name : n.data.name}</span>
+                           </label>`)
+                .join('');
+
+            panel.innerHTML = `
+                <h3>${isGroup ? '📁 Tema:' : '🏷️ Tag:'} ${name}</h3>
+                ${deleteBtn}
+
+                <div class="details-section">
+                    <h4>Mover / Agrupar</h4>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin:0 0 0.5rem 0;">Selecione o destino na lista abaixo:</p>
+                    <div class="form-group" style="flex-direction: column;">
+                        <input type="text" id="targetNodeSearch" placeholder="Pesquisar tema ou tag..." oninput="filterTargetNodes()" style="padding: 0.5rem; width: 100%; box-sizing: border-box; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <div id="targetNodeList" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px; padding: 0.5rem; background: #fff;">
+                            ${selectOptions || '<div style="font-size:0.85rem; color:#a0aec0;">Nenhum destino válido.</div>'}
+                        </div>
+                        <button onclick="applyMoveNode()" style="padding: 0.6rem 1rem; width: 100%; margin-top: 0.5rem;">Aplicar</button>
+                    </div>
+                </div>
+
+                ${excerptsHtml}
+            `;
+        }
+
+        function filterTargetNodes() {
+            const text = document.getElementById('targetNodeSearch').value.toLowerCase();
+            const labels = document.querySelectorAll('#targetNodeList .target-node-option');
+            labels.forEach(lbl => {
+                const lblText = lbl.querySelector('.lbl-text').textContent.toLowerCase();
+                if (lblText.includes(text)) {
+                    lbl.style.display = 'block';
+                } else {
+                    lbl.style.display = 'none';
+                }
+            });
+        }
+
+        function deleteGroup(groupId) {
+            if (!confirm("Tem certeza que deseja excluir este tema? Suas tags e subtemas não serão deletados, mas voltarão para a raiz.")) return;
+            // Desagrupar filhos
+            Object.values(treeNodes).forEach(n => {
+                if (n.parentId === groupId) {
+                    n.parentId = treeNodes[groupId].parentId; // Sobe pro pai (ou pra raiz se o pai for null)
+                }
+            });
+            delete treeNodes[groupId];
+            selectedNodeId = null;
+            renderApp();
+        }
+
+        function applyMoveNode() {
+            const selectedRadio = document.querySelector('input[name="targetNodeRadio"]:checked');
+            if (!selectedRadio) {
+                alert("Por favor, selecione um destino na lista.");
+                return;
+            }
+            const targetId = selectedRadio.value;
+            if (!targetId || !selectedNodeId) return;
+
+            if (isDescendant(selectedNodeId, targetId)) {
+                alert("Operação inválida: Você não pode colocar um grupo dentro dele mesmo ou de seus filhos.");
+                return;
+            }
+
+            const draggedNode = treeNodes[selectedNodeId];
+            const targetNode = treeNodes[targetId];
+
+            if (targetNode.type === 'tag') {
+                const newGroupName = prompt("Você está agrupando com uma Tag. Isso criará um novo Tema. Digite o nome:", "Novo Tema");
+                if (!newGroupName) return;
+
+                const newGroupId = 'group_' + Date.now();
+                treeNodes[newGroupId] = {
+                    id: newGroupId,
+                    type: 'group',
+                    data: { name: newGroupName },
+                    parentId: targetNode.parentId
+                };
+
+                draggedNode.parentId = newGroupId;
+                targetNode.parentId = newGroupId;
+            } else if (targetNode.type === 'group') {
+                const action = confirm(`Deseja inserir "${draggedNode.data.name || draggedNode.data.name}" DENTRO do tema "${targetNode.data.name}"?\n\n[OK] = Inserir dentro\n[Cancelar] = Criar um NOVO tema pai para agrupar ambos`);
+
+                if (action) {
+                    // Inserir dentro
+                    draggedNode.parentId = targetId;
+                } else {
+                    // Criar tema pai para os dois
+                    const nameDragged = draggedNode.type === 'group' ? draggedNode.data.name : draggedNode.data.name;
+                    const newGroupName = prompt(`Criar novo Tema pai para agrupar "${nameDragged}" e "${targetNode.data.name}". Digite o nome:`, "Novo Tema");
+                    if (!newGroupName) return; // Cancelou
+
+                    const newGroupId = 'group_' + Date.now();
+                    treeNodes[newGroupId] = {
+                        id: newGroupId,
+                        type: 'group',
+                        data: { name: newGroupName },
+                        parentId: targetNode.parentId // Mesmo nível do targetNode
+                    };
+
+                    draggedNode.parentId = newGroupId;
+                    targetNode.parentId = newGroupId;
+                }
+            }
+
+            renderApp();
+        }
+
+        function getNodeExcerpts(nodeId) {
+            let tagIds = new Set();
+
+            // Coleta todas as tags associadas a este nó, e a todos os seus filhos recursivamente
+            function collectTags(id) {
+                const node = treeNodes[id];
+                if (!node) return;
+                if (node.type === 'tag') {
+                    tagIds.add(id);
+                } else {
+                    Object.values(treeNodes).forEach(n => {
+                        if (n.parentId === id) collectTags(n.id);
+                    });
+                }
+            }
+
+            collectTags(nodeId);
+
+            let excerpts = new Set();
+            if (tagIds.size === 0) return [];
+
+            qdaData.blocks.forEach(block => {
+                block.excerptClusters.forEach(cluster => {
+                    let hasTag = false;
+                    cluster.codings.forEach(coding => {
+                        coding.tagIds.forEach(id => {
+                            if (tagIds.has(id)) hasTag = true;
+                        });
+                    });
+                    if (hasTag) {
+                        excerpts.add(cluster.longestText);
+                    }
+                });
+            });
+
+            return Array.from(excerpts);
+        }
+
+        // ==========================================
+        // LÓGICA DE DRAG & DROP
+        // ==========================================
+        function handleDragStart(e, id) {
+            draggedNodeId = id;
+            e.dataTransfer.setData('text/plain', id);
+            e.stopPropagation();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault(); // Permite soltar
+            e.currentTarget.classList.add('drag-over');
+            e.stopPropagation();
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDropOnRoot(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            if (!draggedNodeId) return;
+
+            // Move para a raiz
+            treeNodes[draggedNodeId].parentId = null;
+            draggedNodeId = null;
+            renderApp();
+        }
+
+        function handleDropOnNode(e, targetId) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+
+            if (!draggedNodeId || draggedNodeId === targetId) return;
+
+            // Evitar ciclo infinito (arrastar pai para dentro do filho)
+            if (isDescendant(draggedNodeId, targetId)) {
+                alert("Operação inválida: Você não pode colocar um grupo dentro dele mesmo ou de seus filhos.");
+                return;
+            }
+
+            const draggedNode = treeNodes[draggedNodeId];
+            const targetNode = treeNodes[targetId];
+
+            if (targetNode.type === 'tag') {
+                // TAG ➔ TAG: Criar um novo Grupo
+                const newGroupName = prompt("Criar novo Grupo/Tema. Digite o nome:", "Novo Tema");
+                if (!newGroupName) return;
+
+                const newGroupId = 'group_' + Date.now();
+                treeNodes[newGroupId] = {
+                    id: newGroupId,
+                    type: 'group',
+                    data: { name: newGroupName },
+                    parentId: targetNode.parentId // O grupo nasce no mesmo nível da tag alvo
+                };
+
+                // Move ambas as tags para dentro do novo grupo
+                draggedNode.parentId = newGroupId;
+                targetNode.parentId = newGroupId;
+
+            } else if (targetNode.type === 'group') {
+                // NODE ➔ GRUPO: Move para dentro do grupo
+                draggedNode.parentId = targetId;
+            }
+
+            draggedNodeId = null;
+            renderApp();
+        }
+
+        function isDescendant(parentId, childId) {
+            let current = treeNodes[childId];
+            while (current && current.parentId) {
+                if (current.parentId === parentId) return true;
+                current = treeNodes[current.parentId];
+            }
+            return false;
+        }
+
+        function renameGroup(groupId) {
+            const node = treeNodes[groupId];
+            const newName = prompt("Renomear Grupo:", node.data.name);
+            if (newName && newName.trim() !== "") {
+                node.data.name = newName.trim();
+                renderApp();
+            }
+        }
+
+        // ==========================================
+        // CÁLCULO DE TEMAS E MÉTRICAS (IRR)
+        // ==========================================
+        function getTopLevelTheme(nodeId) {
+            let node = treeNodes[nodeId];
+            if (!node || !node.parentId) return null; // Se está na raiz e não tem pai, não tem grupo
+
+            // Sobe na árvore até achar o nó que está logo abaixo da raiz
+            let parent = treeNodes[node.parentId];
+            while (parent && parent.parentId) {
+                parent = treeNodes[parent.parentId];
+            }
+            return parent.data.name;
+        }
+
+        function updateAllThemesAndMetrics() {
+            // Atualiza o "Tema" base de todas as tags baseado na árvore
+            qdaData.tags.forEach(t => {
+                const topTheme = getTopLevelTheme(t.id);
+                t.theme = topTheme || "";
+            });
+
+            const clusterStats = evaluateClustersAndRender();
+            updateMetrics(clusterStats);
+        }
+
+        function evaluateClustersAndRender() {
+            const container = document.getElementById('clustersContainer');
+            container.innerHTML = '';
+
+            let stats = { total: 0, fullSync: 0, partialSync: 0, noSync: 0, singleCoder: 0 };
+            let kappaData = [];
+
+            qdaData.blocks.forEach(block => {
+                block.excerptClusters.forEach(cluster => {
+                    stats.total++;
+
+                    const codersInCluster = [...new Set(cluster.codings.map(c => c.coder))];
+                    const numCoders = codersInCluster.length;
+
+                    // Coleta temas usando a inteligência da árvore
+                    let coderThemes = {};
+                    cluster.codings.forEach(coding => {
+                        if (!coderThemes[coding.coder]) coderThemes[coding.coder] = new Set();
+
+                        coding.tagIds.forEach(id => {
+                            const tagObj = qdaData.tags.find(t => t.id === id);
+                            // Se a tag está em um grupo, o Tema é o grupo. Se não, é ela mesma.
+                            const themeKey = (tagObj && tagObj.theme) ? tagObj.theme.toLowerCase() : (tagObj ? tagObj.normalized : id);
+                            coderThemes[coding.coder].add(themeKey);
+                        });
+                    });
+
+                    // Verifica Concordância
+                    let statusClass = '';
+                    let statusText = '';
+                    let currentMaxAgreement = 0;
+
+                    if (numCoders > 1) {
+                        const arraysOfThemes = Object.values(coderThemes).map(set => Array.from(set));
+
+                        const themeFrequencies = {};
+                        arraysOfThemes.forEach(themes => {
+                            themes.forEach(t => {
+                                themeFrequencies[t] = (themeFrequencies[t] || 0) + 1;
+                            });
+                        });
+
+                        // Para o Kappa de Fleiss, precisamos de exatamente 1 tema por coder (soma == numCoders).
+                        // Escolhemos, para cada coder, o seu tema que teve maior frequência global no cluster.
+                        const kappaThemeCounts = {};
+                        arraysOfThemes.forEach(themes => {
+                            let selectedTheme = null;
+                            let maxFreq = -1;
+                            themes.forEach(t => {
+                                if (themeFrequencies[t] > maxFreq) {
+                                    maxFreq = themeFrequencies[t];
+                                    selectedTheme = t;
+                                }
+                            });
+
+                            if (selectedTheme === null) selectedTheme = "N/A";
+                            kappaThemeCounts[selectedTheme] = (kappaThemeCounts[selectedTheme] || 0) + 1;
+                        });
+
+                        kappaData.push({ numCoders: numCoders, themeCounts: kappaThemeCounts });
+
+                        currentMaxAgreement = Object.keys(themeFrequencies).length > 0
+                            ? Math.max(...Object.values(themeFrequencies))
+                            : 0;
+
+                        if (currentMaxAgreement === numCoders) {
+                            stats.fullSync++;
+                            statusClass = 'status-full';
+                            statusText = `Concordância Total (${numCoders}/${numCoders})`;
+                        } else if (currentMaxAgreement > 1) {
+                            stats.partialSync++;
+                            statusClass = 'status-partial';
+                            statusText = `Concordância (${currentMaxAgreement}/${numCoders})`;
+                        } else {
+                            stats.noSync++;
+                            statusClass = 'status-none';
+                            statusText = `Divergência (${numCoders} coders)`;
+                        }
+                    } else {
+                        stats.fullSync++;
+                        statusClass = 'status-full';
+                        statusText = `Concordância Total (1/1)`;
+                        currentMaxAgreement = 1;
+                    }
+
+                    const hideFullAgreement = document.getElementById('hideFullAgreement') && document.getElementById('hideFullAgreement').checked;
+                    if (hideFullAgreement && currentMaxAgreement === numCoders) {
+                        return; // Oculta da UI, mas as estatísticas já foram computadas
+                    }
+
+                    // Renderiza Card
+                    const card = document.createElement('div');
+                    card.className = 'cluster-card';
+
+                    let codingsHtml = '';
+                    cluster.codings.forEach(coding => {
+                        const tagsHtml = coding.tagIds.map(id => {
+                            const t = qdaData.tags.find(tag => tag.id === id);
+                            if (!t) return '';
+                            const themeText = t.theme ? ` <small style="color:#718096; font-weight:bold;">[Tema: ${t.theme}]</small>` : '';
+                            return `<div class="cluster-tag-item" 
+                                draggable="true"
+                                onclick="event.stopPropagation(); selectNode('${id}')"
+                                ondragstart="handleDragStart(event, '${id}')"
+                                ondragover="handleDragOver(event)"
+                                ondragleave="handleDragLeave(event)"
+                                ondrop="handleDropOnNode(event, '${id}')">
+                                <span class="tag-badge" style="background-color:${t.color || '#eee'}">${t.name}</span>${themeText}
+                            </div>`;
+                        }).join('');
+
+                        codingsHtml += `
+                            <div class="coder-box">
+                                <div class="coder-name">👤 ${coding.coder}</div>
+                                <div style="font-size:0.9rem; margin-bottom:8px; color:#4a5568;">"${coding.text}"</div>
+                                <div>${tagsHtml}</div>
+                            </div>
+                        `;
+                    });
+
+                    card.innerHTML = `
+                        <div class="cluster-header">
+                            <div class="cluster-text">"${cluster.longestText}"</div>
+                            <div class="cluster-meta">
+                                Usuário ${block.userIndex} (${block.type})<br>
+                                <span class="status-badge ${statusClass}" style="display:inline-block; margin-top:8px;">${statusText}</span>
+                            </div>
+                        </div>
+                        <div class="codings-grid">
+                            ${codingsHtml}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+
+            if (typeof filterClusters === 'function') filterClusters();
+
+            stats.kappaResult = calculateFleissKappa(kappaData);
+            return stats;
+        }
+
+        function updateMetrics(stats) {
+            document.getElementById('valTotalClusters').innerText = stats.total;
+            const evaluableClusters = stats.total - stats.singleCoder;
+
+            if (evaluableClusters > 0) {
+                const fullPct = Math.round((stats.fullSync / evaluableClusters) * 100);
+                const partPct = Math.round((stats.partialSync / evaluableClusters) * 100);
+                const noPct = Math.round((stats.noSync / evaluableClusters) * 100);
+
+                document.getElementById('valFullSync').innerText = `${stats.fullSync} (${fullPct}%)`;
+                document.getElementById('valPartialSync').innerText = `${stats.partialSync} (${partPct}%)`;
+                document.getElementById('valNoSync').innerText = `${stats.noSync} (${noPct}%)`;
+            } else {
+                document.getElementById('valFullSync').innerText = stats.fullSync;
+                document.getElementById('valPartialSync').innerText = stats.partialSync;
+                document.getElementById('valNoSync').innerText = stats.noSync;
+            }
+
+            document.getElementById('valKappa').innerText = `κ = ${stats.kappaResult.kappa}`;
+            document.getElementById('lblKappa').innerText = `Confiabilidade: ${stats.kappaResult.interpretation}`;
+        }
+
+        // ==========================================
+        // EXPORTAÇÃO
+        // ==========================================
+        document.getElementById('btnExport').addEventListener('click', () => {
+            if (!qdaData) return;
+
+            // Clona os dados para não sujar o estado em memória local com redundâncias durante o uso da UI,
+            // mas garante que o JSON de saída tenha as informações de cada participante dentro do cluster.
+            const clonedData = JSON.parse(JSON.stringify(qdaData));
+            if (clonedData.blocks) {
+                clonedData.blocks.forEach(block => {
+                    console.log(block);
+                    if (block.excerptClusters) {
+                        block.excerptClusters.forEach(cluster => {
+
+                            cluster.userIndex = block.userIndex;
+                            cluster.userId = block.userId;
+                            cluster.type = block.type;
+                            cluster.ranking = block.ranking;
+                        });
+                    }
+                });
+            }
+
+            // Anexa a estrutura da árvore ao JSON final caso precise recarregar no futuro
+            const exportData = {
+                ...clonedData,
+                treeHierarchy: treeNodes
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "codebook_harmonizado_hierarquico.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        });
+        function filterTree() {
+            const filterInput = document.getElementById('treeFilter');
+            if (!filterInput) return;
+            const text = filterInput.value.toLowerCase();
+            const allLis = document.querySelectorAll('#treeRoot li');
+
+            if (!text) {
+                allLis.forEach(li => li.style.display = '');
+                return;
+            }
+
+            allLis.forEach(li => li.style.display = 'none');
+
+            allLis.forEach(li => {
+                let name = "";
+                const tagDiv = li.querySelector(':scope > .tree-node');
+                if (tagDiv) {
+                    name = tagDiv.textContent.toLowerCase();
+                } else {
+                    const summary = li.querySelector(':scope > details > summary');
+                    if (summary) {
+                        name = summary.textContent.toLowerCase();
+                    }
+                }
+
+                if (name.includes(text)) {
+                    li.style.display = '';
+
+                    let parentLi = li.parentElement ? li.parentElement.closest('li') : null;
+                    while (parentLi) {
+                        parentLi.style.display = '';
+                        const details = parentLi.querySelector(':scope > details');
+                        if (details) details.open = true;
+                        parentLi = parentLi.parentElement ? parentLi.parentElement.closest('li') : null;
+                    }
+
+                    if (li.querySelector(':scope > details')) {
+                        const childLis = li.querySelectorAll('li');
+                        childLis.forEach(child => child.style.display = '');
+                    }
+                }
+            });
+        }
+
+        function filterClusters() {
+            const filterInput = document.getElementById('clusterFilter');
+            if (!filterInput) return;
+            const text = filterInput.value.toLowerCase();
+            const allClusters = document.querySelectorAll('.cluster-card');
+
+            if (!text) {
+                allClusters.forEach(card => card.style.display = '');
+                return;
+            }
+
+            allClusters.forEach(card => {
+                if (card.textContent.toLowerCase().includes(text)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Calcula o Kappa de Fleiss para um número variável de avaliadores (>= 2)
+        function calculateFleissKappa(kappaItems) {
+            if (kappaItems.length === 0) return { kappa: 0, interpretation: "Sem dados" };
+
+            let totalVotes = 0;
+            let categoryTotals = {};
+
+            // 1. Calcula a proporção de uso de cada Tema (p_j)
+            kappaItems.forEach(item => {
+                totalVotes += item.numCoders;
+                for (let theme in item.themeCounts) {
+                    categoryTotals[theme] = (categoryTotals[theme] || 0) + item.themeCounts[theme];
+                }
+            });
+
+            let P_e = 0; // Concordância Esperada ao Acaso
+            for (let theme in categoryTotals) {
+                let p_j = categoryTotals[theme] / totalVotes;
+                P_e += p_j * p_j;
+            }
+
+            // 2. Calcula a Concordância Observada Ponderada (P_o)
+            let sumPiWeighted = 0;
+            let sumWeights = 0;
+
+            kappaItems.forEach(item => {
+                let n_i = item.numCoders;
+                let weight = n_i * (n_i - 1); // Trechos com 3 coders têm mais peso que trechos com 2
+                let sumSquares = 0;
+
+                for (let theme in item.themeCounts) {
+                    let count = item.themeCounts[theme];
+                    sumSquares += count * (count - 1);
+                }
+
+                let P_i = sumSquares / weight;
+                sumPiWeighted += P_i * weight;
+                sumWeights += weight;
+            });
+
+            let P_o = sumWeights > 0 ? (sumPiWeighted / sumWeights) : 0;
+
+            // 3. Calcula o Kappa Final
+            if (P_e === 1) return { kappa: 1, interpretation: "Perfeita (Apenas 1 tema usado)" }; // Previne divisão por zero
+
+            let kappa = (P_o - P_e) / (1 - P_e);
+
+            // 4. Interpretação (Escala de Landis & Koch)
+            let interpretation = "Pobre";
+            if (kappa > 0.00) interpretation = "Ligeira";
+            if (kappa > 0.20) interpretation = "Razoável";
+            if (kappa > 0.40) interpretation = "Moderada";
+            if (kappa > 0.60) interpretation = "Substancial";
+            if (kappa > 0.80) interpretation = "Quase Perfeita";
+
+            return { kappa: kappa.toFixed(3), interpretation: interpretation };
+        }
+
+    </script>
+</body>
+
+</html>
