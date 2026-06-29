@@ -18,8 +18,7 @@
     }
 
     .dot {
-      stroke: black;
-      stroke-width: 1px;
+      stroke-width: 0;
     }
 
     .line {
@@ -115,8 +114,8 @@
   <script>
     // Mapeamento de cores para as visualizações
     const visualizationColors = {
-      "psb25d_manual": "#1f77b4", "psb25d_llm": "#aec7e8", "psb25d_opt": "#0d47a1",
-      "psb3d_manual": "#ff7f0e", "psb3d_llm": "#ffbb78", "psb3d_opt": "#e65100",
+      "psb25d_manual": "#4269d0", "psb25d_llm": "#efb118", "psb25d_opt": "#6cc5b0",
+      "psb3d_manual": "#9c6b4e", "psb3d_llm": "#a463f2", "psb3d_opt": "#3ca951",
       "psb25d": "#1f77b4", "psb3d": "#ff7f0e",
       "manual": "#2ca02c", "llm": "#98df8a", "opt": "#1a5e20"
     };
@@ -151,6 +150,108 @@
       return { mean, lower, upper };
     }
 
+    function getValueByPath(obj, path) {
+      return path.split('.').reduce((acc, key) => {
+        if (acc === undefined || acc === null) return undefined;
+        return acc[key];
+      }, obj);
+    }
+
+    function processDataForChart(data, taskKey, columnName, useCousineauMorey = true) {
+      const grouped = d3.group(data, d => d.vis);
+      const visualizationOrder = Array.from(grouped.keys()).sort();
+      const validValues = data
+        .map(d => getValueByPath(d, columnName))
+        .filter(v => v !== undefined && v !== null && !Number.isNaN(v));
+
+      if (validValues.length === 0) {
+        return [];
+      }
+
+      const grandMean = d3.mean(validValues);
+      const participantMap = new Map();
+
+      data.forEach(record => {
+        const value = getValueByPath(record, columnName);
+        if (value === undefined || value === null || Number.isNaN(value)) return;
+
+        if (!participantMap.has(record.participantId)) {
+          participantMap.set(record.participantId, new Map());
+        }
+
+        participantMap.get(record.participantId).set(record.vis, value);
+      });
+
+      const processed = visualizationOrder.map(vis => {
+        const valuesForVisualization = [];
+
+        participantMap.forEach((participantConditionValues, participantId) => {
+          const currentValue = participantConditionValues.get(vis);
+          if (currentValue === undefined || currentValue === null || Number.isNaN(currentValue)) return;
+
+          if (!useCousineauMorey) {
+            valuesForVisualization.push(currentValue);
+            return;
+          }
+
+          const participantValues = Array.from(participantConditionValues.values()).filter(v => v !== undefined && v !== null && !Number.isNaN(v));
+          const participantMean = d3.mean(participantValues);
+          valuesForVisualization.push(currentValue - participantMean + grandMean);
+        });
+
+        const stats = calculateBootstrapStats(valuesForVisualization);
+        return {
+          Pergunta: taskKey,
+          estrategia: vis,
+          media: stats.mean,
+          IC95_inferior: stats.lower,
+          IC95_superior: stats.upper
+        };
+      });
+
+      return processed.filter(item => item.media !== undefined);
+    }
+
+    function renderSignificanceMarkers(group, wins) {
+      if (wins.length > 0) {
+        wins.sort((a, b) => a.worse.localeCompare(b.worse));
+
+        const markers = wins.map(win => ({
+          text: win.pValue <= 0.001 ? '**' : '*',
+          color: visualizationColors[win.worse] || "black"
+        }));
+
+        const baseSpacing = 4;  // Minimum space between markers
+        const singleWidth = 8; // Estimated width of '*'
+        const doubleWidth = 14; // Estimated width of '**'
+
+        let totalWidth = 0;
+        markers.forEach((marker, i) => {
+          totalWidth += (marker.text === '**' ? doubleWidth : singleWidth);
+          if (i < markers.length - 1) {
+            totalWidth += baseSpacing;
+          }
+        });
+
+        let currentX = -totalWidth / 2;
+
+        markers.forEach(marker => {
+          const markerWidth = (marker.text === '**' ? doubleWidth : singleWidth);
+          const markerXPosition = currentX + (markerWidth / 2);
+
+          group.append("text")
+            .attr("x", markerXPosition)
+            .attr("y", 0)
+            .attr("text-anchor", "middle")
+            .style("font-size", "20px")
+            .style("font-weight", "bold")
+            .text(marker.text)
+            .style("fill", marker.color);
+
+          currentX += markerWidth + baseSpacing;
+        });
+      }
+    }
 
     // Adicionado parâmetro orderArray com valor padrão para manter compatibilidade
     function processData(data, columnName, orderArray) {
@@ -219,9 +320,15 @@
 
       // Escala X (Log Error)
       const maxValue = d3.max(rawData, d => d.IC95_superior);
+      const xDomainValue = xDomain || [0, maxValue > 0 ? maxValue : 1];
       const x = d3.scaleLinear()
-        .domain(xDomain || [0, maxValue > 0 ? maxValue : 1]) // Domínio dinâmico
+        .domain(xDomainValue)
         .range([0, width]);
+
+      const tickValues = d3.range(0, 6).map(i => {
+        const ratio = i / 5;
+        return xDomainValue[0] + (xDomainValue[1] - xDomainValue[0]) * ratio;
+      });
 
       const xLabel = (options && options.xLabel) ? options.xLabel : "Log Error";
       g.append("text")
@@ -240,7 +347,7 @@
       // Eixo X
       g.append("g")
         .attr("transform", `translate(0,${rowHeight * rawData.length})`)
-        .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(".2f")))
+        .call(d3.axisBottom(x).tickValues(tickValues).tickFormat(d3.format(".2f")))
         .selectAll("text").style("font-size", "15pt");
 
       // Linhas de IC
@@ -264,7 +371,9 @@
         .attr("cx", d => x(d.media))
         .attr("cy", (d, i) => y(i) + y.bandwidth() / 2)
         .attr("r", 5)
-        .style("fill", d => visualizationColors[d.estrategia] || "black");
+        .style("fill", d => visualizationColors[d.estrategia] || "black")
+        .style("stroke", d => visualizationColors[d.estrategia] || "black")
+        .style("stroke-width", 0);
 
       // Marcadores de significância
       g.selectAll(".significance-marker-group")
@@ -284,44 +393,7 @@
 
           const wins = significant.filter(s => s.difficulty === currentDiff && s.better === currentVis);
 
-          if (wins.length > 0) {
-            wins.sort((a, b) => a.worse.localeCompare(b.worse));
-
-            const markers = wins.map(win => ({
-              text: win.pValue <= 0.001 ? '**' : '*',
-              color: visualizationColors[win.worse] || "black"
-            }));
-
-            const baseSpacing = 4;  // Minimum space between markers
-            const singleWidth = 8; // Estimated width of '*'
-            const doubleWidth = 14; // Estimated width of '**'
-
-            let totalWidth = 0;
-            markers.forEach((marker, i) => {
-              totalWidth += (marker.text === '**' ? doubleWidth : singleWidth);
-              if (i < markers.length - 1) {
-                totalWidth += baseSpacing;
-              }
-            });
-
-            let currentX = -totalWidth / 2;
-
-            markers.forEach(marker => {
-              const markerWidth = (marker.text === '**' ? doubleWidth : singleWidth);
-              const markerXPosition = currentX + (markerWidth / 2);
-
-              group.append("text")
-                .attr("x", markerXPosition)
-                .attr("y", 0)
-                .attr("text-anchor", "middle")
-                .style("font-size", "20px")
-                .style("font-weight", "bold")
-                .text(marker.text)
-                .style("fill", marker.color);
-
-              currentX += markerWidth + baseSpacing;
-            });
-          }
+          renderSignificanceMarkers(group, wins);
         });
 
       // Labels de texto
@@ -333,7 +405,7 @@
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
         .style("font-size", "15pt")
-        .text(d => d.estrategia);
+        .text(d => d.estrategia.replace('psb25d', 'PSB 2.5D').replace('psb3d', 'PSB 3D').replace('_', ' '));
 
       g.selectAll(".valor-label")
         .data(rawData)
@@ -411,8 +483,10 @@
 
       // Gera os valores dos ticks para garantir que o último seja o valor máximo
       // .ticks(5) sugere 6 ticks (incluindo 0)
-      const tickValues = x.ticks(5);
-      tickValues[tickValues.length - 1] = maxValue; // Garante que o último tick é o valor máximo exato
+      const tickValues = d3.range(0, 6).map(i => {
+        const ratio = i / 5;
+        return ratio * maxValue;
+      });
 
       g.append("text")
         .attr("x", width / 2)
@@ -454,7 +528,9 @@
         .attr("cx", d => x(d.media))
         .attr("cy", (d, i) => y(i) + y.bandwidth() / 2)
         .attr("r", 5)
-        .style("fill", d => visualizationColors[d.estrategia] || "black");
+        .style("fill", d => visualizationColors[d.estrategia] || "black")
+        .style("stroke", d => visualizationColors[d.estrategia] || "black")
+        .style("stroke-width", 0);
 
       // Marcadores de significância
       g.selectAll(".significance-marker-group")
@@ -474,45 +550,7 @@
 
           const wins = significant.filter(s => s.difficulty === currentDiff && s.better === currentVis);
 
-          if (wins.length > 0) {
-            // Sort to have a consistent order for markers
-            wins.sort((a, b) => a.worse.localeCompare(b.worse));
-
-            const markers = wins.map(win => ({
-              text: win.pValue <= 0.001 ? '**' : '*',
-              color: visualizationColors[win.worse] || "black"
-            }));
-
-            const baseSpacing = 4;  // Minimum space between markers
-            const singleWidth = 8; // Estimated width of '*'
-            const doubleWidth = 10; // Estimated width of '**'
-
-            let totalWidth = 0;
-            markers.forEach((marker, i) => {
-              totalWidth += (marker.text === '**' ? doubleWidth : singleWidth);
-              if (i < markers.length - 1) {
-                totalWidth += baseSpacing;
-              }
-            });
-
-            let currentX = -totalWidth / 2;
-
-            markers.forEach(marker => {
-              const markerWidth = (marker.text === '**' ? doubleWidth : singleWidth);
-              const markerXPosition = currentX + (markerWidth / 2);
-
-              group.append("text")
-                .attr("x", markerXPosition)
-                .attr("y", 0)
-                .attr("text-anchor", "middle")
-                .style("font-size", "20px")
-                .style("font-weight", "bold")
-                .text(marker.text)
-                .style("fill", marker.color);
-
-              currentX += markerWidth + baseSpacing;
-            });
-          }
+          renderSignificanceMarkers(group, wins);
         });
 
       // Labels de texto
@@ -612,7 +650,9 @@
         .attr("cx", d => x(d.media))
         .attr("cy", (d, i) => y(i) + y.bandwidth() / 2)
         .attr("r", 5)
-        .style("fill", d => visualizationColors[d.estrategia] || "black");
+        .style("fill", d => visualizationColors[d.estrategia] || "black")
+        .style("stroke", d => visualizationColors[d.estrategia] || "black")
+        .style("stroke-width", 0);
 
       // Labels de texto
       g.selectAll(".estrategia-label")
@@ -623,7 +663,7 @@
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
         .style("font-size", "15pt")
-        .text(d => d.estrategia);
+        .text(d => d.estrategia.replace('psb25d', 'PSB2.5D').replace('psb3d', 'PSB3D'));
 
       g.selectAll(".valor-label")
         .data(rawData)
@@ -719,15 +759,13 @@
       };
 
       rawData.forEach(session => {
-        const expData = session.experimentData;
-        if (!expData) return;
+          const expData = session.experimentData;
+          if (!expData) return;
 
-        const pID = expData.participantId;
+          const pID = expData.participantId;
 
-
-
-        // Process trial blocks
-        (expData.blocks || []).forEach(block => {
+          // Process trial blocks
+          (expData.blocks || []).forEach(block => {
           const epsilon = 1e-9;
           const answer = Number(block.answerNumber);
           const correctAnswer = Number(block.correctAnswer);
@@ -834,7 +872,7 @@
 
       const margin = { top: 30, right: 20, bottom: 80, left: 100 };
       const width = 500;
-      const height = data.length * 20 // Reduced height per bar
+      const height = data.length * 23 // Reduced height per bar
 
       svg.attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
@@ -902,12 +940,22 @@
         .select(".domain").remove();
       g.selectAll(".tick text").style("font-size", "15pt").style("font-weight", "bold");
 
-      // X-axis
+      // X-axis with explicit min/max and spread ticks
+      const tickCount = Math.min(totalParticipants, 5);
+      const tickValues = [];
+      if (tickCount > 0) {
+        for (let i = 0; i <= tickCount; i++) {
+          tickValues.push(Math.round(i * totalParticipants / tickCount));
+        }
+      } else {
+        tickValues.push(0);
+      }
+      const uniqueTickValues = [...new Set(tickValues)];
       g.append("g")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x).ticks(Math.min(totalParticipants, 10), "d"))
+        .call(d3.axisBottom(x).tickValues(uniqueTickValues).tickFormat(d3.format("d")))
         .selectAll("text").style("font-size", "12pt");
-      g.append("text").attr("x", width / 2).attr("y", height + 40).attr("text-anchor", "middle").style("font-size", "14pt").text("Número de Votos");
+      g.append("text").attr("x", width / 2).attr("y", height + 40).attr("text-anchor", "middle").style("font-size", "14pt").text("Number of Votes");
 
       // Legend - Centered
       const legend = g.append("g");
@@ -927,7 +975,10 @@
         .attr("y", 9)
         .attr("dy", "0.35em")
         .style("font-size", "14px")
-        .text(d => `${d}º Lugar`);
+        .text(d => {
+        const suffix = d === 1 ? "st" : d === 2 ? "nd" : d === 3 ? "rd" : "th";
+        return `${d}${suffix} Place`;
+        })
 
       const legendWidth = legend.node().getBBox().width;
       const legendStartX = (width - legendWidth) / 2;
@@ -992,6 +1043,63 @@
       const accWidthDefault = accControleWidthDefault + plotWidth + 40;
       const totalWidthDefault = accWidthDefault + timeControleWidth + plotWidth;
 
+      const significantTimeResults = [
+        {
+          difficulty: "T1",
+          better: "psb25d_llm",
+          worse: "psb3d_manual",
+          pValue: 0.0074
+        },
+        {
+          difficulty: "T1",
+          better: "psb25d_opt",
+          worse: "psb25d_manual",
+          pValue: 0.0270
+        },
+        {
+          difficulty: "T1",
+          better: "psb25d_opt",
+          worse: "psb3d_manual",
+          pValue: 0.0006
+        },
+        {
+          difficulty: "T4",
+          better: "psb25d_llm",
+          worse: "psb3d_llm",
+          pValue: 0.0324
+        },
+        {
+          difficulty: "T4",
+          better: "psb25d_llm",
+          worse: "psb3d_manual",
+          pValue: 0.0001
+        },
+        {
+          difficulty: "T4",
+          better: "psb25d_llm",
+          worse: "psb3d_opt",
+          pValue: 0.0003
+        },
+        {
+          difficulty: "T4",
+          better: "psb25d_opt",
+          worse: "psb3d_llm",
+          pValue: 0.0082
+        },
+        {
+          difficulty: "T4",
+          better: "psb25d_opt",
+          worse: "psb3d_manual",
+          pValue: 0.0000
+        },
+        {
+          difficulty: "T4",
+          better: "psb25d_opt",
+          worse: "psb3d_opt",
+          pValue: 0.0000
+        }
+      ];
+
       uniqueTasks.forEach(taskKey => {
         const taskTrialData = filteredLogs.filter(d => d.task === taskKey && d.type === 'trial');
         const participantCountForTask = new Set(taskTrialData.map(d => d.participantId)).size;
@@ -1007,19 +1115,8 @@
           return;
         }
 
-        const mappedTaskData = taskTrialData.map(d => {
-          return {
-            Difficulty: taskKey,
-            Visualization: d.vis,
-            LogError: d.logError,
-            Time_s: d.Reaction_Time_s
-          };
-        });
-
-        const difficultyOrder = [taskKey];
-
-        const errorData = processData(mappedTaskData, 'LogError', difficultyOrder);
-        const timeData = processData(mappedTaskData, 'Time_s', difficultyOrder);
+        const errorData = processDataForChart(taskTrialData, taskKey, 'logError', true);
+        const timeData = processDataForChart(taskTrialData, taskKey, 'Reaction_Time_s', true);
         const height = 30 * Math.max(errorData.length, 1) + 80;
 
         svg.attr("width", totalWidthDefault).attr("height", height);
@@ -1030,6 +1127,7 @@
           xDomain: taskKey === 'T1' ? [0, 1] : null
         });
         renderTimeChart(svg, timeData, accWidthDefault, { significant: [] });
+        renderTimeChart(svg, timeData, accWidthDefault, { significant: significantTimeResults });
       });
 
       // --- RENDERIZAÇÃO GRÁFICO DE CONFIANÇA ---
@@ -1040,18 +1138,18 @@
       d3.select(h2Confidence).html(`Confiança na Resposta <span style="font-weight: normal; font-size: 14px;">(N=${confidenceParticipantCount})</span>`);
 
       if (confidenceLogs.length > 0) {
-        const confidenceData = confidenceLogs.map(d => ({
-          Difficulty: d.task,
-          Visualization: d.vis,
-          Response: d.confidence
-        }));
-
-        const confidenceOrder = uniqueTasks.sort();
-        const processedConfidenceData = processData(confidenceData, 'Response', confidenceOrder);
+        let processedConfidenceData = [];
+        uniqueTasks.sort().forEach(taskKey => {
+          const taskConfidenceData = confidenceLogs.filter(d => d.task === taskKey);
+          if (taskConfidenceData.length > 0) {
+            const processedForTask = processDataForChart(taskConfidenceData, taskKey, 'confidence', true);
+            processedConfidenceData.push(...processedForTask);
+          }
+        });
 
         const accControleWidthConf = 380;
         const totalWidthConf = accControleWidthConf + plotWidth + 40;
-        const heightConf = 30 * Math.max(processedConfidenceData.length, 1) + 80;
+        const heightConf = 30 * processedConfidenceData.length + 80; // Adjusted height calculation
 
         svgConfidence.attr("width", totalWidthConf).attr("height", heightConf);
         renderSubjectiveChart(svgConfidence, processedConfidenceData, totalWidthConf, {
@@ -1070,33 +1168,30 @@
       const tlxParticipantCount = new Set(questLogs.map(d => d.participantId)).size;
 
       const tlxDimensions = [
-        { key: 'workload', title: 'Workload', id: 'workload' },
-        { key: 'mental', title: 'Mental Demand', id: 'mental' },
-        { key: 'temporal', title: 'Temporal Demand', id: 'temporal' },
-        { key: 'performance', title: 'Performance (self-assessed)', id: 'performance' },
-        { key: 'effort', title: 'Effort', id: 'effort' },
-        { key: 'frustration', title: 'Frustration', id: 'frustration' }
+        { key: 'workload', title: 'Workload', id: 'workload' }, { key: 'mental', title: 'Mental Demand', id: 'mental' },
+        { key: 'temporal', title: 'Temporal Demand', id: 'temporal' }, { key: 'performance', title: 'Performance (self-assessed)', id: 'performance' },
+        { key: 'effort', title: 'Effort', id: 'effort' }, { key: 'frustration', title: 'Frustration', id: 'frustration' }
       ];
 
       tlxDimensions.forEach(dim => {
-        const svgQuest = d3.select(`#chart-questionnaire-${dim.id}`);
-        const h2 = svgQuest.node().previousElementSibling;
-        const baseTitle = h2.textContent.split(' (N=')[0];
-        d3.select(h2).html(`${baseTitle} <span style="font-weight: normal; font-size: 14px;">(N=${tlxParticipantCount})</span>`);
-
         if (questLogs.length > 0) {
-          const questData = questLogs.map(d => ({
-            Difficulty: d.task,
-            Visualization: d.vis,
-            Response: d.ratings[dim.key]
-          }));
+          const svgQuest = d3.select(`#chart-questionnaire-${dim.id}`);
+          const h2 = svgQuest.node().previousElementSibling;
+          const baseTitle = h2.textContent.split(' (N=')[0];
+          d3.select(h2).html(`${baseTitle} <span style="font-weight: normal; font-size: 14px;">(N=${tlxParticipantCount})</span>`);
 
-          const questOrder = uniqueTasks.sort();
-          const processedQuestData = processData(questData, 'Response', questOrder);
+          let processedQuestData = [];
+          uniqueTasks.sort().forEach(taskKey => {
+            const taskQuestData = questLogs.filter(d => d.task === taskKey);
+            if (taskQuestData.length > 0) {
+              const processedForTask = processDataForChart(taskQuestData, taskKey, 'ratings.' + dim.key, true);
+              processedQuestData.push(...processedForTask);
+            }
+          });
 
           const accControleWidthQuest = 380;
           const totalWidthQuest = accControleWidthQuest + plotWidth + 40;
-          const heightQuest = 30 * Math.max(processedQuestData.length, 1) + 80;
+          const heightQuest = 30 * processedQuestData.length + 80; // Adjusted height calculation
 
           svgQuest.attr("width", totalWidthQuest).attr("height", heightQuest);
           renderSubjectiveChart(svgQuest, processedQuestData, totalWidthQuest, {
@@ -1117,14 +1212,14 @@
       if (rankingTechLogs.length > 0) {
         const h2 = svgRankingTech.node().previousElementSibling;
         const n = new Set(rankingTechLogs.map(d => d.participantId)).size;
-        d3.select(h2).html(`Ranking de Preferência (Técnicas) <span style="font-weight: normal; font-size: 14px;">(N=${n})</span>`);
+        d3.select(h2).html(`Ranking de Preferência (Técnicas) <span style="font-weight: normal; font-size: 12px;">(N=${n})</span>`);
 
         const techCounts = d3.rollup(rankingTechLogs, v => v.length, d => d.vis, d => d.ratings.rank);
         const visNames = Array.from(techCounts.keys());
         const ranks = [...new Set(rankingTechLogs.map(d => d.ratings.rank))].sort((a, b) => a - b);
 
         const dataForStack = visNames.map(vis => {
-          const entry = { vis: vis };
+          const entry = { vis: vis.replace('psb25d', 'PSB2.5D').replace('psb3d', 'PSB3D') };
           ranks.forEach(rank => {
             entry[rank] = techCounts.get(vis)?.get(rank) || 0;
           });
