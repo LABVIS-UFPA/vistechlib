@@ -1,0 +1,111 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://www.w3.org/2000/svg" id="svgRight">
+    <style>
+                    .node-left { stroke: #fff; stroke-width: 1.5px; }
+                    .node-left.selected { stroke: #e53e3e !important; stroke-width: 4px !important; }
+                    .node-left.highlight-related { stroke: #2b6cb0; stroke-width: 5px; }
+                    .link-left { stroke: #cbd5e0; stroke-opacity: 0.6; }
+                    .node-right circle { fill: #fbd38d; stroke: #dd6b20; stroke-width: 0px; }
+                    .node-right.is-group circle { fill: #9ae6b4; stroke: #38a169; }
+                    .node-right.is-theme circle { fill: #b794f4; stroke: #805ad5; }
+                    .node-right.selected circle { stroke-width: 3px; }
+                    .node-right text { font-family: sans-serif; font-size: 12px; font-weight: 500; }
+                    .link-right { stroke: #a0aec0; stroke-width: 2px; }
+    </style>
+    <g>
+        <g>
+            <line class="link-right" x1="295.39236955614695" y1="391.81953916960214" x2="340.4460742178078" y2="433.1646897051261"/>
+            <line class="link-right" x1="339.0554120568648" y1="347.98328457604543" x2="295.39236955614695" y2="391.81953916960214"/>
+            <line class="link-right" x1="416.70396848189193" y1="241.43871248013687" x2="472.83147832595563" y2="214.96271279394256"/>
+            <line class="link-right" x1="295.39236955614695" y1="391.81953916960214" x2="272.3152017762266" y2="448.7444960065318"/>
+            <line class="link-right" x1="416.70396848189193" y1="241.43871248013687" x2="383.86067215552356" y2="189.22954826975524"/>
+            <line class="link-right" x1="295.39236955614695" y1="391.81953916960214" x2="235.35805815805418" y2="366.3017312793535"/>
+            <line class="link-right" x1="416.70396848189193" y1="241.43871248013687" x2="473.5484234536256" y2="264.9423349194291"/>
+            <line class="link-right" x1="419.676206973427" y1="356.3071365637463" x2="438.5169122365836" y2="408.30218292516014"/>
+            <line class="link-right" x1="323.9791705578807" y1="268.56411533555143" x2="199.11570246289432" y2="300.78541093399735"/>
+            <line class="link-right" x1="416.70396848189193" y1="241.43871248013687" x2="435.1974077053541" y2="182.0578454872461"/>
+            <line class="link-right" x1="323.9791705578807" y1="268.56411533555143" x2="270.7782452739267" y2="218.1586228064042"/>
+            <line class="link-right" x1="419.676206973427" y1="356.3071365637463" x2="480.62493613345623" y2="381.2581136414277"/>
+            <line class="link-right" x1="419.676206973427" y1="356.3071365637463" x2="451.976310803676" y2="320.1926988110513"/>
+            <line class="link-right" x1="381.8233398074214" y1="299.78682429549144" x2="339.0554120568648" y2="347.98328457604543"/>
+            <line class="link-right" x1="381.8233398074214" y1="299.78682429549144" x2="416.70396848189193" y2="241.43871248013687"/>
+            <line class="link-right" x1="381.8233398074214" y1="299.78682429549144" x2="419.676206973427" y2="356.3071365637463"/>
+            <line class="link-right" x1="381.8233398074214" y1="299.78682429549144" x2="323.9791705578807" y2="268.56411533555143"/>
+        </g>
+        <g>
+            <g class="node-right" transform="translate(340.4460742178078,433.1646897051261)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Melhor Visualização</text>
+            </g>
+            <g class="node-right is-group" transform="translate(295.39236955614695,391.81953916960214)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Melhora Percepção/Visualização</text>
+            </g>
+            <g class="node-right is-group" transform="translate(339.0554120568648,347.98328457604543)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: bold;">Melhor</text>
+            </g>
+            <g class="node-right" transform="translate(472.83147832595563,214.96271279394256)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Configuração Automática</text>
+            </g>
+            <g class="node-right is-group" transform="translate(416.70396848189193,241.43871248013687)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: bold;">Configuração Automática</text>
+            </g>
+            <g class="node-right" transform="translate(272.3152017762266,448.7444960065318)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Agrado com a visualização de dados</text>
+            </g>
+            <g class="node-right" transform="translate(383.86067215552356,189.22954826975524)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">IA</text>
+            </g>
+            <g class="node-right" transform="translate(235.35805815805418,366.3017312793535)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Melhor percepção</text>
+            </g>
+            <g class="node-right" transform="translate(473.5484234536256,264.9423349194291)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">LLM</text>
+            </g>
+            <g class="node-right" transform="translate(438.5169122365836,408.30218292516014)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Preferência</text>
+            </g>
+            <g class="node-right is-group" transform="translate(419.676206973427,356.3071365637463)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: bold;">Agradável/Satisfatório</text>
+            </g>
+            <g class="node-right" transform="translate(199.11570246289432,300.78541093399735)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Facilidade de Interpretação</text>
+            </g>
+            <g class="node-right is-group" transform="translate(323.9791705578807,268.56411533555143)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: bold;">Facilita</text>
+            </g>
+            <g class="node-right" transform="translate(435.1974077053541,182.0578454872461)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Opt</text>
+            </g>
+            <g class="node-right" transform="translate(270.7782452739267,218.1586228064042)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Mais facilidade</text>
+            </g>
+            <g class="node-right" transform="translate(480.62493613345623,381.2581136414277)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Agradável</text>
+            </g>
+            <g class="node-right" transform="translate(451.976310803676,320.1926988110513)">
+                <circle r="8"/>
+                <text dx="12" dy="4" style="font-weight: normal;">Interessante</text>
+            </g>
+            <g class="node-right is-theme" transform="translate(381.8233398074214,299.78682429549144)">
+                <circle r="14"/>
+                <text dx="18" dy="4" style="font-weight: bold;">A configuração automática foi melhor</text>
+            </g>
+        </g>
+    </g>
+</svg>
