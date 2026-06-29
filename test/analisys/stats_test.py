@@ -391,6 +391,20 @@ def run_wilcoxon_test(df, metric_col, group_col='Visualization', block_col='Part
     except ValueError as e:
         return f">> Erro no teste de Wilcoxon: {e}. Verifique se há variação nos dados."
 
+    # --- NEW: Calculate Effect Size (Rank-Biserial Correlation) ---
+    diff = group1_data - group2_data
+    diff_nonzero = diff[diff != 0]
+    
+    effect_size = np.nan
+    if len(diff_nonzero) > 0:
+        ranks = stats.rankdata(np.abs(diff_nonzero))
+        w_plus = np.sum(ranks[diff_nonzero > 0])
+        w_minus = np.sum(ranks[diff_nonzero < 0])
+        
+        # Evita divisão por zero se não houver ranks
+        if (w_plus + w_minus) > 0:
+            effect_size = (w_plus - w_minus) / (w_plus + w_minus)
+
     # Determina o vencedor
     mean1 = group1_data.mean()
     mean2 = group2_data.mean()
@@ -404,6 +418,7 @@ def run_wilcoxon_test(df, metric_col, group_col='Visualization', block_col='Part
         
     return {
         'N': N, 'Statistic': stat, 'p-value': p_value,
+        'EffectSize': effect_size,
         'Significant': p_value < 0.05,
         'Means': {group1_name: mean1, group2_name: mean2},
         'Winner': winner
@@ -687,7 +702,7 @@ if df_rank_tech is not None and not df_rank_tech.empty:
     res = run_wilcoxon_test(df_rank_tech, 'Rank')
     
     if isinstance(res, dict):
-        print(f"Wilcoxon Signed-Rank Test N={res['N']} | W-stat={res['Statistic']:.2f} | p={res['p-value']:.5f}")
+        print(f"Wilcoxon Signed-Rank Test N={res['N']} | W-stat={res['Statistic']:.2f} | p={res['p-value']:.5f} | r_b={res.get('EffectSize', np.nan):.4f}")
         
         # A análise de poder para Wilcoxon é diferente e não foi adicionada à lista global.
         

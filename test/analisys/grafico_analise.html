@@ -865,6 +865,11 @@
     function renderRankingChart(svg, data, title) {
       svg.selectAll("*").remove(); // Clear previous content
 
+      if (data.length === 0) return;
+
+      // Sort data by the number of 1st place rankings, descending
+      data.sort((a, b) => (b['1'] || 0) - (a['1'] || 0));
+
       const ranks = Object.keys(data[0]).filter(k => k !== 'vis').map(Number).sort((a, b) => a - b);
       if (ranks.length === 0) return;
 
@@ -880,7 +885,7 @@
       const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
       const y = d3.scaleBand()
-        .domain(data.map(d => d.vis).sort())
+        .domain(data.map(d => d.vis))
         .range([0, height])
         .padding(0.2);
 
