@@ -264,13 +264,17 @@
             z-index: 999;
             display: none;
         }
+
         .drawer-overlay.open {
             display: block;
         }
+
         .drawer {
             position: fixed;
-            top: 0; right: -700px;
-            width: 700px; height: 100vh;
+            top: 0;
+            right: -1000px;
+            width: 1000px;
+            height: 100vh;
             background: #fff;
             box-shadow: -4px 0 15px rgba(0,0,0,0.1);
             z-index: 1000;
@@ -278,9 +282,11 @@
             display: flex;
             flex-direction: column;
         }
+
         .drawer.open {
             right: 0;
         }
+
         .drawer-header {
             padding: 1rem;
             background: #f7fafc;
@@ -289,45 +295,56 @@
             justify-content: space-between;
             align-items: center;
         }
+
         .drawer-content {
             padding: 1rem;
             overflow-y: auto;
             flex: 1;
         }
+
         .themes-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.9rem;
         }
-        .themes-table th, .themes-table td {
+
+        .themes-table th,
+        .themes-table td {
             padding: 0.75rem;
             border-bottom: 1px solid #e2e8f0;
             text-align: left;
         }
+
         .themes-table tr.theme-row {
             cursor: pointer;
             transition: background 0.2s;
         }
+
         .themes-table tr.theme-row:hover {
             background: #edf2f7;
         }
+
         .themes-table tr.theme-row.active {
             background: #e6fffa;
             border-left: 4px solid #319795;
         }
+
         .excerpts-row {
             display: none;
             background: #fafafa;
         }
+
         .excerpts-row.open {
             display: table-row;
         }
+
         .excerpt-item {
             padding: 0.5rem;
             border-left: 2px solid #cbd5e0;
             margin-bottom: 0.5rem;
             font-size: 0.85rem;
         }
+
         .inline-input {
             border: 1px solid #cbd5e0;
             border-radius: 4px;
@@ -354,9 +371,9 @@
     <div class="drawer" id="themeDrawer">
         <div class="drawer-header">
             <h2 style="margin: 0; font-size: 1.25rem; color: #2d3748;">Temas Oficiais</h2>
-            <div>
-                <button id="btnNewTheme" style="margin-right: 0.5rem;" title="Novo Tema">+</button>
-                <button id="btnCloseDrawer">X</button>
+            <div style="display: flex;">
+                <button id="btnNewTheme" style="margin-right: 0.5rem;" class="icon-btn" title="Novo Tema">➕</button>
+                <button id="btnCloseDrawer" class="icon-btn" title="Fechar">✖️</button>
             </div>
         </div>
         <div class="drawer-content">
@@ -382,6 +399,7 @@
         <div id="leftPanel" class="panel">
             <h2 class="panel-title">1. Trechos Conectados por Categorias em Comum</h2>
             <div class="left-controls" id="leftControls" style="display: none;">
+                <button class="icon-btn" id="btnDownloadSvgLeft" title="Baixar SVG">💾</button>
                 <button class="icon-btn" id="btnToggleForce" title="Pausar/Ativar Força">⏸️</button>
                 <button class="icon-btn" id="btnResetPositions" title="Reiniciar Posições Aleatoriamente">🔄️</button>
             </div>
@@ -390,8 +408,10 @@
 
         <div id="rightPanel" class="panel">
             <div class="right-controls" id="rightControls" style="display: none;">
+                <button class="icon-btn" id="btnDownloadSvgRight" title="Baixar SVG">💾</button>
                 <button class="icon-btn" id="btnToggleForceRight" title="Pausar/Ativar Força">⏸️</button>
-                <button class="icon-btn" id="btnResetPositionsRight" title="Reiniciar Posições Aleatoriamente">🔄️</button>
+                <button class="icon-btn" id="btnResetPositionsRight"
+                    title="Reiniciar Posições Aleatoriamente">🔄️</button>
             </div>
             <svg id="svgRight"></svg>
         </div>
@@ -470,14 +490,28 @@
                         getCategoriesForTag(tId).forEach(catId => clusterCategories.add(catId));
                     });
 
+                    let resolvedUserIndex = cluster.userIndex !== undefined ? cluster.userIndex : block.userIndex;
+                    let resolvedUserId = cluster.userId !== undefined ? cluster.userId : block.userId;
+                    let resolvedType = cluster.type !== undefined ? cluster.type : block.type;
+                    let resolvedRanking = cluster.ranking !== undefined ? cluster.ranking : block.ranking;
+
+                    let userIndexStr = resolvedUserIndex !== undefined && resolvedUserIndex !== null ? resolvedUserIndex : '?';
+                    let userIdStr = resolvedUserId !== undefined && resolvedUserId !== null ? resolvedUserId : '?';
+                    let typeStr = resolvedType !== undefined && resolvedType !== null ? resolvedType : '?';
+                    let rankStr = resolvedRanking && resolvedRanking.length > 0 ? ` [Rank: ${resolvedRanking.join(', ')}]` : "";
+
+                    let finalUserId = resolvedUserId !== undefined && resolvedUserId !== null ? resolvedUserId : (resolvedUserIndex !== undefined && resolvedUserIndex !== null ? resolvedUserIndex : '?');
+                    let firstRank = (resolvedRanking && resolvedRanking.length > 0) ? resolvedRanking[0] : "Sem Ranking";
+
                     leftNodes.push({
                         id: cluster.clusterId,
                         text: cluster.longestText,
                         tags: cluster.allTagIds,
                         categories: Array.from(clusterCategories),
                         coders: [...new Set(cluster.codings.map(c => c.coder))].join(', '),
-                        participants: `Usuário ${cluster.userIndex || block.userIndex || '?'} (${cluster.userId || block.userId || '?'}) (${cluster.type || block.type || '?'})` + ((cluster.ranking || block.ranking) && (cluster.ranking || block.ranking).length > 0 ? ` [Rank: ${(cluster.ranking || block.ranking).join(', ')}]` : ""),
-                        userId: cluster.userId || block.userId,
+                        participants: `Usuário ${userIndexStr} (${userIdStr}) (${typeStr})` + rankStr,
+                        userId: finalUserId,
+                        firstRank: firstRank,
                         radius: 8 // Tamanho agora é FIXO e padrão para todos
                     });
                 });
@@ -618,6 +652,8 @@
                 .attr("class", "link-left")
                 .attr("stroke-width", d => Math.min(d.weight * 2, 8)); // Espessura pelo peso
 
+            const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
             // Desenha Nós
             const node = g.append("g")
                 .selectAll("circle")
@@ -625,7 +661,7 @@
                 .enter().append("circle")
                 .attr("class", "node-left")
                 .attr("r", d => d.radius)
-                .attr("fill", "#4e79a7")
+                .attr("fill", d => colorScale(d.firstRank))
                 .attr("id", d => `node-${d.id}`)
                 .call(d3.drag()
                     .on("start", dragstartedLeft)
@@ -635,7 +671,7 @@
 
             // Tooltip via <title>
             node.append("title")
-                .text(d => `Trecho: "${d.text}"\n\nCodificadores: ${d.coders}\nQtd Categorias: ${d.categories.length}\nOrigem: ${d.participants}`);
+                .text(d => `Trecho: "${d.text}"\n\nCodificadores: ${d.coders}\nQtd Categorias: ${d.categories.length}\nOrigem: ${d.participants}\n1º Rank: ${d.firstRank}`);
 
             simulationLeft.on("tick", updateLeftDOM);
             simulationLeft.on("end", saveLeftPositions);
@@ -759,7 +795,7 @@
                     newRightNodesMap[id].fy = oldNodesMap[id].fy;
                 }
             }
-            
+
             rightNodesMap = newRightNodesMap;
             const rightNodesArray = Object.values(rightNodesMap);
             renderRightGraph(rightNodesArray, rightLinks);
@@ -836,7 +872,7 @@
             if (!event.active && isForceActiveRight) simulationRight.alphaTarget(0.3).restart();
             d.fx = d.x; d.fy = d.y;
         }
-        function draggedRight(event, d) { 
+        function draggedRight(event, d) {
             d.fx = event.x; d.fy = event.y;
             if (!isForceActiveRight) {
                 d.x = event.x; d.y = event.y;
@@ -925,7 +961,7 @@
                     return;
                 }
             }
-            
+
             const newThemeId = 'theme_' + Date.now();
             editingThemeId = newThemeId;
             const newTheme = {
@@ -935,15 +971,15 @@
                 rightGraphState: { positions: [], isForceActive: true },
                 excerpts: []
             };
-            finalThemes.unshift(newTheme); 
-            
+            finalThemes.unshift(newTheme);
+
             d3.selectAll('.node-left').classed('selected', false);
             selectedClusterIds.clear();
             rightNodesMap = {};
             selectedRightNodes.clear();
             isForceActiveRight = true;
             updateRightGraph();
-            
+
             saveThemesToLocalStorage();
             renderSavedThemes();
         }
@@ -952,11 +988,11 @@
             if (!editingThemeId) return;
             const themeIndex = finalThemes.findIndex(t => t.id === editingThemeId);
             if (themeIndex === -1) return;
-            
+
             const themePositions = Object.values(rightNodesMap).map(n => ({
                 id: n.id, x: n.x, y: n.y, fx: n.fx, fy: n.fy
             }));
-            
+
             finalThemes[themeIndex].clusterIds = Array.from(selectedClusterIds);
             finalThemes[themeIndex].rightGraphState = {
                 positions: themePositions,
@@ -966,7 +1002,7 @@
                 const node = leftNodes.find(n => n.id === id);
                 return node ? { text: node.text, coders: node.coders, participants: node.participants, userId: node.userId } : { text: "Trecho não encontrado", coders: "", participants: "", userId: null };
             });
-            
+
             saveThemesToLocalStorage();
         }
 
@@ -984,7 +1020,7 @@
             if (!theme) return;
 
             editingThemeId = theme.id;
-            
+
             selectedClusterIds.clear();
             theme.clusterIds.forEach(id => selectedClusterIds.add(id));
 
@@ -1023,7 +1059,7 @@
             const tbody = document.getElementById('themesTableBody');
             if (!tbody) return;
             tbody.innerHTML = '';
-            
+
             finalThemes = finalThemes.filter(t => {
                 if (t.id !== editingThemeId && t.clusterIds.length === 0 && t.name === "[Novo Tema]") return false;
                 return true;
@@ -1033,17 +1069,22 @@
             finalThemes.forEach(theme => {
                 const tr = document.createElement('tr');
                 tr.className = 'theme-row' + (editingThemeId === theme.id ? ' active' : '');
-                
+
                 const allCoders = new Set();
                 const allParticipants = new Set();
-                
+
                 let excerptRowsHtml = '';
-                
+
                 (theme.excerpts || []).forEach((exc) => {
                     if (exc.coders) exc.coders.split(', ').forEach(c => allCoders.add(c));
-                    if (exc.userId) allParticipants.add(exc.userId);
-                    else if (exc.participants) allParticipants.add(exc.participants);
-                    
+                    if (exc.userId !== undefined && exc.userId !== null && exc.userId !== '?') {
+                        allParticipants.add(exc.userId);
+                    } else if (exc.participants) {
+                        // Extrai o identificador base para não considerar rank ou tipo como participante diferente
+                        let baseParticipant = exc.participants.split(')')[0] + ')';
+                        allParticipants.add(baseParticipant);
+                    }
+
                     excerptRowsHtml += `
                         <div class="excerpt-item">
                             ${exc.text} 
@@ -1081,7 +1122,7 @@
                 const tdExc = document.createElement('td'); tdExc.innerText = theme.clusterIds.length;
                 const tdCoders = document.createElement('td'); tdCoders.innerText = allCoders.size;
                 const tdParticipants = document.createElement('td'); tdParticipants.innerText = allParticipants.size;
-                
+
                 // Ações
                 const tdActions = document.createElement('td');
                 const delBtn = document.createElement('button');
@@ -1105,7 +1146,7 @@
                         editTheme(theme.id);
                     }
                 };
-                
+
                 tbody.appendChild(tr);
 
                 // Linha expansível com trechos brutos
@@ -1118,7 +1159,7 @@
                 trExc.appendChild(tdFull);
                 tbody.appendChild(trExc);
             });
-            
+
             if (finalThemes.length > 0) {
                 document.getElementById('btnExport').style.display = 'inline-block';
             } else {
@@ -1180,7 +1221,7 @@
             localStorage.removeItem('gerador_temas_positions');
             isForceActiveLeft = true;
             document.getElementById('btnToggleForce').innerText = '⏸️';
-            renderLeftGraph(); 
+            renderLeftGraph();
         });
 
         document.getElementById('btnToggleForceRight').addEventListener('click', (e) => {
@@ -1199,7 +1240,7 @@
         document.getElementById('btnResetPositionsRight').addEventListener('click', () => {
             if (!simulationRight) return;
             // Apenas re-renderiza o gráfico direito, o D3 joga posições aleatórias por não ter localStorage
-            updateRightGraph(); 
+            updateRightGraph();
         });
 
         function saveThemesToLocalStorage() {
@@ -1241,7 +1282,7 @@
                 try {
                     qdaData = JSON.parse(savedCodebook);
                     processLeftGraphData();
-                    
+
                     if (finalThemes.length > 0) {
                         editTheme(finalThemes[0].id);
                     } else {
@@ -1251,6 +1292,66 @@
                     console.error("Erro ao carregar codebook:", e);
                 }
             }
+        });
+
+        // ==========================================
+        // DOWNLOAD SVG
+        // ==========================================
+        function downloadSvg(svgId, filename) {
+            const svgElement = document.getElementById(svgId);
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svgElement);
+
+            // Adiciona namespaces caso não existam
+            if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+                source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+            if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+                source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+            }
+
+            // Injeta o CSS dentro do SVG para manter a estilização dos nós e conexões
+            const style = `
+                <style>
+                    .node-left { stroke: #fff; stroke-width: 1.5px; }
+                    .node-left.selected { stroke: #e53e3e !important; stroke-width: 4px !important; }
+                    .node-left.highlight-related { stroke: #2b6cb0; stroke-width: 5px; }
+                    .link-left { stroke: #cbd5e0; stroke-opacity: 0.6; }
+                    .node-right circle { fill: #fbd38d; stroke: #dd6b20; stroke-width: 0px; }
+                    .node-right.is-group circle { fill: #9ae6b4; stroke: #38a169; }
+                    .node-right.is-theme circle { fill: #b794f4; stroke: #805ad5; }
+                    .node-right.selected circle { stroke-width: 3px; }
+                    .node-right text { font-family: sans-serif; font-size: 12px; font-weight: 500; }
+                    .link-right { stroke: #a0aec0; stroke-width: 2px; }
+                </style>
+            `;
+            source = source.replace(/^(<svg[^>]*>)/, '$1' + style);
+
+            // Adiciona declaração XML
+            source = '<?xml version="1.0" standalone="no"?>\\r\\n' + source;
+
+            const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+            const downloadLink = document.createElement("a");
+            downloadLink.href = url;
+            downloadLink.download = filename;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+        document.getElementById('btnDownloadSvgLeft').addEventListener('click', () => {
+            downloadSvg('svgLeft', 'grafo_conexoes_trechos.svg');
+        });
+
+        document.getElementById('btnDownloadSvgRight').addEventListener('click', () => {
+            let themeName = 'tema_atual';
+            if (editingThemeId) {
+                const existingTheme = finalThemes.find(t => t.id === editingThemeId);
+                if (existingTheme && existingTheme.name) {
+                    themeName = existingTheme.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                }
+            }
+            downloadSvg('svgRight', themeName + '_grafo.svg');
         });
 
     </script>
