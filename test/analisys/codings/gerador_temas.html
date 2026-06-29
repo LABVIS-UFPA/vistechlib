@@ -353,6 +353,10 @@
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script type="module">
+        import translate from "https://cdn.jsdelivr.net/npm/translate/index.min.js";
+        window.translate = translate;
+    </script>
 </head>
 
 <body>
@@ -360,9 +364,12 @@
     <div class="top-bar">
         <h1>Geração de Temas (Síntese)</h1>
         <div>
+            <span id="translateStatus" style="margin-right: 1rem; color: #718096; font-size: 0.9rem;"></span>
             <button id="btnOpenDrawer" style="margin-right:1rem;">📂 Gerenciar Temas</button>
             <input type="file" id="fileInput" accept=".json" />
             <button id="btnExport" style="margin-left:1rem; display:none;">📥 Exportar Temas Finais</button>
+            <button id="btnTranslateAll" style="margin-left:1rem;" title="Traduzir para Inglês">🌐 Traduzir</button>
+            <button id="btnLangToggle" style="margin-left:0.5rem; font-weight:bold; width: 45px;" title="Alternar Idioma">PT</button>
         </div>
     </div>
 
@@ -418,6 +425,46 @@
     </div>
 
     <script>
+        let currentLang = 'pt';
+
+        function getLocalizedStr(obj, key) {
+            if (!obj) return "";
+            if (currentLang === 'en' && obj[key + '_en']) {
+                return obj[key + '_en'];
+            }
+            return obj[key] || "";
+        }
+
+        async function translateObjectStrings(obj, keysToTranslate) {
+            if (!obj || typeof obj !== 'object') return;
+            
+            if (Array.isArray(obj)) {
+                for (let i = 0; i < obj.length; i++) {
+                    await translateObjectStrings(obj[i], keysToTranslate);
+                }
+                return;
+            }
+
+            for (let key in obj) {
+                if (keysToTranslate.includes(key) && typeof obj[key] === 'string' && obj[key].trim() !== '') {
+                    const enKey = key + '_en';
+                    if (!obj[enKey]) {
+                        try {
+                            if (window.translate) {
+                                window.translate.engine = 'google';
+                                obj[enKey] = await window.translate(obj[key], { from: 'pt', to: 'en' });
+                            }
+                        } catch (e) {
+                            console.error('Erro ao traduzir:', obj[key], e);
+                            obj[enKey] = obj[key]; // fallback
+                        }
+                    }
+                } else if (typeof obj[key] === 'object') {
+                    await translateObjectStrings(obj[key], keysToTranslate);
+                }
+            }
+        }
+
         let qdaData = null;
         let leftNodes = [];
         let leftLinks = [];
@@ -453,6 +500,59 @@
                 }
             };
             reader.readAsText(file);
+        });
+
+        document.getElementById('btnLangToggle').addEventListener('click', (e) => {
+            if (currentLang === 'pt') {
+                currentLang = 'en';
+                e.target.innerText = 'EN';
+            } else {
+                currentLang = 'pt';
+                e.target.innerText = 'PT';
+            }
+            
+            if (qdaData) {
+                processLeftGraphData();
+                if (editingThemeId) updateRightGraph();
+                renderSavedThemes();
+            }
+        });
+
+        document.getElementById('btnTranslateAll').addEventListener('click', async () => {
+            if (!qdaData) {
+                alert("Carregue um arquivo JSON primeiro.");
+                return;
+            }
+            
+            const statusEl = document.getElementById('translateStatus');
+            const btn = document.getElementById('btnTranslateAll');
+            
+            statusEl.innerText = "Traduzindo...";
+            btn.disabled = true;
+            
+            const keysToTranslate = ['longestText', 'name', 'normalized', 'text']; 
+            
+            try {
+                await translateObjectStrings(qdaData, keysToTranslate);
+                await translateObjectStrings(finalThemes, keysToTranslate);
+                
+                localStorage.setItem('gerador_temas_codebook', JSON.stringify(qdaData));
+                saveThemesToLocalStorage();
+                
+                statusEl.innerText = "Tradução concluída!";
+                setTimeout(() => statusEl.innerText = "", 3000);
+                
+                if (currentLang === 'en') {
+                    processLeftGraphData();
+                    if (editingThemeId) updateRightGraph();
+                    renderSavedThemes();
+                }
+            } catch (e) {
+                statusEl.innerText = "Erro na tradução.";
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+            }
         });
 
         // ==========================================
@@ -506,6 +606,7 @@
                     leftNodes.push({
                         id: cluster.clusterId,
                         text: cluster.longestText,
+                        text_en: cluster.longestText_en,
                         tags: cluster.allTagIds,
                         categories: Array.from(clusterCategories),
                         coders: [...new Set(cluster.codings.map(c => c.coder))].join(', '),
@@ -671,7 +772,7 @@
 
             // Tooltip via <title>
             node.append("title")
-                .text(d => `Trecho: "${d.text}"\n\nCodificadores: ${d.coders}\nQtd Categorias: ${d.categories.length}\nOrigem: ${d.participants}\n1º Rank: ${d.firstRank}`);
+                .text(d => `Trecho: "${getLocalizedStr(d, 'text')}"\n\nCodificadores: ${d.coders}\nQtd Categorias: ${d.categories.length}\nOrigem: ${d.participants}\n1º Rank: ${d.firstRank}`);
 
             simulationLeft.on("tick", updateLeftDOM);
             simulationLeft.on("end", saveLeftPositions);
@@ -749,6 +850,7 @@
                         newRightNodesMap[currentId] = {
                             id: currentId,
                             name: nodeData.data.name || nodeData.data.normalized || "Tag",
+                            name_en: nodeData.data.name_en || nodeData.data.normalized_en,
                             isGroup: nodeData.type === 'group',
                             isRoot: !nodeData.parentId
                         };
@@ -764,17 +866,23 @@
 
             const themeNodeId = "THEME_ROOT";
             let themeName = "";
+            let themeName_en = "";
             if (editingThemeId) {
                 const existingTheme = finalThemes.find(t => t.id === editingThemeId);
-                if (existingTheme) themeName = existingTheme.name;
+                if (existingTheme) {
+                    themeName = existingTheme.name;
+                    themeName_en = existingTheme.name_en;
+                }
             } else {
-                const inputVal = document.getElementById('newThemeName').value.trim();
+                const newThemeInput = document.getElementById('newThemeName');
+                const inputVal = newThemeInput ? newThemeInput.value.trim() : "";
                 themeName = inputVal ? inputVal : "[Novo Tema]";
             }
 
             newRightNodesMap[themeNodeId] = {
                 id: themeNodeId,
                 name: themeName,
+                name_en: themeName_en,
                 isTheme: true,
                 isRoot: false
             };
@@ -793,6 +901,7 @@
                     newRightNodesMap[id].vy = oldNodesMap[id].vy;
                     newRightNodesMap[id].fx = oldNodesMap[id].fx;
                     newRightNodesMap[id].fy = oldNodesMap[id].fy;
+                    newRightNodesMap[id].labelPos = oldNodesMap[id].labelPos;
                 }
             }
 
@@ -845,17 +954,51 @@
                     .on("start", dragstartedRight)
                     .on("drag", draggedRight)
                     .on("end", dragendedRight))
-                .on("click", handleRightNodeClick);
+                .on("click", handleRightNodeClick)
+                .on("dblclick", function(event, d) {
+                    d.labelPos = d.labelPos === 'left' ? 'right' : 'left';
+                    d3.select(this).select("text")
+                        .attr("dx", d.labelPos === 'left' ? (d.isTheme ? -18 : -12) : (d.isTheme ? 18 : 12))
+                        .attr("text-anchor", d.labelPos === 'left' ? "end" : "start");
+                    autoSaveCurrentTheme();
+                });
 
             // Bolinha do nó
             node.append("circle").attr("r", d => d.isTheme ? 14 : 8);
 
             // Texto (Rótulo do Código/Categoria)
             node.append("text")
-                .attr("dx", d => d.isTheme ? 18 : 12)
+                .attr("dx", d => d.labelPos === 'left' ? (d.isTheme ? -18 : -12) : (d.isTheme ? 18 : 12))
                 .attr("dy", 4)
+                .attr("text-anchor", d => d.labelPos === 'left' ? "end" : "start")
                 .style("font-weight", d => (d.isRoot || d.isTheme) ? "bold" : "normal")
-                .text(d => d.name);
+                .text(d => getLocalizedStr(d, 'name'))
+                .on("dblclick", (event, d) => {
+                    event.stopPropagation();
+                    const newEnText = prompt("Editar tradução em Inglês:", d.name_en || d.name);
+                    if (newEnText !== null) {
+                        d.name_en = newEnText;
+                        if (d.isTheme) {
+                            const existingTheme = finalThemes.find(t => t.id === editingThemeId);
+                            if (existingTheme) existingTheme.name_en = newEnText;
+                            saveThemesToLocalStorage();
+                        } else {
+                            if (qdaData && qdaData.treeHierarchy && qdaData.treeHierarchy[d.id]) {
+                                if (qdaData.treeHierarchy[d.id].data.name_en !== undefined || qdaData.treeHierarchy[d.id].data.name) {
+                                    qdaData.treeHierarchy[d.id].data.name_en = newEnText;
+                                } else if (qdaData.treeHierarchy[d.id].data.normalized) {
+                                    qdaData.treeHierarchy[d.id].data.normalized_en = newEnText;
+                                }
+                                localStorage.setItem('gerador_temas_codebook', JSON.stringify(qdaData));
+                            }
+                        }
+                        d3.select(event.target).text(getLocalizedStr(d, 'name'));
+                        if (d.isTheme) {
+                            rightNodesMap[d.id].name_en = newEnText;
+                        }
+                        renderSavedThemes();
+                    }
+                });
 
             simulationRight.on("tick", updateRightDOM);
         }
@@ -946,10 +1089,14 @@
         function renameTheme(themeId, newName) {
             const theme = finalThemes.find(t => t.id === themeId);
             if (theme) {
-                theme.name = newName || "[Novo Tema]";
+                if (currentLang === 'en') {
+                    theme.name_en = newName || "[New Theme]";
+                } else {
+                    theme.name = newName || "[Novo Tema]";
+                }
                 saveThemesToLocalStorage();
                 if (editingThemeId === themeId) {
-                    d3.select(".node-right.is-theme text").text(theme.name);
+                    d3.select(".node-right.is-theme text").text(getLocalizedStr(theme, 'name'));
                 }
             }
         }
@@ -967,6 +1114,7 @@
             const newTheme = {
                 id: newThemeId,
                 name: "[Novo Tema]",
+                name_en: "[New Theme]",
                 clusterIds: [],
                 rightGraphState: { positions: [], isForceActive: true },
                 excerpts: []
@@ -990,7 +1138,7 @@
             if (themeIndex === -1) return;
 
             const themePositions = Object.values(rightNodesMap).map(n => ({
-                id: n.id, x: n.x, y: n.y, fx: n.fx, fy: n.fy
+                id: n.id, x: n.x, y: n.y, fx: n.fx, fy: n.fy, labelPos: n.labelPos
             }));
 
             finalThemes[themeIndex].clusterIds = Array.from(selectedClusterIds);
@@ -1000,7 +1148,7 @@
             };
             finalThemes[themeIndex].excerpts = Array.from(selectedClusterIds).map(id => {
                 const node = leftNodes.find(n => n.id === id);
-                return node ? { text: node.text, coders: node.coders, participants: node.participants, userId: node.userId } : { text: "Trecho não encontrado", coders: "", participants: "", userId: null };
+                return node ? { text: node.text, text_en: node.text_en, coders: node.coders, participants: node.participants, userId: node.userId } : { text: "Trecho não encontrado", text_en: "Excerpt not found", coders: "", participants: "", userId: null };
             });
 
             saveThemesToLocalStorage();
@@ -1029,7 +1177,7 @@
             if (theme.rightGraphState) {
                 isForceActiveRight = theme.rightGraphState.isForceActive;
                 theme.rightGraphState.positions.forEach(p => {
-                    rightNodesMap[p.id] = { x: p.x, y: p.y, fx: p.fx, fy: p.fy, vx: 0, vy: 0 };
+                    rightNodesMap[p.id] = { x: p.x, y: p.y, fx: p.fx, fy: p.fy, vx: 0, vy: 0, labelPos: p.labelPos };
                 });
             } else {
                 isForceActiveRight = true;
@@ -1085,9 +1233,10 @@
                         allParticipants.add(baseParticipant);
                     }
 
+                    const textToShow = getLocalizedStr(exc, 'text');
                     excerptRowsHtml += `
                         <div class="excerpt-item">
-                            ${exc.text} 
+                            ${textToShow} 
                             <div style="margin-top: 4px; font-size: 0.75rem; color: #718096;">Coders: ${exc.coders || '-'} | Origem: ${exc.participants || '-'}</div>
                         </div>
                     `;
@@ -1113,7 +1262,7 @@
                 const tdName = document.createElement('td');
                 const inputName = document.createElement('input');
                 inputName.className = 'inline-input';
-                inputName.value = theme.name;
+                inputName.value = getLocalizedStr(theme, 'name');
                 inputName.onclick = (e) => e.stopPropagation();
                 inputName.onchange = (e) => renameTheme(theme.id, e.target.value);
                 tdName.appendChild(inputName);
@@ -1172,7 +1321,7 @@
 
             const graphData = {
                 nodes: leftNodes.map(n => ({
-                    id: n.id, text: n.text, tags: n.tags, categories: n.categories,
+                    id: n.id, text: n.text, text_en: n.text_en, tags: n.tags, categories: n.categories,
                     coders: n.coders, radius: n.radius,
                     x: n.x, y: n.y, fx: n.fx, fy: n.fy
                 })),
@@ -1347,8 +1496,9 @@
             let themeName = 'tema_atual';
             if (editingThemeId) {
                 const existingTheme = finalThemes.find(t => t.id === editingThemeId);
-                if (existingTheme && existingTheme.name) {
-                    themeName = existingTheme.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                if (existingTheme) {
+                    const locName = getLocalizedStr(existingTheme, 'name');
+                    if (locName) themeName = locName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                 }
             }
             downloadSvg('svgRight', themeName + '_grafo.svg');
