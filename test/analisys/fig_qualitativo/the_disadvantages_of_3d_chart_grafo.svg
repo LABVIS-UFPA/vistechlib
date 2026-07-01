@@ -1,5 +1,32 @@
-<?xml version="1.0" standalone="no"?>\r\n<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" id="svgRight">
-                <style>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svgRight"
+   version="1.1"
+   sodipodi:docname="the_disadvantages_of_3d_chart_grafo.svg"
+   width="748.48865"
+   height="451.01703"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs69" />
+  <sodipodi:namedview
+     id="namedview69"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.2625"
+     inkscape:cx="486.73267"
+     inkscape:cy="219.80198"
+     inkscape:current-layer="g69" />
+  <style
+     id="style1">
                     .node-left { stroke: #fff; stroke-width: 1.5px; }
                     .node-left.selected { stroke: #e53e3e !important; stroke-width: 4px !important; }
                     .node-left.highlight-related { stroke: #2b6cb0; stroke-width: 5px; }
@@ -10,5 +37,760 @@
                     .node-right.selected circle { stroke-width: 3px; }
                     .node-right text { font-family: sans-serif; font-size: 12px; font-weight: 500; }
                     .link-right { stroke: #a0aec0; stroke-width: 2px; }
-                </style>
-            <g transform="translate(-452.41682539225496,-293.3789760091007) scale(1.3195079107728969)"><g><line class="link-right" x1="594.1682390176663" y1="544.2738331900235" x2="579.0612786175832" y2="484.5296392926993"/><line class="link-right" x1="560.8621539064908" y1="659.2707950905258" x2="532.8741435121588" y2="639.5593848572304"/><line class="link-right" x1="605.7010183142572" y1="621.4353681732565" x2="560.8621539064908" y2="659.2707950905258"/><line class="link-right" x1="655.5036159531608" y1="474.4491071964663" x2="674.587547143021" y2="445.84444087680197"/><line class="link-right" x1="594.1682390176663" y1="544.2738331900235" x2="655.5036159531608" y2="474.4491071964663"/><line class="link-right" x1="560.8621539064908" y1="659.2707950905258" x2="534.5169749258453" y2="679.59283036382"/><line class="link-right" x1="655.5036159531608" y1="474.4491071964663" x2="643.076755600054" y2="428.4359211543264"/><line class="link-right" x1="653.3118467201334" y1="512.4549551989714" x2="686.8050258845722" y2="537.6595828245792"/><line class="link-right" x1="594.1682390176663" y1="544.2738331900235" x2="653.3118467201334" y2="512.4549551989714"/><line class="link-right" x1="594.1682390176663" y1="544.2738331900235" x2="539.0517663992867" y2="541.8061073320227"/><line class="link-right" x1="660.2570743884743" y1="691.7778108172282" x2="678.5173607241849" y2="668.9827660092911"/><line class="link-right" x1="660.2570743884743" y1="691.7778108172282" x2="728.8218153527282" y2="713.6796341965621"/><line class="link-right" x1="594.1682390176663" y1="544.2738331900235" x2="637.2274909760059" y2="562.8291256892478"/><line class="link-right" x1="594.1682390176663" y1="544.2738331900235" x2="569.2204992837255" y2="598.4594610522021"/><line class="link-right" x1="594.1682390176663" y1="544.2738331900235" x2="543.2345697029037" y2="572.7681248905146"/><line class="link-right" x1="628.0289235127347" y1="715.1676892110795" x2="660.7600116785945" y2="739.6007588777679"/><line class="link-right" x1="653.3118467201334" y1="512.4549551989714" x2="680.1844777675815" y2="490.9540040775719"/><line class="link-right" x1="596.5571139706586" y1="723.9146694285811" x2="627.0889165852817" y2="743.8397891670205"/><line class="link-right" x1="594.1682390176663" y1="544.2738331900235" x2="550.8640887131199" y2="511.5207909657672"/><line class="link-right" x1="620.8534080406985" y1="465.1494635832171" x2="594.167958229553" y2="441.4137187362931"/><line class="link-right" x1="594.1682390176663" y1="544.2738331900235" x2="620.8534080406985" y2="465.1494635832171"/><line class="link-right" x1="759.2381776184461" y1="657.5580678847855" x2="756.6087152618288" y2="693.9957227733378"/><line class="link-right" x1="620.8534080406985" y1="465.1494635832171" x2="619.7345268221975" y2="418.0327881048119"/><line class="link-right" x1="682.9916749067675" y1="598.5561756932818" x2="718.010824012916" y2="618.7039637295206"/><line class="link-right" x1="649.6223390541517" y1="638.6636281550417" x2="594.1682390176663" y2="544.2738331900235"/><line class="link-right" x1="649.6223390541517" y1="638.6636281550417" x2="605.7010183142572" y2="621.4353681732565"/><line class="link-right" x1="649.6223390541517" y1="638.6636281550417" x2="660.2570743884743" y2="691.7778108172282"/><line class="link-right" x1="649.6223390541517" y1="638.6636281550417" x2="628.0289235127347" y2="715.1676892110795"/><line class="link-right" x1="649.6223390541517" y1="638.6636281550417" x2="596.5571139706586" y2="723.9146694285811"/><line class="link-right" x1="649.6223390541517" y1="638.6636281550417" x2="653.3672559475248" y2="581.9663773529045"/><line class="link-right" x1="649.6223390541517" y1="638.6636281550417" x2="759.2381776184461" y2="657.5580678847855"/><line class="link-right" x1="649.6223390541517" y1="638.6636281550417" x2="572.5866986197819" y2="702.2651782346518"/><line class="link-right" x1="649.6223390541517" y1="638.6636281550417" x2="682.9916749067675" y2="598.5561756932818"/></g><g><g class="node-right" transform="translate(579.0612786175832,484.5296392926993)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">No manual configuration</text></g><g class="node-right is-group" transform="translate(594.1682390176663,544.2738331900235)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Difficulty</text></g><g class="node-right" transform="translate(532.8741435121588,639.5593848572304)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">psb3d</text></g><g class="node-right is-group" transform="translate(560.8621539064908,659.2707950905258)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">PSB 3D</text></g><g class="node-right is-group" transform="translate(605.7010183142572,621.4353681732565)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: bold;">PSB Technique</text></g><g class="node-right" transform="translate(674.587547143021,445.84444087680197)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Difficult to read</text></g><g class="node-right is-group" transform="translate(655.5036159531608,474.4491071964663)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Difficult to determine values</text></g><g class="node-right" transform="translate(534.5169749258453,679.59283036382)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">3D</text></g><g class="node-right" transform="translate(643.076755600054,428.4359211543264)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Difficult to determine values</text></g><g class="node-right" transform="translate(686.8050258845722,537.6595828245792)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Improvement needed</text></g><g class="node-right is-group" transform="translate(653.3118467201334,512.4549551989714)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Improvement needed</text></g><g class="node-right" transform="translate(539.0517663992867,541.8061073320227)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Difficult to View</text></g><g class="node-right" transform="translate(678.5173607241849,668.9827660092911)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Distraction</text></g><g class="node-right is-group" transform="translate(660.2570743884743,691.7778108172282)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Distraction</text></g><g class="node-right" transform="translate(728.8218153527282,713.6796341965621)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Distract</text></g><g class="node-right" transform="translate(637.2274909760059,562.8291256892478)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Discomfort with viewing</text></g><g class="node-right" transform="translate(569.2204992837255,598.4594610522021)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Difficult to view</text></g><g class="node-right" transform="translate(543.2345697029037,572.7681248905146)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Difficult to Interpret</text></g><g class="node-right" transform="translate(660.7600116785945,739.6007588777679)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Scale break</text></g><g class="node-right is-group" transform="translate(628.0289235127347,715.1676892110795)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Components</text></g><g class="node-right" transform="translate(680.1844777675815,490.9540040775719)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Displeasure with visualization manipulation</text></g><g class="node-right" transform="translate(627.0889165852817,743.8397891670205)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Confused</text></g><g class="node-right is-group" transform="translate(596.5571139706586,723.9146694285811)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: bold;">Confusion</text></g><g class="node-right" transform="translate(550.8640887131199,511.5207909657672)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Difficulty of Interpretation</text></g><g class="node-right" transform="translate(653.3672559475248,581.9663773529045)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Distant values</text></g><g class="node-right" transform="translate(594.167958229553,441.4137187362931)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Inaccuracy</text></g><g class="node-right is-group" transform="translate(620.8534080406985,465.1494635832171)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Inaccuracy</text></g><g class="node-right" transform="translate(756.6087152618288,693.9957227733378)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Manual configuration</text></g><g class="node-right is-group" transform="translate(759.2381776184461,657.5580678847855)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Manual Configuration</text></g><g class="node-right" transform="translate(619.7345268221975,418.0327881048119)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Inaccurate</text></g><g class="node-right" transform="translate(572.5866986197819,702.2651782346518)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: bold;">Large values</text></g><g class="node-right" transform="translate(718.010824012916,618.7039637295206)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">unsatisfactory</text></g><g class="node-right is-group" transform="translate(682.9916749067675,598.5561756932818)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Frustration</text></g><g class="node-right is-theme" transform="translate(649.6223390541517,638.6636281550417)"><circle r="14"/><text dx="18" dy="4" text-anchor="start" style="font-weight: bold;">The Disadvantages of 3D Chart</text></g></g></g></svg>
+    </style>
+  <g
+     transform="matrix(1.3195079,0,0,1.3195079,-507.61448,-541.04151)"
+     id="g69">
+    <g
+       id="g33">
+      <path
+         id="line1"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 594.16821,544.2738 579.06128,484.52963" />
+      <path
+         id="line2"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 548.8622,659.27081 520.87417,639.55939" />
+      <path
+         id="line3"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 605.70099,621.43536 548.8622,659.27081"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line4"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 655.5036,474.4491 30.96896,-23.29885"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line5"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 594.16821,544.2738 655.5036,474.4491" />
+      <path
+         id="line6"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 548.8622,659.27081 -26.34521,20.32202" />
+      <path
+         id="line7"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 655.5036,474.4491 643.07678,428.43591" />
+      <path
+         id="line8"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 653.31183,512.45496 33.49322,25.20465" />
+      <path
+         id="line9"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 594.16821,544.2738 59.14362,-31.81884" />
+      <path
+         id="line10"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 594.16821,544.2738 -55.11645,-2.46771" />
+      <path
+         id="line11"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 660.25708,691.77783 18.26025,-22.79504" />
+      <path
+         id="line12"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 660.25708,691.77783 87.45342,23.59966"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line13"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 594.16821,544.2738 43.05927,18.5553" />
+      <path
+         id="line14"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 594.16821,544.2738 -24.94769,54.18567" />
+      <path
+         id="line15"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 594.16821,544.2738 -50.93365,28.49433" />
+      <path
+         id="line16"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 628.02893,715.16766 32.73108,24.43311" />
+      <path
+         id="line17"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 653.31183,512.45496 26.87262,-21.50095" />
+      <path
+         id="line18"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 596.55713,723.91467 30.5318,19.92511" />
+      <path
+         id="line19"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 594.16821,544.2738 550.86407,511.52078" />
+      <path
+         id="line20"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 620.85339,465.14948 594.16797,441.41373" />
+      <path
+         id="line21"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 594.16821,544.2738 26.68518,-79.12432" />
+      <path
+         id="line22"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 773.88221,662.01495 6.70877,31.34407"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line23"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 620.85339,465.14948 -1.11889,-47.1167" />
+      <path
+         id="line24"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 682.9917,598.55615 35.0191,20.14783" />
+      <path
+         id="line25"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 649.62231,638.66364 594.16821,544.2738" />
+      <path
+         id="line26"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 649.62231,638.66364 605.70099,621.43536" />
+      <path
+         id="line27"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 649.62231,638.66364 10.63477,53.11419" />
+      <path
+         id="line28"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 649.62231,638.66364 -21.59338,76.50402" />
+      <path
+         id="line29"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 649.62231,638.66364 -53.06518,85.25103" />
+      <path
+         id="line30"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 649.62231,638.66364 3.74494,-56.69727" />
+      <path
+         id="line31"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 649.62231,638.66364 124.2599,23.35131"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line32"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 649.62231,638.66364 572.58667,702.2652" />
+      <path
+         id="line33"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 649.62231,638.66364 682.9917,598.55615" />
+    </g>
+    <g
+       id="g68">
+      <g
+         class="node-right"
+         transform="translate(579.06128,484.52964)"
+         id="g34">
+        <circle
+           r="8"
+           id="circle33"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text33"
+           x="-9.9943237"
+           y="4.2632564e-14">No manual configuration</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(594.16824,544.27383)"
+         id="g35">
+        <circle
+           r="8"
+           id="circle34"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text34">Difficulty</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(520.87416,639.55938)"
+         id="g36">
+        <circle
+           r="8"
+           id="circle35"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text35"
+           x="-9.9474487"
+           y="-2.8421709e-14">psb3d</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(548.86217,659.2708)"
+         id="g37">
+        <circle
+           r="8"
+           id="circle36"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text36">PSB 3D</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(605.70102,621.43537)"
+         id="g38">
+        <circle
+           r="8"
+           id="circle37"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text37"
+           x="-10.539246"
+           y="1.1368684e-13">PSB Technique</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(686.47256,451.15025)"
+         id="g39">
+        <circle
+           r="8"
+           id="circle38"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text38">Difficult to read</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(655.50362,474.44911)"
+         id="g40">
+        <circle
+           r="8"
+           id="circle39"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text39">Difficult to determine values</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(522.51699,679.59283)"
+         id="g41">
+        <circle
+           r="8"
+           id="circle40"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text40"
+           x="-10.328308"
+           y="-5.6843419e-14">3D</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(643.07676,428.43592)"
+         id="g42">
+        <circle
+           r="8"
+           id="circle41"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text41">Difficult to determine values</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(686.80503,537.65958)"
+         id="g43">
+        <circle
+           r="8"
+           id="circle42"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text42">Improvement needed</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(653.31185,512.45496)"
+         id="g44">
+        <circle
+           r="8"
+           id="circle43"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text43">Improvement needed</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(539.05177,541.80611)"
+         id="g45">
+        <circle
+           r="8"
+           id="circle44"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text44"
+           x="-10.527527"
+           y="2.8421709e-14">Difficult to View</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(678.51736,668.98277)"
+         id="g46">
+        <circle
+           r="8"
+           id="circle45"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text45">Distraction</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(660.25707,691.77781)"
+         id="g47">
+        <circle
+           r="8"
+           id="circle46"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text46"
+           y="-1.5157166"
+           x="1.5157166">Distraction</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(747.7105,715.37749)"
+         id="g48">
+        <circle
+           r="8"
+           id="circle47"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text47">Distract</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(637.22749,562.82913)"
+         id="g49">
+        <circle
+           r="8"
+           id="circle48"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text48">Discomfort with viewing</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(569.2205,598.45946)"
+         id="g50">
+        <circle
+           r="8"
+           id="circle49"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text49"
+           x="-10.527527"
+           y="2.8421709e-14">Difficult to view</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(543.23457,572.76812)"
+         id="g51">
+        <circle
+           r="8"
+           id="circle50"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text50"
+           x="-10.785339"
+           y="5.6843419e-14">Difficult to Interpret</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(660.76001,739.60076)"
+         id="g52">
+        <circle
+           r="8"
+           id="circle51"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text51">Scale break</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(628.02892,715.16769)"
+         id="g53">
+        <circle
+           r="8"
+           id="circle52"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text52">Components</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(680.18448,490.954)"
+         id="g54">
+        <circle
+           r="8"
+           id="circle53"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text53">Displeasure with visualization manipulation</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(627.08892,743.83979)"
+         id="g55">
+        <circle
+           r="8"
+           id="circle54"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text54"
+           x="-9.9474487"
+           y="1.7053026e-13">Confused</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(596.55711,723.91467)"
+         id="g56">
+        <circle
+           r="8"
+           id="circle55"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text55"
+           x="-10.088074"
+           y="-2.2737368e-13">Confusion</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(550.86409,511.52079)"
+         id="g57">
+        <circle
+           r="8"
+           id="circle56"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text56"
+           x="-9.9943237"
+           y="-7.1054274e-14">Difficulty of Interpretation</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(653.36726,581.96638)"
+         id="g58">
+        <circle
+           r="8"
+           id="circle57"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text57">Distant values</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(594.16796,441.41372)"
+         id="g59">
+        <circle
+           r="8"
+           id="circle58"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text58"
+           x="-10.674011"
+           y="-1.0658141e-14">Inaccuracy</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(620.85341,465.14946)"
+         id="g60">
+        <circle
+           r="8"
+           id="circle59"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text59"
+           x="-10.674011"
+           y="2.8421709e-14">Inaccuracy</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(780.59098,693.35902)"
+         id="g61">
+        <circle
+           r="8"
+           id="circle60"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text60">Manual configuration</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(773.88221,662.01495)"
+         id="g62">
+        <circle
+           r="8"
+           id="circle61"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text61">Manual Configuration</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(619.73453,418.03279)"
+         id="g63">
+        <circle
+           r="8"
+           id="circle62"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text62"
+           x="-10.445496">Inaccurate</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(572.5867,702.26518)"
+         id="g64">
+        <circle
+           r="8"
+           id="circle63"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text63"
+           x="-10.627136"
+           y="-1.1368684e-13">Large values</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(718.01082,618.70396)"
+         id="g65">
+        <circle
+           r="8"
+           id="circle64"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text64">unsatisfactory</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(682.99167,598.55618)"
+         id="g66">
+        <circle
+           r="8"
+           id="circle65"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text65">Frustration</text>
+      </g>
+      <g
+         class="node-right is-theme"
+         transform="translate(649.62234,638.66363)"
+         id="g67">
+        <circle
+           r="14"
+           id="circle66"
+           cx="0"
+           cy="0" />
+        <text
+           dx="18"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text66"
+           x="-2.8421709e-14"
+           y="-1.6368294">The Disadvantages of 3D Chart</text>
+      </g>
+    </g>
+  </g>
+</svg>

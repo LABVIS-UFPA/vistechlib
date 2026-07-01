@@ -1,5 +1,32 @@
-<?xml version="1.0" standalone="no"?>\r\n<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" id="svgRight">
-                <style>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svgRight"
+   version="1.1"
+   sodipodi:docname="the_disadvantages_of_2_5d_graphics_grafo.svg"
+   width="813.75977"
+   height="568.80695"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs49" />
+  <sodipodi:namedview
+     id="namedview49"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.7854446"
+     inkscape:cx="466.27041"
+     inkscape:cy="329.60977"
+     inkscape:current-layer="g38" />
+  <style
+     id="style1">
                     .node-left { stroke: #fff; stroke-width: 1.5px; }
                     .node-left.selected { stroke: #e53e3e !important; stroke-width: 4px !important; }
                     .node-left.highlight-related { stroke: #2b6cb0; stroke-width: 5px; }
@@ -10,5 +37,580 @@
                     .node-right.selected circle { stroke-width: 3px; }
                     .node-right text { font-family: sans-serif; font-size: 12px; font-weight: 500; }
                     .link-right { stroke: #a0aec0; stroke-width: 2px; }
-                </style>
-            <g transform="translate(-682.0964405237881,-417.50809384686545) scale(1.7411011265922511)"><g><line class="link-right" x1="716.7603278491713" y1="733.1918151388071" x2="744.3625375780465" y2="709.3215349009997"/><line class="link-right" x1="681.5390974402892" y1="691.2509004675035" x2="716.7603278491713" y2="733.1918151388071"/><line class="link-right" x1="545.8062353436374" y1="516.3862500620667" x2="522.5949921070629" y2="539.7879062723341"/><line class="link-right" x1="581.6580589205947" y1="551.305804116465" x2="545.8062353436374" y2="516.3862500620667"/><line class="link-right" x1="716.7603278491713" y1="733.1918151388071" x2="695.486080758548" y2="757.1578918587933"/><line class="link-right" x1="638.9766865628603" y1="696.8369028926708" x2="675.376360282894" y2="726.602223689536"/><line class="link-right" x1="591.7134234314781" y1="471.4040028750186" x2="617.3107533791374" y2="446.4640692780494"/><line class="link-right" x1="581.6580589205947" y1="551.305804116465" x2="591.7134234314781" y2="471.4040028750186"/><line class="link-right" x1="581.6580589205947" y1="551.305804116465" x2="623.3538016268744" y2="528.9597823583136"/><line class="link-right" x1="581.6580589205947" y1="551.305804116465" x2="612.9998012864511" y2="500.36948468801495"/><line class="link-right" x1="581.6580589205947" y1="551.305804116465" x2="562.1617605205229" y2="488.25739447102876"/><line class="link-right" x1="581.6580589205947" y1="551.305804116465" x2="537.072563971917" y2="565.2970099319128"/><line class="link-right" x1="581.6580589205947" y1="551.305804116465" x2="559.8737271406048" y2="592.5669894847721"/><line class="link-right" x1="581.6580589205947" y1="551.305804116465" x2="591.4782608927193" y2="612.9516549351241"/><line class="link-right" x1="581.6580589205947" y1="551.305804116465" x2="635.8090995701878" y2="575.3022779760735"/><line class="link-right" x1="670.5770649724597" y1="595.4211811104376" x2="713.2469304420365" y2="617.4560981721328"/><line class="link-right" x1="641.6626239769867" y1="636.558710808379" x2="681.5390974402892" y2="691.2509004675035"/><line class="link-right" x1="641.6626239769867" y1="636.558710808379" x2="581.6580589205947" y2="551.305804116465"/><line class="link-right" x1="641.6626239769867" y1="636.558710808379" x2="638.9766865628603" y2="696.8369028926708"/><line class="link-right" x1="641.6626239769867" y1="636.558710808379" x2="603.8509118662653" y2="672.4131874376764"/><line class="link-right" x1="641.6626239769867" y1="636.558710808379" x2="590.8663137206912" y2="643.4044654045512"/><line class="link-right" x1="641.6626239769867" y1="636.558710808379" x2="670.5770649724597" y2="595.4211811104376"/><line class="link-right" x1="641.6626239769867" y1="636.558710808379" x2="694.0915536437202" y2="663.7312348627007"/></g><g><g class="node-right" transform="translate(744.3625375780465,709.3215349009997)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">psb25d</text></g><g class="node-right is-group" transform="translate(716.7603278491713,733.1918151388071)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">PSB 2.5D</text></g><g class="node-right is-group" transform="translate(681.5390974402892,691.2509004675035)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">PSB Technique</text></g><g class="node-right" transform="translate(522.5949921070629,539.7879062723341)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Inaccuracy</text></g><g class="node-right is-group" transform="translate(545.8062353436374,516.3862500620667)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Inaccuracy</text></g><g class="node-right is-group" transform="translate(581.6580589205947,551.305804116465)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Difficulty</text></g><g class="node-right" transform="translate(695.486080758548,757.1578918587933)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">2.5D</text></g><g class="node-right" transform="translate(675.376360282894,726.602223689536)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Scale break</text></g><g class="node-right is-group" transform="translate(638.9766865628603,696.8369028926708)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: bold;">Components</text></g><g class="node-right" transform="translate(603.8509118662653,672.4131874376764)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: bold;">Unnecessary</text></g><g class="node-right" transform="translate(617.3107533791374,446.4640692780494)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Displeasure with visualization manipulation</text></g><g class="node-right is-group" transform="translate(591.7134234314781,471.4040028750186)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Improvement needed</text></g><g class="node-right" transform="translate(623.3538016268744,528.9597823583136)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Difficulty of Interpretation</text></g><g class="node-right" transform="translate(612.9998012864511,500.36948468801495)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">No manual configuration</text></g><g class="node-right" transform="translate(562.1617605205229,488.25739447102876)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Difficult to Interpret</text></g><g class="node-right" transform="translate(537.072563971917,565.2970099319128)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Difficult to view</text></g><g class="node-right" transform="translate(559.8737271406048,592.5669894847721)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Difficult to View</text></g><g class="node-right" transform="translate(590.8663137206912,643.4044654045512)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: bold;">Close values</text></g><g class="node-right" transform="translate(591.4782608927193,612.9516549351241)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Discomfort with viewing</text></g><g class="node-right" transform="translate(635.8090995701878,575.3022779760735)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Difficult to understand</text></g><g class="node-right" transform="translate(713.2469304420365,617.4560981721328)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Confused</text></g><g class="node-right is-group" transform="translate(670.5770649724597,595.4211811104376)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Confusion</text></g><g class="node-right" transform="translate(694.0915536437202,663.7312348627007)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Distant values</text></g><g class="node-right is-theme" transform="translate(641.6626239769867,636.558710808379)"><circle r="14"/><text dx="18" dy="4" text-anchor="start" style="font-weight: bold;">The disadvantages of 2.5D graphics</text></g></g></g></svg>
+    </style>
+  <g
+     transform="matrix(1.7411011,0,0,1.7411011,-753.16413,-763.41027)"
+     id="g49">
+    <g
+       id="g23">
+      <line
+         class="link-right"
+         x1="716.76031"
+         y1="733.19183"
+         x2="744.36255"
+         y2="709.32153"
+         id="line1" />
+      <line
+         class="link-right"
+         x1="681.53912"
+         y1="691.25092"
+         x2="716.76031"
+         y2="733.19183"
+         id="line2" />
+      <line
+         class="link-right"
+         x1="545.80621"
+         y1="516.38623"
+         x2="522.59497"
+         y2="539.7879"
+         id="line3" />
+      <line
+         class="link-right"
+         x1="581.65808"
+         y1="551.30579"
+         x2="545.80621"
+         y2="516.38623"
+         id="line4" />
+      <line
+         class="link-right"
+         x1="716.76031"
+         y1="733.19183"
+         x2="695.48608"
+         y2="757.1579"
+         id="line5" />
+      <line
+         class="link-right"
+         x1="638.97668"
+         y1="696.83691"
+         x2="675.37634"
+         y2="726.60223"
+         id="line6" />
+      <line
+         class="link-right"
+         x1="591.71344"
+         y1="471.40399"
+         x2="617.31073"
+         y2="446.46408"
+         id="line7" />
+      <line
+         class="link-right"
+         x1="581.65808"
+         y1="551.30579"
+         x2="591.71344"
+         y2="471.40399"
+         id="line8" />
+      <line
+         class="link-right"
+         x1="581.65808"
+         y1="551.30579"
+         x2="623.35382"
+         y2="528.95978"
+         id="line9" />
+      <line
+         class="link-right"
+         x1="581.65808"
+         y1="551.30579"
+         x2="612.99982"
+         y2="500.36948"
+         id="line10" />
+      <line
+         class="link-right"
+         x1="581.65808"
+         y1="551.30579"
+         x2="562.16174"
+         y2="488.25739"
+         id="line11" />
+      <line
+         class="link-right"
+         x1="581.65808"
+         y1="551.30579"
+         x2="537.07257"
+         y2="565.297"
+         id="line12" />
+      <line
+         class="link-right"
+         x1="581.65808"
+         y1="551.30579"
+         x2="559.87372"
+         y2="592.56702"
+         id="line13" />
+      <line
+         class="link-right"
+         x1="581.65808"
+         y1="551.30579"
+         x2="591.47827"
+         y2="612.95166"
+         id="line14" />
+      <line
+         class="link-right"
+         x1="581.65808"
+         y1="551.30579"
+         x2="635.80908"
+         y2="575.30231"
+         id="line15" />
+      <line
+         class="link-right"
+         x1="670.57709"
+         y1="595.4212"
+         x2="713.24695"
+         y2="617.45612"
+         id="line16" />
+      <line
+         class="link-right"
+         x1="641.6626"
+         y1="636.55872"
+         x2="681.53912"
+         y2="691.25092"
+         id="line17" />
+      <line
+         class="link-right"
+         x1="641.6626"
+         y1="636.55872"
+         x2="581.65808"
+         y2="551.30579"
+         id="line18" />
+      <line
+         class="link-right"
+         x1="641.6626"
+         y1="636.55872"
+         x2="638.97668"
+         y2="696.83691"
+         id="line19" />
+      <line
+         class="link-right"
+         x1="641.6626"
+         y1="636.55872"
+         x2="603.85089"
+         y2="672.41321"
+         id="line20" />
+      <line
+         class="link-right"
+         x1="641.6626"
+         y1="636.55872"
+         x2="590.86633"
+         y2="643.40448"
+         id="line21" />
+      <line
+         class="link-right"
+         x1="641.6626"
+         y1="636.55872"
+         x2="670.57709"
+         y2="595.4212"
+         id="line22" />
+      <line
+         class="link-right"
+         x1="641.6626"
+         y1="636.55872"
+         x2="694.09155"
+         y2="663.73126"
+         id="line23" />
+    </g>
+    <g
+       id="g48">
+      <g
+         class="node-right"
+         transform="translate(744.36254,709.32153)"
+         id="g24">
+        <circle
+           r="8"
+           id="circle23"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text23">psb25d</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(716.76033,733.19182)"
+         id="g25">
+        <circle
+           r="8"
+           id="circle24"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text24">PSB 2.5D</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(681.5391,691.2509)"
+         id="g26">
+        <circle
+           r="8"
+           id="circle25"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text25">PSB Technique</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(522.59499,539.78791)"
+         id="g27">
+        <circle
+           r="8"
+           id="circle26"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text26"
+           x="-9.9399757"
+           y="9.9475983e-14">Inaccuracy</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(545.80624,516.38625)"
+         id="g28">
+        <circle
+           r="8"
+           id="circle27"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text27"
+           x="-9.9399757"
+           y="-9.9475983e-14">Inaccuracy</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(581.65806,551.3058)"
+         id="g29">
+        <circle
+           r="8"
+           id="circle28"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text28">Difficulty</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(695.48608,757.15789)"
+         id="g30">
+        <circle
+           r="8"
+           id="circle29"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text29"
+           x="-9.5942726"
+           y="-2.8421709e-13">2.5D</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(675.37636,726.60222)"
+         id="g31">
+        <circle
+           r="8"
+           id="circle30"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text30"
+           x="-10.297398">Scale break</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(638.97669,696.8369)"
+         id="g32">
+        <circle
+           r="8"
+           id="circle31"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text31"
+           x="-9.8931007"
+           y="2.8421709e-13">Components</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(603.85091,672.41319)"
+         id="g33">
+        <circle
+           r="8"
+           id="circle32"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text32"
+           x="-10.121616"
+           y="-1.1368684e-13">Unnecessary</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(617.31075,446.46407)"
+         id="g34">
+        <circle
+           r="8"
+           id="circle33"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text33">Displeasure with visualization manipulation</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(591.71342,471.404)"
+         id="g35">
+        <circle
+           r="8"
+           id="circle34"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text34">Improvement needed</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(623.3538,528.95978)"
+         id="g36">
+        <circle
+           r="8"
+           id="circle35"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text35">Difficulty of Interpretation</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(612.9998,500.36948)"
+         id="g37">
+        <circle
+           r="8"
+           id="circle36"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text36">No manual configuration</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(562.16176,488.25739)"
+         id="g38">
+        <circle
+           r="8"
+           id="circle37"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text37"
+           x="-10.051304"
+           y="2.1316282e-14">Difficult to Interpret</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(537.07256,565.29701)"
+         id="g39">
+        <circle
+           r="8"
+           id="circle38"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text38"
+           x="-9.7934914">Difficult to view</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(559.87373,592.56699)"
+         id="g40">
+        <circle
+           r="8"
+           id="circle39"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text39"
+           x="-9.7934914"
+           y="1.4210855e-13">Difficult to View</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(590.86631,643.40447)"
+         id="g41">
+        <circle
+           r="8"
+           id="circle40"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text40"
+           x="-9.8931007"
+           y="2.5579538e-13">Close values</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(591.47826,612.95165)"
+         id="g42">
+        <circle
+           r="8"
+           id="circle41"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text41"
+           x="-9.2134132"
+           y="-8.5265128e-14">Discomfort with viewing</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(635.8091,575.30228)"
+         id="g43">
+        <circle
+           r="8"
+           id="circle42"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text42">Difficult to understand</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(713.24693,617.4561)"
+         id="g44">
+        <circle
+           r="8"
+           id="circle43"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text43">Confused</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(670.57706,595.42118)"
+         id="g45">
+        <circle
+           r="8"
+           id="circle44"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text44">Confusion</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(694.09155,663.73123)"
+         id="g46">
+        <circle
+           r="8"
+           id="circle45"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text45">Distant values</text>
+      </g>
+      <g
+         class="node-right is-theme"
+         transform="translate(641.66262,636.55871)"
+         id="g47">
+        <circle
+           r="14"
+           id="circle46"
+           cx="0"
+           cy="0" />
+        <text
+           dx="18"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text46">The disadvantages of 2.5D graphics</text>
+      </g>
+    </g>
+  </g>
+</svg>

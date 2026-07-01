@@ -1,5 +1,32 @@
-<?xml version="1.0" standalone="no"?>\r\n<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" id="svgRight">
-                <style>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svgRight"
+   version="1.1"
+   sodipodi:docname="the_disadvantages_of_automatic_configuration_grafo.svg"
+   width="809.21161"
+   height="457.90588"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs33" />
+  <sodipodi:namedview
+     id="namedview33"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.7854446"
+     inkscape:cx="205.83108"
+     inkscape:cy="247.27734"
+     inkscape:current-layer="g33" />
+  <style
+     id="style1">
                     .node-left { stroke: #fff; stroke-width: 1.5px; }
                     .node-left.selected { stroke: #e53e3e !important; stroke-width: 4px !important; }
                     .node-left.highlight-related { stroke: #2b6cb0; stroke-width: 5px; }
@@ -10,5 +37,359 @@
                     .node-right.selected circle { stroke-width: 3px; }
                     .node-right text { font-family: sans-serif; font-size: 12px; font-weight: 500; }
                     .link-right { stroke: #a0aec0; stroke-width: 2px; }
-                </style>
-            <g transform="translate(-836.1696526701787,-627.7773697289773) scale(1.7411011265922487)"><g><line class="link-right" x1="645.4080205276381" y1="513.1346183311675" x2="625.1142987642797" y2="474.34868961229324"/><line class="link-right" x1="655.6177248454852" y1="564.2824972314312" x2="645.4080205276381" y2="513.1346183311675"/><line class="link-right" x1="624.2087904333291" y1="676.285805232499" x2="570.2455128189434" y2="692.5454107320171"/><line class="link-right" x1="624.2087904333291" y1="676.285805232499" x2="607.6529937077108" y2="721.3465599228883"/><line class="link-right" x1="624.2087904333291" y1="676.285805232499" x2="655.8345859603868" y2="706.4283273314219"/><line class="link-right" x1="611.5314238784873" y1="548.0087902884278" x2="583.300334852287" y2="498.2463729753172"/><line class="link-right" x1="655.6177248454852" y1="564.2824972314312" x2="693.1551161084226" y2="531.0179143190983"/><line class="link-right" x1="655.6177248454852" y1="564.2824972314312" x2="689.0038160345985" y2="587.199694323178"/><line class="link-right" x1="594.9462258886072" y1="648.9121892874032" x2="558.4269294614666" y2="617.71521329867"/><line class="link-right" x1="627.5050393620752" y1="611.0901751016777" x2="655.6177248454852" y2="564.2824972314312"/><line class="link-right" x1="627.5050393620752" y1="611.0901751016777" x2="624.2087904333291" y2="676.285805232499"/><line class="link-right" x1="627.5050393620752" y1="611.0901751016777" x2="663.0728238456179" y2="646.3156717897203"/><line class="link-right" x1="627.5050393620752" y1="611.0901751016777" x2="611.5314238784873" y2="548.0087902884278"/><line class="link-right" x1="627.5050393620752" y1="611.0901751016777" x2="575.9847253270684" y2="575.6398314532577"/><line class="link-right" x1="627.5050393620752" y1="611.0901751016777" x2="594.9462258886072" y2="648.9121892874032"/></g><g><g class="node-right" transform="translate(625.1142987642797,474.34868961229324)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Inaccuracy</text></g><g class="node-right is-group" transform="translate(645.4080205276381,513.1346183311675)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Inaccuracy</text></g><g class="node-right is-group" transform="translate(655.6177248454852,564.2824972314312)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Difficulty</text></g><g class="node-right" transform="translate(570.2455128189434,692.5454107320171)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">LLM</text></g><g class="node-right is-group" transform="translate(624.2087904333291,676.285805232499)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Automatic Configuration</text></g><g class="node-right" transform="translate(607.6529937077108,721.3465599228883)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">AI</text></g><g class="node-right" transform="translate(663.0728238456179,646.3156717897203)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: bold;">Wrong</text></g><g class="node-right" transform="translate(655.8345859603868,706.4283273314219)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Automatic Configuration</text></g><g class="node-right" transform="translate(583.300334852287,498.2463729753172)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Didn't help</text></g><g class="node-right is-group" transform="translate(611.5314238784873,548.0087902884278)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: bold;">Frustration</text></g><g class="node-right" transform="translate(693.1551161084226,531.0179143190983)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Difficult to view</text></g><g class="node-right" transform="translate(689.0038160345985,587.199694323178)"><circle r="8"/><text dx="12" dy="4" text-anchor="start" style="font-weight: normal;">Difficulty of Interpretation</text></g><g class="node-right" transform="translate(575.9847253270684,575.6398314532577)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: bold;">indifferent</text></g><g class="node-right" transform="translate(558.4269294614666,617.71521329867)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: normal;">Confused</text></g><g class="node-right is-group" transform="translate(594.9462258886072,648.9121892874032)"><circle r="8"/><text dx="-12" dy="4" text-anchor="end" style="font-weight: bold;">Confusion</text></g><g class="node-right is-theme" transform="translate(627.5050393620752,611.0901751016777)"><circle r="14"/><text dx="18" dy="4" text-anchor="start" style="font-weight: bold;">The Disadvantages of Automatic Configuration</text></g></g></g></svg>
+    </style>
+  <g
+     transform="matrix(1.7411011,0,0,1.7411011,-860.00303,-811.96023)"
+     id="g33">
+    <g
+       id="g15">
+      <path
+         id="line1"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 632.86234,509.59609 -7.74802,-35.2474"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line2"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 655.61774,564.28247 -22.7554,-54.68638"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line3"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 624.2088,676.28583 -53.96332,16.25958" />
+      <path
+         id="line4"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 624.2088,676.28583 -16.55578,45.06073" />
+      <path
+         id="line5"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 624.2088,676.28583 31.62579,30.14251" />
+      <path
+         id="line6"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 611.53143,548.00879 583.30035,498.24637" />
+      <path
+         id="line7"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 655.61774,564.28247 37.53735,-33.26453" />
+      <path
+         id="line8"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 655.61774,564.28247 33.38611,22.91724" />
+      <path
+         id="line9"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 594.94623,648.91217 558.42694,617.71521" />
+      <path
+         id="line10"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 627.50507,611.09015 28.11267,-46.80768" />
+      <path
+         id="line11"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 627.50507,611.09015 -3.29627,65.19568" />
+      <path
+         id="line12"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 627.50507,611.09015 35.56774,35.22552" />
+      <path
+         id="line13"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 627.50507,611.09015 611.53143,548.00879" />
+      <path
+         id="line14"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 627.50507,611.09015 575.98474,575.63983" />
+      <path
+         id="line15"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 627.50507,611.09015 -32.55884,37.82202" />
+    </g>
+    <g
+       id="g32">
+      <g
+         class="node-right"
+         transform="translate(625.1143,474.34869)"
+         id="g16">
+        <circle
+           r="8"
+           id="circle15"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text15">Inaccuracy</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(632.86234,509.59609)"
+         id="g17">
+        <circle
+           r="8"
+           id="circle16"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text16">Inaccuracy</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(655.61772,564.2825)"
+         id="g18">
+        <circle
+           r="8"
+           id="circle17"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text17">Difficulty</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(570.24551,692.54541)"
+         id="g19">
+        <circle
+           r="8"
+           id="circle18"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text18"
+           x="-9.1255217"
+           y="-1.7053026e-13">LLM</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(624.20879,676.28581)"
+         id="g20">
+        <circle
+           r="8"
+           id="circle19"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text19">Automatic Configuration</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(607.65299,721.34656)"
+         id="g21">
+        <circle
+           r="8"
+           id="circle20"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text20">AI</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(663.07282,646.31567)"
+         id="g22">
+        <circle
+           r="8"
+           id="circle21"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text21">Wrong</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(655.83459,706.42833)"
+         id="g23">
+        <circle
+           r="8"
+           id="circle22"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text22">Automatic Configuration</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(583.30033,498.24637)"
+         id="g24">
+        <circle
+           r="8"
+           id="circle23"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text23"
+           x="-9.6645851"
+           y="1.9895197e-13">Didn't help</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(611.53142,548.00879)"
+         id="g25">
+        <circle
+           r="8"
+           id="circle24"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text24"
+           x="-9.3540382"
+           y="-8.5265128e-14">Frustration</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(693.15512,531.01791)"
+         id="g26">
+        <circle
+           r="8"
+           id="circle25"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text25">Difficult to view</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(689.00382,587.19969)"
+         id="g27">
+        <circle
+           r="8"
+           id="circle26"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text26">Difficulty of Interpretation</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(575.98473,575.63983)"
+         id="g28">
+        <circle
+           r="8"
+           id="circle27"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text27"
+           x="-10.033726"
+           y="3.126388e-13">indifferent</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(558.42693,617.71521)"
+         id="g29">
+        <circle
+           r="8"
+           id="circle28"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text28"
+           x="-9.2134132"
+           y="5.6843419e-14">Confused</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(594.94623,648.91219)"
+         id="g30">
+        <circle
+           r="8"
+           id="circle29"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text29"
+           x="-10.297398">Confusion</text>
+      </g>
+      <g
+         class="node-right is-theme"
+         transform="translate(627.50504,611.09018)"
+         id="g31">
+        <circle
+           r="14"
+           id="circle30"
+           cx="0"
+           cy="0" />
+        <text
+           dx="18"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text30">The Disadvantages of Automatic Configuration</text>
+      </g>
+    </g>
+  </g>
+</svg>

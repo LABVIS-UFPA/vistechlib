@@ -247,7 +247,7 @@
             font-family: sans-serif;
             font-size: 12px;
             font-weight: 500;
-            pointer-events: none;
+            pointer-events: auto;
             text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
         }
 
@@ -721,7 +721,8 @@
             const g = svg.append("g");
 
             // Zoom/Pan
-            svg.call(d3.zoom().on("zoom", (event) => g.attr("transform", event.transform)));
+            svg.call(d3.zoom().on("zoom", (event) => g.attr("transform", event.transform)))
+               .on("dblclick.zoom", null);
 
             // Forças
             simulationLeft = d3.forceSimulation(leftNodes)
@@ -911,6 +912,97 @@
             reapplyRightSelectionHighlight();
         }
 
+        function forceLabelCollide() {
+            let nodes;
+            
+            function force(alpha) {
+                const padding = 2;
+                const n = nodes.length;
+                
+                for (let i = 0; i < n; ++i) {
+                    const a = nodes[i];
+                    if (!a) continue;
+                    
+                    const aText = getLocalizedStr(a, 'name') || "";
+                    const aWidth = aText.length * 6.5; 
+                    const aHeight = 16;
+                    const aRadius = a.isTheme ? 14 : 8;
+                    
+                    let aDx = a.labelPos === 'left' ? (a.isTheme ? -18 : -12) : (a.isTheme ? 18 : 12);
+                    
+                    let aLeft, aRight;
+                    if (a.labelPos === 'left') {
+                        aLeft = a.x + aDx - aWidth;
+                        aRight = a.x + aDx;
+                    } else {
+                        aLeft = a.x + aDx;
+                        aRight = a.x + aDx + aWidth;
+                    }
+                    let aTop = a.y + 4 - aHeight;
+                    let aBottom = a.y + 4 + 2;
+
+                    const aBox = {
+                        l: Math.min(a.x - aRadius, aLeft) - padding,
+                        r: Math.max(a.x + aRadius, aRight) + padding,
+                        t: Math.min(a.y - aRadius, aTop) - padding,
+                        b: Math.max(a.y + aRadius, aBottom) + padding
+                    };
+
+                    for (let j = i + 1; j < n; ++j) {
+                        const b = nodes[j];
+                        if (!b) continue;
+                        
+                        const bText = getLocalizedStr(b, 'name') || "";
+                        const bWidth = bText.length * 6.5;
+                        const bHeight = 16;
+                        const bRadius = b.isTheme ? 14 : 8;
+                        
+                        let bDx = b.labelPos === 'left' ? (b.isTheme ? -18 : -12) : (b.isTheme ? 18 : 12);
+                        
+                        let bLeft, bRight;
+                        if (b.labelPos === 'left') {
+                            bLeft = b.x + bDx - bWidth;
+                            bRight = b.x + bDx;
+                        } else {
+                            bLeft = b.x + bDx;
+                            bRight = b.x + bDx + bWidth;
+                        }
+                        let bTop = b.y + 4 - bHeight;
+                        let bBottom = b.y + 4 + 2;
+
+                        const bBox = {
+                            l: Math.min(b.x - bRadius, bLeft) - padding,
+                            r: Math.max(b.x + bRadius, bRight) + padding,
+                            t: Math.min(b.y - bRadius, bTop) - padding,
+                            b: Math.max(b.y + bRadius, bBottom) + padding
+                        };
+
+                        if (aBox.l < bBox.r && aBox.r > bBox.l && aBox.t < bBox.b && aBox.b > bBox.t) {
+                            const overlapX = Math.min(aBox.r - bBox.l, bBox.r - aBox.l);
+                            const overlapY = Math.min(aBox.b - bBox.t, bBox.b - aBox.t);
+                            const strength = 0.5 * alpha;
+                            
+                            if (overlapX < overlapY) {
+                                const dir = a.x < b.x ? -1 : 1;
+                                a.vx += dir * overlapX * strength;
+                                b.vx -= dir * overlapX * strength;
+                            } else {
+                                const dir = a.y < b.y ? -1 : 1;
+                                a.vy += dir * overlapY * strength;
+                                b.vy -= dir * overlapY * strength;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            force.initialize = function(_nodes) {
+                nodes = _nodes;
+            };
+            
+            return force;
+        }
+
         function renderRightGraph(nodesData, linksData) {
             const svg = d3.select("#svgRight");
             svg.selectAll("*").remove();
@@ -919,14 +1011,16 @@
             const height = svg.node().getBoundingClientRect().height;
 
             const g = svg.append("g");
-            svg.call(d3.zoom().on("zoom", (event) => g.attr("transform", event.transform)));
+            svg.call(d3.zoom().on("zoom", (event) => g.attr("transform", event.transform)))
+               .on("dblclick.zoom", null);
 
             // FORÇAS CALIBRADAS: Repulsão severamente reduzida (-30) para as sub-árvores não fugirem da tela
             simulationRight = d3.forceSimulation(nodesData)
                 .force("link", d3.forceLink(linksData).id(d => d.id).distance(60))
                 .force("charge", d3.forceManyBody().strength(-30).distanceMax(150))
                 .force("center", d3.forceCenter(width / 2, height / 2))
-                .force("collide", d3.forceCollide().radius(25));
+                .force("collide", d3.forceCollide().radius(25))
+                .force("labelCollide", forceLabelCollide());
 
             const link = g.append("g")
                 .selectAll("line")

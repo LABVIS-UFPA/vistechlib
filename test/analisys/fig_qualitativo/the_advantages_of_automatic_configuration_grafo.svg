@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svgRight"
+   version="1.1"
+   sodipodi:docname="the_advantages_of_automatic_configuration_grafo.svg"
+   width="738.7099"
+   height="347.23886"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs37" />
+  <sodipodi:namedview
+     id="namedview37"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.7854446"
+     inkscape:cx="300.76542"
+     inkscape:cy="153.18313"
+     inkscape:current-layer="g32" />
+  <style
+     id="style1">
+                    .node-left { stroke: #fff; stroke-width: 1.5px; }
+                    .node-left.selected { stroke: #e53e3e !important; stroke-width: 4px !important; }
+                    .node-left.highlight-related { stroke: #2b6cb0; stroke-width: 5px; }
+                    .link-left { stroke: #cbd5e0; stroke-opacity: 0.6; }
+                    .node-right circle { fill: #fbd38d; stroke: #dd6b20; stroke-width: 0px; }
+                    .node-right.is-group circle { fill: #9ae6b4; stroke: #38a169; }
+                    .node-right.is-theme circle { fill: #b794f4; stroke: #805ad5; }
+                    .node-right.selected circle { stroke-width: 3px; }
+                    .node-right text { font-family: sans-serif; font-size: 12px; font-weight: 500; }
+                    .link-right { stroke: #a0aec0; stroke-width: 2px; }
+    </style>
+  <g
+     transform="matrix(1.3195079,0,0,1.3195079,-507.81814,-622.87901)"
+     id="g37">
+    <g
+       id="g17">
+      <line
+         class="link-right"
+         x1="599.15906"
+         y1="686.3667"
+         x2="627.35419"
+         y2="727.21185"
+         id="line1" />
+      <line
+         class="link-right"
+         x1="612.32208"
+         y1="630.48328"
+         x2="599.15906"
+         y2="686.3667"
+         id="line2" />
+      <line
+         class="link-right"
+         x1="666.97064"
+         y1="537.43872"
+         x2="721.10242"
+         y2="512.45898"
+         id="line3" />
+      <line
+         class="link-right"
+         x1="599.15906"
+         y1="686.3667"
+         x2="576.58191"
+         y2="718.74451"
+         id="line4" />
+      <line
+         class="link-right"
+         x1="666.97064"
+         y1="537.43872"
+         x2="630.62738"
+         y2="492.22955"
+         id="line5" />
+      <line
+         class="link-right"
+         x1="599.15906"
+         y1="686.3667"
+         x2="550.12476"
+         y2="657.80176"
+         id="line6" />
+      <line
+         class="link-right"
+         x1="666.97064"
+         y1="537.43872"
+         x2="709.31525"
+         y2="565.44989"
+         id="line7" />
+      <line
+         class="link-right"
+         x1="674.94739"
+         y1="648.36115"
+         x2="671.28369"
+         y2="697.80219"
+         id="line8" />
+      <line
+         class="link-right"
+         x1="585.74585"
+         y1="560.06409"
+         x2="560.88245"
+         y2="594.7854"
+         id="line9" />
+      <line
+         class="link-right"
+         x1="666.97064"
+         y1="537.43872"
+         x2="687.95972"
+         y2="480.05402"
+         id="line10" />
+      <line
+         class="link-right"
+         x1="585.74585"
+         y1="560.06409"
+         x2="575.54492"
+         y2="518.15863"
+         id="line11" />
+      <line
+         class="link-right"
+         x1="674.94739"
+         y1="648.36115"
+         x2="720.3916"
+         y2="676.75812"
+         id="line12" />
+      <line
+         class="link-right"
+         x1="674.94739"
+         y1="648.36115"
+         x2="703.23853"
+         y2="618.63867"
+         id="line13" />
+      <line
+         class="link-right"
+         x1="637.59003"
+         y1="587.7868"
+         x2="612.32208"
+         y2="630.48328"
+         id="line14" />
+      <line
+         class="link-right"
+         x1="637.59003"
+         y1="587.7868"
+         x2="666.97064"
+         y2="537.43872"
+         id="line15" />
+      <line
+         class="link-right"
+         x1="637.59003"
+         y1="587.7868"
+         x2="674.94739"
+         y2="648.36115"
+         id="line16" />
+      <line
+         class="link-right"
+         x1="637.59003"
+         y1="587.7868"
+         x2="585.74585"
+         y2="560.06409"
+         id="line17" />
+    </g>
+    <g
+       id="g36">
+      <g
+         class="node-right"
+         transform="translate(627.35419,727.21187)"
+         id="g18">
+        <circle
+           r="8"
+           id="circle17"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text17">Better View</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(599.15906,686.36672)"
+         id="g19">
+        <circle
+           r="8"
+           id="circle18"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text18"
+           x="-9.9943237"
+           y="-1.1368684e-13">Improves Perception/Visualization</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(612.32211,630.48328)"
+         id="g20">
+        <circle
+           r="8"
+           id="circle19"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text19"
+           x="-10.832214"
+           y="1.7053026e-13">Better</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(721.10244,512.459)"
+         id="g21">
+        <circle
+           r="8"
+           id="circle20"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text20">Automatic Configuration</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(666.97066,537.43871)"
+         id="g22">
+        <circle
+           r="8"
+           id="circle21"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text21">Automatic Configuration</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(576.58189,718.7445)"
+         id="g23">
+        <circle
+           r="8"
+           id="circle22"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text22"
+           x="-9.9943237">Better visualization</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(630.62737,492.22955)"
+         id="g24">
+        <circle
+           r="8"
+           id="circle23"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text23">AI</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(550.12478,657.80173)"
+         id="g25">
+        <circle
+           r="8"
+           id="circle24"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text24"
+           x="-9.9943237"
+           y="-8.5265128e-14">Better perception</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(709.31522,565.44987)"
+         id="g26">
+        <circle
+           r="8"
+           id="circle25"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text25">LLM</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(671.28367,697.80218)"
+         id="g27">
+        <circle
+           r="8"
+           id="circle26"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text26">Preference</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(674.9474,648.36115)"
+         id="g28">
+        <circle
+           r="8"
+           id="circle27"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text27">Pleasant/Satisfactory</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(560.88243,594.78541)"
+         id="g29">
+        <circle
+           r="8"
+           id="circle28"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text28"
+           x="-9.9943237"
+           y="4.2632564e-14">Ease of Interpretation</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(585.74586,560.06412)"
+         id="g30">
+        <circle
+           r="8"
+           id="circle29"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text29"
+           x="-10.832214"
+           y="-8.5265128e-14">Makes it easier</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(687.95973,480.05402)"
+         id="g31">
+        <circle
+           r="8"
+           id="circle30"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text30">Opt</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(575.54494,518.15862)"
+         id="g32">
+        <circle
+           r="8"
+           id="circle31"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text31"
+           x="-11.031433">Easier</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(720.39163,676.75811)"
+         id="g33">
+        <circle
+           r="8"
+           id="circle32"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text32">Pleasant</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(703.23851,618.63868)"
+         id="g34">
+        <circle
+           r="8"
+           id="circle33"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text33">Interesting</text>
+      </g>
+      <g
+         class="node-right is-theme"
+         transform="translate(637.59003,587.78682)"
+         id="g35">
+        <circle
+           r="14"
+           id="circle34"
+           cx="0"
+           cy="0" />
+        <text
+           dx="18"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text34">The advantages of automatic configuration</text>
+      </g>
+    </g>
+  </g>
+</svg>

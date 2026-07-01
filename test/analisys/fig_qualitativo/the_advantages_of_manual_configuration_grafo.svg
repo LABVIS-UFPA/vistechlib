@@ -1,0 +1,1096 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svgRight"
+   version="1.1"
+   sodipodi:docname="the_advantages_of_manual_configuration_grafo.svg"
+   width="747.47021"
+   height="628.6723"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs97" />
+  <sodipodi:namedview
+     id="namedview97"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.2625"
+     inkscape:cx="445.54455"
+     inkscape:cy="306.93069"
+     inkscape:current-layer="g97" />
+  <style
+     id="style1">
+                    .node-left { stroke: #fff; stroke-width: 1.5px; }
+                    .node-left.selected { stroke: #e53e3e !important; stroke-width: 4px !important; }
+                    .node-left.highlight-related { stroke: #2b6cb0; stroke-width: 5px; }
+                    .link-left { stroke: #cbd5e0; stroke-opacity: 0.6; }
+                    .node-right circle { fill: #fbd38d; stroke: #dd6b20; stroke-width: 0px; }
+                    .node-right.is-group circle { fill: #9ae6b4; stroke: #38a169; }
+                    .node-right.is-theme circle { fill: #b794f4; stroke: #805ad5; }
+                    .node-right.selected circle { stroke-width: 3px; }
+                    .node-right text { font-family: sans-serif; font-size: 12px; font-weight: 500; }
+                    .link-right { stroke: #a0aec0; stroke-width: 2px; }
+    </style>
+  <g
+     transform="matrix(1.5157166,0,0,1.5157166,-625.8807,-599.40735)"
+     id="g97">
+    <g
+       id="g47">
+      <path
+         id="line1"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 628.15924,744.95709 581.89288,725.91803" />
+      <path
+         id="line2"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 644.54828,691.55035 -16.38904,53.40674" />
+      <path
+         id="line3"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 623.43939,493.12619 575.82062,473.84555" />
+      <path
+         id="line4"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 623.43939,493.12619 9.9397,-89.66483" />
+      <path
+         id="line5"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 628.15924,744.95709 605.4054,784.68848" />
+      <path
+         id="line6"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 623.43939,493.12619 -36.56305,18.85443" />
+      <path
+         id="line7"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 514.82361,612.8877 -44.83542,-2.57404" />
+      <path
+         id="line8"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 523.77606,651.22675 514.82361,612.8877" />
+      <path
+         id="line9"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 514.82361,612.8877 -33.87799,19.80383" />
+      <path
+         id="line10"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 628.15924,744.95709 9.63678,57.27332" />
+      <path
+         id="line11"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 689.15375,711.99176 31.99121,20.12018" />
+      <path
+         id="line12"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 644.54828,691.55035 44.60547,20.44141" />
+      <path
+         id="line13"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 689.15375,711.99176 40.39721,-17.98029" />
+      <path
+         id="line14"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 664.23212,748.61566 0.77606,46.13568" />
+      <path
+         id="line15"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 644.54828,691.55035 19.68384,57.06531" />
+      <path
+         id="line16"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 623.43939,493.12619 606.37433,422.65628" />
+      <path
+         id="line17"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 653.34491,486.03958 11.0246,25.46597" />
+      <path
+         id="line18"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 664.23212,748.61566 31.96832,24.83661" />
+      <path
+         id="line19"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 628.15924,744.95709 -41.52783,20.36347" />
+      <path
+         id="line20"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 623.43939,493.12619 592.09064,450.55801" />
+      <path
+         id="line21"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 754.63812,618.85803 0.0494,34.76898" />
+      <path
+         id="line22"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 553.54456,592.12347 511.10312,569.41473" />
+      <path
+         id="line23"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 754.63812,618.85803 34.12763,21.06861" />
+      <path
+         id="line24"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 653.34491,486.03958 685.8902,440.32315" />
+      <path
+         id="line25"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 644.54828,691.55035 611.62805,707.0238" />
+      <path
+         id="line26"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 686.79309,546.50287 47.73682,-42.20908" />
+      <path
+         id="line27"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 686.79309,546.50287 53.83136,-21.7685" />
+      <path
+         id="line28"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 653.34491,486.03958 50.68854,-23.55823" />
+      <path
+         id="line29"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 653.34491,486.03958 8.65198,-68.32379" />
+      <path
+         id="line30"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 686.79309,546.50287 11.37381,34.77339"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line31"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 686.79309,546.50287 37.97174,17.09326" />
+      <path
+         id="line32"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 561.42316,655.44574 -34.52619,32.15765" />
+      <path
+         id="line33"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 523.77606,651.22675 37.6471,4.21899" />
+      <path
+         id="line34"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 561.42316,655.44574 11.30737,29.49915" />
+      <path
+         id="line35"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 29.20337,95.03216" />
+      <path
+         id="line36"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 8.09448,-103.392" />
+      <path
+         id="line37"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 -91.56885,54.70856" />
+      <path
+         id="line38"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 38,-110.47861" />
+      <path
+         id="line39"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 139.29321,22.33984" />
+      <path
+         id="line40"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 -61.80035,-4.39472" />
+      <path
+         id="line41"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 57.64528,56.51143"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line42"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 57.81034,32.95249"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line43"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 615.34491,596.51819 574.13812,565.64081" />
+      <path
+         id="line44"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 71.44818,-50.01532" />
+      <path
+         id="line45"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="m 615.34491,596.51819 51.13713,77.63871"
+         sodipodi:nodetypes="cc" />
+      <path
+         id="line46"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 615.34491,596.51819 587.40283,545.57037" />
+      <path
+         id="line47"
+         class="link-right"
+         style="stroke:#a0aec0;stroke-width:2px"
+         d="M 615.34491,596.51819 603.72284,528.40063" />
+    </g>
+    <g
+       id="g96">
+      <g
+         class="node-right"
+         transform="translate(581.8929,725.91802)"
+         id="g48">
+        <circle
+           r="8"
+           id="circle47"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text47"
+           x="-10.921413"
+           y="-1.1368684e-13">Better perception</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(628.15922,744.95707)"
+         id="g49">
+        <circle
+           r="8"
+           id="circle48"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text48"
+           x="-10.921413"
+           y="-1.3195078">Improves Perception/Visualization</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(644.54829,691.55033)"
+         id="g50">
+        <circle
+           r="8"
+           id="circle49"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text49">Better</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(575.82063,473.84557)"
+         id="g51">
+        <circle
+           r="8"
+           id="circle50"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text50"
+           x="-9.5433121">Manual</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(623.43939,493.1262)"
+         id="g52">
+        <circle
+           r="8"
+           id="circle51"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text51"
+           x="-9.6956558"
+           y="8.5265128e-14">Manual Configuration</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(633.37908,403.46136)"
+         id="g53">
+        <circle
+           r="8"
+           id="circle52"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text52"
+           x="-9.6019058">Manual configuration</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(605.40541,784.6885)"
+         id="g54">
+        <circle
+           r="8"
+           id="circle53"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text53"
+           x="-10.135109"
+           y="1.7053026e-13">Better View</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(586.87633,511.98063)"
+         id="g55">
+        <circle
+           r="8"
+           id="circle54"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text54"
+           x="-9.6019058"
+           y="8.5265128e-14">Enjoyable manipulation</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(469.98818,610.31366)"
+         id="g56">
+        <circle
+           r="8"
+           id="circle55"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text55"
+           x="-9.5550308">psb3d</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(514.82362,612.88768)"
+         id="g57">
+        <circle
+           r="8"
+           id="circle56"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text56">PSB 3D</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(523.77607,651.22675)"
+         id="g58">
+        <circle
+           r="8"
+           id="circle57"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text57"
+           x="-10.146828"
+           y="8.5265128e-14">PSB Technique</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(480.94562,632.69153)"
+         id="g59">
+        <circle
+           r="8"
+           id="circle58"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text58"
+           x="-9.9358902"
+           y="5.6843419e-14">3D</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(637.79603,802.23038)"
+         id="g60">
+        <circle
+           r="8"
+           id="circle59"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text59"
+           x="-10.639015">Better visualization</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(721.14497,732.11193)"
+         id="g61">
+        <circle
+           r="8"
+           id="circle60"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text60">More freedom</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(689.15374,711.99174)"
+         id="g62">
+        <circle
+           r="8"
+           id="circle61"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text61">Better interaction (more freedom)</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(729.55098,694.01145)"
+         id="g63">
+        <circle
+           r="8"
+           id="circle62"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text62">Better interaction</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(665.00818,794.75135)"
+         id="g64">
+        <circle
+           r="8"
+           id="circle63"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text63">More precision</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(664.23211,748.61563)"
+         id="g65">
+        <circle
+           r="8"
+           id="circle64"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text64">More precision</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(606.37433,422.65628)"
+         id="g66">
+        <circle
+           r="8"
+           id="circle65"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text65"
+           x="-10.053078"
+           y="-2.8421709e-14">Customizable</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(664.36948,511.50555)"
+         id="g67">
+        <circle
+           r="8"
+           id="circle66"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text66">Easier</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(653.34491,486.03957)"
+         id="g68">
+        <circle
+           r="8"
+           id="circle67"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text67"
+           y="1.3746278">Makes it easier</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(696.20042,773.45224)"
+         id="g69">
+        <circle
+           r="8"
+           id="circle68"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text68">Precise</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(586.63138,765.32053)"
+         id="g70">
+        <circle
+           r="8"
+           id="circle69"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text69"
+           x="-9.5550308"
+           y="5.6843419e-14">Easy to Understand</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(592.09064,450.55802)"
+         id="g71">
+        <circle
+           r="8"
+           id="circle70"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text70"
+           x="-9.6019058"
+           y="-2.8421709e-14">Rotation</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(754.68759,653.62699)"
+         id="g72">
+        <circle
+           r="8"
+           id="circle71"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text71">z-axis</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(754.63812,618.85801)"
+         id="g73">
+        <circle
+           r="8"
+           id="circle72"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text72">Axis</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(511.10312,569.41476)"
+         id="g74">
+        <circle
+           r="8"
+           id="circle73"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text73"
+           x="-10.562843"
+           y="1.4210855e-13">Scale break</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(553.54459,592.1235)"
+         id="g75">
+        <circle
+           r="8"
+           id="circle74"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text74"
+           x="-10.639015">Components</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(788.76573,639.92663)"
+         id="g76">
+        <circle
+           r="8"
+           id="circle75"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text75">y-axis</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(672.99019,653.02962)"
+         id="g77">
+        <circle
+           r="8"
+           id="circle76"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text76">It Helps</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(685.89022,440.32314)"
+         id="g78">
+        <circle
+           r="8"
+           id="circle77"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text77">Ease of Interpretation</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(673.15525,629.47068)"
+         id="g79">
+        <circle
+           r="8"
+           id="circle78"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text78">Intuitive</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(611.62808,707.02382)"
+         id="g80">
+        <circle
+           r="8"
+           id="circle79"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text79"
+           x="-9.6019058"
+           y="3.9790393e-13">Improves interpretation</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(574.13812,565.64079)"
+         id="g81">
+        <circle
+           r="8"
+           id="circle80"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text80"
+           x="-10.375343"
+           y="-1.4210855e-13">Trust</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(734.5299,504.29381)"
+         id="g82">
+        <circle
+           r="8"
+           id="circle81"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text81">Interesting</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(686.79308,546.5029)"
+         id="g83">
+        <circle
+           r="8"
+           id="circle82"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text82">Pleasant/Satisfactory</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(666.48204,674.1569)"
+         id="g84">
+        <circle
+           r="8"
+           id="circle83"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text83">Revealed Information</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(740.62443,524.73438)"
+         id="g85">
+        <circle
+           r="8"
+           id="circle84"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text84">Preference</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(704.03345,462.48136)"
+         id="g86">
+        <circle
+           r="8"
+           id="circle85"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text85">Makes searching easier</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(661.99687,417.71578)"
+         id="g87">
+        <circle
+           r="8"
+           id="circle86"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text86">Makes comparison easier</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(698.1669,581.27626)"
+         id="g88">
+        <circle
+           r="8"
+           id="circle87"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text87">More satisfying</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(587.40282,545.5704)"
+         id="g89">
+        <circle
+           r="8"
+           id="circle88"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text88"
+           x="-10.146828"
+           y="1.1368684e-13">Comfortable</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(724.76486,563.59611)"
+         id="g90">
+        <circle
+           r="8"
+           id="circle89"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text89">More pleasant</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(526.89694,687.60339)"
+         id="g91">
+        <circle
+           r="8"
+           id="circle90"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:normal"
+           id="text90"
+           x="-9.5550308"
+           y="-1.7053026e-13">psb25d</text>
+      </g>
+      <g
+         class="node-right is-group"
+         transform="translate(561.42315,655.44574)"
+         id="g92">
+        <circle
+           r="8"
+           id="circle91"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text91">PSB 2.5D</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(572.73056,684.94488)"
+         id="g93">
+        <circle
+           r="8"
+           id="circle92"
+           cx="0"
+           cy="0" />
+        <text
+           dx="12"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:normal"
+           id="text92">2.5D</text>
+      </g>
+      <g
+         class="node-right"
+         transform="translate(603.72287,528.40061)"
+         id="g94">
+        <circle
+           r="8"
+           id="circle93"
+           cx="0"
+           cy="0" />
+        <text
+           dx="-12"
+           dy="4"
+           text-anchor="end"
+           style="font-weight:bold"
+           id="text93"
+           x="-10.463234"
+           y="5.6843419e-14">Improves readability</text>
+      </g>
+      <g
+         class="node-right is-theme"
+         transform="translate(615.34492,596.51821)"
+         id="g95">
+        <circle
+           r="14"
+           id="circle94"
+           cx="0"
+           cy="0" />
+        <text
+           dx="18"
+           dy="4"
+           text-anchor="start"
+           style="font-weight:bold"
+           id="text94">The advantages of manual configuration</text>
+      </g>
+    </g>
+  </g>
+</svg>
