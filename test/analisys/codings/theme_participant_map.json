@@ -1,0 +1,539 @@
+{
+  "generatedAt": "2026-07-01T18:59:27.195Z",
+  "themeCount": 8,
+  "pairCount": 75,
+  "themes": [
+    {
+      "themeId": "theme_1782699870406",
+      "themeName": "As desvantagens da configuração automática",
+      "themeNamePt": "As desvantagens da configuração automática",
+      "themeNameEn": "The Disadvantages of Automatic Configuration",
+      "participantIds": [
+        "b79f7405-a912-48a5-a7d9-cc117a6743b2",
+        "bddd529f-8322-4671-a012-872ae015bfcc",
+        "cbbff2ef-8c34-44aa-ae65-b972289ff1da",
+        "cdf7b010-dac7-418f-9fcb-d7b3822328dc",
+        "e3817d4c-14cd-4084-a8ea-68c2b8140e8c"
+      ],
+      "participantCount": 5,
+      "excerptCount": 7
+    },
+    {
+      "themeId": "theme_1782699491240",
+      "themeName": "As desvantagens da configuração manual",
+      "themeNamePt": "As desvantagens da configuração manual",
+      "themeNameEn": "The Disadvantages of Manual Configuration",
+      "participantIds": [
+        "18a73e7b-3145-4831-acba-d8b4ec728e0e",
+        "b21afff4-41df-484c-9ca0-7fdaa86add85",
+        "c4bcd132-fe52-4b3d-9844-7cd9e812ef29",
+        "d105672d-49a5-477a-af0a-478002c5afbe"
+      ],
+      "participantCount": 4,
+      "excerptCount": 4
+    },
+    {
+      "themeId": "theme_1782697799978",
+      "themeName": "As desvantagens do gráfico 2.5D",
+      "themeNamePt": "As desvantagens do gráfico 2.5D",
+      "themeNameEn": "The disadvantages of 2.5D graphics",
+      "participantIds": [
+        "37f18261-c7ee-4a10-aad7-89198f8a2029",
+        "944cb3e3-3896-426d-ab78-90f14bd3b891",
+        "b79f7405-a912-48a5-a7d9-cc117a6743b2",
+        "bc2d0820-b64c-4d1d-8548-4674a45a0991",
+        "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e"
+      ],
+      "participantCount": 5,
+      "excerptCount": 5
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "themeNamePt": "As desvantagens do gráfico 3D",
+      "themeNameEn": "The Disadvantages of 3D Chart",
+      "participantIds": [
+        "4fff3da6-9ccb-4c5f-95f8-f55d2392c5e9",
+        "9a28cbc5-bcee-49bf-b30e-912cef49ff7e",
+        "18a73e7b-3145-4831-acba-d8b4ec728e0e",
+        "630c2845-e93c-4392-ae73-5d2536743ba2",
+        "824d2229-0b3f-4895-80dd-ea2630c86f6b",
+        "bddd529f-8322-4671-a012-872ae015bfcc",
+        "c4bcd132-fe52-4b3d-9844-7cd9e812ef29",
+        "d105672d-49a5-477a-af0a-478002c5afbe",
+        "e1ee6127-652a-4241-9456-0bbdaa918915",
+        "e3817d4c-14cd-4084-a8ea-68c2b8140e8c"
+      ],
+      "participantCount": 10,
+      "excerptCount": 10
+    },
+    {
+      "themeId": "theme_1782695927673",
+      "themeName": "As vantagens do gráfico 2.5D",
+      "themeNamePt": "As vantagens do gráfico 2.5D",
+      "themeNameEn": "The advantages of 2.5D graphics",
+      "participantIds": [
+        "630c2845-e93c-4392-ae73-5d2536743ba2",
+        "944cb3e3-3896-426d-ab78-90f14bd3b891",
+        "e1ee6127-652a-4241-9456-0bbdaa918915",
+        "e3817d4c-14cd-4084-a8ea-68c2b8140e8c"
+      ],
+      "participantCount": 4,
+      "excerptCount": 4
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "themeNamePt": "As vantagens do gráfico 3D",
+      "themeNameEn": "The advantages of 3D graphics",
+      "participantIds": [
+        "0da5cbab-ef20-4021-a1f8-3c7aceb84534",
+        "1e1eece5-b5a8-4c64-86e9-b93ebc8cf5d5",
+        "37f18261-c7ee-4a10-aad7-89198f8a2029",
+        "52f66258-3e00-4ccd-9350-c759a7adbd57",
+        "419c1ee0-dee1-4e13-8621-1c65129be04f",
+        "456fcff0-f55d-4d54-94b3-b942cfa8f2b1",
+        "1222e3ae-9ba2-4e96-b2ab-3d763a50789c",
+        "7599f200-85dc-46fd-a907-eea95b9c7745",
+        "a6e1cabe-ce58-41b8-9ee5-f250c3aab950",
+        "b21afff4-41df-484c-9ca0-7fdaa86add85",
+        "bddd529f-8322-4671-a012-872ae015bfcc",
+        "c3e8c7bd-5de9-4c43-851b-b32375f4802e",
+        "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e",
+        "cbbff2ef-8c34-44aa-ae65-b972289ff1da",
+        "cdf7b010-dac7-418f-9fcb-d7b3822328dc",
+        "e501754d-440f-4fc9-ad26-e44adcf6859c",
+        "fa78fc81-63d8-452c-8a9e-339451da0cce"
+      ],
+      "participantCount": 17,
+      "excerptCount": 18
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "themeNamePt": "As vantagens da configuração manual",
+      "themeNameEn": "The advantages of manual configuration",
+      "participantIds": [
+        "0da5cbab-ef20-4021-a1f8-3c7aceb84534",
+        "0f9082d4-7ef3-419c-823d-d019a939c14c",
+        "1e1eece5-b5a8-4c64-86e9-b93ebc8cf5d5",
+        "3ba50609-dd9f-4f5c-883b-4f5975144a2a",
+        "4fff3da6-9ccb-4c5f-95f8-f55d2392c5e9",
+        "18a73e7b-3145-4831-acba-d8b4ec728e0e",
+        "419c1ee0-dee1-4e13-8621-1c65129be04f",
+        "456fcff0-f55d-4d54-94b3-b942cfa8f2b1",
+        "630c2845-e93c-4392-ae73-5d2536743ba2",
+        "824d2229-0b3f-4895-80dd-ea2630c86f6b",
+        "932ffa2b-de7b-4680-a047-4d913318a64f",
+        "944cb3e3-3896-426d-ab78-90f14bd3b891",
+        "7599f200-85dc-46fd-a907-eea95b9c7745",
+        "b21afff4-41df-484c-9ca0-7fdaa86add85",
+        "bc2d0820-b64c-4d1d-8548-4674a45a0991",
+        "bddd529f-8322-4671-a012-872ae015bfcc",
+        "c3e8c7bd-5de9-4c43-851b-b32375f4802e",
+        "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e",
+        "cbbff2ef-8c34-44aa-ae65-b972289ff1da",
+        "cdf7b010-dac7-418f-9fcb-d7b3822328dc",
+        "e1ee6127-652a-4241-9456-0bbdaa918915",
+        "e3817d4c-14cd-4084-a8ea-68c2b8140e8c",
+        "fa78fc81-63d8-452c-8a9e-339451da0cce"
+      ],
+      "participantCount": 23,
+      "excerptCount": 33
+    },
+    {
+      "themeId": "theme_1782591968270",
+      "themeName": "As vantagens da configuração automática",
+      "themeNamePt": "As vantagens da configuração automática",
+      "themeNameEn": "The advantages of automatic configuration",
+      "participantIds": [
+        "0da5cbab-ef20-4021-a1f8-3c7aceb84534",
+        "630c2845-e93c-4392-ae73-5d2536743ba2",
+        "1222e3ae-9ba2-4e96-b2ab-3d763a50789c",
+        "a6e1cabe-ce58-41b8-9ee5-f250c3aab950",
+        "b21afff4-41df-484c-9ca0-7fdaa86add85",
+        "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e",
+        "d105672d-49a5-477a-af0a-478002c5afbe"
+      ],
+      "participantCount": 7,
+      "excerptCount": 7
+    }
+  ],
+  "themeParticipantPairs": [
+    {
+      "themeId": "theme_1782699870406",
+      "themeName": "As desvantagens da configuração automática",
+      "participantId": "b79f7405-a912-48a5-a7d9-cc117a6743b2"
+    },
+    {
+      "themeId": "theme_1782699870406",
+      "themeName": "As desvantagens da configuração automática",
+      "participantId": "bddd529f-8322-4671-a012-872ae015bfcc"
+    },
+    {
+      "themeId": "theme_1782699870406",
+      "themeName": "As desvantagens da configuração automática",
+      "participantId": "cbbff2ef-8c34-44aa-ae65-b972289ff1da"
+    },
+    {
+      "themeId": "theme_1782699870406",
+      "themeName": "As desvantagens da configuração automática",
+      "participantId": "cdf7b010-dac7-418f-9fcb-d7b3822328dc"
+    },
+    {
+      "themeId": "theme_1782699870406",
+      "themeName": "As desvantagens da configuração automática",
+      "participantId": "e3817d4c-14cd-4084-a8ea-68c2b8140e8c"
+    },
+    {
+      "themeId": "theme_1782699491240",
+      "themeName": "As desvantagens da configuração manual",
+      "participantId": "18a73e7b-3145-4831-acba-d8b4ec728e0e"
+    },
+    {
+      "themeId": "theme_1782699491240",
+      "themeName": "As desvantagens da configuração manual",
+      "participantId": "b21afff4-41df-484c-9ca0-7fdaa86add85"
+    },
+    {
+      "themeId": "theme_1782699491240",
+      "themeName": "As desvantagens da configuração manual",
+      "participantId": "c4bcd132-fe52-4b3d-9844-7cd9e812ef29"
+    },
+    {
+      "themeId": "theme_1782699491240",
+      "themeName": "As desvantagens da configuração manual",
+      "participantId": "d105672d-49a5-477a-af0a-478002c5afbe"
+    },
+    {
+      "themeId": "theme_1782697799978",
+      "themeName": "As desvantagens do gráfico 2.5D",
+      "participantId": "37f18261-c7ee-4a10-aad7-89198f8a2029"
+    },
+    {
+      "themeId": "theme_1782697799978",
+      "themeName": "As desvantagens do gráfico 2.5D",
+      "participantId": "944cb3e3-3896-426d-ab78-90f14bd3b891"
+    },
+    {
+      "themeId": "theme_1782697799978",
+      "themeName": "As desvantagens do gráfico 2.5D",
+      "participantId": "b79f7405-a912-48a5-a7d9-cc117a6743b2"
+    },
+    {
+      "themeId": "theme_1782697799978",
+      "themeName": "As desvantagens do gráfico 2.5D",
+      "participantId": "bc2d0820-b64c-4d1d-8548-4674a45a0991"
+    },
+    {
+      "themeId": "theme_1782697799978",
+      "themeName": "As desvantagens do gráfico 2.5D",
+      "participantId": "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "4fff3da6-9ccb-4c5f-95f8-f55d2392c5e9"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "9a28cbc5-bcee-49bf-b30e-912cef49ff7e"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "18a73e7b-3145-4831-acba-d8b4ec728e0e"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "630c2845-e93c-4392-ae73-5d2536743ba2"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "824d2229-0b3f-4895-80dd-ea2630c86f6b"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "bddd529f-8322-4671-a012-872ae015bfcc"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "c4bcd132-fe52-4b3d-9844-7cd9e812ef29"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "d105672d-49a5-477a-af0a-478002c5afbe"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "e1ee6127-652a-4241-9456-0bbdaa918915"
+    },
+    {
+      "themeId": "theme_1782696784372",
+      "themeName": "As desvantagens do gráfico 3D",
+      "participantId": "e3817d4c-14cd-4084-a8ea-68c2b8140e8c"
+    },
+    {
+      "themeId": "theme_1782695927673",
+      "themeName": "As vantagens do gráfico 2.5D",
+      "participantId": "630c2845-e93c-4392-ae73-5d2536743ba2"
+    },
+    {
+      "themeId": "theme_1782695927673",
+      "themeName": "As vantagens do gráfico 2.5D",
+      "participantId": "944cb3e3-3896-426d-ab78-90f14bd3b891"
+    },
+    {
+      "themeId": "theme_1782695927673",
+      "themeName": "As vantagens do gráfico 2.5D",
+      "participantId": "e1ee6127-652a-4241-9456-0bbdaa918915"
+    },
+    {
+      "themeId": "theme_1782695927673",
+      "themeName": "As vantagens do gráfico 2.5D",
+      "participantId": "e3817d4c-14cd-4084-a8ea-68c2b8140e8c"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "0da5cbab-ef20-4021-a1f8-3c7aceb84534"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "1e1eece5-b5a8-4c64-86e9-b93ebc8cf5d5"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "37f18261-c7ee-4a10-aad7-89198f8a2029"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "52f66258-3e00-4ccd-9350-c759a7adbd57"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "419c1ee0-dee1-4e13-8621-1c65129be04f"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "456fcff0-f55d-4d54-94b3-b942cfa8f2b1"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "1222e3ae-9ba2-4e96-b2ab-3d763a50789c"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "7599f200-85dc-46fd-a907-eea95b9c7745"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "a6e1cabe-ce58-41b8-9ee5-f250c3aab950"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "b21afff4-41df-484c-9ca0-7fdaa86add85"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "bddd529f-8322-4671-a012-872ae015bfcc"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "c3e8c7bd-5de9-4c43-851b-b32375f4802e"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "cbbff2ef-8c34-44aa-ae65-b972289ff1da"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "cdf7b010-dac7-418f-9fcb-d7b3822328dc"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "e501754d-440f-4fc9-ad26-e44adcf6859c"
+    },
+    {
+      "themeId": "theme_1782609818454",
+      "themeName": "As vantagens do gráfico 3D",
+      "participantId": "fa78fc81-63d8-452c-8a9e-339451da0cce"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "0da5cbab-ef20-4021-a1f8-3c7aceb84534"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "0f9082d4-7ef3-419c-823d-d019a939c14c"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "1e1eece5-b5a8-4c64-86e9-b93ebc8cf5d5"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "3ba50609-dd9f-4f5c-883b-4f5975144a2a"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "4fff3da6-9ccb-4c5f-95f8-f55d2392c5e9"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "18a73e7b-3145-4831-acba-d8b4ec728e0e"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "419c1ee0-dee1-4e13-8621-1c65129be04f"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "456fcff0-f55d-4d54-94b3-b942cfa8f2b1"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "630c2845-e93c-4392-ae73-5d2536743ba2"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "824d2229-0b3f-4895-80dd-ea2630c86f6b"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "932ffa2b-de7b-4680-a047-4d913318a64f"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "944cb3e3-3896-426d-ab78-90f14bd3b891"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "7599f200-85dc-46fd-a907-eea95b9c7745"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "b21afff4-41df-484c-9ca0-7fdaa86add85"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "bc2d0820-b64c-4d1d-8548-4674a45a0991"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "bddd529f-8322-4671-a012-872ae015bfcc"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "c3e8c7bd-5de9-4c43-851b-b32375f4802e"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "cbbff2ef-8c34-44aa-ae65-b972289ff1da"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "cdf7b010-dac7-418f-9fcb-d7b3822328dc"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "e1ee6127-652a-4241-9456-0bbdaa918915"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "e3817d4c-14cd-4084-a8ea-68c2b8140e8c"
+    },
+    {
+      "themeId": "theme_1782580583266",
+      "themeName": "As vantagens da configuração manual",
+      "participantId": "fa78fc81-63d8-452c-8a9e-339451da0cce"
+    },
+    {
+      "themeId": "theme_1782591968270",
+      "themeName": "As vantagens da configuração automática",
+      "participantId": "0da5cbab-ef20-4021-a1f8-3c7aceb84534"
+    },
+    {
+      "themeId": "theme_1782591968270",
+      "themeName": "As vantagens da configuração automática",
+      "participantId": "630c2845-e93c-4392-ae73-5d2536743ba2"
+    },
+    {
+      "themeId": "theme_1782591968270",
+      "themeName": "As vantagens da configuração automática",
+      "participantId": "1222e3ae-9ba2-4e96-b2ab-3d763a50789c"
+    },
+    {
+      "themeId": "theme_1782591968270",
+      "themeName": "As vantagens da configuração automática",
+      "participantId": "a6e1cabe-ce58-41b8-9ee5-f250c3aab950"
+    },
+    {
+      "themeId": "theme_1782591968270",
+      "themeName": "As vantagens da configuração automática",
+      "participantId": "b21afff4-41df-484c-9ca0-7fdaa86add85"
+    },
+    {
+      "themeId": "theme_1782591968270",
+      "themeName": "As vantagens da configuração automática",
+      "participantId": "c4a67e9d-2bbe-4ef7-a298-5496f9e2541e"
+    },
+    {
+      "themeId": "theme_1782591968270",
+      "themeName": "As vantagens da configuração automática",
+      "participantId": "d105672d-49a5-477a-af0a-478002c5afbe"
+    }
+  ]
+}
