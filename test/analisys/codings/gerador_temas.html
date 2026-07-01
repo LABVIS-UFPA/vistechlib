@@ -380,6 +380,7 @@
             <h2 style="margin: 0; font-size: 1.25rem; color: #2d3748;">Temas Oficiais</h2>
             <div style="display: flex;">
                 <button id="btnNewTheme" style="margin-right: 0.5rem;" class="icon-btn" title="Novo Tema">➕</button>
+                <button id="btnCopyCSV" style="margin-right: 0.5rem;" class="icon-btn" title="Copiar CSV">📋</button>
                 <button id="btnCloseDrawer" class="icon-btn" title="Fechar">✖️</button>
             </div>
         </div>
@@ -1297,6 +1298,85 @@
             }
         }
 
+        function downloadThemeHierarchy(theme) {
+            if (!qdaData || !qdaData.treeHierarchy) {
+                alert("Dados de hierarquia não disponíveis.");
+                return;
+            }
+
+            let excerpts = theme.clusterIds.map(id => leftNodes.find(n => n.id === id)).filter(n => n);
+            let counts = {};
+            counts['THEME_ROOT'] = { excerpts: new Set(), participants: new Set() };
+
+            excerpts.forEach(exc => {
+                counts['THEME_ROOT'].excerpts.add(exc.id);
+                
+                let pId = (exc.userId !== undefined && exc.userId !== null && exc.userId !== '?') ? exc.userId : (exc.participants ? exc.participants.split(')')[0] + ')' : null);
+                if (pId) counts['THEME_ROOT'].participants.add(pId);
+                
+                let allItemIds = new Set([...(exc.tags || []), ...(exc.categories || [])]);
+                allItemIds.forEach(itemId => {
+                    if (!counts[itemId]) counts[itemId] = { excerpts: new Set(), participants: new Set() };
+                    counts[itemId].excerpts.add(exc.id);
+                    if (pId) counts[itemId].participants.add(pId);
+                });
+            });
+
+            let nodesMap = {};
+            nodesMap['THEME_ROOT'] = {
+                nome: theme.name || "",
+                nome_en: theme.name_en || theme.name || "",
+                tipo: "tema",
+                quantitativo_excerpts: counts['THEME_ROOT'].excerpts.size,
+                quantitativo_participantes: counts['THEME_ROOT'].participants.size,
+                filhos: []
+            };
+
+            let th = qdaData.treeHierarchy;
+            
+            Object.keys(counts).forEach(itemId => {
+                if (itemId === 'THEME_ROOT') return;
+                const info = th[itemId];
+                if (!info) return;
+
+                let typeStr = info.type === 'tag' ? 'code' : (info.type === 'group' ? 'categoria' : info.type);
+                nodesMap[itemId] = {
+                    id: itemId,
+                    parentId: info.parentId,
+                    nome: info.data ? info.data.name : "",
+                    nome_en: info.data ? (info.data.name_en || info.data.name) : "",
+                    tipo: typeStr,
+                    quantitativo_excerpts: counts[itemId].excerpts.size,
+                    quantitativo_participantes: counts[itemId].participants.size,
+                    filhos: []
+                };
+            });
+
+            Object.keys(nodesMap).forEach(itemId => {
+                if (itemId === 'THEME_ROOT') return;
+                const node = nodesMap[itemId];
+                let parent = nodesMap[node.parentId];
+                if (!parent) parent = nodesMap['THEME_ROOT'];
+                parent.filhos.push(node);
+            });
+
+            Object.keys(nodesMap).forEach(itemId => {
+                if(itemId !== 'THEME_ROOT') {
+                    delete nodesMap[itemId].id;
+                    delete nodesMap[itemId].parentId;
+                }
+            });
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(nodesMap['THEME_ROOT'], null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            const safeName = (theme.name || 'tema').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            downloadAnchorNode.setAttribute("download", `hierarquia_${safeName}.json`);
+            document.body.appendChild(downloadAnchorNode); // required for firefox
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
         function renderSavedThemes() {
             const tbody = document.getElementById('themesTableBody');
             if (!tbody) return;
@@ -1368,6 +1448,15 @@
 
                 // Ações
                 const tdActions = document.createElement('td');
+                const downloadBtn = document.createElement('button');
+                downloadBtn.innerText = '⬇️';
+                downloadBtn.title = 'Baixar Hierarquia (JSON)';
+                downloadBtn.style.border = 'none';
+                downloadBtn.style.background = 'transparent';
+                downloadBtn.style.cursor = 'pointer';
+                downloadBtn.onclick = (e) => { e.stopPropagation(); downloadThemeHierarchy(theme); };
+                tdActions.appendChild(downloadBtn);
+
                 const delBtn = document.createElement('button');
                 delBtn.innerText = '🗑️';
                 delBtn.title = 'Excluir Tema';
@@ -1409,6 +1498,34 @@
                 document.getElementById('btnExport').style.display = 'none';
             }
         }
+
+        document.getElementById('btnCopyCSV').addEventListener('click', () => {
+            let csvContent = "Nome do Tema,Trechos,Coders,Participantes\n";
+            finalThemes.forEach(theme => {
+                const name = getLocalizedStr(theme, 'name').replace(/"/g, '""');
+                const trechos = theme.clusterIds.length;
+                
+                const allCoders = new Set();
+                const allParticipants = new Set();
+                (theme.excerpts || []).forEach((exc) => {
+                    if (exc.coders) exc.coders.split(', ').forEach(c => allCoders.add(c));
+                    if (exc.userId !== undefined && exc.userId !== null && exc.userId !== '?') {
+                        allParticipants.add(exc.userId);
+                    } else if (exc.participants) {
+                        let baseParticipant = exc.participants.split(')')[0] + ')';
+                        allParticipants.add(baseParticipant);
+                    }
+                });
+                
+                csvContent += `"${name}",${trechos},${allCoders.size},${allParticipants.size}\n`;
+            });
+            navigator.clipboard.writeText(csvContent).then(() => {
+                alert('Tabela copiada para a área de transferência!');
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+                alert('Erro ao copiar para a área de transferência.');
+            });
+        });
 
         document.getElementById('btnExport').addEventListener('click', () => {
             if (finalThemes.length === 0) return;

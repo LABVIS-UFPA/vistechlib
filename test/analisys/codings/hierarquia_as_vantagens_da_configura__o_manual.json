@@ -1,0 +1,397 @@
+{
+  "nome": "As vantagens da configuração manual",
+  "nome_en": "The advantages of manual configuration",
+  "tipo": "tema",
+  "quantitativo_excerpts": 33,
+  "quantitativo_participantes": 23,
+  "filhos": [
+    {
+      "nome": "Técnica de PSB",
+      "nome_en": "PSB Technique",
+      "tipo": "categoria",
+      "quantitativo_excerpts": 14,
+      "quantitativo_participantes": 11,
+      "filhos": [
+        {
+          "nome": "PSB 3D",
+          "nome_en": "PSB 3D",
+          "tipo": "categoria",
+          "quantitativo_excerpts": 13,
+          "quantitativo_participantes": 10,
+          "filhos": [
+            {
+              "nome": "psb3d",
+              "nome_en": "psb3d",
+              "tipo": "code",
+              "quantitativo_excerpts": 12,
+              "quantitativo_participantes": 10,
+              "filhos": []
+            },
+            {
+              "nome": "3D",
+              "nome_en": "3D",
+              "tipo": "code",
+              "quantitativo_excerpts": 11,
+              "quantitativo_participantes": 9,
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "nome": "PSB 2.5D",
+          "nome_en": "PSB 2.5D",
+          "tipo": "categoria",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": [
+            {
+              "nome": "psb25d",
+              "nome_en": "psb25d",
+              "tipo": "code",
+              "quantitativo_excerpts": 1,
+              "quantitativo_participantes": 1,
+              "filhos": []
+            },
+            {
+              "nome": "2.5D",
+              "nome_en": "2.5D",
+              "tipo": "code",
+              "quantitativo_excerpts": 1,
+              "quantitativo_participantes": 1,
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nome": "Melhor",
+      "nome_en": "Better",
+      "tipo": "categoria",
+      "quantitativo_excerpts": 29,
+      "quantitativo_participantes": 21,
+      "filhos": [
+        {
+          "nome": "Melhora Percepção/Visualização",
+          "nome_en": "Improves Perception/Visualization",
+          "tipo": "categoria",
+          "quantitativo_excerpts": 25,
+          "quantitativo_participantes": 19,
+          "filhos": [
+            {
+              "nome": "Melhor percepção",
+              "nome_en": "Better perception",
+              "tipo": "code",
+              "quantitativo_excerpts": 20,
+              "quantitativo_participantes": 17,
+              "filhos": []
+            },
+            {
+              "nome": "Agrado com a visualização de dados",
+              "nome_en": "Better visualization",
+              "tipo": "code",
+              "quantitativo_excerpts": 11,
+              "quantitativo_participantes": 10,
+              "filhos": []
+            },
+            {
+              "nome": "Melhor Visualização",
+              "nome_en": "Better View",
+              "tipo": "code",
+              "quantitativo_excerpts": 9,
+              "quantitativo_participantes": 7,
+              "filhos": []
+            },
+            {
+              "nome": "Fácil de Compreender",
+              "nome_en": "Easy to Understand",
+              "tipo": "code",
+              "quantitativo_excerpts": 5,
+              "quantitativo_participantes": 5,
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "nome": "Mais precisão",
+          "nome_en": "More precision",
+          "tipo": "categoria",
+          "quantitativo_excerpts": 13,
+          "quantitativo_participantes": 10,
+          "filhos": [
+            {
+              "nome": "Mais precisão",
+              "nome_en": "More precision",
+              "tipo": "code",
+              "quantitativo_excerpts": 12,
+              "quantitativo_participantes": 10,
+              "filhos": []
+            },
+            {
+              "nome": "Preciso",
+              "nome_en": "Precise",
+              "tipo": "code",
+              "quantitativo_excerpts": 5,
+              "quantitativo_participantes": 4,
+              "filhos": []
+            }
+          ]
+        },
+        {
+          "nome": "Melhora a interpretação",
+          "nome_en": "Improves interpretation",
+          "tipo": "code",
+          "quantitativo_excerpts": 2,
+          "quantitativo_participantes": 2,
+          "filhos": []
+        },
+        {
+          "nome": "Melhor interação (mais liberdade)",
+          "nome_en": "Better interaction (more freedom)",
+          "tipo": "categoria",
+          "quantitativo_excerpts": 7,
+          "quantitativo_participantes": 7,
+          "filhos": [
+            {
+              "nome": "Mais liberdade",
+              "nome_en": "More freedom",
+              "tipo": "code",
+              "quantitativo_excerpts": 6,
+              "quantitativo_participantes": 6,
+              "filhos": []
+            },
+            {
+              "nome": "Melhor interação",
+              "nome_en": "Better interaction",
+              "tipo": "code",
+              "quantitativo_excerpts": 2,
+              "quantitativo_participantes": 2,
+              "filhos": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nome": "Configuração Manual",
+      "nome_en": "Manual Configuration",
+      "tipo": "categoria",
+      "quantitativo_excerpts": 33,
+      "quantitativo_participantes": 23,
+      "filhos": [
+        {
+          "nome": "Configuração manual",
+          "nome_en": "Manual configuration",
+          "tipo": "code",
+          "quantitativo_excerpts": 30,
+          "quantitativo_participantes": 22,
+          "filhos": []
+        },
+        {
+          "nome": "Agrado com a manipulação da visualização",
+          "nome_en": "Enjoyable manipulation",
+          "tipo": "code",
+          "quantitativo_excerpts": 27,
+          "quantitativo_participantes": 19,
+          "filhos": []
+        },
+        {
+          "nome": "Manual",
+          "nome_en": "Manual",
+          "tipo": "code",
+          "quantitativo_excerpts": 29,
+          "quantitativo_participantes": 21,
+          "filhos": []
+        },
+        {
+          "nome": "Rotação",
+          "nome_en": "Rotation",
+          "tipo": "code",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": []
+        },
+        {
+          "nome": "Personalizável",
+          "nome_en": "Customizable",
+          "tipo": "code",
+          "quantitativo_excerpts": 4,
+          "quantitativo_participantes": 4,
+          "filhos": []
+        }
+      ]
+    },
+    {
+      "nome": "Intuitivo",
+      "nome_en": "Intuitive",
+      "tipo": "code",
+      "quantitativo_excerpts": 1,
+      "quantitativo_participantes": 1,
+      "filhos": []
+    },
+    {
+      "nome": "Eixo",
+      "nome_en": "Axis",
+      "tipo": "categoria",
+      "quantitativo_excerpts": 3,
+      "quantitativo_participantes": 2,
+      "filhos": [
+        {
+          "nome": "Eixo y",
+          "nome_en": "y-axis",
+          "tipo": "code",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": []
+        },
+        {
+          "nome": "Eixo z",
+          "nome_en": "z-axis",
+          "tipo": "code",
+          "quantitativo_excerpts": 2,
+          "quantitativo_participantes": 2,
+          "filhos": []
+        }
+      ]
+    },
+    {
+      "nome": "Facilita",
+      "nome_en": "Makes it easier",
+      "tipo": "categoria",
+      "quantitativo_excerpts": 11,
+      "quantitativo_participantes": 11,
+      "filhos": [
+        {
+          "nome": "Mais facilidade",
+          "nome_en": "Easier",
+          "tipo": "code",
+          "quantitativo_excerpts": 9,
+          "quantitativo_participantes": 9,
+          "filhos": []
+        },
+        {
+          "nome": "Facilidade de Interpretação",
+          "nome_en": "Ease of Interpretation",
+          "tipo": "code",
+          "quantitativo_excerpts": 2,
+          "quantitativo_participantes": 2,
+          "filhos": []
+        },
+        {
+          "nome": "Facilita busca",
+          "nome_en": "Makes searching easier",
+          "tipo": "code",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": []
+        },
+        {
+          "nome": "Facilita comparação",
+          "nome_en": "Makes comparison easier",
+          "tipo": "code",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": []
+        }
+      ]
+    },
+    {
+      "nome": "Confortável",
+      "nome_en": "Comfortable",
+      "tipo": "code",
+      "quantitativo_excerpts": 1,
+      "quantitativo_participantes": 1,
+      "filhos": []
+    },
+    {
+      "nome": "Melhora legibilidade",
+      "nome_en": "Improves readability",
+      "tipo": "code",
+      "quantitativo_excerpts": 1,
+      "quantitativo_participantes": 1,
+      "filhos": []
+    },
+    {
+      "nome": "Ajuda",
+      "nome_en": "It Helps",
+      "tipo": "code",
+      "quantitativo_excerpts": 1,
+      "quantitativo_participantes": 1,
+      "filhos": []
+    },
+    {
+      "nome": "Revelou Informação",
+      "nome_en": "Revealed Information",
+      "tipo": "code",
+      "quantitativo_excerpts": 2,
+      "quantitativo_participantes": 2,
+      "filhos": []
+    },
+    {
+      "nome": "Componentes",
+      "nome_en": "Components",
+      "tipo": "categoria",
+      "quantitativo_excerpts": 1,
+      "quantitativo_participantes": 1,
+      "filhos": [
+        {
+          "nome": "Quebra de escala",
+          "nome_en": "Scale break",
+          "tipo": "code",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": []
+        }
+      ]
+    },
+    {
+      "nome": "Confiança",
+      "nome_en": "Trust",
+      "tipo": "code",
+      "quantitativo_excerpts": 1,
+      "quantitativo_participantes": 1,
+      "filhos": []
+    },
+    {
+      "nome": "Agradável/Satisfatório",
+      "nome_en": "Pleasant/Satisfactory",
+      "tipo": "categoria",
+      "quantitativo_excerpts": 4,
+      "quantitativo_participantes": 4,
+      "filhos": [
+        {
+          "nome": "Mais agradável",
+          "nome_en": "More pleasant",
+          "tipo": "code",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": []
+        },
+        {
+          "nome": "Mais satisfatório",
+          "nome_en": "More satisfying",
+          "tipo": "code",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": []
+        },
+        {
+          "nome": "Interessante",
+          "nome_en": "Interesting",
+          "tipo": "code",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": []
+        },
+        {
+          "nome": "Preferência",
+          "nome_en": "Preference",
+          "tipo": "code",
+          "quantitativo_excerpts": 1,
+          "quantitativo_participantes": 1,
+          "filhos": []
+        }
+      ]
+    }
+  ]
+}
