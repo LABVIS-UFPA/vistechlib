@@ -56,15 +56,15 @@
   <br>
   <button onclick="downloadSVG('chart-t3')">Download T3 (Diferença Próxima) SVG</button> -->
 
-  <h2>T4 (Proporção Distante)</h2>
+  <h2>T2</h2>
   <svg id="chart-t4"></svg>
   <br>
-  <button onclick="downloadSVG('chart-t4')">Download T4 (Proporção Distante) SVG</button>
+  <button onclick="downloadSVG('chart-t4')">Download T2 SVG</button>
 
-  <h2>T5 (Proporção Próxima)</h2>
+  <h2>T3</h2>
   <svg id="chart-t5"></svg>
   <br>
-  <button onclick="downloadSVG('chart-t5')">Download T5 (Proporção Próxima) SVG</button>
+  <button onclick="downloadSVG('chart-t5')">Download T3 SVG</button>
 
   <h2>Confiança na Resposta</h2>
   <svg id="chart-confidence"></svg>
@@ -161,6 +161,17 @@
       }, obj);
     }
 
+    function getTaskDisplayLabel(taskKey) {
+      const labelMap = {
+        'T1': 'T1',
+        'T2': 'T2',
+        'T3': 'T3',
+        'T4': 'T2',
+        'T5': 'T3'
+      };
+      return labelMap[taskKey] || taskKey;
+    }
+
     function processDataForChart(data, taskKey, columnName, useCousineauMorey = true) {
       const grouped = d3.group(data, d => d.vis);
       const visualizationOrder = Array.from(grouped.keys()).sort();
@@ -205,7 +216,7 @@
 
         const stats = calculateBootstrapStats(valuesForVisualization);
         return {
-          Pergunta: taskKey,
+          Pergunta: getTaskDisplayLabel(taskKey),
           estrategia: vis,
           media: stats.mean,
           IC95_inferior: stats.lower,
@@ -1355,8 +1366,8 @@
       const uniqueTasks = [...new Set(filteredLogs.filter(d => d.type === 'trial').map(d => d.task))].sort();
 
       const TASK_MAP = {
-        'T1': 'T1 (Valor Exato)', 'T2': 'T2 (Diferença Distante)', 'T3': 'T3 (Diferença Próxima)',
-        'T4': 'T4 (Proporção Distante)', 'T5': 'T5 (Proporção Próxima)'
+        'T1': 'T1', 'T2': 'T2', 'T3': 'T3',
+        'T4': 'T2', 'T5': 'T3'
       };
 
       const plotWidth = 350;
@@ -1443,7 +1454,7 @@
 
         svg.attr("width", totalWidthDefault).attr("height", height);
         renderErrorChart(svg, errorData, 0, totalWidthDefault, {
-          col1Header: "Tarefa",
+          col1Header: "Task",
           significant: [],
           xLabel: taskKey === 'T1' ? 'Error Rate' : 'Log Error',
           xDomain: taskKey === 'T1' ? [0, 1] : null
