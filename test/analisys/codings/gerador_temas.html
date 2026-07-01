@@ -367,6 +367,8 @@
             <span id="translateStatus" style="margin-right: 1rem; color: #718096; font-size: 0.9rem;"></span>
             <button id="btnOpenDrawer" style="margin-right:1rem;">📂 Gerenciar Temas</button>
             <input type="file" id="fileInput" accept=".json" />
+            <input type="file" id="finalThemesInput" accept=".json" style="display:none;" />
+            <button id="btnImportThemes" style="margin-left:1rem;">📤 Importar Temas Finais</button>
             <button id="btnExport" style="margin-left:1rem; display:none;">📥 Exportar Temas Finais</button>
             <button id="btnTranslateAll" style="margin-left:1rem;" title="Traduzir para Inglês">🌐 Traduzir</button>
             <button id="btnLangToggle" style="margin-left:0.5rem; font-weight:bold; width: 45px;" title="Alternar Idioma">PT</button>
@@ -497,6 +499,66 @@
                     createNewTheme();
                 } catch (error) {
                     alert("Erro ao ler o arquivo JSON."); console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        document.getElementById('btnImportThemes').addEventListener('click', () => {
+            document.getElementById('finalThemesInput').click();
+        });
+
+        document.getElementById('finalThemesInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    const importedThemes = Array.isArray(importedData)
+                        ? importedData
+                        : importedData.themes;
+
+                    if (!Array.isArray(importedThemes)) {
+                        alert("O arquivo importado não possui uma lista de temas finais.");
+                        return;
+                    }
+
+                    finalThemes = importedThemes;
+                    localStorage.setItem('gerador_temas_finais', JSON.stringify(finalThemes));
+
+                    if (importedData.leftGraph && Array.isArray(importedData.leftGraph.nodes)) {
+                        const importedPositions = importedData.leftGraph.nodes.map(node => ({
+                            id: node.id,
+                            x: node.x,
+                            y: node.y,
+                            fx: node.fx ?? null,
+                            fy: node.fy ?? null
+                        }));
+                        localStorage.setItem('gerador_temas_positions', JSON.stringify(importedPositions));
+                    }
+
+                    if (qdaData) {
+                        processLeftGraphData();
+
+                        if (finalThemes.length > 0) {
+                            editTheme(finalThemes[0].id);
+                        } else {
+                            editingThemeId = null;
+                            updateRightGraph();
+                        }
+                    } else {
+                        editingThemeId = null;
+                    }
+
+                    renderSavedThemes();
+                    alert(`Temas finais importados com sucesso (${finalThemes.length} temas).`);
+                } catch (error) {
+                    alert("Erro ao importar os temas finais.");
+                    console.error(error);
+                } finally {
+                    e.target.value = '';
                 }
             };
             reader.readAsText(file);
