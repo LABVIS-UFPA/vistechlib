@@ -367,6 +367,8 @@
             <span id="translateStatus" style="margin-right: 1rem; color: #718096; font-size: 0.9rem;"></span>
             <button id="btnOpenDrawer" style="margin-right:1rem;">📂 Gerenciar Temas</button>
             <input type="file" id="fileInput" accept=".json" />
+            <input type="file" id="finalThemesInput" accept=".json" style="display:none;" />
+            <button id="btnImportThemes" style="margin-left:1rem;">📤 Importar Temas Finais</button>
             <button id="btnExport" style="margin-left:1rem; display:none;">📥 Exportar Temas Finais</button>
             <button id="btnTranslateAll" style="margin-left:1rem;" title="Traduzir para Inglês">🌐 Traduzir</button>
             <button id="btnLangToggle" style="margin-left:0.5rem; font-weight:bold; width: 45px;" title="Alternar Idioma">PT</button>
@@ -379,6 +381,8 @@
         <div class="drawer-header">
             <h2 style="margin: 0; font-size: 1.25rem; color: #2d3748;">Temas Oficiais</h2>
             <div style="display: flex;">
+                <button id="btnExportThemeParticipants" style="margin-right: 0.5rem;" class="icon-btn"
+                    title="Export theme-participant JSON">📊</button>
                 <button id="btnNewTheme" style="margin-right: 0.5rem;" class="icon-btn" title="Novo Tema">➕</button>
                 <button id="btnCopyCSV" style="margin-right: 0.5rem;" class="icon-btn" title="Copiar CSV">📋</button>
                 <button id="btnCloseDrawer" class="icon-btn" title="Fechar">✖️</button>
@@ -498,6 +502,66 @@
                     createNewTheme();
                 } catch (error) {
                     alert("Erro ao ler o arquivo JSON."); console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        document.getElementById('btnImportThemes').addEventListener('click', () => {
+            document.getElementById('finalThemesInput').click();
+        });
+
+        document.getElementById('finalThemesInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    const importedThemes = Array.isArray(importedData)
+                        ? importedData
+                        : importedData.themes;
+
+                    if (!Array.isArray(importedThemes)) {
+                        alert("O arquivo importado não possui uma lista de temas finais.");
+                        return;
+                    }
+
+                    finalThemes = importedThemes;
+                    localStorage.setItem('gerador_temas_finais', JSON.stringify(finalThemes));
+
+                    if (importedData.leftGraph && Array.isArray(importedData.leftGraph.nodes)) {
+                        const importedPositions = importedData.leftGraph.nodes.map(node => ({
+                            id: node.id,
+                            x: node.x,
+                            y: node.y,
+                            fx: node.fx ?? null,
+                            fy: node.fy ?? null
+                        }));
+                        localStorage.setItem('gerador_temas_positions', JSON.stringify(importedPositions));
+                    }
+
+                    if (qdaData) {
+                        processLeftGraphData();
+
+                        if (finalThemes.length > 0) {
+                            editTheme(finalThemes[0].id);
+                        } else {
+                            editingThemeId = null;
+                            updateRightGraph();
+                        }
+                    } else {
+                        editingThemeId = null;
+                    }
+
+                    renderSavedThemes();
+                    alert(`Temas finais importados com sucesso (${finalThemes.length} temas).`);
+                } catch (error) {
+                    alert("Erro ao importar os temas finais.");
+                    console.error(error);
+                } finally {
+                    e.target.value = '';
                 }
             };
             reader.readAsText(file);
@@ -1298,6 +1362,80 @@
             }
         }
 
+        function getThemeParticipantIds(theme) {
+            const participantIds = new Set();
+
+            (theme.excerpts || []).forEach(exc => {
+                if (exc.userId !== undefined && exc.userId !== null && exc.userId !== '?') {
+                    participantIds.add(String(exc.userId));
+                }
+            });
+
+            if (theme.clusterIds && theme.clusterIds.length > 0) {
+                theme.clusterIds.forEach(clusterId => {
+                    const node = leftNodes.find(n => n.id === clusterId);
+                    if (node && node.userId !== undefined && node.userId !== null && node.userId !== '?') {
+                        participantIds.add(String(node.userId));
+                    }
+                });
+            }
+
+            return Array.from(participantIds).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+        }
+
+        function exportThemeParticipantMap() {
+            if (editingThemeId) {
+                autoSaveCurrentTheme();
+            }
+
+            if (finalThemes.length === 0) {
+                alert("There are no final themes to export.");
+                return;
+            }
+
+            const themes = finalThemes
+                .filter(theme => theme.clusterIds && theme.clusterIds.length > 0)
+                .map(theme => {
+                    const participantIds = getThemeParticipantIds(theme);
+                    const themeName = theme.name_en || theme.name || "";
+                    return {
+                        themeId: theme.id,
+                        themeName,
+                        themeNamePt: theme.name || null,
+                        themeNameEn: theme.name_en || null,
+                        participantIds,
+                        participantCount: participantIds.length,
+                        excerptCount: theme.clusterIds.length
+                    };
+                });
+
+            const themeParticipantPairs = themes.flatMap(theme =>
+                theme.participantIds.map(participantId => ({
+                    themeId: theme.themeId,
+                    themeName: theme.themeName,
+                    themeNamePt: theme.themeNamePt,
+                    themeNameEn: theme.themeNameEn,
+                    participantId
+                }))
+            );
+
+            const payload = {
+                generatedAt: new Date().toISOString(),
+                themeCount: themes.length,
+                pairCount: themeParticipantPairs.length,
+                themes,
+                themeParticipantPairs
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "theme_participant_map.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
         function downloadThemeHierarchy(theme) {
             if (!qdaData || !qdaData.treeHierarchy) {
                 alert("Dados de hierarquia não disponíveis.");
@@ -1625,6 +1763,10 @@
 
         document.getElementById('btnNewTheme').addEventListener('click', () => {
             createNewTheme();
+        });
+
+        document.getElementById('btnExportThemeParticipants').addEventListener('click', () => {
+            exportThemeParticipantMap();
         });
 
         window.addEventListener('DOMContentLoaded', () => {

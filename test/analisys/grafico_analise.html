@@ -111,13 +111,17 @@
   <br>
   <button onclick="downloadSVG('chart-ranking-mode')">Download Ranking de Preferência (Modos) SVG</button>
 
+  <h2>Qualitative Themes: Error and Time</h2>
+  <p id="theme-performance-note"></p>
+  <div id="theme-performance-charts"></div>
+
   <script>
     // Mapeamento de cores para as visualizações
     const visualizationColors = {
       "psb25d_manual": "#4269d0", "psb25d_llm": "#efb118", "psb25d_opt": "#6cc5b0",
       "psb3d_manual": "#9c6b4e", "psb3d_llm": "#a463f2", "psb3d_opt": "#3ca951",
       "psb25d": "#1f77b4", "psb3d": "#ff7f0e",
-      "manual": "#2ca02c", "llm": "#98df8a", "opt": "#1a5e20"
+      "manual": "#2ca02c", "automatic": "#efb118", "llm": "#98df8a", "opt": "#1a5e20"
     };
     const rankColors = { '1': '#2c7bb6', '2': '#fdae61', '3': '#d7191c', '4': '#abd9e9' };
 
@@ -292,9 +296,13 @@
       const {
         controlewidth = 400,
         col1Header = "Difficulty", // Pode ser ajustado para "Task" ou outro
+        secondColumnHeader = "Visualization",
         posStrategyFactor = 0.80, // Ajuste este valor para mover "Visualization"
         significant = [], // Adicionado para receber dados de significância
-        xDomain = null
+        xDomain = null,
+        labelFormatter = d => d.estrategia.replace('psb25d', 'PSB 2.5D').replace('psb3d', 'PSB 3D').replace('_', ' '),
+        labelFontSize = "15pt",
+        groupLabelFontSize = "15pt"
       } = options || {};
 
       const margin = { top: 30, right: 40, bottom: 40, left: controlewidth };
@@ -315,7 +323,7 @@
         .attr("stroke-width", 2);
 
       g.append("text").attr("x", -controlewidth).attr("y", -15).text(col1Header).attr("font-weight", "bold").style("font-size", "15pt"); // Posição da coluna "Task"
-      g.append("text").attr("x", posstrategy).attr("y", -15).text("Visualization").attr("font-weight", "bold").style("font-size", "15pt");
+      g.append("text").attr("x", posstrategy).attr("y", -15).text(secondColumnHeader).attr("font-weight", "bold").style("font-size", "15pt");
       g.append("text").attr("x", 0).attr("y", -15).text("Estimate (95% CI)").attr("font-weight", "bold").style("font-size", "15pt").attr("text-anchor", "end");
 
       // Escala X (Log Error)
@@ -404,8 +412,8 @@
         .attr("x", posstrategy) // Posição da coluna "Visualization"
         .attr("y", (d, i) => y(i) + y.bandwidth() / 2 + 4)
         .style("fill", d => visualizationColors[d.estrategia] || "black")
-        .style("font-size", "15pt")
-        .text(d => d.estrategia.replace('psb25d', 'PSB 2.5D').replace('psb3d', 'PSB 3D').replace('_', ' '));
+        .style("font-size", labelFontSize)
+        .text(labelFormatter);
 
       g.selectAll(".valor-label")
         .data(rawData)
@@ -445,7 +453,7 @@
           .attr("y", yMean + 4)
           .attr("text-anchor", "start")
           .style("font-weight", "bold")
-          .style("font-size", "15pt")
+          .style("font-size", groupLabelFontSize)
           .text(pergunta);
       });
     }
@@ -770,7 +778,14 @@
           const answer = Number(block.answerNumber);
           const correctAnswer = Number(block.correctAnswer);
           let logError = NaN;
+          let errorRate = NaN;
           const confidenceValue = confidenceMap[block.confidence];
+
+          if (block.isCorrect === true) {
+            errorRate = 0;
+          } else if (block.isCorrect === false) {
+            errorRate = 1;
+          }
 
           if (block.taskKey === 'T1') {
             if (block.isCorrect === true) {
@@ -792,6 +807,7 @@
             vis: block.visualizationId,
             Reaction_Time_s: block.timeOnBlockTaskScreenSeconds,
             logError: logError,
+            errorRate: errorRate,
             confidence: confidenceValue
           });
         });
@@ -860,6 +876,300 @@
       });
 
       return allLogs;
+    }
+
+    function getThemeDisplayName(theme) {
+      return theme.themeNameEn || theme.themeName || theme.themeNamePt || theme.themeId || "Unnamed theme";
+    }
+
+    function prepareThemes(themeParticipantMap) {
+      const themes = (themeParticipantMap && Array.isArray(themeParticipantMap.themes))
+        ? themeParticipantMap.themes
+        : [];
+
+      return themes
+        .map((theme, index) => ({
+          ...theme,
+          displayName: getThemeDisplayName(theme),
+          participantIds: Array.isArray(theme.participantIds) ? theme.participantIds : [],
+          originalIndex: index
+        }))
+        .filter(theme => theme.participantIds.length > 0);
+    }
+
+    function isConfigurationTheme(theme) {
+      return theme.displayName.toLowerCase().includes("configuration");
+    }
+
+    function isGraphTheme(theme) {
+      const name = theme.displayName.toLowerCase();
+      return name.includes("2.5d") || name.includes("3d") || name.includes("graphic") || name.includes("chart");
+    }
+
+    function countParticipantsInThemes(themes) {
+      const participantIds = new Set();
+      themes.forEach(theme => {
+        (theme.participantIds || []).forEach(participantId => participantIds.add(participantId));
+      });
+      return participantIds.size;
+    }
+
+    function applyThemeColors(themes) {
+      const palette = [
+        "#4e79a7", "#f28e2b", "#59a14f", "#e15759",
+        "#76b7b2", "#edc949", "#af7aa1", "#ff9da7",
+        "#9c755f", "#bab0ab", "#2f4b7c", "#665191"
+      ];
+
+      themes.forEach((theme, index) => {
+        visualizationColors[theme.displayName] = palette[index % palette.length];
+      });
+    }
+
+    function processThemeDataForChart(trialLogs, taskKeys, themes, columnName) {
+      const taskSet = new Set(taskKeys);
+      const visualizationOrder = Array.from(new Set(trialLogs.map(record => record.vis))).sort();
+      const processed = [];
+
+      themes.forEach(theme => {
+        const participantSet = new Set(theme.participantIds);
+
+        visualizationOrder.forEach(vis => {
+          const values = trialLogs
+            .filter(record => taskSet.has(record.task) && participantSet.has(record.participantId) && record.vis === vis)
+            .map(record => getValueByPath(record, columnName))
+            .filter(value => value !== undefined && value !== null && !Number.isNaN(value));
+
+          if (values.length === 0) return;
+
+          const stats = calculateBootstrapStats(values);
+          processed.push({
+            Pergunta: theme.displayName,
+            estrategia: vis,
+            media: stats.mean,
+            IC95_inferior: stats.lower,
+            IC95_superior: stats.upper,
+            participantCount: participantSet.size,
+            sampleCount: values.length
+          });
+        });
+      });
+
+      return processed;
+    }
+
+    function getConfigurationMode(visualizationId) {
+      if (visualizationId && visualizationId.includes("_manual")) return "manual";
+      if (visualizationId && (visualizationId.includes("_llm") || visualizationId.includes("_opt"))) return "automatic";
+      return null;
+    }
+
+    function formatConfigurationMode(mode) {
+      if (mode === "manual") return "Manual";
+      if (mode === "automatic") return "Automatic";
+      return mode;
+    }
+
+    function getChartDimension(visualizationId) {
+      if (visualizationId && visualizationId.startsWith("psb25d")) return "psb25d";
+      if (visualizationId && visualizationId.startsWith("psb3d")) return "psb3d";
+      return null;
+    }
+
+    function formatChartDimension(dimension) {
+      if (dimension === "psb25d") return "2.5D";
+      if (dimension === "psb3d") return "3D";
+      return dimension;
+    }
+
+    function processThemeConfigurationModeDataForChart(trialLogs, taskKeys, themes, columnName) {
+      const taskSet = new Set(taskKeys);
+      const modeOrder = ["manual", "automatic"];
+      const processed = [];
+
+      themes.forEach(theme => {
+        const participantSet = new Set(theme.participantIds);
+
+        modeOrder.forEach(mode => {
+          const values = trialLogs
+            .filter(record => {
+              const recordMode = getConfigurationMode(record.vis);
+              return taskSet.has(record.task)
+                && participantSet.has(record.participantId)
+                && recordMode === mode;
+            })
+            .map(record => getValueByPath(record, columnName))
+            .filter(value => value !== undefined && value !== null && !Number.isNaN(value));
+
+          if (values.length === 0) return;
+
+          const stats = calculateBootstrapStats(values);
+          processed.push({
+            Pergunta: theme.displayName,
+            estrategia: mode,
+            media: stats.mean,
+            IC95_inferior: stats.lower,
+            IC95_superior: stats.upper,
+            participantCount: participantSet.size,
+            sampleCount: values.length
+          });
+        });
+      });
+
+      return processed;
+    }
+
+    function processThemeChartDimensionDataForChart(trialLogs, taskKeys, themes, columnName) {
+      const taskSet = new Set(taskKeys);
+      const dimensionOrder = ["psb25d", "psb3d"];
+      const processed = [];
+
+      themes.forEach(theme => {
+        const participantSet = new Set(theme.participantIds);
+
+        dimensionOrder.forEach(dimension => {
+          const values = trialLogs
+            .filter(record => {
+              const recordDimension = getChartDimension(record.vis);
+              return taskSet.has(record.task)
+                && participantSet.has(record.participantId)
+                && recordDimension === dimension;
+            })
+            .map(record => getValueByPath(record, columnName))
+            .filter(value => value !== undefined && value !== null && !Number.isNaN(value));
+
+          if (values.length === 0) return;
+
+          const stats = calculateBootstrapStats(values);
+          processed.push({
+            Pergunta: theme.displayName,
+            estrategia: dimension,
+            media: stats.mean,
+            IC95_inferior: stats.lower,
+            IC95_superior: stats.upper,
+            participantCount: participantSet.size,
+            sampleCount: values.length
+          });
+        });
+      });
+
+      return processed;
+    }
+
+    function renderThemeMetricChart(container, chartId, title, participantCount, errorData, timeData, options) {
+      const {
+        themeControleWidth = 900,
+        secondColumnHeader = "Visualization",
+        posStrategyFactor = 0.34,
+        labelFormatter = undefined,
+        labelFontSize = "12pt",
+        groupLabelFontSize = "9pt"
+      } = options || {};
+
+      container.append("h3")
+        .html(`${title} <span style="font-weight: normal; font-size: 14px;">(N=${participantCount})</span>`);
+
+      const svg = container.append("svg").attr("id", chartId);
+      container.append("br");
+      container.append("button")
+        .attr("onclick", `downloadSVG('${chartId}')`)
+        .text(`Download ${title} SVG`);
+
+      const plotWidth = 350;
+      const timeControleWidth = 190;
+      const accWidth = themeControleWidth + plotWidth + 40;
+      const totalWidth = accWidth + timeControleWidth + plotWidth;
+      const height = 30 * Math.max(errorData.length, 1) + 80;
+
+      svg.attr("width", totalWidth).attr("height", height);
+      renderErrorChart(svg, errorData, 0, totalWidth, {
+        controlewidth: themeControleWidth,
+        col1Header: "Theme",
+        secondColumnHeader,
+        posStrategyFactor,
+        significant: [],
+        xLabel: "Error Rate",
+        xDomain: [0, 1],
+        labelFormatter,
+        labelFontSize,
+        groupLabelFontSize
+      });
+      renderTimeChart(svg, timeData, accWidth, { significant: [] });
+    }
+
+    function renderThemePerformanceCharts(filteredLogs, themeParticipantMap, taskOrder) {
+      const container = d3.select("#theme-performance-charts");
+      const note = d3.select("#theme-performance-note");
+      container.selectAll("*").remove();
+
+      const themes = prepareThemes(themeParticipantMap);
+      if (themes.length === 0) {
+        note
+          .style("color", "#a33")
+          .text("Theme-participant map not found. Generate theme_participant_map.json in the theme generator and place it at test/analisys/codings/theme_participant_map.json.");
+        return;
+      }
+
+      applyThemeColors(themes);
+      note
+        .style("color", "#333")
+        .text("Task trials are aggregated across T1, T4, and T5. The focused charts filter qualitative themes by subject: configuration themes for Manual vs Automatic, and graph themes for 2.5D vs 3D.");
+
+      const trialLogs = filteredLogs.filter(d => d.type === "trial");
+      const taskKeys = taskOrder.filter(taskKey => trialLogs.some(record => record.task === taskKey));
+      if (taskKeys.length === 0) {
+        note
+          .style("color", "#a33")
+          .text("No task trial data available for theme aggregation.");
+        return;
+      }
+
+      const aggregatedTrialData = trialLogs.filter(record => taskKeys.includes(record.task));
+      const configurationThemes = themes.filter(isConfigurationTheme);
+      const graphThemes = themes.filter(isGraphTheme);
+      const errorData = processThemeDataForChart(trialLogs, taskKeys, themes, "errorRate");
+      const timeData = processThemeDataForChart(trialLogs, taskKeys, themes, "Reaction_Time_s");
+      const modeErrorData = processThemeConfigurationModeDataForChart(trialLogs, taskKeys, configurationThemes, "errorRate");
+      const modeTimeData = processThemeConfigurationModeDataForChart(trialLogs, taskKeys, configurationThemes, "Reaction_Time_s");
+      const dimensionErrorData = processThemeChartDimensionDataForChart(trialLogs, taskKeys, graphThemes, "errorRate");
+      const dimensionTimeData = processThemeChartDimensionDataForChart(trialLogs, taskKeys, graphThemes, "Reaction_Time_s");
+      if (errorData.length === 0 || timeData.length === 0) {
+        note
+          .style("color", "#a33")
+          .text("No matching participants were found between the theme map and the task data.");
+        return;
+      }
+
+      const participantCount = new Set(aggregatedTrialData.map(d => d.participantId)).size;
+      const configurationParticipantCount = countParticipantsInThemes(configurationThemes);
+      const graphParticipantCount = countParticipantsInThemes(graphThemes);
+
+      renderThemeMetricChart(container, "chart-theme-aggregated", "Aggregated Tasks by Qualitative Theme", participantCount, errorData, timeData, {
+        secondColumnHeader: "Visualization",
+        posStrategyFactor: 0.34,
+        labelFontSize: "12pt",
+        groupLabelFontSize: "9pt"
+      });
+
+      if (modeErrorData.length > 0 && modeTimeData.length > 0) {
+        renderThemeMetricChart(container, "chart-theme-mode-aggregated", "Configuration Themes: Manual vs Automatic", configurationParticipantCount, modeErrorData, modeTimeData, {
+          secondColumnHeader: "Configuration",
+          posStrategyFactor: 0.34,
+          labelFormatter: d => formatConfigurationMode(d.estrategia),
+          labelFontSize: "12pt",
+          groupLabelFontSize: "9pt"
+        });
+      }
+
+      if (dimensionErrorData.length > 0 && dimensionTimeData.length > 0) {
+        renderThemeMetricChart(container, "chart-theme-dimension-aggregated", "Graph Themes: 2.5D vs 3D", graphParticipantCount, dimensionErrorData, dimensionTimeData, {
+          secondColumnHeader: "Chart",
+          posStrategyFactor: 0.34,
+          labelFormatter: d => formatChartDimension(d.estrategia),
+          labelFontSize: "12pt",
+          groupLabelFontSize: "9pt"
+        });
+      }
     }
 
     function renderRankingChart(svg, data, title) {
@@ -1025,8 +1335,15 @@
 
     // --- LÓGICA PRINCIPAL ---
     const jsonFilePath = "../../results.json";
+    const themeParticipantMapPath = "codings/theme_participant_map.json";
 
-    d3.json(jsonFilePath).then(rawJsonData => {
+    Promise.all([
+      d3.json(jsonFilePath),
+      d3.json(themeParticipantMapPath).catch(error => {
+        console.warn(`Theme participant map not loaded from ${themeParticipantMapPath}:`, error);
+        return null;
+      })
+    ]).then(([rawJsonData, themeParticipantMap]) => {
       console.log(`Carregado ${rawJsonData.length} registros de: ${jsonFilePath}`);
 
       const allLogs = transformData(rawJsonData);
@@ -1261,6 +1578,8 @@
         svgRankingMode.attr("width", 400).attr("height", 50);
         svgRankingMode.append("text").attr("x", 10).attr("y", 30).text(`⚠️ Sem dados para ranking de modos.`).style("fill", "red");
       }
+
+      renderThemePerformanceCharts(filteredLogs, themeParticipantMap, uniqueTasks);
     }).catch(error => {
       console.error("Erro ao carregar o JSON:", error);
       d3.select("body").insert("p", ":first-child")
