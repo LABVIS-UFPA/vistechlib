@@ -162,7 +162,19 @@
             right: 1rem;
             z-index: 5;
             display: flex;
+            flex-direction: column;
             gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .left-controls-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .left-controls-filter {
+            width: 220px;
+            background: rgba(255, 255, 255, 0.95);
         }
 
         .right-controls {
@@ -411,9 +423,13 @@
         <div id="leftPanel" class="panel">
             <h2 class="panel-title">1. Trechos Conectados por Categorias em Comum</h2>
             <div class="left-controls" id="leftControls" style="display: none;">
-                <button class="icon-btn" id="btnDownloadSvgLeft" title="Baixar SVG">💾</button>
-                <button class="icon-btn" id="btnToggleForce" title="Pausar/Ativar Força">⏸️</button>
-                <button class="icon-btn" id="btnResetPositions" title="Reiniciar Posições Aleatoriamente">🔄️</button>
+                <div class="left-controls-buttons">
+                    <button class="icon-btn" id="btnDownloadSvgLeft" title="Baixar SVG">💾</button>
+                    <button class="icon-btn" id="btnToggleForce" title="Pausar/Ativar Força">⏸️</button>
+                    <button class="icon-btn" id="btnResetPositions" title="Reiniciar Posições Aleatoriamente">🔄️</button>
+                </div>
+                <input type="text" id="leftFilterInput" class="left-controls-filter"
+                    placeholder="Filtrar trechos por texto...">
             </div>
             <svg id="svgLeft"></svg>
         </div>
@@ -480,6 +496,7 @@
         let isForceActiveRight = true;
         let selectedRightNodes = new Map();
         let rightNodesMap = {};
+        let leftFilterText = "";
 
         let simulationLeft, simulationRight;
 
@@ -618,6 +635,11 @@
             } finally {
                 btn.disabled = false;
             }
+        });
+
+        document.getElementById('leftFilterInput').addEventListener('input', function (event) {
+            leftFilterText = event.target.value.trim().toLowerCase();
+            applyLeftNodeFilter();
         });
 
         // ==========================================
@@ -840,8 +862,21 @@
             node.append("title")
                 .text(d => `Trecho: "${getLocalizedStr(d, 'text')}"\n\nCodificadores: ${d.coders}\nQtd Categorias: ${d.categories.length}\nOrigem: ${d.participants}\n1º Rank: ${d.firstRank}`);
 
+            applyLeftNodeFilter();
+
             simulationLeft.on("tick", updateLeftDOM);
             simulationLeft.on("end", saveLeftPositions);
+        }
+
+        function applyLeftNodeFilter() {
+            const normalizedFilter = leftFilterText.trim().toLowerCase();
+
+            d3.select("#svgLeft").selectAll(".node-left")
+                .style("opacity", d => {
+                    if (!normalizedFilter) return 1;
+                    const nodeText = getLocalizedStr(d, 'text').toLowerCase();
+                    return nodeText.includes(normalizedFilter) ? 1 : 0.3;
+                });
         }
 
         function updateLeftDOM() {

@@ -7,10 +7,91 @@
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            max-width: 900px;
-            margin: 2rem auto;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
             color: #333;
             background-color: #fafafa;
+        }
+        .app-shell {
+            max-width: 1600px;
+            margin: 1.5rem auto;
+            padding: 0 1rem 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .chart-sidebar {
+            width: 320px;
+            position: sticky;
+            top: 1.5rem;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+        }
+        .chart-sidebar h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+        .chart-sidebar .sidebar-hint {
+            margin: 0 0 1rem 0;
+            color: #6b7280;
+            font-size: 0.92rem;
+        }
+        .chart-sidebar .sidebar-section {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .chart-sidebar .sidebar-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        .chart-sidebar label {
+            display: block;
+            font-size: 0.85rem;
+            color: #4b5563;
+            margin-bottom: 0.35rem;
+        }
+        .chart-sidebar input {
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 0.6rem;
+        }
+        .chart-sidebar .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.6rem;
+        }
+        .chart-sidebar .field-group {
+            margin-bottom: 0.75rem;
+        }
+        .chart-sidebar .field-group.is-hidden {
+            display: none;
+        }
+        .chart-sidebar .chart-meta {
+            font-size: 0.9rem;
+            color: #111827;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 0.65rem;
+            margin-bottom: 0.85rem;
+        }
+        .chart-sidebar button {
+            width: 100%;
+            margin-top: 0.25rem;
+        }
+        .chart-sidebar button + button {
+            margin-top: 0.5rem;
         }
         .controls {
             background: #fff;
@@ -26,6 +107,43 @@
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             position: relative;
+        }
+        .plot-container.is-selected {
+            outline: 2px solid #4e79a7;
+            outline-offset: 2px;
+        }
+        .section-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        .title-area {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background: #f3f4f6;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            user-select: none;
+        }
+        .title-area h2 {
+            margin: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+            font-size: 1.2rem;
+        }
+        .title-toggle {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        .section-content {
+            padding: 1.5rem;
+        }
+        .section-content.is-collapsed {
+            display: none;
         }
         h2 { border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; }
         h3 { color: #555; margin-top: 0; font-size: 1.1rem; }
@@ -81,14 +199,88 @@
     <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
 </head>
 <body>
+    <div class="app-shell">
+        <div class="main-content">
+            <div class="controls">
+                <h2>Painel de Resultados do Experimento</h2>
+                <p>Selecione o arquivo JSON contendo o array com os dados dos participantes.</p>
+                <input type="file" id="fileInput" accept=".json" />
+            </div>
 
-    <div class="controls">
-        <h2>Painel de Resultados do Experimento</h2>
-        <p>Selecione o arquivo JSON contendo o array com os dados dos participantes.</p>
-        <input type="file" id="fileInput" accept=".json" />
+            <div class="section-container">
+                <div class="title-area" data-target="plotsArea">
+                    <h2>Respostas por Tarefa e Base</h2>
+                    <span class="title-toggle">▼</span>
+                </div>
+                <div id="plotsArea" class="section-content"></div>
+            </div>
+
+            <div class="section-container">
+                <div class="title-area" data-target="questionnairePlotsArea">
+                    <h2>Questionários</h2>
+                    <span class="title-toggle">▼</span>
+                </div>
+                <div id="questionnairePlotsArea" class="section-content"></div>
+            </div>
+
+            <div class="section-container">
+                <div class="title-area" data-target="correlationPlotsArea">
+                    <h2>Correlações</h2>
+                    <span class="title-toggle">▼</span>
+                </div>
+                <div id="correlationPlotsArea" class="section-content"></div>
+            </div>
+        </div>
+
+        <aside class="chart-sidebar" id="chartSidebar">
+            <h3>Configurar gráfico</h3>
+            <p class="sidebar-hint">Clique em um gráfico para editar largura, altura, domínio e ponto.</p>
+            <div class="chart-meta" id="chartSidebarMeta">Nenhum gráfico selecionado.</div>
+
+            <div class="sidebar-section">
+                <div class="grid-2">
+                    <div>
+                        <label for="chartWidthInput">Largura (px)</label>
+                        <input type="number" id="chartWidthInput" min="100" step="1">
+                    </div>
+                    <div>
+                        <label for="chartHeightInput">Altura (px)</label>
+                        <input type="number" id="chartHeightInput" min="100" step="1">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label for="pointSizeInput">Tamanho do ponto</label>
+                        <input type="number" id="pointSizeInput" min="1" step="1">
+                    </div>
+                    <div>
+                        <label for="pointOpacityInput">Opacidade</label>
+                        <input type="number" id="pointOpacityInput" min="0" max="1" step="0.05">
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="field-group" id="xDomainGroup">
+                    <label>Domínio X</label>
+                    <div class="grid-2">
+                        <input type="number" id="xDomainMinInput" step="any" placeholder="Mínimo">
+                        <input type="number" id="xDomainMaxInput" step="any" placeholder="Máximo">
+                    </div>
+                </div>
+                <div class="field-group" id="yDomainGroup">
+                    <label>Domínio Y</label>
+                    <div class="grid-2">
+                        <input type="number" id="yDomainMinInput" step="any" placeholder="Mínimo">
+                        <input type="number" id="yDomainMaxInput" step="any" placeholder="Máximo">
+                    </div>
+                </div>
+            </div>
+
+            <button id="btnResetChartSidebar" type="button">Restaurar padrão</button>
+            <button id="btnDownloadChartSvg" type="button">Baixar SVG do gráfico</button>
+        </aside>
     </div>
-
-    <div id="plotsArea"></div>
 
     <script>
         // Estado global para armazenar os dados carregados e o estado de toggle de cada gráfico
@@ -102,6 +294,22 @@
         const colorRange = ["#4e79a7", "#f28e2c", "#e15759"]; // Azul, Laranja, Vermelho
         const symbolDomain = ["psb25d", "psb3d"];
         const symbolRange = ["circle", "square"];
+        const confidenceMap = {
+            "Muito Baixa": 1,
+            "Baixa": 2,
+            "Média": 3,
+            "Alta": 4,
+            "Muito Alta": 5
+        };
+        const confidenceTicks = Object.entries(confidenceMap)
+            .sort((a, b) => a[1] - b[1]);
+
+        const chartRegistry = new Map();
+        let selectedChartId = null;
+        let chartSequence = 0;
+
+        initializeCollapsibleSections();
+        initializeChartSidebar();
 
         // Evento de upload de arquivo
         document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -125,31 +333,484 @@
             reader.readAsText(file);
         });
 
-        function renderPlots(usersData) {
-            const container = document.getElementById('plotsArea');
-            container.innerHTML = ''; 
+        function getVisParts(visualizationId) {
+            const parts = (visualizationId || '').split('_');
+            return {
+                type: parts[0] || 'Desconhecido',
+                mode: parts[1] || 'Desconhecido'
+            };
+        }
 
-            let flatData = [];
+        function getNasaTlxWorkload(visTlx) {
+            const mental = visTlx.mentalDemand;
+            const temporal = visTlx.temporalDemand;
+            const performance = visTlx.performance;
+            const effort = visTlx.effort;
+            const frustration = visTlx.frustration;
 
-            usersData.forEach((user, userIndex) => {
-                if (user.experimentData && user.experimentData.blocks) {
-                    user.experimentData.blocks.forEach(block => {
-                        const parts = block.visualizationId.split('_');
-                        const type = parts[0] || "Desconhecido";
-                        const mode = parts[1] || "Desconhecido";
+            if ([mental, temporal, performance, effort, frustration].some(value => value === null || value === undefined)) {
+                return null;
+            }
 
-                        flatData.push({
-                            userIndex: userIndex,
-                            task: block.taskKey,
-                            dataset: block.datasetId,
-                            visType: type,
-                            visMode: mode,
-                            answer: block.answerNumber,
-                            correctAnswer: block.correctAnswer
-                        });
-                    });
+            const performanceInverted = 100 - performance;
+            return (mental + temporal + performanceInverted + effort + frustration) / 5;
+        }
+
+        function getBlockLookup(blocks) {
+            const lookup = new Map();
+
+            (blocks || []).forEach(block => {
+                const key = `${block.taskKey}::${block.visualizationId}`;
+                lookup.set(key, block);
+            });
+
+            return lookup;
+        }
+
+        function getTlxLookup(blockNasaTlx) {
+            const lookup = new Map();
+
+            (blockNasaTlx || []).forEach(tlxBlock => {
+                (tlxBlock.visualizations || []).forEach(visTlx => {
+                    const key = `${tlxBlock.taskKey}::${visTlx.visualizationId}`;
+                    lookup.set(key, visTlx);
+                });
+            });
+
+            return lookup;
+        }
+
+        function initializeChartSidebar() {
+            const inputIds = [
+                'chartWidthInput',
+                'chartHeightInput',
+                'pointSizeInput',
+                'pointOpacityInput',
+                'xDomainMinInput',
+                'xDomainMaxInput',
+                'yDomainMinInput',
+                'yDomainMaxInput'
+            ];
+
+            inputIds.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', applySidebarChanges);
                 }
             });
+
+            const resetButton = document.getElementById('btnResetChartSidebar');
+            if (resetButton) {
+                resetButton.addEventListener('click', resetSelectedChartSettings);
+            }
+
+            const downloadButton = document.getElementById('btnDownloadChartSvg');
+            if (downloadButton) {
+                downloadButton.addEventListener('click', downloadSelectedChartSvg);
+            }
+
+            updateChartSidebar();
+        }
+
+        function downloadSelectedChartSvg() {
+            const meta = chartRegistry.get(selectedChartId);
+            if (!meta || !meta.wrapper) {
+                alert('Selecione um gráfico para baixar o SVG.');
+                return;
+            }
+
+            const figure = meta.wrapper.querySelector('figure');
+            const svgCandidates = figure
+                ? figure.querySelectorAll('svg')
+                : meta.wrapper.querySelectorAll('svg');
+            const svg = svgCandidates.length > 0
+                ? svgCandidates[svgCandidates.length - 1]
+                : null;
+            if (!svg) {
+                alert('Não foi possível encontrar o SVG do gráfico selecionado.');
+                return;
+            }
+
+            const serializer = new XMLSerializer();
+            const svgString = serializer.serializeToString(svg);
+            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const safeTitle = (meta.title || 'grafico')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${safeTitle || 'grafico'}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(url);
+        }
+
+        function createDefaultChartConfig(kind) {
+            return {
+                width: 850,
+                height: kind === 'scatter' ? 320 : 250,
+                pointSize: 6,
+                pointOpacity: 0.8,
+                xDomainMin: '',
+                xDomainMax: '',
+                yDomainMin: '',
+                yDomainMax: ''
+            };
+        }
+
+        function registerChart(meta) {
+            chartRegistry.set(meta.id, meta);
+            return meta.id;
+        }
+
+        function clearCharts() {
+            chartRegistry.clear();
+            selectedChartId = null;
+        }
+
+        function parseOptionalNumber(value) {
+            if (value === '' || value === null || value === undefined) return '';
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : '';
+        }
+
+        function readSelectedChartConfig() {
+            const meta = chartRegistry.get(selectedChartId);
+            if (!meta) return null;
+
+            return {
+                width: parseOptionalNumber(document.getElementById('chartWidthInput')?.value),
+                height: parseOptionalNumber(document.getElementById('chartHeightInput')?.value),
+                pointSize: parseOptionalNumber(document.getElementById('pointSizeInput')?.value),
+                pointOpacity: parseOptionalNumber(document.getElementById('pointOpacityInput')?.value),
+                xDomainMin: parseOptionalNumber(document.getElementById('xDomainMinInput')?.value),
+                xDomainMax: parseOptionalNumber(document.getElementById('xDomainMaxInput')?.value),
+                yDomainMin: parseOptionalNumber(document.getElementById('yDomainMinInput')?.value),
+                yDomainMax: parseOptionalNumber(document.getElementById('yDomainMaxInput')?.value)
+            };
+        }
+
+        function applySidebarChanges() {
+            const meta = chartRegistry.get(selectedChartId);
+            if (!meta) return;
+
+            const nextConfig = readSelectedChartConfig();
+            if (!nextConfig) return;
+
+            meta.config = {
+                ...meta.config,
+                ...nextConfig
+            };
+            meta.render();
+            updateChartSidebar();
+        }
+
+        function resetSelectedChartSettings() {
+            const meta = chartRegistry.get(selectedChartId);
+            if (!meta) return;
+
+            meta.config = createDefaultChartConfig(meta.kind);
+            meta.render();
+            updateChartSidebar();
+        }
+
+        function selectChart(chartId) {
+            selectedChartId = chartId;
+            updateSelectedChartStyles();
+            updateChartSidebar();
+        }
+
+        function updateSelectedChartStyles() {
+            chartRegistry.forEach(meta => {
+                if (meta.wrapper) {
+                    meta.wrapper.classList.toggle('is-selected', meta.id === selectedChartId);
+                }
+            });
+        }
+
+        function updateChartSidebar() {
+            const meta = chartRegistry.get(selectedChartId);
+            const metaBox = document.getElementById('chartSidebarMeta');
+            const yGroup = document.getElementById('yDomainGroup');
+            const inputIds = [
+                'chartWidthInput',
+                'chartHeightInput',
+                'pointSizeInput',
+                'pointOpacityInput',
+                'xDomainMinInput',
+                'xDomainMaxInput',
+                'yDomainMinInput',
+                'yDomainMaxInput'
+            ];
+
+            if (!meta) {
+                if (metaBox) metaBox.textContent = 'Nenhum gráfico selecionado.';
+                inputIds.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) input.value = '';
+                });
+                if (yGroup) yGroup.classList.add('is-hidden');
+                inputIds.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) input.disabled = true;
+                });
+                return;
+            }
+
+            if (metaBox) {
+                metaBox.textContent = `Selecionado: ${meta.title}`;
+            }
+
+            const config = meta.config || createDefaultChartConfig(meta.kind);
+            document.getElementById('chartWidthInput').value = config.width ?? '';
+            document.getElementById('chartHeightInput').value = config.height ?? '';
+            document.getElementById('pointSizeInput').value = config.pointSize ?? '';
+            document.getElementById('pointOpacityInput').value = config.pointOpacity ?? '';
+            document.getElementById('xDomainMinInput').value = config.xDomainMin ?? '';
+            document.getElementById('xDomainMaxInput').value = config.xDomainMax ?? '';
+            document.getElementById('yDomainMinInput').value = config.yDomainMin ?? '';
+            document.getElementById('yDomainMaxInput').value = config.yDomainMax ?? '';
+
+            if (yGroup) {
+                yGroup.classList.toggle('is-hidden', !meta.supportsYDomain);
+            }
+
+            inputIds.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) input.disabled = false;
+            });
+        }
+
+        function normalizeDomain(minValue, maxValue) {
+            if (minValue === '' || maxValue === '') return null;
+            return [minValue, maxValue];
+        }
+
+        function basePlotOptions(config, xLabel, supportsYDomain = false, yLabel = null) {
+            const options = {
+                width: config.width || 850,
+                height: config.height || (supportsYDomain ? 320 : 250),
+                marginLeft: 40,
+                marginRight: 40,
+                x: {
+                    label: xLabel,
+                    grid: true,
+                    ...(normalizeDomain(config.xDomainMin, config.xDomainMax) ? { domain: normalizeDomain(config.xDomainMin, config.xDomainMax) } : {})
+                },
+                color: {
+                    legend: true,
+                    label: "Modo de Configuração",
+                    domain: colorDomain,
+                    range: colorRange
+                },
+                symbol: {
+                    legend: true,
+                    label: "Tipo de Visualização",
+                    domain: symbolDomain,
+                    range: symbolRange
+                }
+            };
+
+            if (supportsYDomain) {
+                options.y = {
+                    label: yLabel || '',
+                    grid: true,
+                    ...(normalizeDomain(config.yDomainMin, config.yDomainMax) ? { domain: normalizeDomain(config.yDomainMin, config.yDomainMax) } : {})
+                };
+            }
+
+            return options;
+        }
+
+        function initializeCollapsibleSections() {
+            document.querySelectorAll('.title-area').forEach(titleArea => {
+                titleArea.addEventListener('click', () => {
+                    const targetId = titleArea.dataset.target;
+                    const target = document.getElementById(targetId);
+                    if (!target) return;
+
+                    const isCollapsed = target.classList.toggle('is-collapsed');
+                    const toggle = titleArea.querySelector('.title-toggle');
+                    if (toggle) {
+                        toggle.textContent = isCollapsed ? '▶' : '▼';
+                    }
+                });
+            });
+        }
+
+        function calculateLogError(block) {
+            const epsilon = 1e-9;
+            const answer = Number(block.answerNumber);
+            const correctAnswer = Number(block.correctAnswer);
+
+            if (block.taskKey === 'T1') {
+                if (block.isCorrect === true) return 0;
+                if (block.isCorrect === false) return 1;
+                return NaN;
+            }
+
+            if (isNaN(answer) || isNaN(correctAnswer)) {
+                return NaN;
+            }
+
+            return Math.abs(Math.log10((answer + epsilon) / (correctAnswer + epsilon)));
+        }
+
+        function calculateRawError(block) {
+            const answer = Number(block.answerNumber);
+            const correctAnswer = Number(block.correctAnswer);
+
+            if (block.taskKey === 'T1') {
+                if (block.isCorrect === true) return 0;
+                if (block.isCorrect === false) return 1;
+                return NaN;
+            }
+
+            if (isNaN(answer) || isNaN(correctAnswer)) {
+                return NaN;
+            }
+
+            return Math.abs(answer - correctAnswer);
+        }
+
+        function createBasePlotConfig(xLabel) {
+            return {
+                width: 850,
+                height: 250,
+                marginLeft: 40,
+                marginRight: 40,
+                x: {
+                    label: xLabel,
+                    grid: true
+                },
+                color: {
+                    legend: true,
+                    label: "Modo de Configuração",
+                    domain: colorDomain,
+                    range: colorRange
+                },
+                symbol: {
+                    legend: true,
+                    label: "Tipo de Visualização",
+                    domain: symbolDomain,
+                    range: symbolRange
+                }
+            };
+        }
+
+        function renderPlots(usersData) {
+            clearCharts();
+            const derivedData = buildDerivedData(usersData);
+            renderAnswerPlots(derivedData.answerData);
+            renderQuestionnairePlots(derivedData.confidenceData, derivedData.tlxData);
+            renderCorrelationPlots(derivedData.correlationData);
+
+            const firstChartId = chartRegistry.keys().next().value;
+            if (firstChartId) {
+                selectChart(firstChartId);
+            } else {
+                updateChartSidebar();
+            }
+        }
+
+        function buildDerivedData(usersData) {
+            const answerData = [];
+            const confidenceData = [];
+            const tlxData = [];
+            const correlationData = [];
+
+            usersData.forEach((user, userIndex) => {
+                const expData = user.experimentData;
+                if (!expData) return;
+
+                const blockLookup = getBlockLookup(expData.blocks);
+                const tlxLookup = getTlxLookup(expData.blockNasaTlx);
+
+                (expData.blocks || []).forEach(block => {
+                    const visParts = getVisParts(block.visualizationId);
+                    const answerRecord = {
+                        userIndex,
+                        task: block.taskKey,
+                        dataset: block.datasetId,
+                        visType: visParts.type,
+                        visMode: visParts.mode,
+                        answer: block.answerNumber,
+                        correctAnswer: block.correctAnswer
+                    };
+                    answerData.push(answerRecord);
+
+                    const confidenceValue = confidenceMap[block.confidence];
+                    if (confidenceValue) {
+                        confidenceData.push({
+                            userIndex,
+                            task: block.taskKey,
+                            dataset: block.datasetId,
+                            visType: visParts.type,
+                            visMode: visParts.mode,
+                            value: confidenceValue,
+                            confidenceLabel: block.confidence
+                        });
+                    }
+
+                    const tlxEntry = tlxLookup.get(`${block.taskKey}::${block.visualizationId}`);
+                    const tlxScore = tlxEntry ? getNasaTlxWorkload(tlxEntry) : null;
+
+                    correlationData.push({
+                        userIndex,
+                        task: block.taskKey,
+                        dataset: block.datasetId,
+                        visType: visParts.type,
+                        visMode: visParts.mode,
+                        timeSeconds: block.timeOnBlockTaskScreenSeconds ?? (block.timeOnBlockTaskScreenMs != null ? block.timeOnBlockTaskScreenMs / 1000 : null),
+                        confidenceValue: confidenceValue ?? null,
+                        confidenceLabel: block.confidence || null,
+                        logError: calculateLogError(block),
+                        rawError: calculateRawError(block),
+                        tlxScore,
+                        mentalDemand: tlxEntry ? tlxEntry.mentalDemand : null,
+                        temporalDemand: tlxEntry ? tlxEntry.temporalDemand : null,
+                        performance: tlxEntry ? tlxEntry.performance : null,
+                        effort: tlxEntry ? tlxEntry.effort : null,
+                        frustration: tlxEntry ? tlxEntry.frustration : null
+                    });
+                });
+
+                (expData.blockNasaTlx || []).forEach(tlxBlock => {
+                    (tlxBlock.visualizations || []).forEach(visTlx => {
+                        const workload = getNasaTlxWorkload(visTlx);
+                        if (workload === null) return;
+
+                        const visParts = getVisParts(visTlx.visualizationId);
+                        const relatedBlock = blockLookup.get(`${tlxBlock.taskKey}::${visTlx.visualizationId}`);
+                        tlxData.push({
+                            userIndex,
+                            task: tlxBlock.taskKey,
+                            dataset: relatedBlock ? relatedBlock.datasetId : 'Desconhecida',
+                            visType: visParts.type,
+                            visMode: visParts.mode,
+                            value: workload,
+                            mentalDemand: visTlx.mentalDemand,
+                            temporalDemand: visTlx.temporalDemand,
+                            performance: visTlx.performance,
+                            effort: visTlx.effort,
+                            frustration: visTlx.frustration
+                        });
+                    });
+                });
+            });
+
+            return { answerData, confidenceData, tlxData, correlationData };
+        }
+
+        function renderAnswerPlots(flatData) {
+            const container = document.getElementById('plotsArea');
+            container.innerHTML = ''; 
 
             const groupedData = d3.group(flatData, d => d.task, d => d.dataset);
 
@@ -187,98 +848,342 @@
 
                     // Decide quais dados vão para o gráfico baseado no estado
                     const plotData = isMerged ? dataPoints : actualNormalData;
+                    const chartId = `chart-${++chartSequence}`;
+                    const chartConfig = createDefaultChartConfig('beeswarm');
+                    const chartTitle = `Tarefa: ${task} | Base de Dados: ${dataset}`;
+                    const chartMeta = {
+                        id: chartId,
+                        kind: 'beeswarm',
+                        title: chartTitle,
+                        wrapper,
+                        supportsYDomain: false,
+                        config: chartConfig,
+                        render: null
+                    };
 
-                    // Construção do Beeswarm
-                    const plot = Plot.plot({
-                        width: 850,
-                        height: 250,
-                        marginLeft: 40,
-                        marginRight: 40,
-                        x: { 
-                            label: "Valor da Resposta (Bruto) →",
-                            grid: true
-                        },
-                        color: { 
-                            legend: true,
-                            label: "Modo de Configuração",
-                            domain: colorDomain,
-                            range: colorRange
-                        },
-                        symbol: { 
-                            legend: true,
-                            label: "Tipo de Visualização",
-                            domain: symbolDomain,
-                            range: symbolRange
-                        },
-                        marks: [
-                            Plot.ruleX([targetValue], { 
-                                stroke: "red", 
-                                strokeWidth: 2, 
-                                strokeDasharray: "4,4",
-                                title: d => `Gabarito: ${targetValue}` 
-                            }),
-                            Plot.dot(plotData, Plot.dodgeY({
-                                x: "answer",
-                                fill: "visMode",
-                                symbol: "visType",
-                                r: 6,
-                                title: d => `Usuário (Index): ${d.userIndex}\nResp: ${d.answer}\nCorreto: ${d.correctAnswer}\nTipo: ${d.visType}\nModo: ${d.visMode}`
-                            }))
-                        ]
-                    });
+                    chartMeta.render = () => {
+                        wrapper.innerHTML = '';
+                        wrapper.classList.toggle('is-selected', selectedChartId === chartId);
 
-                    wrapper.appendChild(plot);
+                        const title = document.createElement('h3');
+                        title.textContent = chartTitle;
+                        wrapper.appendChild(title);
 
-                    // Renderiza a caixa de controle de outliers SE houver outliers detectados
-                    if (actualOutlierData.length > 0) {
-                        const controlsDiv = document.createElement('div');
-                        controlsDiv.className = 'top-right-controls';
-                        
-                        const outLabel = document.createElement('span');
-                        outLabel.className = 'outliers-label';
-                        
-                        if (!isMerged) {
-                            outLabel.textContent = `Outliers (${actualOutlierData.length}):`;
-                            controlsDiv.appendChild(outLabel);
-                            
-                            // Renderiza os pontos na caixa apenas se estiverem separados
-                            actualOutlierData.forEach(d => {
-                                const colorIdx = colorDomain.indexOf(d.visMode);
-                                const color = colorIdx >= 0 ? colorRange[colorIdx] : "#000";
-                                const isCircle = d.visType === "psb25d"; 
-                                
-                                const dot = document.createElement('div');
-                                dot.className = 'outlier-dot';
-                                dot.style.backgroundColor = color;
-                                dot.style.borderRadius = isCircle ? "50%" : "0%";
-                                dot.title = `⚠️ OUTLIER\nUsuário (Index): ${d.userIndex}\nResp: ${d.answer}\nCorreto: ${d.correctAnswer}\nTipo: ${d.visType}\nModo: ${d.visMode}`;
-                                
-                                controlsDiv.appendChild(dot);
-                            });
-                        } else {
-                            outLabel.textContent = `Outliers plotados`;
-                            controlsDiv.appendChild(outLabel);
-                        }
+                        const targetValue = dataPoints[0].correctAnswer;
+                        const currentPlotData = chartMeta.config.pointOpacity === 0 ? plotData : plotData;
 
-                        // Botão Toggle Individual
-                        const btn = document.createElement('button');
-                        btn.className = 'toggle-btn-small';
-                        // Se estão separados (!isMerged), o botão mostra ⬇️ para juntar. Se estão juntos (isMerged), mostra ⬆️ para separar.
-                        btn.textContent = isMerged ? "⬆️" : "⬇️";
-                        btn.title = isMerged ? "Remover outliers do gráfico" : "Colocar outliers de volta no gráfico";
-                        
-                        btn.addEventListener('click', () => {
-                            mergedStates[stateKey] = !isMerged;
-                            renderPlots(currentUsersData); // Re-renderiza tudo para aplicar o novo estado
+                        dataPoints.sort((a, b) => d3.ascending(a.answer, b.answer));
+                        const answers = dataPoints.map(d => d.answer);
+                        const q1 = d3.quantile(answers, 0.25);
+                        const q3 = d3.quantile(answers, 0.75);
+                        const iqr = q3 - q1;
+                        const lowerBound = q1 - 1.5 * iqr;
+                        const upperBound = q3 + 1.5 * iqr;
+
+                        const actualNormalData = dataPoints.filter(d => d.answer >= lowerBound && d.answer <= upperBound);
+                        const actualOutlierData = dataPoints.filter(d => d.answer < lowerBound || d.answer > upperBound);
+                        const plotDataForRender = isMerged ? dataPoints : actualNormalData;
+
+                        const plot = Plot.plot({
+                            ...basePlotOptions(chartMeta.config, "Valor da Resposta (Bruto) →"),
+                            marks: [
+                                Plot.ruleX([targetValue], {
+                                    stroke: "red",
+                                    strokeWidth: 2,
+                                    strokeDasharray: "4,4",
+                                    title: d => `Gabarito: ${targetValue}`
+                                }),
+                                Plot.dot(plotDataForRender, Plot.dodgeY({
+                                    x: "answer",
+                                    fill: "visMode",
+                                    symbol: "visType",
+                                    r: chartMeta.config.pointSize || 6,
+                                    opacity: chartMeta.config.pointOpacity ?? 0.8,
+                                    title: d => `Usuário (Index): ${d.userIndex}\nResp: ${d.answer}\nCorreto: ${d.correctAnswer}\nTipo: ${d.visType}\nModo: ${d.visMode}`
+                                }))
+                            ]
                         });
 
-                        controlsDiv.appendChild(btn);
-                        wrapper.appendChild(controlsDiv);
-                    }
+                        plot.style.cursor = 'pointer';
+                        plot.addEventListener('click', () => selectChart(chartId));
+                        wrapper.appendChild(plot);
+
+                        if (actualOutlierData.length > 0) {
+                            const controlsDiv = document.createElement('div');
+                            controlsDiv.className = 'top-right-controls';
+
+                            const outLabel = document.createElement('span');
+                            outLabel.className = 'outliers-label';
+
+                            if (!isMerged) {
+                                outLabel.textContent = `Outliers (${actualOutlierData.length}):`;
+                                controlsDiv.appendChild(outLabel);
+
+                                actualOutlierData.forEach(d => {
+                                    const colorIdx = colorDomain.indexOf(d.visMode);
+                                    const color = colorIdx >= 0 ? colorRange[colorIdx] : "#000";
+                                    const isCircle = d.visType === "psb25d";
+
+                                    const dot = document.createElement('div');
+                                    dot.className = 'outlier-dot';
+                                    dot.style.backgroundColor = color;
+                                    dot.style.borderRadius = isCircle ? "50%" : "0%";
+                                    dot.title = `⚠️ OUTLIER\nUsuário (Index): ${d.userIndex}\nResp: ${d.answer}\nCorreto: ${d.correctAnswer}\nTipo: ${d.visType}\nModo: ${d.visMode}`;
+
+                                    controlsDiv.appendChild(dot);
+                                });
+                            } else {
+                                outLabel.textContent = `Outliers plotados`;
+                                controlsDiv.appendChild(outLabel);
+                            }
+
+                            const btn = document.createElement('button');
+                            btn.className = 'toggle-btn-small';
+                            btn.textContent = isMerged ? "⬆️" : "⬇️";
+                            btn.title = isMerged ? "Remover outliers do gráfico" : "Colocar outliers de volta no gráfico";
+
+                            btn.addEventListener('click', () => {
+                                mergedStates[stateKey] = !isMerged;
+                                renderPlots(currentUsersData);
+                            });
+
+                            controlsDiv.appendChild(btn);
+                            wrapper.appendChild(controlsDiv);
+                        }
+                    };
+
+                    registerChart(chartMeta);
+                    chartMeta.render();
 
                     container.appendChild(wrapper);
                 });
             });
+        }
+
+        function renderQuestionnairePlots(confidenceData, tlxData) {
+            const container = document.getElementById('questionnairePlotsArea');
+            container.innerHTML = '';
+
+            appendGroupedQuestionnairePlots(container, confidenceData, {
+                sectionTitle: 'Nível de Confiança',
+                xLabel: 'Nível de Confiança →',
+                xOptions: {
+                    domain: [1, 5],
+                    ticks: confidenceTicks.map(([, value]) => value),
+                    tickFormat: value => {
+                        const found = confidenceTicks.find(([, mappedValue]) => mappedValue === value);
+                        return found ? found[0] : value;
+                    }
+                },
+                title: d => `Usuário (Index): ${d.userIndex}\nConfiança: ${d.confidenceLabel}\nTipo: ${d.visType}\nModo: ${d.visMode}`
+            });
+
+            appendGroupedQuestionnairePlots(container, tlxData, {
+                sectionTitle: 'NASA TLX',
+                xLabel: 'Carga de Trabalho (NASA TLX) →',
+                title: d => `Usuário (Index): ${d.userIndex}\nNASA TLX: ${d.value.toFixed(1)}\nMental: ${d.mentalDemand}\nTemporal: ${d.temporalDemand}\nPerformance: ${d.performance}\nEsforço: ${d.effort}\nFrustração: ${d.frustration}\nTipo: ${d.visType}\nModo: ${d.visMode}`
+            });
+
+            appendGroupedQuestionnairePlots(container, tlxData, {
+                sectionTitle: 'NASA TLX',
+                xLabel: 'Carga de Trabalho (NASA TLX) →',
+                groupBy: d => d.dataset,
+                groupLabel: dataset => `Base de Dados: ${dataset}`,
+                title: d => `Usuário (Index): ${d.userIndex}\nBase: ${d.dataset}\nNASA TLX: ${d.value.toFixed(1)}\nMental: ${d.mentalDemand}\nTemporal: ${d.temporalDemand}\nPerformance: ${d.performance}\nEsforço: ${d.effort}\nFrustração: ${d.frustration}\nTipo: ${d.visType}\nModo: ${d.visMode}`
+            });
+        }
+
+        function renderCorrelationPlots(correlationData) {
+            const container = document.getElementById('correlationPlotsArea');
+            container.innerHTML = '';
+
+            appendScatterPlot(container, correlationData.filter(d => !isNaN(d.rawError) && d.tlxScore !== null), {
+                title: 'Erro Bruto × NASA TLX',
+                xField: d => Math.max(d.rawError, 1e-9),
+                yField: 'tlxScore',
+                xLabel: 'Erro Bruto (escala log) →',
+                yLabel: 'NASA TLX Score →',
+                xOptions: {
+                    type: 'log'
+                },
+                pointTitle: d => `Usuário (Index): ${d.userIndex}\nTarefa: ${d.task}\nBase: ${d.dataset}\nErro Bruto: ${d.rawError.toFixed(3)}\nNASA TLX: ${d.tlxScore.toFixed(1)}\nTipo: ${d.visType}\nModo: ${d.visMode}`
+            });
+
+            appendScatterPlot(container, correlationData.filter(d => d.timeSeconds !== null && d.tlxScore !== null), {
+                title: 'Tempo × NASA TLX',
+                xField: 'timeSeconds',
+                yField: 'tlxScore',
+                xLabel: 'Tempo no Trial (s) →',
+                yLabel: 'NASA TLX Score →',
+                pointTitle: d => `Usuário (Index): ${d.userIndex}\nTarefa: ${d.task}\nBase: ${d.dataset}\nTempo: ${d.timeSeconds.toFixed(2)} s\nNASA TLX: ${d.tlxScore.toFixed(1)}\nTipo: ${d.visType}\nModo: ${d.visMode}`
+            });
+
+            appendScatterPlot(container, correlationData.filter(d => d.tlxScore !== null && d.confidenceValue !== null), {
+                title: 'NASA TLX × Nível de Confiança',
+                xField: 'tlxScore',
+                yField: 'confidenceValue',
+                xLabel: 'NASA TLX Score →',
+                yLabel: 'Nível de Confiança →',
+                yOptions: {
+                    domain: [1, 5],
+                    ticks: confidenceTicks.map(([, value]) => value),
+                    tickFormat: value => {
+                        const found = confidenceTicks.find(([, mappedValue]) => mappedValue === value);
+                        return found ? found[0] : value;
+                    }
+                },
+                pointTitle: d => `Usuário (Index): ${d.userIndex}\nTarefa: ${d.task}\nBase: ${d.dataset}\nNASA TLX: ${d.tlxScore.toFixed(1)}\nConfiança: ${d.confidenceLabel}\nTipo: ${d.visType}\nModo: ${d.visMode}`
+            });
+
+            appendScatterPlot(container, correlationData.filter(d => !isNaN(d.rawError) && d.confidenceValue !== null), {
+                title: 'Erro Bruto × Nível de Confiança',
+                xField: d => Math.max(d.rawError, 1e-9),
+                yField: 'confidenceValue',
+                xLabel: 'Erro Bruto (escala log) →',
+                yLabel: 'Nível de Confiança →',
+                xOptions: {
+                    type: 'log'
+                },
+                yOptions: {
+                    domain: [1, 5],
+                    ticks: confidenceTicks.map(([, value]) => value),
+                    tickFormat: value => {
+                        const found = confidenceTicks.find(([, mappedValue]) => mappedValue === value);
+                        return found ? found[0] : value;
+                    }
+                },
+                pointTitle: d => `Usuário (Index): ${d.userIndex}\nTarefa: ${d.task}\nBase: ${d.dataset}\nErro Bruto: ${d.rawError.toFixed(3)}\nConfiança: ${d.confidenceLabel}\nTipo: ${d.visType}\nModo: ${d.visMode}`
+            });
+        }
+
+        function appendGroupedQuestionnairePlots(container, data, options) {
+            if (data.length === 0) {
+                return;
+            }
+
+            const groupBy = options.groupBy || (d => d.task);
+            const groupLabel = options.groupLabel || (value => `Tarefa: ${value}`);
+            const groupedData = d3.group(data, groupBy);
+
+            groupedData.forEach((dataPoints, groupValue) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'plot-container';
+                const chartId = `chart-${++chartSequence}`;
+                const chartMeta = {
+                    id: chartId,
+                    kind: 'beeswarm',
+                    title: `${options.sectionTitle} | ${groupLabel(groupValue)}`,
+                    wrapper,
+                    supportsYDomain: false,
+                    config: createDefaultChartConfig('beeswarm'),
+                    render: null
+                };
+
+                chartMeta.render = () => {
+                    wrapper.innerHTML = '';
+                    wrapper.classList.toggle('is-selected', selectedChartId === chartId);
+
+                    const title = document.createElement('h3');
+                    title.textContent = `${options.sectionTitle} | ${groupLabel(groupValue)}`;
+                    wrapper.appendChild(title);
+
+                    const plotOptions = basePlotOptions(chartMeta.config, options.xLabel, false);
+                    if (options.xOptions) {
+                        plotOptions.x = {
+                            ...plotOptions.x,
+                            ...options.xOptions
+                        };
+                    }
+
+                    const plot = Plot.plot({
+                        ...plotOptions,
+                        marks: [
+                            Plot.dot(dataPoints, Plot.dodgeY({
+                                x: 'value',
+                                fill: 'visMode',
+                                symbol: 'visType',
+                                r: chartMeta.config.pointSize || 6,
+                                opacity: chartMeta.config.pointOpacity ?? 0.8,
+                                title: options.title
+                            }))
+                        ]
+                    });
+
+                    plot.style.cursor = 'pointer';
+                    plot.addEventListener('click', () => selectChart(chartId));
+                    wrapper.appendChild(plot);
+                };
+
+                registerChart(chartMeta);
+                chartMeta.render();
+                container.appendChild(wrapper);
+            });
+        }
+
+        function appendScatterPlot(container, data, options) {
+            if (data.length === 0) {
+                return;
+            }
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'plot-container';
+            const chartId = `chart-${++chartSequence}`;
+            const chartMeta = {
+                id: chartId,
+                kind: 'scatter',
+                title: options.title,
+                wrapper,
+                supportsYDomain: true,
+                config: createDefaultChartConfig('scatter'),
+                render: null
+            };
+
+            chartMeta.render = () => {
+                wrapper.innerHTML = '';
+                wrapper.classList.toggle('is-selected', selectedChartId === chartId);
+
+                const title = document.createElement('h3');
+                title.textContent = options.title;
+                wrapper.appendChild(title);
+
+                const plotOptions = basePlotOptions(chartMeta.config, options.xLabel, true, options.yLabel);
+                if (options.xOptions) {
+                    plotOptions.x = {
+                        ...plotOptions.x,
+                        ...options.xOptions
+                    };
+                }
+                if (options.yOptions) {
+                    plotOptions.y = {
+                        ...plotOptions.y,
+                        ...options.yOptions
+                    };
+                }
+
+                const plot = Plot.plot({
+                    ...plotOptions,
+                    height: chartMeta.config.height || 320,
+                    marks: [
+                        Plot.dot(data, {
+                            x: options.xField,
+                            y: options.yField,
+                            fill: 'visMode',
+                            symbol: 'visType',
+                            r: chartMeta.config.pointSize || 6,
+                            opacity: chartMeta.config.pointOpacity ?? 0.8,
+                            title: options.pointTitle
+                        })
+                    ]
+                });
+
+                plot.style.cursor = 'pointer';
+                plot.addEventListener('click', () => selectChart(chartId));
+                wrapper.appendChild(plot);
+            };
+
+            registerChart(chartMeta);
+            chartMeta.render();
+            container.appendChild(wrapper);
         }
     </script>
 </body>
