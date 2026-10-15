@@ -1,104 +1,276 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
-  <title>Treemap com Outlier Empilhado</title>
+  <title>Comparação de Treemaps: Normal vs Outlier Empilhado</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
       font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8fafc;
+      color: #1e293b;
     }
 
-    #chart {
+    header {
+      background-color: #e2e8f0;
+      padding: 0.5rem 1rem;
+    }
+
+    header img {
+      height: 4rem;
+    }
+
+    main {
+      padding: 1rem 2rem;
+    }
+
+    h1 {
+      margin: 0.5rem 0;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin: 0.5rem 0 1.5rem 0;
+      color: #64748b;
+    }
+
+    #chart,
+    .charts-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: stretch;
+      gap: 1.5rem;
+      width: 100%;
+      box-sizing: border-box;
+      flex-wrap: wrap;
+    }
+
+    .chart-box {
+      flex: 1 1 500px;
+      max-width: 750px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .chart-box h2 {
+      margin: 0 0 1rem 0;
+      font-size: 1.15rem;
+      color: #334155;
+      text-align: center;
+    }
+
+    .chart-content {
+      width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    .node rect {
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    rect {
       stroke: #fff;
       stroke-width: 1px;
     }
 
-    .node text {
+    text {
       fill: white;
-      font-size: 12px;
-      pointer-events: none; /* Para que o texto não bloqueie eventos do mouse no retângulo */
+      font-size: 15px;
+      font-family: sans-serif;
+      pointer-events: none;
+      /* Para que o texto não bloqueie eventos do mouse no retângulo */
     }
   </style>
 </head>
+
 <body>
   <header class="bg-slate-200 p-2">
     <img class="h-24" src="./Imagem/logo_labvis.svg" alt="">
   </header>
 
   <main>
-    <h1 class="p-4">Gráfico de Treemap com Outlier Empilhado</h1>
-    <p class="p-4">Empilhamento do outlier em uma categoria dominante.</p>
+    <h1 class="p-4">Comparação de Gráficos Treemap</h1>
+    <p class="p-4">Treemap normal (à esquerda) e Treemap com outlier empilhado (à direita).</p>
 
-    <div id="chart" style="height: 600px; width: 90%;"></div>
+    <div id="chart" class="charts-container">
+      <!-- Div à esquerda: Treemap normal -->
+      <div id="div-esquerda" class="chart-box">
+        <h2>Treemap Normal</h2>
+        <div id="chart-normal" class="chart-content"></div>
+      </div>
+
+      <!-- Div à direita: Treemap com outlier empilhado -->
+      <div id="div-direita" class="chart-box">
+        <h2>Treemap com Outlier Empilhado</h2>
+        <div id="chart-stacked" class="chart-content"></div>
+      </div>
+    </div>
   </main>
 
   <script>
+    // Mesmo conjunto de dados para ambos os treemaps
     const originalData = {
       name: "root",
       children: [
-        { name: "Outlier", value: 500 },
+        { name: "Outlier", value: 5000 },
         { name: "A", value: 200 },
-        { name: "B", value: 150 },
-        { name: "C", value: 150 },
-        { name: "D", value: 100 },
-        { name: "E", value: 50 }
+        { name: "B", value: 250 },
+        { name: "C", value: 350 },
+        { name: "D", value: 300 },
+        { name: "E", value: 60 },
+        { name: "F", value: 30 },
+        { name: "H", value: 27 },
+        { name: "G", value: 20 }
       ]
     };
 
     const width = 800;
     const height = 500;
-    const depthOffset = 8; // Deslocamento para o efeito 3D
+    const depthOffset = 10; // Deslocamento vertical para o efeito 3D
     const nStacks = 5; // Número de camadas para o outlier
-
-    const svg = d3.select("#chart")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
 
     const color = d3.scaleOrdinal(d3.schemeTableau10);
 
-    // Criar a hierarquia de dados necessária para o treemap
-    const root = d3.hierarchy(originalData)
+    // =========================================================================
+    // 1. TREEMAP NORMAL (Div à esquerda)
+    // O outlier ocupa sua área normal proporcional, condensando os menores
+    // =========================================================================
+    const svgNormal = d3.select("#chart-normal")
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("width", "100%")
+      .attr("height", "100%");
+
+    const rootNormal = d3.hierarchy(originalData)
+      .sum(d => d.value)
+      .sort((a, b) => b.value - a.value);
+
+    const treemapLayoutNormal = d3.treemap()
+      .size([width, height])
+      .padding(2);
+
+    treemapLayoutNormal(rootNormal);
+
+    const nodesNormal = rootNormal.leaves();
+
+    const normalTreemapGroup = svgNormal.append("g").attr("class", "normal-treemap-nodes");
+
+    // Desenha todos os retângulos normalmente (o Outlier domina a área)
+    normalTreemapGroup.selectAll("rect")
+      .data(nodesNormal)
+      .join("rect")
+      .attr('x', d => d.x0)
+      .attr('y', d => d.y0)
+      .attr('width', d => d.x1 - d.x0)
+      .attr('height', d => d.y1 - d.y0)
+      .attr("fill", d => color(d.data.name))
+      .attr("stroke", "white");
+
+    // Adiciona os rótulos para todos os nós
+    normalTreemapGroup.selectAll("text")
+      .data(nodesNormal)
+      .join("text")
+      .attr("x", d => d.x0 + 5)
+      .attr("y", d => d.y0 + 20)
+      .text(d => `${d.data.name} (${d.value})`)
+      .attr("font-size", d => (d.y1 - d.y0 < 30 || d.x1 - d.x0 < 60) ? "11px" : "15px")
+      .attr("fill", "white");
+
+
+    // =========================================================================
+    // 2. TREEMAP COM OUTLIER EMPILHADO (Div à direita)
+    // Quebra o outlier para ocupar uma área 2D menor (valor / nStacks),
+    // liberando espaço para as demais categorias e empilhando as camadas com 3D/sombras.
+    // =========================================================================
+    const svgStacked = d3.select("#chart-stacked")
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("width", "100%")
+      .attr("height", "100%");
+
+    // Definições de filtros de sombra e efeitos de profundidade
+    const defs = svgStacked.append("defs");
+
+    // Sombra projetada para cada degrau da pilha no topo (efeito descendente)
+    const stackShadow = defs.append("filter")
+      .attr("id", "stack-shadow")
+      .attr("x", "-10%")
+      .attr("y", "-15%")
+      .attr("width", "125%")
+      .attr("height", "135%");
+
+    stackShadow.append("feDropShadow")
+      .attr("dx", "0")
+      .attr("dy", "-2.5")
+      .attr("stdDeviation", "2.5")
+      .attr("flood-color", "#000000")
+      .attr("flood-opacity", "0.4");
+
+    // Quebra o outlier no cálculo do layout para que ele ocupe uma área menor
+    const stackedData = {
+      name: originalData.name,
+      children: originalData.children.map(d => ({
+        name: d.name,
+        value: d.name === "Outlier" ? d.value / nStacks : d.value,
+        realValue: d.value
+      }))
+    };
+
+    // Criar a hierarquia com os dados adaptados para área reduzida
+    const rootStacked = d3.hierarchy(stackedData)
       .sum(d => d.value)
       .sort((a, b) => b.value - a.value);
 
     // Criar o layout do treemap
-    const treemapLayout = d3.treemap()
-      .size([width, height]) // O layout usa toda a área disponível
+    const treemapLayoutStacked = d3.treemap()
+      .size([width, height])
       .padding(2);
 
     // Aplicar o layout aos dados
-    treemapLayout(root);
+    treemapLayoutStacked(rootStacked);
 
-    const nodes = root.leaves(); // Pega as folhas da árvore (os retângulos)
+    const nodesStacked = rootStacked.leaves();
 
-    // Identifica o nó do outlier
-    const outlierNode = nodes.find(d => d.data.name === "Outlier");
+    // Identifica o nó do outlier (alocado na área menor)
+    const outlierNode = nodesStacked.find(d => d.data.name === "Outlier");
 
-    // A pilha será desenhada DENTRO do espaço do outlier.
-    // O retângulo é encurtado para dar espaço para a pilha crescer para cima, dentro dos limites.
+    // A pilha será desenhada DENTRO do espaço reduzido do outlier.
     const originalOutlierHeight = outlierNode.y1 - outlierNode.y0;
     const stackBaseHeight = (nStacks - 1) * depthOffset;
-    const mainOutlierHeight = originalOutlierHeight - stackBaseHeight; // A altura de cada fatia da pilha
+    const mainOutlierHeight = originalOutlierHeight - stackBaseHeight;
 
     const stackData = Array.from({ length: nStacks }, (_, i) => ({
       ...outlierNode,
-      depth_stack: i // Usando um nome de propriedade diferente para não confundir
+      depth_stack: i
     }));
 
-    // Grupo para os elementos normais
-    const normalGroup = svg.append("g").attr("class", "normal-nodes");
+    // Escala de iluminação: da camada inicial no topo até a camada frontal mais luminosa
+    const baseColor = d3.rgb(color("Outlier"));
+    const layerColorScale = d3.scaleLinear()
+      .domain([0, nStacks - 1])
+      .range([baseColor.darker(0.85), baseColor.brighter(0.15)]);
+
+    // Grupo para os elementos normais (que agora ganham mais espaço e não ficam condensados)
+    const normalGroup = svgStacked.append("g").attr("class", "normal-nodes");
 
     // Desenha os retângulos normais
     normalGroup.selectAll("rect")
-      .data(nodes.filter(d => d.data.name !== "Outlier"))
+      .data(nodesStacked.filter(d => d.data.name !== "Outlier"))
       .join("rect")
       .attr('x', d => d.x0)
       .attr('y', d => d.y0)
@@ -109,39 +281,44 @@
 
     // Adiciona os rótulos para os retângulos normais
     normalGroup.selectAll("text")
-      .data(nodes.filter(d => d.data.name !== "Outlier"))
+      .data(nodesStacked.filter(d => d.data.name !== "Outlier"))
       .join("text")
       .attr("x", d => d.x0 + 5)
       .attr("y", d => d.y0 + 20)
-      .text(d => `${d.data.name} (${d.value})`)
-      .attr("font-size", "15px")
+      .text(d => `${d.data.name} (${d.data.realValue || d.value})`)
+      .attr("font-size", d => (d.y1 - d.y0 < 30 || d.x1 - d.x0 < 60) ? "11px" : "14px")
       .attr("fill", "white");
 
-    // Grupo para o outlier empilhado
-    const outlierGroup = svg.append("g").attr("class", "outlier-node");
+    // Grupo para o outlier empilhado na área menor
+    const outlierGroup = svgStacked.append("g").attr("class", "outlier-node");
 
-    // Desenha as camadas do outlier empilhadas
-    // A direção foi invertida para empilhar para cima. A camada de baixo (depth_stack: 0) tem o maior 'y'.
-    // A camada de cima (depth_stack: n-1) tem o menor 'y' (y0), ficando no topo.
+    // Desenha as camadas do outlier empilhadas na parte de cima, descendo até a camada frontal
     outlierGroup.selectAll("rect.outlier")
-      .data(stackData) // A ordem de desenho (de 0 a n-1) garante que a camada de cima seja desenhada por último.
+      .data(stackData)
       .join("rect")
       .attr("class", "outlier")
+      .attr("rx", 4)
+      .attr("ry", 4)
       .attr('x', d => d.x0)
-      .attr('y', d => d.y0 + ( d.depth_stack) * depthOffset) // Inverte a direção do empilhamento para cima
+      .attr('y', d => d.y0 + d.depth_stack * depthOffset)
       .attr('width', d => d.x1 - d.x0)
       .attr('height', mainOutlierHeight)
-      .attr("fill", color("Outlier"))
-      .attr("stroke", "white");
+      .attr("fill", d => layerColorScale(d.depth_stack))
+      .attr("stroke", d => d.depth_stack === nStacks - 1 ? "#ffffff" : "rgba(255, 255, 255, 0.75)")
+      .attr("stroke-width", d => d.depth_stack === nStacks - 1 ? "1.5px" : "1px")
+      .style("filter", d => d.depth_stack === 0 ? null : "url(#stack-shadow)");
 
-    // Adiciona o rótulo para o outlier (apenas na camada superior)
+    // Rótulo principal do Outlier na camada frontal, posicionado abaixo dos degraus
     outlierGroup.append("text")
-      .attr("x", outlierNode.x0 + 5)
-      .attr("y", outlierNode.y0 + 60) // O topo da pilha está em y0, então o texto fica em y0 + 20
-      .text(`${outlierNode.data.name} (${outlierNode.value})`)
-      .attr("font-size", "15px")
+      .attr("x", outlierNode.x0 + 15)
+      .attr("y", outlierNode.y0 + stackBaseHeight + 35)
+      .text(`${outlierNode.data.name} (${outlierNode.data.realValue || outlierNode.value})`)
+      .attr("font-size", "17px")
+      .attr("font-weight", "bold")
       .attr("fill", "white");
+
 
   </script>
 </body>
+
 </html>

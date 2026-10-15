@@ -2,21 +2,90 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Donut com Outlier Empilhado</title>
+  <title>Comparação de Donuts: Normal vs Outlier Empilhado</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body {
       font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8fafc;
+      color: #1e293b;
     }
 
-    #chart {
+    header {
+      background-color: #e2e8f0;
+      padding: 0.5rem 1rem;
+    }
+
+    header img {
+      height: 4rem;
+    }
+
+    main {
+      padding: 1rem 2rem;
+    }
+
+    h1 {
+      margin: 0.5rem 0;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin: 0.5rem 0 1.5rem 0;
+      color: #64748b;
+    }
+
+    #chart,
+    .charts-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: stretch;
+      gap: 1.5rem;
+      width: 100%;
+      box-sizing: border-box;
+      flex-wrap: wrap;
+    }
+
+    .chart-box {
+      flex: 1 1 450px;
+      max-width: 650px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .chart-box h2 {
+      margin: 0.25rem 0 0.25rem 0;
+      font-size: 1.15rem;
+      color: #334155;
+      text-align: center;
+    }
+
+    .chart-content {
+      width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
+    svg {
+      width: 100%;
+      max-width: 460px;
+      height: auto;
+      display: block;
+    }
+
     text {
-      font-size: 12px;
+      font-family: sans-serif;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -26,99 +95,195 @@
   </header>
 
   <main>
-    <h1 class="p-4">Gráfico de Rosca com Outlier Empilhado</h1>
-    <p class="p-4">Empilhamento do outlier dentro do próprio arco.</p>
+    <h1 class="p-4">Comparação de Gráficos de Rosca (Donut)</h1>
+    <p class="p-4">Donut normal (outlier D ocupa 80%) à esquerda e Donut empilhado (quebrado para 40%) à direita.</p>
 
-    <div id="chart" style="height: 600px; width: 90%;"></div>
+    <div id="chart" class="charts-container">
+      <!-- Div à esquerda: Donut normal -->
+      <div id="div-esquerda" class="chart-box">
+        <h2>Donut Normal</h2>
+        <div id="chart-normal" class="chart-content"></div>
+      </div>
+
+      <!-- Div à direita: Donut com outlier empilhado -->
+      <div id="div-direita" class="chart-box">
+        <h2>Donut com Outlier Empilhado</h2>
+        <div id="chart-stacked" class="chart-content"></div>
+      </div>
+    </div>
   </main>
 
   <script>
+    // Conjunto de dados compartilhado (no Donut Normal, D ocupa 80% do círculo)
     const originalData = [
-      { label: "Outlier", value: 50 },  // outlier ocupa 50% do círculo
-      { label: "A", value: 20 },
-      { label: "B", value: 15 },
-      { label: "C", value: 15 }
+      { label: "D", value: 300, isOutlier: true }, // Outlier ocupa 80% do espaço no Donut Normal
+      { label: "A", value: 10 },
+      { label: "B", value: 5 },
+      { label: "F", value: 4 },
+      { label: "C", value: 5 }
     ];
 
-    const width = 600;
-    const height = 500;
-    const radius = 150;
-    const depthOffset = 12;
-    const donutThickness = 60;
+    const width = 460;
+    const height = 350;
+    const radius = 140;
+    const depthOffset = 9;
+    const donutThickness = 50;
+    const nStacks = 5;
+    const centerNormalY = 160;
+    const centerStackedY = 190;
 
-    const svg = d3.select("#chart")
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
-
-    const centerGroup = svg.append("g")
-      .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-    const total = d3.sum(originalData, d => d.value);
-
-    const pie = d3.pie()
-      .sort(null)
-      .value(d => d.value);
-
-    const arcs = pie(originalData);
+    // Escala de cores consistente para todas as fatias
+    const color = d3.scaleOrdinal()
+      .domain(originalData.map(d => d.label))
+      .range(d3.schemeTableau10);
 
     const arcGen = d3.arc()
       .innerRadius(radius - donutThickness)
       .outerRadius(radius);
 
-    const color = d3.scaleOrdinal(d3.schemeTableau10);
+    // =========================================================================
+    // 1. DONUT NORMAL (Div à esquerda - D ocupa 80% do círculo)
+    // =========================================================================
+    const svgNormal = d3.select("#chart-normal")
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("width", "100%")
+      .attr("height", "100%");
 
-    // Identifica a fatia do outlier
-    const outlierArc = arcs.find(d => d.data.label === "Outlier");
-    const nStacks = 5;
+    const centerGroupNormal = svgNormal.append("g")
+      .attr("transform", `translate(${width / 2}, ${centerNormalY})`);
+
+    const pieNormal = d3.pie()
+      .sort(null)
+      .value(d => d.value);
+
+    const arcsNormal = pieNormal(originalData);
+
+    // Desenha todos os arcos normalmente (incluindo o Outlier D em 80%)
+    centerGroupNormal.selectAll("path")
+      .data(arcsNormal)
+      .join("path")
+      .attr("d", arcGen)
+      .attr("fill", d => color(d.data.label))
+      .attr("stroke", "white")
+      .attr("stroke-width", "2px");
+
+    // Adiciona apenas os rótulos A, B, C e D (sem porcentagens)
+    centerGroupNormal.selectAll("text")
+      .data(arcsNormal)
+      .join("text")
+      .attr("transform", d => `translate(${arcGen.centroid(d)})`)
+      .attr("text-anchor", "middle")
+      .attr("dy", "0.35em")
+      .attr("fill", "white")
+      .attr("font-size", d => d.data.label === "D" ? "18px" : "11px")
+      .attr("font-weight", "bold")
+      .text(d => d.data.label);
+
+
+    // =========================================================================
+    // 2. DONUT COM OUTLIER EMPILHADO (Div à direita - D quebrado para 40%)
+    // =========================================================================
+    const svgStacked = d3.select("#chart-stacked")
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("width", "100%")
+      .attr("height", "100%");
+
+    // Filtro de sombra para as camadas empilhadas do donut
+    const defs = svgStacked.append("defs");
+    const donutShadow = defs.append("filter")
+      .attr("id", "donut-stack-shadow")
+      .attr("x", "-20%")
+      .attr("y", "-20%")
+      .attr("width", "140%")
+      .attr("height", "140%");
+
+    donutShadow.append("feDropShadow")
+      .attr("dx", "0")
+      .attr("dy", "3")
+      .attr("stdDeviation", "2.5")
+      .attr("flood-color", "#091424")
+      .attr("flood-opacity", "0.35");
+
+    const centerGroupStacked = svgStacked.append("g")
+      .attr("transform", `translate(${width / 2}, ${centerStackedY})`);
+
+    // Quebra o valor do outlier D para ocupar exatamente 40% do círculo (e A, B, C ocupam 60%)
+    const nonOutliers = originalData.filter(d => !d.isOutlier);
+    const nonOutliersSum = d3.sum(nonOutliers, d => d.value); // 20
+    const stackedOutlierValue = (0.40 / 0.60) * nonOutliersSum; // D ocupa 40% do total
+
+    const stackedPieData = [
+      { label: "D", value: stackedOutlierValue, isOutlier: true },
+      ...nonOutliers.map(d => ({ ...d }))
+    ];
+
+    const pieStacked = d3.pie()
+      .sort(null)
+      .value(d => d.value);
+
+    const arcsStacked = pieStacked(stackedPieData);
+
+    // Identifica a fatia do outlier D
+    const outlierArc = arcsStacked.find(d => d.data.label === "D");
     const stackData = Array.from({ length: nStacks }, (_, i) => ({
       ...outlierArc,
-      data: {
-        label: "Outlier_p" + (i + 1),
-        value: outlierArc.data.value / nStacks
-      },
       depth: i
     }));
 
-    // Desenha os elementos menores normalmente
-    centerGroup.selectAll("path.normal")
-      .data(arcs.filter(d => d.data.label !== "Outlier"))
+    // Desenha os elementos normais (A, B, C) com espaço expandido (60%)
+    centerGroupStacked.selectAll("path.normal")
+      .data(arcsStacked.filter(d => d.data.label !== "D"))
       .join("path")
       .attr("class", "normal")
       .attr("d", arcGen)
       .attr("fill", d => color(d.data.label))
-      .attr("stroke", "white");
+      .attr("stroke", "white")
+      .attr("stroke-width", "2px");
 
-    centerGroup.selectAll("text.normal")
-      .data(arcs.filter(d => d.data.label !== "Outlier"))
+    // Rótulos A, B, C (sem porcentagem)
+    centerGroupStacked.selectAll("text.normal")
+      .data(arcsStacked.filter(d => d.data.label !== "D"))
       .join("text")
       .attr("transform", d => `translate(${arcGen.centroid(d)})`)
       .attr("text-anchor", "middle")
+      .attr("dy", "0.35em")
+      .attr("fill", "white")
+      .attr("font-size", "14px")
+      .attr("font-weight", "bold")
       .text(d => d.data.label);
 
-    // Desenha as camadas do outlier empilhadas na mesma posição angular
-    const outlierGroup = svg.append("g")
-      .attr("transform", `translate(${width / 2}, ${height / 2})`);
+    // Grupo para o outlier empilhado em 40% do círculo
+    const outlierGroup = svgStacked.append("g")
+      .attr("transform", `translate(${width / 2}, ${centerStackedY})`);
+
+    // Escala de iluminação da camada mais profunda até o topo
+    const baseColor = d3.rgb(color("D"));
+    const layerColorScale = d3.scaleLinear()
+      .domain([0, nStacks - 1])
+      .range([baseColor.darker(0.85), baseColor.brighter(0.15)]);
 
     outlierGroup.selectAll("path.outlier")
       .data(stackData)
       .join("path")
       .attr("class", "outlier")
-      .attr("d", d => {
-        const arc3D = d3.arc()
-          .innerRadius(radius - donutThickness)
-          .outerRadius(radius);
-        return arc3D(d);
-      })
+      .attr("d", arcGen)
       .attr("transform", d => `translate(0, ${-d.depth * depthOffset})`)
-      .attr("fill", color("Outlier"))
-      .attr("stroke", "white");
+      .attr("fill", d => layerColorScale(d.depth))
+      .attr("stroke", "white")
+      .attr("stroke-width", "1.5px")
+      .style("filter", d => d.depth === 0 ? null : "url(#donut-stack-shadow)");
 
-    // Rótulo geral do outlier
+    // Rótulo apenas D na camada superior do outlier empilhado
+    const outlierCentroid = arcGen.centroid(outlierArc);
     outlierGroup.append("text")
       .attr("text-anchor", "middle")
-      .attr("y", -nStacks * depthOffset - 10)
-      .attr("X", 100)
+      .attr("transform", `translate(${outlierCentroid[0]}, ${outlierCentroid[1] - (nStacks - 1) * depthOffset})`)
+      .attr("dy", "0.35em")
+      .attr("fill", "white")
+      .attr("font-size", "17px")
+      .attr("font-weight", "bold")
       .text("D");
 
   </script>
