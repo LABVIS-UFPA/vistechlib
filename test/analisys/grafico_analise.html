@@ -66,10 +66,16 @@
   <br>
   <button onclick="downloadSVG('chart-t5')">Download T3 SVG</button>
 
-  <h2>Tasks Agregadas</h2>
-  <svg id="chart-tasks-aggregated"></svg>
+  <h2>T2 + T3 Agregadas</h2>
+  <svg id="chart-t2-t3-aggregated"></svg>
   <br>
-  <button onclick="downloadSVG('chart-tasks-aggregated')">Download Tasks Agregadas SVG</button>
+  <button onclick="downloadSVG('chart-t2-t3-aggregated')">Download T2 + T3 Agregadas SVG</button>
+
+  <h2>Tarefas Agregadas (OBSOLETA: T1 + T2 + T3)</h2>
+  <p>Visualização mantida apenas para comparação histórica. Não utilizar como resultado principal, pois combina erro binário e erro logarítmico.</p>
+  <svg id="chart-tasks-aggregated-obsolete"></svg>
+  <br>
+  <button onclick="downloadSVG('chart-tasks-aggregated-obsolete')">Download Agregação Obsoleta SVG</button>
 
   <h2>Confiança na Resposta</h2>
   <svg id="chart-confidence"></svg>
@@ -238,10 +244,92 @@
       return processed.filter(item => item.media !== undefined);
     }
 
-    function processAggregatedTasksForChart(data, columnName, useCousineauMorey = true) {
+    function processCompatibleTasksForChart(data, taskKeys, columnName, useCousineauMorey = true) {
+      const taskSet = new Set(taskKeys);
+      const taskValuesByParticipantAndVisualization = new Map();
+
+      data.forEach(record => {
+        if (!taskSet.has(record.task)) return;
+
+        const value = getValueByPath(record, columnName);
+        if (value === undefined || value === null || Number.isNaN(value)) return;
+
+        if (!taskValuesByParticipantAndVisualization.has(record.participantId)) {
+          taskValuesByParticipantAndVisualization.set(record.participantId, new Map());
+        }
+
+        const participantValues = taskValuesByParticipantAndVisualization.get(record.participantId);
+        if (!participantValues.has(record.vis)) {
+          participantValues.set(record.vis, new Map());
+        }
+
+        const visualizationTaskValues = participantValues.get(record.vis);
+        if (!visualizationTaskValues.has(record.task)) {
+          visualizationTaskValues.set(record.task, []);
+        }
+        visualizationTaskValues.get(record.task).push(value);
+      });
+
+      const participantVisualizationValues = new Map();
+      const validValues = [];
+
+      taskValuesByParticipantAndVisualization.forEach((participantValues, participantId) => {
+        const visualizationValues = new Map();
+
+        participantValues.forEach((taskValues, vis) => {
+          const taskMeans = Array.from(taskValues.values()).map(values => d3.mean(values));
+          const value = d3.mean(taskMeans);
+          if (value === undefined || value === null || Number.isNaN(value)) return;
+
+          visualizationValues.set(vis, value);
+          validValues.push(value);
+        });
+
+        if (visualizationValues.size > 0) {
+          participantVisualizationValues.set(participantId, visualizationValues);
+        }
+      });
+
+      if (validValues.length === 0) {
+        return [];
+      }
+
+      const visualizationOrder = Array.from(new Set(
+        Array.from(participantVisualizationValues.values())
+          .flatMap(values => Array.from(values.keys()))
+      )).sort();
+      const grandMean = d3.mean(validValues);
+
+      return visualizationOrder.map(vis => {
+        const valuesForVisualization = [];
+
+        participantVisualizationValues.forEach(visualizationValues => {
+          const currentValue = visualizationValues.get(vis);
+          if (currentValue === undefined || currentValue === null || Number.isNaN(currentValue)) return;
+
+          if (!useCousineauMorey) {
+            valuesForVisualization.push(currentValue);
+            return;
+          }
+
+          const participantMean = d3.mean(Array.from(visualizationValues.values()));
+          valuesForVisualization.push(currentValue - participantMean + grandMean);
+        });
+
+        const stats = calculateBootstrapStats(valuesForVisualization);
+        return {
+          Pergunta: "T2 + T3",
+          estrategia: vis,
+          media: stats.mean,
+          IC95_inferior: stats.lower,
+          IC95_superior: stats.upper
+        };
+      }).filter(item => item.media !== undefined);
+    }
+
+    function processObsoleteAggregatedTasksForChart(data, columnName, useCousineauMorey = true) {
       const grouped = d3.group(data, d => d.vis);
       const visualizationOrder = Array.from(grouped.keys()).sort();
-
       const validValues = data
         .map(d => getValueByPath(d, columnName))
         .filter(v => v !== undefined && v !== null && !Number.isNaN(v));
@@ -278,15 +366,13 @@
 
           const participantValues = Array.from(participantConditionValues.values())
             .filter(v => v !== undefined && v !== null && !Number.isNaN(v));
-
           const participantMean = d3.mean(participantValues);
           valuesForVisualization.push(currentValue - participantMean + grandMean);
         });
 
         const stats = calculateBootstrapStats(valuesForVisualization);
-
         return {
-          Pergunta: "All Tasks",
+          Pergunta: "T1 + T2 + T3 (obsoleta)",
           estrategia: vis,
           media: stats.mean,
           IC95_inferior: stats.lower,
@@ -1581,32 +1667,46 @@
         renderTimeChart(svg, timeData, accWidthDefault, { significant: significantTimeResults });
       });
 
-      // --- RENDERIZAÇÃO GRÁFICO DE TASKS AGREGADAS ---
-      const aggregatedTaskLogs = filteredLogs.filter(d =>
-        d.type === 'trial' && ['T1', 'T4', 'T5'].includes(d.task)
+      // T2 (T4) and T3 (T5) share the same logarithmic error metric.
+      const compatibleTaskKeys = ['T4', 'T5'];
+      const compatibleTaskLogs = filteredLogs.filter(d =>
+        d.type === 'trial' && compatibleTaskKeys.includes(d.task)
+      );
+      const svgAggregatedCompatibleTasks = d3.select("#chart-t2-t3-aggregated");
+      const h2AggregatedCompatibleTasks = svgAggregatedCompatibleTasks.node().previousElementSibling;
+      const compatibleParticipantCount = new Set(
+        compatibleTaskLogs.map(d => d.participantId)
+      ).size;
+
+      d3.select(h2AggregatedCompatibleTasks).html(
+        `T2 + T3 Agregadas <span style="font-weight: normal; font-size: 14px;">(N=${compatibleParticipantCount})</span>`
       );
 
-      const svgAggregatedTasks = d3.select("#chart-tasks-aggregated");
-      const h2AggregatedTasks = svgAggregatedTasks.node().previousElementSibling;
-      const aggregatedParticipantCount = new Set(aggregatedTaskLogs.map(d => d.participantId)).size;
+      if (compatibleTaskLogs.length > 0) {
+        const compatibleErrorData = processCompatibleTasksForChart(
+          compatibleTaskLogs,
+          compatibleTaskKeys,
+          'logError',
+          true
+        );
+        const compatibleTimeData = processCompatibleTasksForChart(
+          compatibleTaskLogs,
+          compatibleTaskKeys,
+          'Reaction_Time_s',
+          true
+        );
 
-      d3.select(h2AggregatedTasks).html(
-        `Tasks Agregadas <span style="font-weight: normal; font-size: 14px;">(N=${aggregatedParticipantCount})</span>`
-      );
+        const compatibleErrorWidth = 520;
+        const compatibleTimeOffset = compatibleErrorWidth + plotWidth + 40;
+        const compatibleTotalWidth = compatibleTimeOffset + timeControleWidth + plotWidth;
+        const compatibleHeight = 30 * Math.max(compatibleErrorData.length, 1) + 80;
 
-      if (aggregatedTaskLogs.length > 0) {
-        const errorDataAggregated = processAggregatedTasksForChart(aggregatedTaskLogs, 'logError', true);
-        const timeDataAggregated = processAggregatedTasksForChart(aggregatedTaskLogs, 'Reaction_Time_s', true);
+        svgAggregatedCompatibleTasks
+          .attr("width", compatibleTotalWidth)
+          .attr("height", compatibleHeight);
 
-        const accControleWidthAgg = 520;
-        const accWidthAgg = accControleWidthAgg + plotWidth + 40;
-        const totalWidthAgg = accWidthAgg + timeControleWidth + plotWidth;
-        const heightAgg = 30 * Math.max(errorDataAggregated.length, 1) + 80;
-
-        svgAggregatedTasks.attr("width", totalWidthAgg).attr("height", heightAgg);
-
-        renderErrorChart(svgAggregatedTasks, errorDataAggregated, 0, totalWidthAgg, {
-          controlewidth: accControleWidthAgg,
+        renderErrorChart(svgAggregatedCompatibleTasks, compatibleErrorData, 0, compatibleTotalWidth, {
+          controlewidth: compatibleErrorWidth,
           col1Header: "",
           secondColumnHeader: "Visualization",
           posStrategyFactor: 0.95,
@@ -1615,15 +1715,73 @@
           xDomain: null
         });
 
-        renderTimeChart(svgAggregatedTasks, timeDataAggregated, accWidthAgg, {
+        renderTimeChart(svgAggregatedCompatibleTasks, compatibleTimeData, compatibleTimeOffset, {
           significant: []
         });
       } else {
-        svgAggregatedTasks.attr("width", 400).attr("height", 50);
-        svgAggregatedTasks.append("text")
+        svgAggregatedCompatibleTasks.attr("width", 400).attr("height", 50);
+        svgAggregatedCompatibleTasks.append("text")
           .attr("x", 10)
           .attr("y", 30)
-          .text(`⚠️ Sem dados para tasks agregadas.`)
+          .text(`⚠️ Sem dados para T2 e T3 agregadas.`)
+          .style("fill", "red");
+      }
+
+      // Legacy comparison only: this combines binary T1 error with logarithmic T2/T3 error.
+      const obsoleteAggregatedTaskKeys = ['T1', 'T4', 'T5'];
+      const obsoleteAggregatedTaskLogs = filteredLogs.filter(d =>
+        d.type === 'trial' && obsoleteAggregatedTaskKeys.includes(d.task)
+      );
+      const svgObsoleteAggregatedTasks = d3.select("#chart-tasks-aggregated-obsolete");
+      const h2ObsoleteAggregatedTasks = svgObsoleteAggregatedTasks.node().previousElementSibling.previousElementSibling;
+      const obsoleteParticipantCount = new Set(
+        obsoleteAggregatedTaskLogs.map(d => d.participantId)
+      ).size;
+
+      d3.select(h2ObsoleteAggregatedTasks).html(
+        `Tarefas Agregadas (OBSOLETA: T1 + T2 + T3) <span style="font-weight: normal; font-size: 14px;">(N=${obsoleteParticipantCount})</span>`
+      );
+
+      if (obsoleteAggregatedTaskLogs.length > 0) {
+        const obsoleteErrorData = processObsoleteAggregatedTasksForChart(
+          obsoleteAggregatedTaskLogs,
+          'logError',
+          true
+        );
+        const obsoleteTimeData = processObsoleteAggregatedTasksForChart(
+          obsoleteAggregatedTaskLogs,
+          'Reaction_Time_s',
+          true
+        );
+
+        const obsoleteErrorWidth = 520;
+        const obsoleteTimeOffset = obsoleteErrorWidth + plotWidth + 40;
+        const obsoleteTotalWidth = obsoleteTimeOffset + timeControleWidth + plotWidth;
+        const obsoleteHeight = 30 * Math.max(obsoleteErrorData.length, 1) + 80;
+
+        svgObsoleteAggregatedTasks
+          .attr("width", obsoleteTotalWidth)
+          .attr("height", obsoleteHeight);
+
+        renderErrorChart(svgObsoleteAggregatedTasks, obsoleteErrorData, 0, obsoleteTotalWidth, {
+          controlewidth: obsoleteErrorWidth,
+          col1Header: "",
+          secondColumnHeader: "Visualization",
+          posStrategyFactor: 0.95,
+          significant: [],
+          xLabel: "Log Error (obsoleto)",
+          xDomain: null
+        });
+
+        renderTimeChart(svgObsoleteAggregatedTasks, obsoleteTimeData, obsoleteTimeOffset, {
+          significant: []
+        });
+      } else {
+        svgObsoleteAggregatedTasks.attr("width", 400).attr("height", 50);
+        svgObsoleteAggregatedTasks.append("text")
+          .attr("x", 10)
+          .attr("y", 30)
+          .text(`⚠️ Sem dados para a agregação obsoleta.`)
           .style("fill", "red");
       }
 
