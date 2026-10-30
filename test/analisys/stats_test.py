@@ -572,6 +572,39 @@ for task in unique_tasks:
 print_separator("ANÁLISE AGREGADA (EFEITOS PRINCIPAIS)")
 
 if df_perf is not None and not df_perf.empty:
+    # --- ANÁLISE AGREGADA T2 + T3 (TÉCNICAS COMPATÍVEIS) ---
+    print("\n--- ANÁLISE AGREGADA T2 + T3 (LogError e RT) ---")
+    df_t2_t3 = df_perf[df_perf['Task'].isin(['T2', 'T3', 'T4', 'T5'])].copy()
+    if not df_t2_t3.empty:
+        # Média por participante, visualização e tarefa
+        df_t2_t3_grouped = df_t2_t3.groupby(['Participant', 'Visualization', 'Task', 'Mode', 'Technique'])[['LogError', 'RT', 'Confidence']].mean().reset_index()
+        # Média combinada de T2 e T3 por participante e visualização
+        df_t2_t3_combined = df_t2_t3_grouped.groupby(['Participant', 'Visualization', 'Mode', 'Technique'])[['LogError', 'RT', 'Confidence']].mean().reset_index()
+
+        print("\n--- LogError (Agregado T2 + T3) ---")
+        res_t2t3_log = run_friedman_test(df_t2_t3_combined, 'LogError', group_col='Visualization')
+        if isinstance(res_t2t3_log, dict):
+            print(f"Friedman N={res_t2t3_log['N']} | Chi²={res_t2t3_log['Statistic']:.2f} | p={res_t2t3_log['p-value']:.5f} | Kendall's W={res_t2t3_log['KendallW']:.4f}")
+            if res_t2t3_log['Significant']:
+                pairs = run_posthoc_tests(res_t2t3_log, 'LogError')
+                if pairs:
+                    print("\n   Diferenças Reais (menor erro é melhor):")
+                    for g1, g2, p, winner in pairs:
+                        loser = g2 if winner == g1 else g1
+                        print(f"   * Condição '{winner}' teve erro menor que '{loser}' (p={p:.5f})")
+
+        print("\n--- RT (Agregado T2 + T3) ---")
+        res_t2t3_rt = run_friedman_test(df_t2_t3_combined, 'RT', group_col='Visualization')
+        if isinstance(res_t2t3_rt, dict):
+            print(f"Friedman N={res_t2t3_rt['N']} | Chi²={res_t2t3_rt['Statistic']:.2f} | p={res_t2t3_rt['p-value']:.5f} | Kendall's W={res_t2t3_rt['KendallW']:.4f}")
+            if res_t2t3_rt['Significant']:
+                pairs = run_posthoc_tests(res_t2t3_rt, 'RT')
+                if pairs:
+                    print("\n   Diferenças Reais (menor tempo é melhor):")
+                    for g1, g2, p, winner in pairs:
+                        loser = g2 if winner == g1 else g1
+                        print(f"   * Condição '{winner}' foi mais rápida que '{loser}' (p={p:.5f})")
+
     # --- ANÁLISE AGREGADA POR CONDIÇÃO (TÉCNICA + MODO) ---
     print("\n--- ANÁLISE AGREGADA POR CONDIÇÃO (as 6 combinações) ---")
 
