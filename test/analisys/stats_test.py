@@ -387,7 +387,7 @@ def run_wilcoxon_test(df, metric_col, group_col='Visualization', block_col='Part
     group2_data = pivot_clean[group2_name]
     
     try:
-        stat, p_value = stats.wilcoxon(group1_data, group2_data, correction=True)
+        stat, p_value = stats.wilcoxon(group1_data, group2_data, correction=False, alternative="greater")
     except ValueError as e:
         return f">> Erro no teste de Wilcoxon: {e}. Verifique se há variação nos dados."
 
@@ -573,7 +573,7 @@ print_separator("ANÁLISE AGREGADA (EFEITOS PRINCIPAIS)")
 
 if df_perf is not None and not df_perf.empty:
     # --- ANÁLISE AGREGADA T2 + T3 (TÉCNICAS COMPATÍVEIS) ---
-    print("\n--- ANÁLISE AGREGADA T2 + T3 (LogError e RT) ---")
+    print("\n--- ANÁLISE AGREGADA T2 + T3 (LogError) ---")
     df_t2_t3 = df_perf[df_perf['Task'].isin(['T2', 'T3', 'T4', 'T5'])].copy()
     if not df_t2_t3.empty:
         # Média por participante, visualização e tarefa
@@ -593,36 +593,36 @@ if df_perf is not None and not df_perf.empty:
                         loser = g2 if winner == g1 else g1
                         print(f"   * Condição '{winner}' teve erro menor que '{loser}' (p={p:.5f})")
 
-        print("\n--- RT (Agregado T2 + T3) ---")
-        res_t2t3_rt = run_friedman_test(df_t2_t3_combined, 'RT', group_col='Visualization')
-        if isinstance(res_t2t3_rt, dict):
-            print(f"Friedman N={res_t2t3_rt['N']} | Chi²={res_t2t3_rt['Statistic']:.2f} | p={res_t2t3_rt['p-value']:.5f} | Kendall's W={res_t2t3_rt['KendallW']:.4f}")
-            if res_t2t3_rt['Significant']:
-                pairs = run_posthoc_tests(res_t2t3_rt, 'RT')
-                if pairs:
-                    print("\n   Diferenças Reais (menor tempo é melhor):")
-                    for g1, g2, p, winner in pairs:
-                        loser = g2 if winner == g1 else g1
-                        print(f"   * Condição '{winner}' foi mais rápida que '{loser}' (p={p:.5f})")
+        # print("\n--- RT (Agregado T2 + T3) ---")
+        # res_t2t3_rt = run_friedman_test(df_t2_t3_combined, 'RT', group_col='Visualization')
+        # if isinstance(res_t2t3_rt, dict):
+        #     print(f"Friedman N={res_t2t3_rt['N']} | Chi²={res_t2t3_rt['Statistic']:.2f} | p={res_t2t3_rt['p-value']:.5f} | Kendall's W={res_t2t3_rt['KendallW']:.4f}")
+        #     if res_t2t3_rt['Significant']:
+        #         pairs = run_posthoc_tests(res_t2t3_rt, 'RT')
+        #         if pairs:
+        #             print("\n   Diferenças Reais (menor tempo é melhor):")
+        #             for g1, g2, p, winner in pairs:
+        #                 loser = g2 if winner == g1 else g1
+        #                 print(f"   * Condição '{winner}' foi mais rápida que '{loser}' (p={p:.5f})")
 
     # --- ANÁLISE AGREGADA POR CONDIÇÃO (TÉCNICA + MODO) ---
     print("\n--- ANÁLISE AGREGADA POR CONDIÇÃO (as 6 combinações) ---")
 
-    # --- LogError por Condição (Agregado) ---
-    print("\n--- Log Error (Agregado por Condição) ---")
-    res_cond_log = run_friedman_test(df_perf, 'LogError', group_col='Visualization')
-    if isinstance(res_cond_log, dict):
-        print(f"Friedman N={res_cond_log['N']} | Chi²={res_cond_log['Statistic']:.2f} | p={res_cond_log['p-value']:.5f} | Kendall's W={res_cond_log['KendallW']:.4f}")
-        power_analysis_data.append({'Label': "Agregado (LogError por Condição)", 'N': res_cond_log['N'], 'k': res_cond_log['k'], 'W': res_cond_log['KendallW'], 'Sig': res_cond_log['Significant']})
-        if res_cond_log['Significant']:
-            pairs = run_posthoc_tests(res_cond_log, 'LogError')
-            if pairs:
-                print("\n   Diferenças Reais (menor erro é melhor):")
-                for g1, g2, p, winner in pairs:
-                    loser = g2 if winner == g1 else g1
-                    print(f"   * Condição '{winner}' teve erro menor que '{loser}' (p={p:.5f})")
-    else:
-        print(res_cond_log)
+    # # --- LogError por Condição (Agregado) ---
+    # print("\n--- Log Error (Agregado por Condição) ---")
+    # res_cond_log = run_friedman_test(df_perf, 'LogError', group_col='Visualization')
+    # if isinstance(res_cond_log, dict):
+    #     print(f"Friedman N={res_cond_log['N']} | Chi²={res_cond_log['Statistic']:.2f} | p={res_cond_log['p-value']:.5f} | Kendall's W={res_cond_log['KendallW']:.4f}")
+    #     power_analysis_data.append({'Label': "Agregado (LogError por Condição)", 'N': res_cond_log['N'], 'k': res_cond_log['k'], 'W': res_cond_log['KendallW'], 'Sig': res_cond_log['Significant']})
+    #     if res_cond_log['Significant']:
+    #         pairs = run_posthoc_tests(res_cond_log, 'LogError')
+    #         if pairs:
+    #             print("\n   Diferenças Reais (menor erro é melhor):")
+    #             for g1, g2, p, winner in pairs:
+    #                 loser = g2 if winner == g1 else g1
+    #                 print(f"   * Condição '{winner}' teve erro menor que '{loser}' (p={p:.5f})")
+    # else:
+    #     print(res_cond_log)
 
     # --- RT por Condição (Agregado) ---
     print("\n--- Tempo de Resposta (RT) (Agregado por Condição) ---")
@@ -656,39 +656,87 @@ if df_perf is not None and not df_perf.empty:
     else:
         print(res_cond_conf)
 
-    # --- ANÁLISE POR MODO DE INTERAÇÃO (AGREGADO) ---
-    print("\n--- ANÁLISE POR MODO DE INTERAÇÃO (EFEITO PRINCIPAL) ---")
-    # --- LogError por Modo ---
-    print("\n--- Log Error (por Modo) ---")
-    res_mode_log = run_friedman_test(df_perf, 'LogError', group_col='Mode')
-    if isinstance(res_mode_log, dict):
-        print(f"Friedman N={res_mode_log['N']} | Chi²={res_mode_log['Statistic']:.2f} | p={res_mode_log['p-value']:.5f} | Kendall's W={res_mode_log['KendallW']:.4f}")
-        power_analysis_data.append({'Label': "Agregado (LogError por Modo)", 'N': res_mode_log['N'], 'k': res_mode_log['k'], 'W': res_mode_log['KendallW'], 'Sig': res_mode_log['Significant']})
-        if res_mode_log['Significant']:
-            pairs = run_posthoc_tests(res_mode_log, 'LogError')
-            if pairs:
-                print("\n   Diferenças Reais (menor erro é melhor):")
-                for g1, g2, p, winner in pairs:
-                    loser = g2 if winner == g1 else g1
-                    print(f"   * Modo '{winner}' teve erro menor que '{loser}' (p={p:.5f})")
-    else:
-        print(res_mode_log)
+    # --- ANÁLISE POR MODO DE INTERAÇÃO ---
+    # A técnica é combinada dentro de cada modo. O erro é separado porque
+    # T1 usa erro binário, enquanto T4/T5 usam LogError contínuo.
+    print("\n--- ANÁLISE POR MODO DE INTERAÇÃO (TÉCNICA COMBINADA) ---")
 
-    # --- RT por Modo ---
-    print("\n--- Tempo de Resposta (RT) (por Modo) ---")
-    res_mode_rt = run_friedman_test(df_perf, 'RT', group_col='Mode')
-    if isinstance(res_mode_rt, dict):
-        print(f"Friedman N={res_mode_rt['N']} | Chi²={res_mode_rt['Statistic']:.2f} | p={res_mode_rt['p-value']:.5f} | Kendall's W={res_mode_rt['KendallW']:.4f}")
-        power_analysis_data.append({'Label': "Agregado (RT por Modo)", 'N': res_mode_rt['N'], 'k': res_mode_rt['k'], 'W': res_mode_rt['KendallW'], 'Sig': res_mode_rt['Significant']})
-        if res_mode_rt['Significant']:
-            pairs = run_posthoc_tests(res_mode_rt, 'RT')
+    def analyze_mode_metric(df_subset, metric, label, metric_description):
+        if df_subset.empty:
+            print(f"\n--- {label} ---\nSem dados disponíveis.")
+            return
+
+        # Primeiro calcula a média de cada tarefa por participante e modo.
+        # Assim, T4 e T5 têm o mesmo peso na agregação, sem duplicar
+        # observações por técnica.
+        grouped = (
+            df_subset
+            .groupby(['Participant', 'Mode', 'Task'])[metric]
+            .mean()
+            .reset_index()
+        )
+        aggregated = (
+            grouped
+            .groupby(['Participant', 'Mode'])[metric]
+            .mean()
+            .reset_index()
+        )
+
+        print(f"\n--- {label} ---")
+        result = run_friedman_test(aggregated, metric, group_col='Mode')
+        if not isinstance(result, dict):
+            print(result)
+            return
+
+        print(
+            f"Friedman N={result['N']} | "
+            f"Chi²={result['Statistic']:.2f} | "
+            f"p={result['p-value']:.5f} | "
+            f"Kendall's W={result['KendallW']:.4f}"
+        )
+        power_analysis_data.append({
+            'Label': label,
+            'N': result['N'],
+            'k': result['k'],
+            'W': result['KendallW'],
+            'Sig': result['Significant']
+        })
+
+        if result['Significant']:
+            pairs = run_posthoc_tests(result, metric)
             if pairs:
-                print("\n   Diferenças Reais (menor tempo é melhor):")
+                print(f"\n   Diferenças Reais ({metric_description}):")
                 for g1, g2, p, winner in pairs:
                     loser = g2 if winner == g1 else g1
-                    print(f"   * Modo '{winner}' foi mais rápido que '{loser}' (p={p:.5f})")
-    else:
-        print(res_mode_rt)
+                    print(
+                        f"   * Modo '{winner}' foi melhor que "
+                        f"'{loser}' (p={p:.5f})"
+                    )
+
+    # Erro da T1: analisado isoladamente por ser uma métrica binária.
+    analyze_mode_metric(
+        df_perf[df_perf['Task'] == 'T1'],
+        'LogError',
+        'T1 — LogError por Modo',
+        'menor erro é melhor'
+    )
+
+    # Erro das tarefas compatíveis: T4/T5 correspondem a T2/T3.
+    analyze_mode_metric(
+        df_perf[df_perf['Task'].isin(['T4', 'T5'])],
+        'LogError',
+        'T2 + T3 Agregadas — LogError por Modo',
+        'menor erro é melhor'
+    )
+
+    # O tempo pode ser agregado nas três tarefas, pois a métrica RT possui
+    # a mesma interpretação em T1, T4 e T5.
+    analyze_mode_metric(
+        df_perf[df_perf['Task'].isin(['T1', 'T4', 'T5'])],
+        'RT',
+        'T1 + T2 + T3 — RT Agregado por Modo',
+        'menor tempo é melhor'
+    )
 
 # --- ANÁLISE AGREGADA DO NASA-TLX ---
 if df_quest is not None and not df_quest.empty:
